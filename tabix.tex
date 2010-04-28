@@ -11,7 +11,7 @@
 \begin{document}
 
 \title{The Tabix index file format}
-\author{}
+\author{Heng Li}
 \date{}
 
 \maketitle
@@ -21,7 +21,7 @@
 \hline
 \multicolumn{4}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Descrption} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\
 \hline\hline
-\multicolumn{4}{|l|}{\tt magic} & Magic string & {\tt char[4]} & TAI$\backslash$1 \\
+\multicolumn{4}{|l|}{\tt magic} & Magic string & {\tt char[4]} & TBI$\backslash$1 \\
 \hline
 \multicolumn{4}{|l|}{\tt n\_ref} & \# sequences & {\tt int32\_t} & \\
 \hline
@@ -66,8 +66,25 @@
 \end{tabular}
 \end{center}
 
+{\bf Notes:}
+
 \begin{itemize}
-\item The index file is BGZF compressed. All integers are little-endian.
+\item The index file is BGZF compressed.
+\item All integers are little-endian.
+\item When {\tt (format\&0x10000)} is true, the coordinate follows the
+  {\tt BED} rule (i.e. half-closed-half-open and zero based); otherwise,
+  the coordinate follows the {\tt GFF} rule (closed and one based).
+\item For the SAM format, the end of a region equals {\tt POS} plus the
+  reference length in the alignment, inferred from {\tt CIGAR}. For the
+  VCF format, the end of a region equals {\tt POS} plus the size of the
+  deletion.
+\item Field {\tt col\_beg} may equal {\tt col\_end}, and in this case,
+  the end of a region is {\tt end}={\tt beg+1}.
+\item Example. For {\tt GFF}, {\tt format}=0, {\tt col\_seq}=1, {\tt
+    col\_beg}=4, {\tt col\_end}=5, {\tt meta}=`{\tt \#}' and {\tt
+    skip}=0. For {\tt BED}, {\tt format}=0x10000, {\tt col\_seq}=1, {\tt
+    col\_beg}=2, {\tt col\_end}=3, {\tt meta}=`{\tt \#}' and {\tt
+    skip}=0.
 \item Given a zero-based, half-closed and half-open region {\tt
     [beg,end)}, the {\tt bin} number is calculated with the following C
   function:
@@ -82,14 +99,23 @@ int reg2bin(int beg, int end) {
   return 0;
 }
 \end{verbatim}
-\item For the SAM format, the end of a region equals {\tt POS} plus the
-  reference length in the alignment, inferred from {\tt CIGAR}. For the
-  VCF format, the end of a region equals {\tt POS} plus the size of the
-  deletion.
-\item Field {\tt col\_beg} may equal {\tt col\_end}, and in this case,
-  the end of a region is {\tt end}={\tt beg+1}.
-\item Example. For {\tt GFF}, {\tt format}=0, {\tt col\_seq}=1, {\tt col\_beg}=4, {\tt
-    col\_end}=5, {\tt meta}=`{\tt \#}' and {\tt skip}=0.
+\item The list of bins that may overlap a region {\tt [beg,end)} can be
+  obtained with the following C function.
+\begin{verbatim}
+#define MAX_BIN (((1<<18)-1)/7)
+int reg2bins(int rbeg, int rend, uint16_t list[MAX_BIN])
+{
+  int i = 0, k;
+  --rend;
+  list[i++] = 0;
+  for (k =    1 + (rbeg>>26); k <=    1 + (rend>>26); ++k) list[i++] = k;
+  for (k =    9 + (rbeg>>23); k <=    9 + (rend>>23); ++k) list[i++] = k;
+  for (k =   73 + (rbeg>>20); k <=   73 + (rend>>20); ++k) list[i++] = k;
+  for (k =  585 + (rbeg>>17); k <=  585 + (rend>>17); ++k) list[i++] = k;
+  for (k = 4681 + (rbeg>>14); k <= 4681 + (rend>>14); ++k) list[i++] = k;
+  return i; // #elements in list[]
+}
+\end{verbatim}
 \end{itemize}
 
 \end{document}
