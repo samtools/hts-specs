@@ -1,0 +1,205 @@
+\documentclass[10pt]{article}
+
+\addtolength{\textwidth}{3.2cm}
+\addtolength{\hoffset}{-1.6cm}
+\addtolength{\textheight}{4cm}
+\addtolength{\voffset}{-2cm}
+
+\makeindex
+
+\title{The SAM Format Specification (v1.3 draft)}
+
+\begin{document}
+
+\maketitle
+
+\section{Terminologies and Concepts}
+
+\begin{description}
+\item[Template] A DNA/RNA sequence part of which is sequenced on a
+  sequencing machine.
+\item[Fragment] A (sub)sequence on a template which is
+  sequenced. Fragments on a template are said to be \emph{ordered} if
+  the their relative positions on the template are known. In this case,
+  the template is also said to be ordered.
+\item[Read] A raw sequence that comes off a sequencing machine. A read
+  may consist of multiple fragments.
+\item[1-based coordinate system] A coordinate system where the first
+  base of a sequence is one. In this coordinate system, a region is
+  specified by a closed interval. For example, the region between the 3rd
+  and the 7th bases inclusive is $[3,7]$. The SAM and GFF formats are
+  using the 1-based coordinate system.
+\item[0-based coordinate system] A coordinate system where the first
+  base of a sequence is zero. In this coordinate system, a region is
+  specified by a half-close-half-open interval. For example, the region
+  between the 3rd and the 7th bases inclusive is $[2,7)$. The BED,
+  Wiggle and PSL formats are using the 0-based coordinate system.
+\end{description}
+
+\section{The SAM Format Specification}
+\subsection{The header}
+The header section can be absent.
+\begin{center}
+\begin{tabular}{|l|l|p{13.5cm}|}
+  \hline
+  \multicolumn{2}{|l|}{\bf Tag} & {\bf Description} \\
+  \hline
+  \multicolumn{2}{|l}{\tt @HD} & The header line. \\\cline{2-3}
+  & {\tt VN}* & Formate version. \emph{Accepted format}: {\tt /\char94[0-9]+\char92.[0-9]+\$/}.\\\cline{2-3}
+  & {\tt SO} & Sorting order. \emph{Valid values}: {\tt unsorted}, {\tt queryname} and {\tt coordinate}. \\\hline
+  \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. \\\cline{2-3}
+  & {\tt SN}* & Reference sequence name. Unique among all
+  sequence records in the file. The value of this field is used in the
+  alignment records. \\\cline{2-3}
+  & {\tt LN}* & Reference sequence length. \emph{Range}: {\tt [1,2$^{29}$-1]}\\\cline{2-3}
+  & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
+  & {\tt M5} & MD5 checksum of the sequence in the uppercase, with gaps and spaces removed.\\\cline{2-3}
+  & {\tt SP} & Species.\\\cline{2-3}
+  & {\tt UR} & URI of the sequence.\\\hline
+  \multicolumn{2}{|l}{\tt @RG} & Read group. \\\cline{2-3}
+  & {\tt ID}* & Unique read group identifier. The value of ID
+  is used in the RG tags of alignment records. \\\cline{2-3}
+  & {\tt CN} & Name of sequencing center producing the read.\\\cline{2-3}
+  & {\tt DS} & Description.\\\cline{2-3}
+  & {\tt DT} & Date the run was produced (ISO8601 date or date/time).\\\cline{2-3}
+  & {\tt LB} & Library.\\\cline{2-3}
+  & {\tt PI} & Predicted median insert size.\\\cline{2-3}
+  & {\tt PL} & Platform/technology used to produce the read. \emph{Valid values}:
+  {\tt ILLUMINA}, {\tt SOLID}, {\tt LS454}, {\tt HELICOS} and {\tt PACBIO}.\\\cline{2-3}
+  & {\tt PU} & Platform unit (e.g. lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
+  & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\hline
+  \multicolumn{2}{|l}{\tt @PG} & Program. \\\cline{2-3}
+  & {\tt ID}* & Program name \\\cline{2-3}
+  & {\tt VN} & Program version \\\cline{2-3}
+  & {\tt CL} & Command line \\\hline
+  \multicolumn{2}{|l}{\tt @CO} & One-line text comment.\\
+  \hline
+\end{tabular}
+\end{center}
+
+\subsection{The mandatory fields}
+The following table gives an overview of the mandatory fields in
+the SAM format:
+\begin{center}
+\begin{tabular}{rllll}
+  \hline
+  {\bf Col} & {\bf Field} & {\bf Type} & {\bf Regexp/Range} & {\bf Brief description} \\
+  \hline
+  1 & {\sf QNAME} & String & {\tt [!-?A-\char126]+} & Query template NAME\\
+  2 & {\sf FLAG} & Int/Chr & {\tt [0,2$^{16}$-1]}/{\tt [*pPuUrR12sfd]} & bitwise FLAG \\
+  3 & {\sf RNAME} & String & {\tt [!-\char126]+} & Reference sequence NAME\\
+  4 & {\sf POS} & Int & {\tt [0,2$^{29}$-1]} & 1-based leftmost mapping POSition \\
+  5 & {\sf MAPQ} & Int & {\tt [0,2$^8$-1]} & MAPping Quality \\
+  6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
+  7 & {\sf RNEXT} & String & {\tt [!-\char126]+} & Ref. name of the mate/next fragment\\
+  8 & {\sf PNEXT} & Int & {\tt [0,2$^{29}$-1]} & Position of the mate/next fragment \\
+  9 & {\sf TLEN} & Int & {\tt [0,2$^{29}$-1]} & observed Template LENgth \\
+  10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=]+} & fragment SEQuence\\
+  11 & {\sf QUAL} & String & {\tt [!-\char126]+} & ASCII of base QUALity+33 \\
+  \hline
+\end{tabular}
+\end{center}
+
+\begin{enumerate}
+\item {\sf QNAME}: Query template NAME. Each template has a unique name.
+\item {\sf FLAG}: bitwise FLAG. Each bit is explained in the following
+  table:
+  \begin{center}
+  \begin{tabular}{rcl}
+  \hline
+  Bit & Char & Description\\
+  \hline
+  0x1 & p & template having multiple fragments in sequencing \\
+  0x2 & P & each fragment properly aligned according to the aligner \\
+  0x4 & u & fragment unmapped \\
+  0x8 & U & next fragment in the template unmapped \\
+  0x10 & r & {\sf SEQ} being reverse complemented \\
+  0x20 & R & {\sf SEQ} of the next fragment in the template being reversed \\
+  0x40 & 1 & the first fragment in the template \\
+  0x80 & 2 & the last fragment in the template \\
+  0x100 & s & secondary alignment\\
+  0x200 & f & not passing quality controls \\
+  0x400 & d & PCR or optical duplicate \\
+  \hline
+  \end{tabular}
+  \end{center}
+  \begin{itemize}
+  \item Bit 0x4 is the only reliable place to tell whether the fragment is unmapped.
+  \item If 0x40 and 0x80 are both set, the fragment is part of a linear
+    template, but it is neither the first nor the last fragment. If both
+    0x40 and 0x80 are unset, the index of the fragment in the template
+    is unknown. This may happen for a non-linear template or the index
+    is lost in data processing.
+  \item Bit 0x100 marks the alignment not to be used in certain analyses
+    when the tools in use are aware of this bit.
+  \item \emph{Implicit rules}: if 0x1 is unset, 0x2, 0x8, 0x20, 0x40,
+    0x80 are all regarded to be unset; if 0x4 or 0x8 is set, 0x2 is
+    regarded to be unset.
+  \item Bits 0x10 and 0x20 only indicate the strand of the
+    fragment. Unmapped reads may have these two bits set.
+  \end{itemize}
+\item {\sf RNAME}: Reference sequence NAME of the alignment. An unmapped
+  fragment without coordinate has a `*' at this field. However, an
+  unmapped fragment may also have an ordinary coordinate such that it
+  can be placed at a desired position after sorting.
+\item {\sf POS}: 1-based leftmost mapping POSition of the first matching
+  base. The first base in a reference sequence has coordinate 1. {\sf
+    POS} is set as 0 for an unmapped read without
+  coordinate. \emph{Implicit rules}: if {\sf RNAME} is `*', {\sf POS} is
+  regarded to be 0, and vice versa.
+\item {\sf MAPQ}: MAPping Quality. It equals
+  $-10\log_{10}\Pr\{\mbox{mapping position is wrong}\}$, rounded to the
+  nearest integer.
+\item {\sf CIGAR}: CIGAR string. The CIGAR operations are given in the
+  following table:
+  \begin{center}
+  \begin{tabular}{cl}
+  \hline
+  Op & Description\\
+  \hline
+  {\tt M} & alignment match (can be a sequence match or mismatch)\\
+  {\tt I} & insertion to the reference \\
+  {\tt D} & deletion from the reference \\
+  {\tt N} & skipped region from the reference \\
+  {\tt S} & soft clipping (clipped sequences present in {\sf SEQ})\\
+  {\tt H} & hard clipping (clipped sequences NOT present in {\sf SEQ})\\
+  {\tt P} & padding (silent deletion from padded reference)\\
+  {\tt =} & sequence match \\
+  {\tt X} & sequence mismatch \\
+  \hline
+  \end{tabular}
+  \end{center}
+  \begin{itemize}
+  \item S/H can only be the first or the last operation.
+  \end{itemize}
+\item {\sf RNEXT}: Reference sequence name of the NEXT fragment in the
+  template. This field is set as `*' when the information is
+  unavailable.
+\item {\sf PNEXT}: Position of the NEXT fragment in the template. Set as
+  0 when the information is unavailable. \emph{Implicit rules}: if {\sf
+    RNEXT} is `*', {\sf PNEXT} is regarded to be 0, and vice versa.
+\item {\sf TLEN}: observed Template LENgth. It is set as 0 for
+  single-fragment template or when the information is unavailable.
+\item {\sf SEQ}: fragment SEQuence. This field can be a `*' when the
+  sequence is not stored. If not a `*', the length of the sequence must
+  equal the sum of lengths of M/I/S/=/X operations in {\sf CIGAR}.
+\item {\sf QUAL}: ASCII of base QUALity plus 33. A base quality equals
+  $-10\log_{10}\Pr\{\mbox{base is wrong}\}$. This field can be a `*'
+  when quality is not stored. If not a `*', {\sf SEQ} is not a `*' and
+  the length of the quality string must equal the length of {\sf SEQ}.
+\end{enumerate}
+
+\subsection{Optional fields}
+All optional fields can be absent.
+\begin{center}
+\begin{tabular}{ll}
+\hline
+{\bf Tag} & {\bf Description} \\
+\hline
+\hline
+\end{tabular}
+\end{center}
+
+\section{The SAM Format Standards}
+
+\end{document}
