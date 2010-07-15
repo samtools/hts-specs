@@ -1,25 +1,69 @@
 \documentclass[10pt]{article}
+\usepackage{framed}
+\usepackage{enumitem}
 
-\addtolength{\textwidth}{3.2cm}
-\addtolength{\hoffset}{-1.6cm}
+\addtolength{\textwidth}{3.4cm}
+\addtolength{\hoffset}{-1.7cm}
 \addtolength{\textheight}{4cm}
 \addtolength{\voffset}{-2cm}
 
 \makeindex
 
 \title{The SAM Format Specification (v1.3 draft)}
-
+\author{The SAM Format Specification Working Group}
 \begin{document}
 
 \maketitle
 
-\section{Terminologies and Concepts}
+
+\section{The SAM Format Specification}
+SAM stands for Sequence Alignment/Map format. It is a TAB-delimited text
+format consisting of a header section, which is optional, and an
+alignment section. Header lines start with `{\tt @}', while alignment
+lines do not. Each alignment line has 11 mandatory fields for essential
+alignment information such as mapping position, and variable number of
+optional fields for flexible or aligner specific information.
+
+\subsection{An example}
+Suppose we have the following alignment with bases in lower cases
+clipped from the alignment. Read {\tt r001/1} and {\tt r001/2}
+constitute a read pair; {\tt r003} is a chimeric read; {\tt r004}
+represents a split alignment.
+
+\begin{framed}\small
+\begin{verbatim}
+Coor     12345678901234  5678901234567890123456789012345
+ref      AGCATGTTAGATAA**GATAGCTGTGCTAGTAGGCAGTCAGCGCCAT
+
++r001/1        TTAGATAAAGGATA*CTG
++r002         aaaAGATAA*GGATA
++r003       gcctaAGCTAA
++r004                     ATAGCT..............TCAGC
+-r003                            ttagctTAGGC
+-r001/2                                        CAGCGCCAT
+\end{verbatim}
+\end{framed}
+The corresponding SAM format is:
+\begin{framed}\small
+\begin{verbatim}
+@HD VN:1.3 SO:coordinate
+@SQ SN:ref LN:45
+r001 163 ref  7 30 8M2I4M1D3M = 37  39 TTAGATAAAGGATACTA *
+r002   0 ref  9 30 3S6M1P1I4M *  0   0 AAAAGATAAGGATA    *
+r003   0 ref  9 30 5H6M       *  0   0 AGCTAA   *   NM:i:1
+r004   0 ref 16 30 6M14N5M    *  0   0 ATAGCTTCAGC       *
+r003  16 ref 29 30 6H5M       *  0   0 TAGGC    *   NM:i:0
+r001  83 ref 37 30 9M         =  7 -39 CAGCGCCAT         *
+\end{verbatim}
+\end{framed}
+
+\subsection{Terminologies and Concepts}
 
 \begin{description}
 \item[Template] A DNA/RNA sequence part of which is sequenced on a
-  sequencing machine.
-\item[Fragment] A (sub)sequence on a template which is
-  sequenced. Fragments on a template are said to be \emph{ordered} if
+  sequencing machine or assembled from raw sequences.
+\item[Fragment] A (sub)sequence on a template which is sequenced or
+  assembled. Fragments on a template are said to be \emph{ordered} if
   the their relative positions on the template are known. In this case,
   the template is also said to be ordered.
 \item[Read] A raw sequence that comes off a sequencing machine. A read
@@ -34,12 +78,21 @@
   specified by a half-close-half-open interval. For example, the region
   between the 3rd and the 7th bases inclusive is $[2,7)$. The BED,
   Wiggle and PSL formats are using the 0-based coordinate system.
+\item[Phred scale] Given a probability $0<p\le 1$, the phred scale of $p$
+  equals $-10\log_{10}p$, rounded to the closest integer.
 \end{description}
 
-\section{The SAM Format Specification}
-\subsection{The header}
-The header section can be absent.
+\subsection{The header section}
+Each header line begins with character `{\tt @}' followed by a
+two-letter record type code. In the header, each line is TAB-delimited
+and each data field has an explicit field tag, which is represented
+using two letters, as is described below. The field tag defines the
+content and format of the data in the field.
+
+The following table give the defined record types and tags. Tags with
+`*' are required when the record type is present.
 \begin{center}
+\small
 \begin{tabular}{|l|l|p{13.5cm}|}
   \hline
   \multicolumn{2}{|l|}{\bf Tag} & {\bf Description} \\
@@ -68,7 +121,7 @@ The header section can be absent.
   {\tt ILLUMINA}, {\tt SOLID}, {\tt LS454}, {\tt HELICOS} and {\tt PACBIO}.\\\cline{2-3}
   & {\tt PU} & Platform unit (e.g. lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
   & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\hline
-  \multicolumn{2}{|l}{\tt @PG} & Program. \\\cline{2-3}
+  \multicolumn{2}{|l}{\tt @PG} & Program. [TODO: the chaining PG] \\\cline{2-3}
   & {\tt ID}* & Program name \\\cline{2-3}
   & {\tt VN} & Program version \\\cline{2-3}
   & {\tt CL} & Command line \\\hline
@@ -77,16 +130,20 @@ The header section can be absent.
 \end{tabular}
 \end{center}
 
-\subsection{The mandatory fields}
-The following table gives an overview of the mandatory fields in
-the SAM format:
+\subsection{The alignment section: mandatory fields}
+Each alignment line has 11 mandatory fields. These fields always appear
+in the same order and must be present, but their values can be `0' or
+`*' (depending on the field) if the corresponding information is
+unavailable. The following table gives an overview of the mandatory
+fields in the SAM format:
 \begin{center}
+\small
 \begin{tabular}{rllll}
   \hline
   {\bf Col} & {\bf Field} & {\bf Type} & {\bf Regexp/Range} & {\bf Brief description} \\
   \hline
   1 & {\sf QNAME} & String & {\tt [!-?A-\char126]+} & Query template NAME\\
-  2 & {\sf FLAG} & Int/Chr & {\tt [0,2$^{16}$-1]}/{\tt [*pPuUrR12sfd]} & bitwise FLAG \\
+  2 & {\sf FLAG} & Int/Str & {\tt [0,2$^{16}$-1]}/{\tt [*pPuUrR12sfd]+} & bitwise FLAG \\
   3 & {\sf RNAME} & String & {\tt [!-\char126]+} & Reference sequence NAME\\
   4 & {\sf POS} & Int & {\tt [0,2$^{29}$-1]} & 1-based leftmost mapping POSition \\
   5 & {\sf MAPQ} & Int & {\tt [0,2$^8$-1]} & MAPping Quality \\
@@ -104,7 +161,7 @@ the SAM format:
 \item {\sf QNAME}: Query template NAME. Each template has a unique name.
 \item {\sf FLAG}: bitwise FLAG. Each bit is explained in the following
   table:
-  \begin{center}
+  \begin{center}\small
   \begin{tabular}{rcl}
   \hline
   Bit & Char & Description\\
@@ -132,11 +189,11 @@ the SAM format:
     is lost in data processing.
   \item Bit 0x100 marks the alignment not to be used in certain analyses
     when the tools in use are aware of this bit.
-  \item \emph{Implicit rules}: if 0x1 is unset, 0x2, 0x8, 0x20, 0x40,
-    0x80 are all regarded to be unset; if 0x4 or 0x8 is set, 0x2 is
-    regarded to be unset.
   \item Bits 0x10 and 0x20 only indicate the strand of the
     fragment. Unmapped reads may have these two bits set.
+  \item \emph{Implicit rule}: if 0x1 is unset, 0x2, 0x8, 0x20, 0x40,
+    0x80 are all regarded to be unset; if 0x4 or 0x8 is set, 0x2 is
+    regarded to be unset.
   \end{itemize}
 \item {\sf RNAME}: Reference sequence NAME of the alignment. An unmapped
   fragment without coordinate has a `*' at this field. However, an
@@ -145,14 +202,20 @@ the SAM format:
 \item {\sf POS}: 1-based leftmost mapping POSition of the first matching
   base. The first base in a reference sequence has coordinate 1. {\sf
     POS} is set as 0 for an unmapped read without
-  coordinate. \emph{Implicit rules}: if {\sf RNAME} is `*', {\sf POS} is
-  regarded to be 0, and vice versa.
+  coordinate.
+  \begin{itemize}
+  \item \emph{Implicit rule}: if {\sf POS} plus the sum of lengths
+    of I/N/M/=/X operations in {\sf CIGAR} exceeds the length of {\sf
+      RNAME}, the alignment is considered to be unmapped.
+  \item \emph{Implicit rule}: if {\sf RNAME} is `*', {\sf POS} is
+    regarded to be 0, and vice versa.
+  \end{itemize}
 \item {\sf MAPQ}: MAPping Quality. It equals
   $-10\log_{10}\Pr\{\mbox{mapping position is wrong}\}$, rounded to the
   nearest integer.
 \item {\sf CIGAR}: CIGAR string. The CIGAR operations are given in the
   following table:
-  \begin{center}
+  \begin{center}\small
   \begin{tabular}{cl}
   \hline
   Op & Description\\
@@ -174,10 +237,14 @@ the SAM format:
   \end{itemize}
 \item {\sf RNEXT}: Reference sequence name of the NEXT fragment in the
   template. This field is set as `*' when the information is
-  unavailable.
+  unavailable, and set as `=' if {\sf RNEXT} is identical {\sf
+    RNAME}. If not `=' and all fragments in the template have one
+  primary mapping, this field is identical to {\sf RNAME} of the next
+  fragment.
 \item {\sf PNEXT}: Position of the NEXT fragment in the template. Set as
-  0 when the information is unavailable. \emph{Implicit rules}: if {\sf
-    RNEXT} is `*', {\sf PNEXT} is regarded to be 0, and vice versa.
+  0 when the information is unavailable. \emph{Implicit rule}: if {\sf
+    RNEXT} is `*', {\sf PNEXT} is regarded to be 0, and vice versa. This
+  field equals {\sf POS} of the next fragment.
 \item {\sf TLEN}: observed Template LENgth. It is set as 0 for
   single-fragment template or when the information is unavailable.
 \item {\sf SEQ}: fragment SEQuence. This field can be a `*' when the
@@ -189,17 +256,110 @@ the SAM format:
   the length of the quality string must equal the length of {\sf SEQ}.
 \end{enumerate}
 
-\subsection{Optional fields}
-All optional fields can be absent.
-\begin{center}
-\begin{tabular}{ll}
+\subsection{The alignment section: optional fields}
+All optional fields are presented in the {\tt TAG:TYPE:VALUE} format
+where {\tt TAG} is a two-character string that matches {\tt
+  /[A-Z][A-Z0-9]/}, {\tt TYPE} is a casesensitive single letter which
+defines the format of {\tt VALUE}:
+\begin{center}\small
+\begin{tabular}{cll}
 \hline
-{\bf Tag} & {\bf Description} \\
+{\bf Type} & {\bf Regexp matching {\tt VALUE}} & {\bf Descrption} \\
 \hline
+A & {\tt [!-\char126]} & Printable character \\
+i & {\tt [-+]?[0-9]+} & Singed 32-bit integer \\
+f & {\tt [-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?} & Single-precision floating number \\
+Z & {\tt [\,\,\,!-\char126]+} & Printable string, including space\\
+H & {\tt [0-9A-F]+} & Hex string, high nybble first \\
 \hline
 \end{tabular}
 \end{center}
 
+{\flushleft Predefined tags are shown in the following table. You can
+  freely add new tags, and if a new tag may be of general interest, you
+  can email {\tt samtools-help@lists.sourceforge.net} to add the new tag
+  to the specification. Note that tags started with `{\tt X}', `{\tt Y}'
+  and `{\tt Z}' are reserved for local use and will not be formally
+  defined in any future version of this specification.}
+\begin{center}\small
+\begin{tabular}{ccp{12.5cm}}
+  \hline
+  {\bf Tag} & {\bf Type} & {\bf Description} \\
+  \hline
+  {\tt X?} & ? & Reserved fields for end users (together with {\tt Y?} and {\tt Z?}) \\
+  {\tt AM} & i & The smallest template-independent mapping quality of fragments in the  \\
+  {\tt AS} & i & ALignment score  generated by aligner \\
+  {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM})\\
+  {\tt CQ} & Z & Color read quality on the original strand of the read. Same encoding as {\sf QUAL}.\\
+  {\tt CS} & Z & Color read sequence on the original strand of the read. Of the same length as {\tt CQ}. \\
+  {\tt E2} & Z & The 2nd most likely base calls. Of the same length as {\sf SEQ}. \\
+  {\tt FI} & i & The index of fragment in the template.\\
+  {\tt FS} & Z & Fragment suffix.\\
+  {\tt LB} & Z & Library. Value to be consistent with the header {\tt RG-LB} tag if {\tt @RG} is present.\\
+  {\tt H0} & i & Number of perfect hits\\
+  {\tt H1} & i & Number of 1-difference hits (see also {\tt NM})\\
+  {\tt H2} & i & Number of 2-difference hits \\
+  {\tt HI} & i & Query hit index, indicating the alignment record is the i-th one stored in SAM\\
+  {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
+  {\tt MD} & Z & String for mismatching positions \\
+  {\tt MQ} & i & Mapping quality of the mate/next fragment \\
+  {\tt NH} & i & Number of reported alignments that contains the query in the current record\\
+  {\tt NM} & i & Edit distance to the reference, including ambiguous bases but excluding clipping \\
+  {\tt OQ} & i & Original base quality (usually before recalibration). Same encoding as {\sf QUAL}.\\
+  {\tt OP} & i & Original mapping position (usually before realignment) \\
+  {\tt OC} & Z & Original CIGAR (usually before realignment) \\
+  {\tt PG} & Z & Program. Value matches the header {\tt PG-ID} tag if {\tt @PG} is present. \\
+  {\tt PQ} & i & Phred likelihood of the template, conditional on both the mapping being correct \\
+  {\tt PU} & Z & Platform unit. Value to be consistent with the header {\tt RG-PU} tag if {\tt @RG} is present.\\
+  {\tt Q2} & Z & Phred quality of the mate/next fragment. Same encoding as {\sf QUAL}.\\
+  {\tt R2} & Z & Sequence of the mate/next fragment in the template. \\
+  {\tt RG} & Z & Read group. Value matches the header {\tt RG-ID} tag if {\tt @RG} is present in the header. \\
+  {\tt SM} & i & Template-independent mapping quality \\
+  {\tt TC} & i & The number of fragments in the template.\\
+  {\tt U2} & Z & Phred prob. of the 2nd call being wrong conditional on the best being wrong \\
+  {\tt UQ} & i & Phred likelihood of the fragment, conditional on the mapping being correct \\
+  \hline
+\end{tabular}
+\end{center}
+The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt S2} and {\tt SQ} are reserved for
+backward compatibility.
+\pagebreak
 \section{The SAM Format Standards}
+
+\begin{enumerate}
+\item No implicit rules need to be applied.
+\item The header section
+  \begin{enumerate}[label*=\arabic*]
+  \item The {\tt @HD} line is present with the {\tt SO} tag specified.
+  \item The {\tt @SQ} lines are present if reads have been mapped.
+  \item The corresponding {\tt @RG} lines are defined if {\tt RG} tags
+    appear in the alignment lines.
+  \item The corresponding {\tt @PG} lines are defined if {\tt PG} tags
+    appear in the alignment lines.
+  \end{enumerate}
+\item Adjacent CIGAR operations are different.
+\item Unmapped reads
+  \begin{enumerate}[label*=\arabic*]
+  \item For a unmapped paired-end or mate-pair read whose mate is
+    mapped, the unmapped read has {\sf RNAME} and {\sf POS} identical to
+    its mate.
+  \item If all fragments in a template are unmapped, their {\sf RNAME}
+    is set as `*' and {\sf POS} as 0.
+  \end{enumerate}
+\item Multiple mapping
+  \begin{enumerate}[label*=\arabic*]
+  \item At most one primary alignment for each fragment (controlled
+    by the 0x100 bit). {\sf RNEXT} and {\sf PNEXT} point to the primary
+    alignment of the next fragment.
+  \item {\sf SEQ} and {\sf QUAL} of secondary alignments are set to `*'.
+  \end{enumerate}
+\item Chimeric alignment
+  \begin{enumerate}[label*=\arabic*]
+  \item There is no overlap between fragments of a read (few/no existing
+    aligners follow this standard).
+  \item {\sf RNEXT} and {\sf PNEXT} describes the relationship between
+    chimera, where appropriate.
+  \end{enumerate}  
+\end{enumerate}
 
 \end{document}
