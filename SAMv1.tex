@@ -19,10 +19,11 @@
 \section{The SAM Format Specification}
 SAM stands for Sequence Alignment/Map format. It is a TAB-delimited text
 format consisting of a header section, which is optional, and an
-alignment section. Header lines start with `{\tt @}', while alignment
-lines do not. Each alignment line has 11 mandatory fields for essential
-alignment information such as mapping position, and variable number of
-optional fields for flexible or aligner specific information.
+alignment section. If present, the header must be prior the
+alignments. Header lines start with `{\tt @}', while alignment lines do
+not. Each alignment line has 11 mandatory fields for essential alignment
+information such as mapping position, and variable number of optional
+fields for flexible or aligner specific information.
 
 \subsection{An example}
 Suppose we have the following alignment with bases in lower cases
@@ -48,7 +49,7 @@ The corresponding SAM format is:
 \begin{verbatim}
 @HD VN:1.3 SO:coordinate
 @SQ SN:ref LN:45
-r001 163 ref  7 30 8M2I4M1D3M = 37  39 TTAGATAAAGGATACTA *
+r001 163 ref  7 30 8M2I4M1D3M = 37  39 TTAGATAAAGGATACTG *
 r002   0 ref  9 30 3S6M1P1I4M *  0   0 AAAAGATAAGGATA    *
 r003   0 ref  9 30 5H6M       *  0   0 AGCTAA   *   NM:i:1
 r004   0 ref 16 30 6M14N5M    *  0   0 ATAGCTTCAGC       *
@@ -85,9 +86,10 @@ r001  83 ref 37 30 9M         =  7 -39 CAGCGCCAT         *
 \subsection{The header section}
 Each header line begins with character `{\tt @}' followed by a
 two-letter record type code. In the header, each line is TAB-delimited
-and each data field has an explicit field tag, which is represented
-using two letters, as is described below. The field tag defines the
-content and format of the data in the field.
+and each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
+is a two-letter string that defines the content and the format of {\tt
+  VALUE}. Each header line should match:\\ {\tt
+  /\char94@[A-Z][A-Z](\char92t[A-Z][A-Z]:[ -\char126])+\$/}.
 
 The following table give the defined record types and tags. Tags with
 `*' are required when the record type is present.
@@ -97,20 +99,20 @@ The following table give the defined record types and tags. Tags with
   \hline
   \multicolumn{2}{|l|}{\bf Tag} & {\bf Description} \\
   \hline
-  \multicolumn{2}{|l}{\tt @HD} & The header line. \\\cline{2-3}
-  & {\tt VN}* & Formate version. \emph{Accepted format}: {\tt /\char94[0-9]+\char92.[0-9]+\$/}.\\\cline{2-3}
-  & {\tt SO} & Sorting order. \emph{Valid values}: {\tt unsorted}, {\tt queryname} and {\tt coordinate}. \\\hline
-  \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. \\\cline{2-3}
-  & {\tt SN}* & Reference sequence name. Unique among all
-  sequence records in the file. The value of this field is used in the
+  \multicolumn{2}{|l}{\tt @HD} & The header line. The first line if present. \\\cline{2-3}
+  & {\tt VN}* & Format version. \emph{Accepted format}: {\tt /\char94[0-9]+\char92.[0-9]+\$/}.\\\cline{2-3}
+  & {\tt SO} & Sorting order. \emph{Valid values}: {\tt unknown} (default), {\tt unsorted}, {\tt queryname} and {\tt coordinate}. \\\hline
+  \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. The order of {\tt @SQ} lines defines the alignment sorting order.\\\cline{2-3}
+  & {\tt SN}* & Reference sequence name. Each {\tt @SQ} line must have a unique {\tt SN} tag. The value of this
+  field is used in the
   alignment records. \\\cline{2-3}
   & {\tt LN}* & Reference sequence length. \emph{Range}: {\tt [1,2$^{29}$-1]}\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
   & {\tt M5} & MD5 checksum of the sequence in the uppercase, with gaps and spaces removed.\\\cline{2-3}
   & {\tt SP} & Species.\\\cline{2-3}
   & {\tt UR} & URI of the sequence.\\\hline
-  \multicolumn{2}{|l}{\tt @RG} & Read group. \\\cline{2-3}
-  & {\tt ID}* & Unique read group identifier. The value of ID
+  \multicolumn{2}{|l}{\tt @RG} & Read group. Unordered multiple lines are allowed.\\\cline{2-3}
+  & {\tt ID}* & Read group identifier. Each {\tt @RG} line must have a unique {\tt ID}. The value of ID
   is used in the RG tags of alignment records. \\\cline{2-3}
   & {\tt CN} & Name of sequencing center producing the read.\\\cline{2-3}
   & {\tt DS} & Description.\\\cline{2-3}
@@ -125,7 +127,7 @@ The following table give the defined record types and tags. Tags with
   & {\tt ID}* & Program name \\\cline{2-3}
   & {\tt VN} & Program version \\\cline{2-3}
   & {\tt CL} & Command line \\\hline
-  \multicolumn{2}{|l}{\tt @CO} & One-line text comment.\\
+  \multicolumn{2}{|l}{\tt @CO} & One-line text comment. Unordered multiple lines are allowed.\\
   \hline
 \end{tabular}
 \end{center}
@@ -143,15 +145,15 @@ fields in the SAM format:
   {\bf Col} & {\bf Field} & {\bf Type} & {\bf Regexp/Range} & {\bf Brief description} \\
   \hline
   1 & {\sf QNAME} & String & {\tt [!-?A-\char126]+} & Query template NAME\\
-  2 & {\sf FLAG} & Int/Str & {\tt [0,2$^{16}$-1]}/{\tt [*pPuUrR12sfd]+} & bitwise FLAG \\
-  3 & {\sf RNAME} & String & {\tt [!-\char126]+} & Reference sequence NAME\\
+  2 & {\sf FLAG} & Int/Str & {\tt [0,2$^{16}$-1]}/{\tt \*|[pPuUrR12sfd]+} & bitwise FLAG \\
+  3 & {\sf RNAME} & String & {\tt \char92*|[!-)+-\char60\char62-\char126]+} & Reference sequence NAME\\
   4 & {\sf POS} & Int & {\tt [0,2$^{29}$-1]} & 1-based leftmost mapping POSition \\
   5 & {\sf MAPQ} & Int & {\tt [0,2$^8$-1]} & MAPping Quality \\
   6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
-  7 & {\sf RNEXT} & String & {\tt [!-\char126]+} & Ref. name of the mate/next fragment\\
+  7 & {\sf RNEXT} & String & {\tt =|\char92*|[!-)+-\char60\char62-\char126]+} & Ref. name of the mate/next fragment\\
   8 & {\sf PNEXT} & Int & {\tt [0,2$^{29}$-1]} & Position of the mate/next fragment \\
-  9 & {\sf TLEN} & Int & {\tt [0,2$^{29}$-1]} & observed Template LENgth \\
-  10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=]+} & fragment SEQuence\\
+  9 & {\sf TLEN} & Int & {\tt [-2$^{29}$+1,2$^{29}$-1]} & observed Template LENgth \\
+  10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & fragment SEQuence\\
   11 & {\sf QUAL} & String & {\tt [!-\char126]+} & ASCII of base QUALity+33 \\
   \hline
 \end{tabular}
@@ -160,7 +162,7 @@ fields in the SAM format:
 \begin{enumerate}
 \item {\sf QNAME}: Query template NAME. Each template has a unique name.
 \item {\sf FLAG}: bitwise FLAG. Each bit is explained in the following
-  table:
+  table (`*' means no bits are set):
   \begin{center}\small
   \begin{tabular}{rcl}
   \hline
@@ -195,26 +197,31 @@ fields in the SAM format:
     0x80 are all regarded to be unset; if 0x4 or 0x8 is set, 0x2 is
     regarded to be unset.
   \end{itemize}
-\item {\sf RNAME}: Reference sequence NAME of the alignment. An unmapped
-  fragment without coordinate has a `*' at this field. However, an
-  unmapped fragment may also have an ordinary coordinate such that it
-  can be placed at a desired position after sorting.
+\item {\sf RNAME}: Reference sequence NAME of the alignment. If {\tt
+    @SQ} header lines are present, {\tt RNAME} (if not `*') must be
+  present in one of the {\tt SQ-SN} tag. An unmapped fragment without
+  coordinate has a `*' at this field. However, an unmapped fragment may
+  also have an ordinary coordinate such that it can be placed at a
+  desired position after sorting.
 \item {\sf POS}: 1-based leftmost mapping POSition of the first matching
   base. The first base in a reference sequence has coordinate 1. {\sf
     POS} is set as 0 for an unmapped read without
   coordinate.
   \begin{itemize}
-  \item \emph{Implicit rule}: if {\sf POS} plus the sum of lengths
-    of I/N/M/=/X operations in {\sf CIGAR} exceeds the length of {\sf
-      RNAME}, the alignment is considered to be unmapped.
+  \item \emph{Implicit rule}: if {\sf POS} plus the sum of lengths of
+    {\tt M/=/X/D/N} operations in {\sf CIGAR} exceeds the length
+    specified in the {\tt LN} field of the {\tt @SQ} header line (if
+    exists) with an SN equal to {\sf RNAME}, the alignment is considered
+    to be unmapped.
   \item \emph{Implicit rule}: if {\sf RNAME} is `*', {\sf POS} is
     regarded to be 0, and vice versa.
   \end{itemize}
 \item {\sf MAPQ}: MAPping Quality. It equals
   $-10\log_{10}\Pr\{\mbox{mapping position is wrong}\}$, rounded to the
-  nearest integer.
+  nearest integer. A value 255 indicates that the mapping quality is not
+  available.
 \item {\sf CIGAR}: CIGAR string. The CIGAR operations are given in the
-  following table:
+  following table (set `*' if unavailable):
   \begin{center}\small
   \begin{tabular}{cl}
   \hline
@@ -235,21 +242,30 @@ fields in the SAM format:
   \begin{itemize}
   \item S/H can only be the first or the last operation.
   \end{itemize}
+  \emph{Implicit rule}: if {\sf RNAME} is `*' or {\sf POS} is 0, {\sf
+    CIGAR} is set as `*'.
 \item {\sf RNEXT}: Reference sequence name of the NEXT fragment in the
-  template. This field is set as `*' when the information is
-  unavailable, and set as `=' if {\sf RNEXT} is identical {\sf
-    RNAME}. If not `=' and all fragments in the template have one
-  primary mapping, this field is identical to {\sf RNAME} of the next
-  fragment.
+  template. If {\tt @SQ} header lines are present, {\tt RNEXT} (if not
+  `*' or `=') must be present in one of the {\tt SQ-SN} tag. This field
+  is set as `*' when the information is unavailable, and set as `=' if
+  {\sf RNEXT} is identical {\sf RNAME}. If not `=' and all fragments in
+  the template have one primary mapping (see also bit 0x100 in {\sf
+    FLAG}, this field is identical to {\sf RNAME} of the next
+  fragment. \emph{Implicit rule}: if one of the fragments in the
+  template has multiple primary mappings, {\sf RNEXT} is set as `*'.
 \item {\sf PNEXT}: Position of the NEXT fragment in the template. Set as
   0 when the information is unavailable. \emph{Implicit rule}: if {\sf
     RNEXT} is `*', {\sf PNEXT} is regarded to be 0, and vice versa. This
   field equals {\sf POS} of the next fragment.
 \item {\sf TLEN}: observed Template LENgth. It is set as 0 for
-  single-fragment template or when the information is unavailable.
+  single-fragment template or when the information is
+  unavailable. [TODO: needs more work here]
 \item {\sf SEQ}: fragment SEQuence. This field can be a `*' when the
   sequence is not stored. If not a `*', the length of the sequence must
-  equal the sum of lengths of M/I/S/=/X operations in {\sf CIGAR}.
+  equal the sum of lengths of {\tt M/I/S/=/X} operations in {\sf CIGAR}.
+  An `=' denotes the base is identical to the reference base.
+  \emph{Implicit rules}: all letters are converted to uppercase;
+  anything other than {\tt A/C/G/T/=} is treated as {\tt N}.
 \item {\sf QUAL}: ASCII of base QUALity plus 33. A base quality equals
   $-10\log_{10}\Pr\{\mbox{base is wrong}\}$. This field can be a `*'
   when quality is not stored. If not a `*', {\sf SEQ} is not a `*' and
@@ -274,6 +290,7 @@ H & {\tt [0-9A-F]+} & Hex string, high nybble first \\
 \hline
 \end{tabular}
 \end{center}
+Each {\tt TAG} can only appear once in one alignment line.
 
 {\flushleft Predefined tags are shown in the following table. You can
   freely add new tags, and if a new tag may be of general interest, you
@@ -287,8 +304,8 @@ H & {\tt [0-9A-F]+} & Hex string, high nybble first \\
   {\bf Tag} & {\bf Type} & {\bf Description} \\
   \hline
   {\tt X?} & ? & Reserved fields for end users (together with {\tt Y?} and {\tt Z?}) \\
-  {\tt AM} & i & The smallest template-independent mapping quality of fragments in the  \\
-  {\tt AS} & i & ALignment score  generated by aligner \\
+  {\tt AM} & i & The smallest template-independent mapping quality of fragments in the rest \\
+  {\tt AS} & i & Alignment score  generated by aligner \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM})\\
   {\tt CQ} & Z & Color read quality on the original strand of the read. Same encoding as {\sf QUAL}.\\
   {\tt CS} & Z & Color read sequence on the original strand of the read. Of the same length as {\tt CQ}. \\
@@ -301,11 +318,11 @@ H & {\tt [0-9A-F]+} & Hex string, high nybble first \\
   {\tt H2} & i & Number of 2-difference hits \\
   {\tt HI} & i & Query hit index, indicating the alignment record is the i-th one stored in SAM\\
   {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
-  {\tt MD} & Z & String for mismatching positions \\
+  {\tt MD} & Z & String for mismatching positions [TODO: add descriptions]\\
   {\tt MQ} & i & Mapping quality of the mate/next fragment \\
   {\tt NH} & i & Number of reported alignments that contains the query in the current record\\
   {\tt NM} & i & Edit distance to the reference, including ambiguous bases but excluding clipping \\
-  {\tt OQ} & i & Original base quality (usually before recalibration). Same encoding as {\sf QUAL}.\\
+  {\tt OQ} & Z & Original base quality (usually before recalibration). Same encoding as {\sf QUAL}.\\
   {\tt OP} & i & Original mapping position (usually before realignment) \\
   {\tt OC} & Z & Original CIGAR (usually before realignment) \\
   {\tt PG} & Z & Program. Value matches the header {\tt PG-ID} tag if {\tt @PG} is present. \\
@@ -316,14 +333,18 @@ H & {\tt [0-9A-F]+} & Hex string, high nybble first \\
   {\tt RG} & Z & Read group. Value matches the header {\tt RG-ID} tag if {\tt @RG} is present in the header. \\
   {\tt SM} & i & Template-independent mapping quality \\
   {\tt TC} & i & The number of fragments in the template.\\
-  {\tt U2} & Z & Phred prob. of the 2nd call being wrong conditional on the best being wrong \\
+  {\tt U2} & Z & Phred probility of the 2nd call being wrong conditional on the best being wrong. The same encoding as {\sf QUAL}. \\
   {\tt UQ} & i & Phred likelihood of the fragment, conditional on the mapping being correct \\
   \hline
 \end{tabular}
 \end{center}
-The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt S2} and {\tt SQ} are reserved for
-backward compatibility.
+The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt CC}, {\tt CP}, {\tt MF}, {\tt S2}
+and {\tt SQ} are reserved for backward compatibility.
+
+[TODO: more descriptions about tags]
+
 \pagebreak
+
 \section{The SAM Format Standards}
 
 \begin{enumerate}
@@ -338,6 +359,7 @@ backward compatibility.
     appear in the alignment lines.
   \end{enumerate}
 \item Adjacent CIGAR operations are different.
+\item No alignments are assigned mapping quality 255.
 \item Unmapped reads
   \begin{enumerate}[label*=\arabic*]
   \item For a unmapped paired-end or mate-pair read whose mate is
