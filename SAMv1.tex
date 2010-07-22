@@ -10,7 +10,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r623)}
+\title{The SAM Format Specification (v1.3-r624)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -124,7 +124,7 @@ The following table give the defined record types and tags. Tags with
   & {\tt PL} & Platform/technology used to produce the read. \emph{Valid values}:
   {\tt ILLUMINA}, {\tt SOLID}, {\tt LS454}, {\tt HELICOS} and {\tt PACBIO}.\\\cline{2-3}
   & {\tt PU} & Platform unit (e.g. lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
-  & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\cline{1-3}
+  & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\cline{1-3}\pagebreak\hline
   \multicolumn{2}{|l}{\tt @PG} & Program. \\\cline{2-3}
   & {\tt ID}* & Program name. Each {\tt @PG} line must have a unique {\tt ID}. The value of {\tt ID} is used in the alignment {\tt PG} tag and {\tt PP} tags of other {\tt @PG} lines.\\\cline{2-3}
   & {\tt CL} & Command line \\\cline{2-3}
