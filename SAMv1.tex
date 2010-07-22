@@ -10,7 +10,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r624)}
+\title{The SAM Format Specification (v1.3-r625)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -344,49 +344,54 @@ and {\tt SQ} are reserved for backward compatibility.
 
 \pagebreak
 
-\section{The SAM Format Standards}
+\section{Recommended Practice for the SAM Format}
+This section describes the best practice for representating data in the
+SAM format. They are not required in general, but may be required by a
+specific software package for it to function properly.
 
 \begin{enumerate}
 \item The header section
   \begin{enumerate}[label*=\arabic*]
-  \item The {\tt @HD} line is present with the {\tt SO} tag specified.
-  \item The {\tt @SQ} lines are present if reads have been mapped.
-  \item The corresponding {\tt @RG} lines are defined if {\tt RG} tags
-    appear in the alignment lines.
-  \item The corresponding {\tt @PG} lines are defined if {\tt PG} tags
-    appear in the alignment lines.
+  \item The {\tt @HD} line should be present with the {\tt SO} tag specified.
+  \item The {\tt @SQ} lines should be present if reads have been mapped.
+  \item When a {\tt RG} tag appears anywhere in the alignment section,
+    there should be a single corresponding {\tt @RG} line with matching
+    {\tt ID} tag in the header.
+  \item When a {\tt PG} tag appears anywhere in the alignment section,
+    there should be a single corresponding {\tt @PG} line with matching
+    {\tt ID} tag in the header.
   \end{enumerate}
-\item CIGAR
-  \begin{enumerate}[label*=\arabic*]
-  \item Adjacent CIGAR operations are different.
-  \item If {\sf POS} plus the sum of lengths of {\tt M/=/X/D/N}
-    operations in {\sf CIGAR} exceeds the length specified in the {\tt
-      LN} field of the {\tt @SQ} header line (if exists) with an SN
-    equal to {\sf RNAME}, the alignment is unmapped.
-  \end{enumerate}
-\item No alignments are assigned mapping quality 255.
+\item Adjacent CIGAR operations should be different.
+\item No alignments should be assigned mapping quality 255.
 \item Unmapped reads
   \begin{enumerate}[label*=\arabic*]
   \item For a unmapped paired-end or mate-pair read whose mate is
-    mapped, the unmapped read has {\sf RNAME} and {\sf POS} identical to
-    its mate.
+    mapped, the unmapped read should have {\sf RNAME} and {\sf POS}
+    identical to its mate.
   \item If all fragments in a template are unmapped, their {\sf RNAME}
-    is set as `*' and {\sf POS} as 0.
+    should be set as `*' and {\sf POS} as 0.
+  \item If {\sf POS} plus the sum of lengths of {\tt M/=/X/D/N}
+    operations in {\sf CIGAR} exceeds the length specified in the {\tt
+      LN} field of the {\tt @SQ} header line (if exists) with an SN
+    equal to {\sf RNAME}, the alignment should be unmapped.
   \end{enumerate}
 \item Multiple mapping
   \begin{enumerate}[label*=\arabic*]
-  \item At most one primary alignment for each fragment (controlled
-    by the 0x100 bit). {\sf RNEXT} and {\sf PNEXT} point to the primary
-    alignment of the next fragment.
-  \item {\sf SEQ} and {\sf QUAL} of secondary alignments are set to `*'.
+  \item When one fragment is present in multiple records, only one
+    record should have the primary alignment flag bit (0x100) set. {\sf
+      RNEXT} and {\sf PNEXT} point to the primary alignment of the next
+    fragment.
+  \item {\sf SEQ} and {\sf QUAL} of secondary alignments should be set
+    to `*' to reduce the file size.
   \end{enumerate}
-\item Chimeric alignment
+\item There should be no overlap between fragments of a read\footnote{Few/no
+  existing aligners follow this practice.}.
+\item Optional tags:
   \begin{enumerate}[label*=\arabic*]
-  \item There is no overlap between fragments of a read (few/no existing
-    aligners follow this standard).
-  \item {\sf RNEXT} and {\sf PNEXT} describes the relationship between
-    chimera, where appropriate.
-  \end{enumerate}  
+  \item If the template has more than 2 fragments, the {\tt TC} tag
+    should be present.
+  \item The {\tt NM} tag should be present.
+  \end{enumerate}
 \end{enumerate}
 
 \end{document}
