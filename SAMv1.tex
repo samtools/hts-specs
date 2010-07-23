@@ -147,8 +147,8 @@ fields in the SAM format:
   \hline
   {\bf Col} & {\bf Field} & {\bf Type} & {\bf Regexp/Range} & {\bf Brief description} \\
   \hline
-  1 & {\sf QNAME} & String & {\tt [!-?A-\char126]+} & Query template NAME\\
-  2 & {\sf FLAG} & Int/Str & {\tt [0,2$^{16}$-1]}/{\tt \char92*|[pPuUrR12sfd]+} & bitwise FLAG \\
+  1 & {\sf QNAME} & String & {\tt [!-?A-\char126]{1,255}} & Query template NAME\\
+  2 & {\sf FLAG} & Int & {\tt [0,2$^{16}$-1]} & bitwise FLAG \\
   3 & {\sf RNAME} & String & {\tt \char92*|[!-)+-\char60\char62-\char126][!-\char126]*} & Reference sequence NAME\\
   4 & {\sf POS} & Int & {\tt [0,2$^{29}$-1]} & 1-based leftmost mapping POSition \\
   5 & {\sf MAPQ} & Int & {\tt [0,2$^8$-1]} & MAPping Quality \\
@@ -167,21 +167,21 @@ fields in the SAM format:
 \item {\sf FLAG}: bitwise FLAG. Each bit is explained in the following
   table (`*' means no bits are set):
   \begin{center}\small
-  \begin{tabular}{rcl}
+  \begin{tabular}{rl}
   \hline
-  Bit & Char & Description\\
+  Bit & Description\\
   \hline
-  0x1 & p & template having multiple fragments in sequencing \\
-  0x2 & P & each fragment properly aligned according to the aligner \\
-  0x4 & u & fragment unmapped \\
-  0x8 & U & next fragment in the template unmapped \\
-  0x10 & r & {\sf SEQ} being reverse complemented \\
-  0x20 & R & {\sf SEQ} of the next fragment in the template being reversed \\
-  0x40 & 1 & the first fragment in the template \\
-  0x80 & 2 & the last fragment in the template \\
-  0x100 & s & secondary alignment\\
-  0x200 & f & not passing quality controls \\
-  0x400 & d & PCR or optical duplicate \\
+  0x1 &  template having multiple fragments in sequencing \\
+  0x2 &  each fragment properly aligned according to the aligner \\
+  0x4 &  fragment unmapped \\
+  0x8 &  next fragment in the template unmapped \\
+  0x10 &  {\sf SEQ} being reverse complemented \\
+  0x20 &  {\sf SEQ} of the next fragment in the template being reversed \\
+  0x40 &  the first fragment in the template \\
+  0x80 &  the last fragment in the template \\
+  0x100 &  secondary alignment\\
+  0x200 &  not passing quality controls \\
+  0x400 &  PCR or optical duplicate \\
   \hline
   \end{tabular}
   \end{center}
