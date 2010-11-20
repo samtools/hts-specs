@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r845)}
+\title{The SAM Format Specification (v1.3-r846)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -533,7 +533,96 @@ the default when the corresponding information is not available:
 \end{tabular}}
 \end{table}
 
-\subsection{The BAM index format}
+\pagebreak
+
+\section{Indexing BAM}
+Indexing aims to achieve fast retrieval of alignments overlapping a
+specified region without going through the whole alignments. BAM must be
+sorted by the reference ID and then the leftmost coordinate before
+indexing.
+
+\subsection{Algorithm}
+\subsubsection{Basic binning index}
+The UCSC binning scheme was suggested by Richard Durbin and Lincoln
+Stein and is explained by Kent et al. (2002). In this scheme, each bin
+represents a contiguous genomic region which is either fully contained
+in or non-overlapping with another bin; each alignment is associated
+with a bin which represents the smallest region containing the entire
+alignment. The binning scheme is essentially a representation of
+R-tree. A distinct bin uniquely corresponds to a distinct internal node
+in a R-tree. Bin A is a child of Bin B if the region represented by A is
+contained in B.
+
+To find the alignments that overlap a specified region, we need to get
+the bins that overlap the region, and then test each alignment in the
+bins to check overlap. To quickly find alignments associated with a
+specified bin, we can keep in the index the start file offsets of chunks
+of alignments which all have the bin. As alignments are sorted by the
+leftmost coordinates, alignments having the same bin tend to be
+clustered together on the disk and therefore usually a bin is only
+associated with a few chunks. Traversing all the alignments having the
+same bin usually needs a few seek calls. Given the set of bins that
+overlap the specified region, we can visit alignments in the order of
+their leftmost coordinates and stop seeking the rest when an alignment
+falls outside the required region. This strategy saves half of the seek
+calls in average.
+
+In BAM, each bin may span $2^{29}$, $2^{26}$, $2^{23}$, $2^{20}$,
+$2^{17}$ or $2^{14}$ bp. Bin 0 spans a 512Mbp region, bins 1--8 span
+64Mbp, 9--72 8Mbp, 73--584 1Mbp, 585--4680 128Kbp and bins 4681--37449
+span 16Kbp regions.
+
+\subsubsection{Reducing small chunks}
+Around the boundary of two adjacent bins, we may see many small chunks
+with some having a shorter bin while the rest having a larger bin. To
+reduce the number of seek calls, we may join two chunks having the same
+bin if they are close to each other. After this process, a joined chunk
+will contain alignments with different bins. We need to keep in the
+index the file offset of the end of each chunk to identify its
+boundaries.
+
+\subsubsection{Combining with linear index}
+For an alignment starting beyond 64Mbp, we always need to seek to some
+chunks in bin 0, which can be avoided by using a linear index. In the
+linear index, for each tiling 16384bp window on the reference, we record
+the smallest file offset of the alignments that start in the
+window. Given a region [rbeg,rend), we only need to visit a chunk whose
+end file offset is larger than the file offset of the 16kbp window
+containing rbeg.
+
+With both binning and linear indices, we can retrieve alignments in most
+of regions with just one seek call.
+
+\subsubsection{A conceptual example}
+Suppose we have a genome shorter than 144kbp. we can design a binning
+scheme which consists of three types of bins: bin 0 spans 0-144kbp, bin
+1, 2 and 3 span 48kbp and bins from 4 to 12 span 16kbp each:
+
+\begin{table}[h]
+  \centering
+  {\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+    \cline{1-9}
+    \multicolumn{9}{|c|}{0 (0--144kbp)}\\\cline{1-9}
+    \multicolumn{3}{|c|}{1 (0--48kbp)} & \multicolumn{3}{c|}{2 (48--96kbp)} & \multicolumn{3}{c|}{1 (96--144kbp)} \\\cline{1-9}
+    4 (0--16k) & 5 (16--32k) & 6 (32--48k) & 7 (48--64k) & 8 (64--80k) & 9 (80--96k) & 10 & 11 & 12 \\
+    \cline{1-9}
+  \end{tabular}}
+\end{table}
+
+An alignment starting at 65kbp and ending at 67kbp would have a bin
+number 8, which is the smallest bin containing the alignment. Similarly,
+an alignment starting at 51kbp and ending at 70kbp would go to bin 2,
+while an alignment between [40k,49k] to bin 0. Suppose we want to find
+all the alignments overlapping region [65k,71k). We first calculate that
+bin 0, 2 and 8 overlap with this region and then traverse the alignments
+in these bins to find the required alignments. With a binning index
+alone, we need to visit the alignment at [40k,49k] as it belongs to bin
+0. But with a linear index, we know that such an alignment stops before
+64kbp and cannot overlap the specified region. A seek call can thus be
+saved.
+
+\subsection{The BAM indexing format}
+\begin{table}[h]
 {\small
 \begin{tabular}{|l|l|l|l|l|l|r|}
   \cline{1-7}
@@ -552,7 +641,39 @@ the default when the corresponding information is not available:
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of intervals (n=n\_intv)}} \\\cline{3-7}
   & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\
   \cline{1-7}
-\end{tabular}
+\end{tabular}}
+\end{table}
+
+\subsection{C source code for computing bin number and overlapping bins}
+
+{\small
+\begin{verbatim}
+/* calculate bin given an alignment covering [beg,end) (zero-based, half-close-half-open) */
+int reg2bin(int beg, int end)
+{
+    --end;
+    if (beg>>14 == end>>14) return ((1<<15)-1)/7 + (beg>>14);
+    if (beg>>17 == end>>17) return ((1<<12)-1)/7 + (beg>>17);
+    if (beg>>20 == end>>20) return ((1<<9)-1)/7  + (beg>>20);
+    if (beg>>23 == end>>23) return ((1<<6)-1)/7  + (beg>>23);
+    if (beg>>26 == end>>26) return ((1<<3)-1)/7  + (beg>>26);
+    return 0;
+}
+/* calculate the list of bins that may overlap with region [beg,end) (zero-based) */
+#define MAX_BIN (((1<<18)-1)/7)
+int reg2bins(int beg, int end, uint16_t list[MAX_BIN])
+{
+    int i = 0, k;
+    --end;
+    list[i++] = 0;
+    for (k =    1 + (beg>>26); k <=    1 + (end>>26); ++k) list[i++] = k;
+    for (k =    9 + (beg>>23); k <=    9 + (end>>23); ++k) list[i++] = k;
+    for (k =   73 + (beg>>20); k <=   73 + (end>>20); ++k) list[i++] = k;
+    for (k =  585 + (beg>>17); k <=  585 + (end>>17); ++k) list[i++] = k;
+    for (k = 4681 + (beg>>14); k <= 4681 + (end>>14); ++k) list[i++] = k;
+    return i;
+}
+\end{verbatim}
 }
 
 \end{document}
