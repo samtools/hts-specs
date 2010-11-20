@@ -1,4 +1,6 @@
 \documentclass[10pt]{article}
+\usepackage{color}
+\definecolor{gray}{rgb}{0.7,0.7,0.7}
 \usepackage{framed}
 \usepackage{enumitem}
 \usepackage{longtable}
@@ -10,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r837)}
+\title{The SAM Format Specification (v1.3-r845)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -405,5 +407,152 @@ specific software package for it to function properly.
   \item The {\tt NM} tag should be present.
   \end{enumerate}
 \end{enumerate}
+
+\pagebreak
+
+\section{The BAM Format Specification}
+
+\subsection{The BGZF compression format}
+
+BGZF is block compression implemented on top of the standard gzip file
+format. The goal of BGZF is to provide good compression while allowing
+efficient random access to the BAM file for indexed queries. The BGZF
+format is `gunzip compatible', in the sense that a compliant gunzip
+utility can decompress a BGZF compressed file.
+
+A BGZF archive is a series of concatenated BGZF blocks. Each BGZF block
+is itself a spec-compliant gzip archive which contains an "extra field"
+in the format described in RFC1952. The gzip file format allows the
+inclusion of application-specific extra fields and these are ignored by
+compliant decompression implementation. The gzip specification also
+allows gzip files to be concatenated. The result of decompressing
+concatenated gzip files is the concatenation of the uncompressed data.
+
+Each BGZF block contains a standard gzip file header with the following
+standard-compliant extensions:
+
+\begin{enumerate}
+\item The {\sf F.EXTRA} bit in the header is set to indicate that extra
+  fields are present.
+\item The extra field used by BGZF uses the two subfield ID values 66 and 67 (ascii `BC').
+\item The length of the BGZF extra field payload (field {\sf LEN} in the
+  gzip specification) is 2 (two bytes of payload).
+\item The payload of the BGZF extra field is a 16-bit unsigned integer
+  in little endian format. This integer gives the size of the containing
+  BGZF block minus one.
+\end{enumerate}
+
+On disk, a full BGZF file is (all integers are little endian as is
+required by RFC1952):
+\begin{table}[h]
+\centering
+{\small
+\begin{tabular}{|l|l|l|l|l|r|}
+  \cline{1-6}
+  \multicolumn{3}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-6}
+  \multicolumn{6}{|c|}{\textcolor{gray}{\it List of compression blocks (until the end of the file)}} \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf ID1} & gzip IDentifier1 & {\tt uint8\_t} & 31 \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf ID2} & gzip IDentifier2 & {\tt uint8\_t} & 139 \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf CM} & gzip Compression Method & {\tt uint8\_t} & 8 \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf FLG} & gzip FLaGs & {\tt uint8\_t} & 4 \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf MTIME} & gzip Modification TIME & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf XFL} & gzip eXtra FLags & {\tt uint8\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf OS} & gzip Operating System & {\tt uint8\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf XLEN} & gzip eXtra LENgth & {\tt uint16\_t} & \\\cline{2-6}
+  & \multicolumn{5}{c|}{\textcolor{gray}{\it Extra subfield(s) (total size=XLEN)}} \\\cline{3-6}
+  & & \multicolumn{4}{c|}{\textcolor{gray}{\it Additional RFC1952 extra subfields if present}} \\\cline{3-6}
+  & & {\sf SI1} & Subfield Identifier1 & {\tt uint8\_t} & 66 \\\cline{3-6}
+  & & {\sf SI2} & Subfield Identifier2 & {\tt uint8\_t} & 67 \\\cline{3-6}
+  & & {\sf SLEN} & Subfield LENgth & {\tt uint16\_t} & 2 \\\cline{3-6}
+  & & {\sf BSIZE} & total Block SIZE minus 1 & {\tt uint16\_t} & \\\cline{3-6}
+  & & \multicolumn{4}{c|}{\textcolor{gray}{\it Additional RFC1952 extra subfields if present}} \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf CDATA} & Compressed DATA by {\sf zlib::deflate()} & {\tt uint8\_t[{\sf BSIZE-XLEN-19}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf CRC32} & CRC-32 & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf ISIZE} & Input SIZE (length of uncompressed data) & {\tt uint32\_t} & \\
+  \cline{1-6}
+\end{tabular}}
+\end{table}
+
+BGZF files support random access through the BAM file index. To achieve
+this, the BAM file index uses \emph{virtual file offsets} into the BGZF
+file. Each virtual file offset is 64 bits, defined as: {\tt
+  coffset\char60\char60 16\char124uoffset}, where {\tt coffset} is an
+unsigned byte offset into the BGZF file to the beginning of a BGZF
+block, and {\tt uoffset} is an unsigned byte offset into the
+uncompressed data stream represented by that BGZF block. Virtual file
+offsets can be compared, but subtraction between virtual file offsets
+and addition between a virtual offset and an integer are both
+disallowed.
+
+It is worth noting that there is a known bug in the Java {\sf
+  GZIPInputStream} class that concatenated gzip archives cannot be
+successfully decompressed by this class. BGZF files can be created and
+manipulated using the built-in Java {\sf util.zip} package, but naive
+use of {\sf GZIPInputStream} on a BGZF file will not work due to this
+bug.
+
+\subsection{The BAM format}
+BAM is compressed in the BGZF format. All integers in BAM are
+little-endian, regardless of the machine endianness. The format is
+formally described in the following table where values in brackets are
+the default when the corresponding information is not available:
+
+\begin{table}[h]
+\centering
+{\small
+\begin{tabular}{|l|l|l|p{8.15cm}|l|r|}
+  \cline{1-6}
+  \multicolumn{3}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf magic} & BAM magic string & {\tt char[4]} & {\tt BAM\char92 1}\\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf l\_text} & Length of the header text, including any {\tt NULL} padding & {\tt int32\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf text} & Plain header text in SAM; not necessarily {\tt NULL} terminated & {\tt char[{\sf l\_text}]} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf n\_ref} & \# reference sequences & {\tt int32\_t} & \\\cline{1-6}
+  \multicolumn{6}{|c|}{\textcolor{gray}{\it List of reference information (n=n\_ref)}} \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_name} & Length of the reference name plus 1 (including {\tt NULL}) & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf name} & Reference sequence name; {\tt NULL} terminated & {\tt char[{\sf l\_name}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt int32\_t} & \\\cline{1-6}
+  \multicolumn{6}{|c|}{\textcolor{gray}{\it List of alignments (until the end of the file)}} \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the block & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID ($-1\leq{\sf refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($\underline{\sf POS}-1$)& {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf read\_name\_len}}, including {\tt NULL} & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}} & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_seq} & Length of the read sequence & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next fragment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next fragment ($\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf tlen} & Template length (\underline{\sf TLEN}) & {\tt int32\_t} & [0] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf read\_name} & Read name, {\tt NULL} terminated & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACGTN}'$\to0,1,2,4,8,15$; high nybble first (1st base in the highest 4-bit of the 1st byte) & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
+  & \multicolumn{5}{c|}{\textcolor{gray}{\it List of auxiliary data (until the end of the alignment block)}} \\\cline{3-6}
+  & & {\sf tag} & Two-character tag & {\tt char[2]} & \\\cline{3-6}
+  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZH}. An integer may be stored as `{\tt cCsSiI}' depending on the magnitude of the integer. & {\tt char} & \\\cline{3-6}
+  & & {\sf value} & Tag value & by {\sf val\_type} &\\
+  \cline{1-6}
+\end{tabular}}
+\end{table}
+
+\subsection{The BAM index format}
+{\small
+\begin{tabular}{|l|l|l|l|l|l|r|}
+  \cline{1-7}
+  \multicolumn{4}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-7}
+  \multicolumn{4}{|l|}{\sf magic} & Magic string & {\tt char[4]} & {\tt BAI\char92 1}\\\cline{1-7}
+  \multicolumn{4}{|l|}{\sf n\_ref} & \# reference sequences & {\tt int32\_t} & \\\cline{1-7}
+  \multicolumn{7}{|c|}{\textcolor{gray}{\it List of indices (n=n\_ref)}} \\\cline{2-7}
+  & \multicolumn{3}{l|}{\sf n\_bin} & \# distinct bins (for the binning index) & {\tt int32\_t} & \\\cline{2-7}
+  & \multicolumn{6}{c|}{\textcolor{gray}{\it List of distinct bins (n=n\_bin)}} \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf bin} & Distinct bin & {\tt uint32\_t} & \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf n\_chunk} & \# chunks & {\tt int32\_t} & \\\cline{3-7}
+  & & \multicolumn{5}{c|}{\textcolor{gray}{\it List of chunks (n=n\_chunk)}} \\\cline{4-7}
+  & & & {\sf chunk\_beg} & (Virtual) file offset of the start of the chunk & {\tt uint64\_t} & \\\cline{4-7}
+  & & & {\sf chunk\_end} & (Virtual) file offset of the end of the chunk & {\tt uint64\_t} & \\\cline{2-7}
+  & \multicolumn{3}{l|}{\sf n\_intv} & \# 16kbp intervals (for the linear index) & {\tt int32\_t} & \\\cline{2-7}
+  & \multicolumn{6}{c|}{\textcolor{gray}{\it List of intervals (n=n\_intv)}} \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\
+  \cline{1-7}
+\end{tabular}
+}
 
 \end{document}
