@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r847)}
+\title{The SAM Format Specification (v1.3-r848)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -75,14 +75,14 @@ r001  83 ref 37 30 9M         =  7 -39 CAGCGCCAT         *
   may consist of multiple fragments.
 \item[1-based coordinate system] A coordinate system where the first
   base of a sequence is one. In this coordinate system, a region is
-  specified by a closed interval. For example, the region between the 3rd
-  and the 7th bases inclusive is $[3,7]$. The SAM and GFF formats are
-  using the 1-based coordinate system.
+  specified by a closed interval. For example, the region between the
+  3rd and the 7th bases inclusive is $[3,7]$. The SAM, GFF and Wiggle
+  formats are using the 1-based coordinate system.
 \item[0-based coordinate system] A coordinate system where the first
   base of a sequence is zero. In this coordinate system, a region is
   specified by a half-closed-half-open interval. For example, the region
   between the 3rd and the 7th bases inclusive is $[2,7)$. The BAM, BED,
-  Wiggle and PSL formats are using the 0-based coordinate system.
+  and PSL formats are using the 0-based coordinate system.
 \item[Phred scale] Given a probability $0<p\le 1$, the phred scale of $p$
   equals $-10\log_{10}p$, rounded to the closest integer.
 \end{description}
