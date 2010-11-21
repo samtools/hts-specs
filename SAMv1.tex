@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r848)}
+\title{The SAM Format Specification (v1.3-r849)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -93,7 +93,9 @@ two-letter record type code. In the header, each line is TAB-delimited
 and each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
 is a two-letter string that defines the content and the format of {\tt
   VALUE}. Each header line should match:\\ {\tt
-  /\char94@[A-Za-z][A-Za-z](\char92t[A-Za-z][A-Za-z]:[ -\char126])+\$/}.
+  /\char94@[A-Za-z][A-Za-z](\char92t[A-Za-z][A-Za-z]:[
+  -\char126])+\$/}. Tags containing lowercase letters are reserved for
+end users.
 
 The following table give the defined record types and tags. Tags with
 `*' are required when the record type is present.
@@ -128,6 +130,7 @@ The following table give the defined record types and tags. Tags with
   & {\tt DS} & Description.\\\cline{2-3}
   & {\tt DT} & Date the run was produced (ISO8601 date or date/time).\\\cline{2-3}
   & {\tt LB} & Library.\\\cline{2-3}
+  & {\tt PG} & Programs used for processing the read group.\\\cline{2-3}
   & {\tt PI} & Predicted median insert size.\\\cline{2-3}
   & {\tt PL} & Platform/technology used to produce the read. \emph{Valid values}:
   {\tt ILLUMINA}, {\tt SOLID}, {\tt LS454}, {\tt HELICOS} and {\tt PACBIO}.\\\cline{2-3}
