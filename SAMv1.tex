@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r846)}
+\title{The SAM Format Specification (v1.3-r847)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -245,7 +245,9 @@ fields in the SAM format:
   \end{tabular}
   \end{center}
   \begin{itemize}
-  \item S/H can only be the first or the last operation.
+  \item {\tt H} can only be present as the first and/or last operation.
+  \item {\tt S} may only have {\tt H} operations between them and the
+    ends of the {\sf CIGAR} string.
   \end{itemize}
 \item {\sf RNEXT}: Reference sequence name of the NEXT fragment in the
   template. For the last fragment, the next fragment is the first
@@ -322,9 +324,9 @@ containing lowercase letters are reserved for end users.
   {\tt BQ} & Z & Offset to base alignment quality (BAQ), of the same length as the read sequence.
   At the $i$-th read base, ${\rm BAQ}_i=Q_i-({\rm BQ}_i-64)$ where $Q_i$ is the $i$-th base quality. \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM})\\
-  {\tt CQ} & Z & Color read quality on the original strand of the read. Same encoding as {\sf QUAL}.\\
-  {\tt CS} & Z & Color read sequence on the original strand of the read. Of the same length as {\tt CQ}. \\
-  {\tt E2} & Z & The 2nd most likely base calls. Of the same length as {\sf SEQ}. \\
+  {\tt CQ} & Z & Color read quality on the original strand of the read. Same encoding as {\sf QUAL}; same length as {\tt CS}.\\
+  {\tt CS} & Z & Color read sequence on the original strand of the read. The primer base must be included.\\
+  {\tt E2} & Z & The 2nd most likely base calls. Same encoding and same length as {\sf QUAL}.\\
   {\tt FI} & i & The index of fragment in the template.\\
   {\tt FS} & Z & Fragment suffix.\\
   {\tt LB} & Z & Library. Value to be consistent with the header {\tt RG-LB} tag if {\tt @RG} is present.\\
@@ -333,10 +335,10 @@ containing lowercase letters are reserved for end users.
   {\tt H2} & i & Number of 2-difference hits \\
   {\tt HI} & i & Query hit index, indicating the alignment record is the i-th one stored in SAM\\
   {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
-  {\tt MD} & Z & String for mismatching positions [TODO: add descriptions]\\
+  {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([ACGTN]|\char92\char94[ACGTN]+)[0-9]+)*}\,$^1$\\
   {\tt MQ} & i & Mapping quality of the mate/next fragment \\
   {\tt NH} & i & Number of reported alignments that contains the query in the current record\\
-  {\tt NM} & i & Edit distance to the reference, including ambiguous bases but excluding clipping \\
+  {\tt NM} & i & Edit distance to the reference, including ambiguous bases but excluding clipping\\
   {\tt OQ} & Z & Original base quality (usually before recalibration). Same encoding as {\sf QUAL}.\\
   {\tt OP} & i & Original mapping position (usually before realignment) \\
   {\tt OC} & Z & Original CIGAR (usually before realignment) \\
@@ -353,8 +355,18 @@ containing lowercase letters are reserved for end users.
   \hline
 \end{tabular}
 \end{center}
-The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt CC}, {\tt CP}, {\tt MF}, {\tt S2}
-and {\tt SQ} are reserved for backward compatibility.
+\begin{enumerate}
+\item The MD field aims to achieve SNP/indel calling without looking at
+  the reference. For example, a string `{\tt 10A5\char94AC6}' means from
+  the leftmost reference base in the alignment, there are 10 matches
+  followed by an A on the reference which is different from the aligned
+  read base; the next 5 reference bases are matches followed by a 2bp
+  deletion from the reference; the deleted sequence is AC; the last 6
+  bases are matches. The {\tt MD} field ought to match the {\sf CIGAR}
+  string.
+\item The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt CC}, {\tt CP}, {\tt MF}, {\tt S2}
+  and {\tt SQ} are reserved for backward compatibility.
+\end{enumerate}
 
 \pagebreak
 
@@ -495,7 +507,8 @@ bug.
 BAM is compressed in the BGZF format. All integers in BAM are
 little-endian, regardless of the machine endianness. The format is
 formally described in the following table where values in brackets are
-the default when the corresponding information is not available:
+the default when the corresponding information is not available; an
+underlined word in uppercase denotes a field in the SAM format.
 
 \begin{table}[h]
 \centering
@@ -512,22 +525,22 @@ the default when the corresponding information is not available:
   & \multicolumn{2}{l|}{\sf name} & Reference sequence name; {\tt NULL} terminated & {\tt char[{\sf l\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of alignments (until the end of the file)}} \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the block & {\tt int32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID ($-1\leq{\sf refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($\underline{\sf POS}-1$)& {\tt int32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf read\_name\_len}}, including {\tt NULL} & {\tt uint32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}} & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [0]\\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed by the {\sf reg2bin()} function in Section~\ref{sec:code}; {\sf l\_read\_name} is the length of {\sf read\_name} below. & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}}; {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}. & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of the read sequence & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next fragment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next fragment ($\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf tlen} & Template length (\underline{\sf TLEN}) & {\tt int32\_t} & [0] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next fragment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf read\_name} & Read name, {\tt NULL} terminated & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACGTN}'$\to0,1,2,4,8,15$; high nybble first (1st base in the highest 4-bit of the 1st byte) & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
   & \multicolumn{5}{c|}{\textcolor{gray}{\it List of auxiliary data (until the end of the alignment block)}} \\\cline{3-6}
   & & {\sf tag} & Two-character tag & {\tt char[2]} & \\\cline{3-6}
-  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZH}. An integer may be stored as `{\tt cCsSiI}' depending on the magnitude of the integer. & {\tt char} & \\\cline{3-6}
+  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZH}. An integer may be stored as `{\tt cCsSiI}' depending on the magnitude of the integer. In SAM, all integer types are mapped to `{\tt i}'. & {\tt char} & \\\cline{3-6}
   & & {\sf value} & Tag value & by {\sf val\_type} &\\
   \cline{1-6}
 \end{tabular}}
@@ -644,7 +657,7 @@ saved.
 \end{tabular}}
 \end{table}
 
-\subsection{C source code for computing bin number and overlapping bins}
+\subsection{C source code for computing bin number and overlapping bins}\label{sec:code}
 
 {\small
 \begin{verbatim}
