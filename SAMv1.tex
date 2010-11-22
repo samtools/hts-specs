@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r849)}
+\title{The SAM Format Specification (v1.3-r853)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -407,14 +407,14 @@ specific software package for it to function properly.
 \item Multiple mapping
   \begin{enumerate}[label*=\arabic*]
   \item When one fragment is present in multiple records, only one
-    record should have the primary alignment flag bit (0x100) set. {\sf
-      RNEXT} and {\sf PNEXT} point to the primary alignment of the next
-    fragment.
+    record should have the secondary alignment flag bit (0x100)
+    unset. {\sf RNEXT} and {\sf PNEXT} point to the primary alignment of
+    the next fragment.
   \item {\sf SEQ} and {\sf QUAL} of secondary alignments should be set
     to `*' to reduce the file size.
   \end{enumerate}
-\item There should be no overlap between fragments of a read\footnote{Few/no
-  existing aligners follow this practice.}.
+%\item There should be no overlap between fragments of a read\footnote{Few/no
+%  existing aligners follow this practice.}.
 \item Optional tags:
   \begin{enumerate}[label*=\arabic*]
   \item If the template has more than 2 fragments, the {\tt TC} tag
