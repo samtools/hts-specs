@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r853)}
+\title{The SAM Format Specification (v1.3-r870)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -251,6 +251,9 @@ fields in the SAM format:
   \item {\tt H} can only be present as the first and/or last operation.
   \item {\tt S} may only have {\tt H} operations between them and the
     ends of the {\sf CIGAR} string.
+  \item For mRNA-to-genome alignment, an {\tt N} operation represents an
+    intron. For other types of alignments, the interpretation of {\tt N}
+    is not defined.
   \end{itemize}
 \item {\sf RNEXT}: Reference sequence name of the NEXT fragment in the
   template. For the last fragment, the next fragment is the first
