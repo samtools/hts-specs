@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r870)}
+\title{The SAM Format Specification (v1.3-r871)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -200,8 +200,8 @@ fields in the SAM format:
   \begin{itemize}
   \item Bit 0x4 is the only reliable place to tell whether the fragment
     is unmapped. If 0x4 is set, no assumptions can be made about {\sf
-      RNAME}, {\sf POS}, bits 0x2, 0x10 and 0x100 and the bit 0x20 of
-    the next fragment in the template.
+      RNAME}, {\sf POS}, {\sf CIGAR}, {\sf MAPQ}, bits 0x2, 0x10 and
+    0x100 and the bit 0x20 of the next fragment in the template.
   \item If 0x40 and 0x80 are both set, the fragment is part of a linear
     template, but it is neither the first nor the last fragment. If both
     0x40 and 0x80 are unset, the index of the fragment in the template
