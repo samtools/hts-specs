@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r871)}
+\title{The SAM Format Specification (v1.3-r882)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -254,6 +254,8 @@ fields in the SAM format:
   \item For mRNA-to-genome alignment, an {\tt N} operation represents an
     intron. For other types of alignments, the interpretation of {\tt N}
     is not defined.
+  \item Sum of lengths of the {\tt M/I/S/=/X} operations ought to equal
+    the length of {\sf SEQ}.
   \end{itemize}
 \item {\sf RNEXT}: Reference sequence name of the NEXT fragment in the
   template. For the last fragment, the next fragment is the first
@@ -289,7 +291,7 @@ fields in the SAM format:
   base error probability which equals $-10\log_{10}\Pr\{\mbox{base is
     wrong}\}$. This field can be a `*' when quality is not stored. If
   not a `*', {\sf SEQ} is not a `*' and the length of the quality string
-  must equal the length of {\sf SEQ}.
+  ought to equal the length of {\sf SEQ}.
 \end{enumerate}
 
 \subsection{The alignment section: optional fields}
