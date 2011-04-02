@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r882)}
+\title{The SAM Format Specification (v1.3-r946)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -61,6 +61,8 @@ r001  83 ref 37 30 9M         =  7 -39 CAGCGCCAT         *
 \end{verbatim}
 \end{framed}
 
+\pagebreak
+
 \subsection{Terminologies and Concepts}
 
 \begin{description}
@@ -90,9 +92,9 @@ r001  83 ref 37 30 9M         =  7 -39 CAGCGCCAT         *
 \subsection{The header section}
 Each header line begins with character `{\tt @}' followed by a
 two-letter record type code. In the header, each line is TAB-delimited
-and each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
+and except the {\tt @CO} lines, each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
 is a two-letter string that defines the content and the format of {\tt
-  VALUE}. Each header line should match:\\ {\tt
+  VALUE}. Each header line should match: {\tt
   /\char94@[A-Za-z][A-Za-z](\char92t[A-Za-z][A-Za-z]:[
   -\char126])+\$/}. Tags containing lowercase letters are reserved for
 end users.
@@ -109,9 +111,9 @@ The following table give the defined record types and tags. Tags with
   & {\tt VN}* & Format version. \emph{Accepted format}: {\tt /\char94[0-9]+\char92.[0-9]+\$/}.\\\cline{2-3}
   & {\tt SO} & Sorting order of alignments. \emph{Valid values}: {\tt unknown} (default), {\tt
     unsorted}, {\tt queryname} and {\tt coordinate}. For coordinate sort, the major sort
-  key is the RNAME field, with order defined by the order of @SQ lines in the header.  The
-  minor sort key is the POS field.  For alignments with equal RNAME and POS, order is
-  arbitrary.  All alignments with * in RNAME field follow alignments with some other
+  key is the {\sf RNAME} field, with order defined by the order of {\tt @SQ} lines in the header.  The
+  minor sort key is the {\sf POS} field.  For alignments with equal {\sf RNAME} and {\sf POS}, order is
+  arbitrary.  All alignments with `{\tt *}' in {\sf RNAME} field follow alignments with some other
   value but otherwise are in arbitrary order.\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. The order of {\tt @SQ} lines defines the alignment sorting order.\\\cline{2-3}
   & {\tt SN}* & Reference sequence name. Each {\tt @SQ} line must have a unique {\tt SN} tag. The value of this
@@ -123,26 +125,37 @@ The following table give the defined record types and tags. Tags with
   & {\tt SP} & Species.\\\cline{2-3}
   & {\tt UR} & URI of the sequence.  This value may start with one of the standard
   protocols, e.g http: or ftp:.  If it does not start with one of these protocols, it is assumed to be a file-system path.\\\cline{1-3}\pagebreak\cline{1-3}
-  \multicolumn{2}{|l}{\tt @RG} & Read group. Unordered multiple lines are allowed.\\\cline{2-3}
+  \multicolumn{2}{|l}{\tt @RG} & Read group. Unordered multiple {\tt @RG} lines are allowed.\\\cline{2-3}
   & {\tt ID}* & Read group identifier. Each {\tt @RG} line must have a unique {\tt ID}. The value of {\tt ID}
   is used in the RG tags of alignment records. Must be unique among all read groups in header section.  Read group IDs may be modified when merging SAM files in order to handle collisions.\\\cline{2-3}
   & {\tt CN} & Name of sequencing center producing the read.\\\cline{2-3}
   & {\tt DS} & Description.\\\cline{2-3}
   & {\tt DT} & Date the run was produced (ISO8601 date or date/time).\\\cline{2-3}
+  & {\tt FO} & Flow order. The array of nucleotide bases that correspond to the nucleotides used for each flow of each read.
+  	Multi-base flows are encoded in IUPAC format, and non-nucleotide flows by various other characters. \emph{Format}: {\tt /\char92*|[ACMGRSVTWYHKDBN]+/}\\\cline{2-3}
+  & {\tt KS} & The array of nucleotide bases that correspond to the key sequence of each read.\\\cline{2-3}
   & {\tt LB} & Library.\\\cline{2-3}
   & {\tt PG} & Programs used for processing the read group.\\\cline{2-3}
   & {\tt PI} & Predicted median insert size.\\\cline{2-3}
-  & {\tt PL} & Platform/technology used to produce the read. \emph{Valid values}:
-  {\tt ILLUMINA}, {\tt SOLID}, {\tt LS454}, {\tt HELICOS} and {\tt PACBIO}.\\\cline{2-3}
+  & {\tt PL} & Platform/technology used to produce the reads. \emph{Valid values}:
+  {\tt CAPILLARY}, {\tt LS454}, {\tt ILLUMINA}, {\tt SOLID}, {\tt HELICOS}, {\tt IONTORRENT} and {\tt PACBIO}.\\\cline{2-3}
   & {\tt PU} & Platform unit (e.g. flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
   & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @PG} & Program. \\\cline{2-3}
-  & {\tt ID}* & Program record identifier. Each {\tt @PG} line must have a unique {\tt ID}. The value of {\tt ID} is used in the alignment {\tt PG} tag and {\tt PP} tags of other {\tt @PG} lines.  PG IDs may be modified when merging SAM files in order to handle collisions.\\\cline{2-3}
+  & {\tt ID}* & Program record identifier. Each {\tt @PG} line must have a unique {\tt ID}.
+  	The value of {\tt ID} is used in the alignment {\tt PG} tag and {\tt PP} tags of other {\tt @PG} lines.
+	{\tt PG} IDs may be modified when merging SAM files in order to handle collisions.\\\cline{2-3}
   & {\tt PN} & Program name \\\cline{2-3}
   & {\tt CL} & Command line \\\cline{2-3}
-  & {\tt PP} & Previous {\tt @PG-ID}. Must match another {\tt @PG} header's {\tt ID} tag. {\tt @PG} records may be chained using {\tt PP} tag, with the last record in the chain having no {\tt PP} tag. This chain defines the order of programs that have been applied to the alignment.  PP values may be modified when merging SAM files in order to handle collisions of PG IDs.  The first PG record in a chain (i.e. the one referred to by the PG tag in a SAM record) describes the most recent program that operated on the SAM record.  The next PG record in the chain describes the next most recent program that operated on the SAM record. \\\cline{2-3}
+  & {\tt PP} & Previous {\tt @PG-ID}. Must match another {\tt @PG} header's {\tt ID} tag.
+  	{\tt @PG} records may be chained using {\tt PP} tag, with the last record in the chain
+	having no {\tt PP} tag. This chain defines the order of programs that have been applied to the alignment.
+	{\tt PP} values may be modified when merging SAM files in order to handle collisions of {\tt PG} {\tt ID}s.
+	The first {\tt PG} record in a chain (i.e. the one referred to by the {\tt PG} tag in a SAM record)
+	describes the most recent program that operated on the SAM record.
+	The next {\tt PG} record in the chain describes the next most recent program that operated on the SAM record. \\\cline{2-3}
   & {\tt VN} & Program version \\\cline{1-3}
-  \multicolumn{2}{|l}{\tt @CO} & One-line text comment. Unordered multiple lines are allowed.\\
+  \multicolumn{2}{|l}{\tt @CO} & One-line text comment. Unordered multiple {\tt @CO} lines are allowed.\\
   \cline{1-3}
 \end{longtable}
 \end{center}
@@ -179,24 +192,25 @@ fields in the SAM format:
 \item {\sf FLAG}: bitwise FLAG. Each bit is explained in the following
   table (`*' means no bits are set):
   \begin{center}\small
-  \begin{tabular}{rl}
+  \begin{tabular}{rcl}
   \hline
-  Bit & Description\\
+  Bit & Chr\footnotemark[1] & Description\\
   \hline
-  0x1 &  template having multiple fragments in sequencing \\
-  0x2 &  each fragment properly aligned according to the aligner \\
-  0x4 &  fragment unmapped \\
-  0x8 &  next fragment in the template unmapped \\
-  0x10 &  {\sf SEQ} being reverse complemented \\
-  0x20 &  {\sf SEQ} of the next fragment in the template being reversed \\
-  0x40 &  the first fragment in the template \\
-  0x80 &  the last fragment in the template \\
-  0x100 &  secondary alignment\\
-  0x200 &  not passing quality controls \\
-  0x400 &  PCR or optical duplicate \\
+  0x1 &  p&template having multiple fragments in sequencing \\
+  0x2 &  P&each fragment properly aligned according to the aligner \\
+  0x4 &  u&fragment unmapped \\
+  0x8 &  U&next fragment in the template unmapped \\
+  0x10 & r& {\sf SEQ} being reverse complemented \\
+  0x20 & R& {\sf SEQ} of the next fragment in the template being reversed \\
+  0x40 & 1& the first fragment in the template \\
+  0x80 & 2& the last fragment in the template \\
+  0x100 &s&  secondary alignment\\
+  0x200 &f&  not passing quality controls \\
+  0x400 &d&  PCR or optical duplicate \\
   \hline
   \end{tabular}
   \end{center}
+  \footnotetext[1]{For human readability, some programs may use a string to represent {\sf FLAG}, but this is not formally defined in the SAM spec.}
   \begin{itemize}
   \item Bit 0x4 is the only reliable place to tell whether the fragment
     is unmapped. If 0x4 is set, no assumptions can be made about {\sf
@@ -284,20 +298,19 @@ fields in the SAM format:
   sequence is not stored. If not a `*', the length of the sequence must
   equal the sum of lengths of {\tt M/I/S/=/X} operations in {\sf CIGAR}.
   An `=' denotes the base is identical to the reference base. No
-  assumptions can be made on the letter cases. Anything other than {\tt
-    A/C/G/T/=} is regarded as ambiguous base {\tt N}.
+  assumptions can be made on the letter cases.
 \item {\sf QUAL}: ASCII of base QUALity plus 33 (same as the quality
   string in the Sanger FASTQ format). A base quality is the phred-scaled
   base error probability which equals $-10\log_{10}\Pr\{\mbox{base is
     wrong}\}$. This field can be a `*' when quality is not stored. If
-  not a `*', {\sf SEQ} is not a `*' and the length of the quality string
+  not a `*', {\sf SEQ} must not be a `*' and the length of the quality string
   ought to equal the length of {\sf SEQ}.
 \end{enumerate}
 
 \subsection{The alignment section: optional fields}
 All optional fields are presented in the {\tt TAG:TYPE:VALUE} format
 where {\tt TAG} is a two-character string that matches {\tt
-  /[A-Za-z][A-Za-z0-9]/}, {\tt TYPE} is a casesensitive single letter which
+  /[A-Za-z][A-Za-z0-9]/}, and {\tt TYPE} is a casesensitive single letter which
 defines the format of {\tt VALUE}:
 \begin{center}\small
 \begin{tabular}{cll}
@@ -308,23 +321,24 @@ A & {\tt [!-\char126]} & Printable character \\
 i & {\tt [-+]?[0-9]+} & Singed 32-bit integer \\
 f & {\tt [-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?} & Single-precision floating number \\
 Z & {\tt [\,\,\,!-\char126]+} & Printable string, including space\\
-H & {\tt [0-9A-F]+} & Hex string, high nybble first \\
+H & {\tt [0-9A-F]+} & Byte array in the Hex format\footnotemark[1]\\
 \hline
 \end{tabular}
+\footnotetext[1]{For example, a byte array {\tt \{0x1a,0xe3,0x1\}} corresponds to a Hex string `{\tt 1AE301}'.}
 \end{center}
 Each {\tt TAG} can only appear once in one alignment line. A {\tt TAG}
 containing lowercase letters are reserved for end users.
 
-{\flushleft Predefined tags are shown in the following table. You can
+{Predefined tags are shown in the following table. You can
   freely add new tags, and if a new tag may be of general interest, you
-  can email {\tt samtools-help@lists.sourceforge.net} to add the new tag
+  can email {\tt samtools-devel@lists.sourceforge.net} to add the new tag
   to the specification. Note that tags started with `{\tt X}', `{\tt Y}'
   and `{\tt Z}' or tags containing lowercase letters in either position are reserved for local use and will not be formally
   defined in any future version of this specification.}
 \begin{center}\small
 \begin{tabular}{ccp{12.5cm}}
   \hline
-  {\bf Tag} & {\bf Type} & {\bf Description} \\
+  {\bf Tag\footnotemark[1]} & {\bf Type} & {\bf Description} \\
   \hline
   {\tt X?} & ? & Reserved fields for end users (together with {\tt Y?} and {\tt Z?}) \\
   {\tt AM} & i & The smallest template-independent mapping quality of fragments in the rest \\
@@ -339,13 +353,14 @@ containing lowercase letters are reserved for end users.
   {\tt E2} & Z & The 2nd most likely base calls. Same encoding and same length as {\sf QUAL}.\\
   {\tt FI} & i & The index of fragment in the template.\\
   {\tt FS} & Z & Fragment suffix.\\
+  {\tt FZ} & H & Flow signal intensities on the original strand of the read, stored as {\tt (uint16\_t) round(value * 100.0)}. \\
   {\tt LB} & Z & Library. Value to be consistent with the header {\tt RG-LB} tag if {\tt @RG} is present.\\
   {\tt H0} & i & Number of perfect hits\\
   {\tt H1} & i & Number of 1-difference hits (see also {\tt NM})\\
   {\tt H2} & i & Number of 2-difference hits \\
   {\tt HI} & i & Query hit index, indicating the alignment record is the i-th one stored in SAM\\
   {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
-  {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([ACGTN]|\char92\char94[ACGTN]+)[0-9]+)*}\,$^1$\\
+  {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([A-Z]|\char92\char94[A-Z]+)[0-9]+)*}\footnotemark[2]\\
   {\tt MQ} & i & Mapping quality of the mate/next fragment \\
   {\tt NH} & i & Number of reported alignments that contains the query in the current record\\
   {\tt NM} & i & Edit distance to the reference, including ambiguous bases but excluding clipping\\
@@ -365,18 +380,16 @@ containing lowercase letters are reserved for end users.
   \hline
 \end{tabular}
 \end{center}
-\begin{enumerate}
-\item The MD field aims to achieve SNP/indel calling without looking at
+\footnotetext[1]{The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt MF}, {\tt S2}
+  and {\tt SQ} are reserved for backward compatibility.}
+\footnotetext[2]{The MD field aims to achieve SNP/indel calling without looking at
   the reference. For example, a string `{\tt 10A5\char94AC6}' means from
   the leftmost reference base in the alignment, there are 10 matches
   followed by an A on the reference which is different from the aligned
   read base; the next 5 reference bases are matches followed by a 2bp
   deletion from the reference; the deleted sequence is AC; the last 6
   bases are matches. The {\tt MD} field ought to match the {\sf CIGAR}
-  string.
-\item The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt MF}, {\tt S2}
-  and {\tt SQ} are reserved for backward compatibility.
-\end{enumerate}
+  string.}
 
 \pagebreak
 
@@ -440,7 +453,12 @@ BGZF is block compression implemented on top of the standard gzip file
 format. The goal of BGZF is to provide good compression while allowing
 efficient random access to the BAM file for indexed queries. The BGZF
 format is `gunzip compatible', in the sense that a compliant gunzip
-utility can decompress a BGZF compressed file.
+utility can decompress a BGZF compressed file\footnote{It is worth noting that there is a known bug in the Java {\sf
+  GZIPInputStream} class that concatenated gzip archives cannot be
+successfully decompressed by this class. BGZF files can be created and
+manipulated using the built-in Java {\sf util.zip} package, but naive
+use of {\sf GZIPInputStream} on a BGZF file will not work due to this
+bug.}.
 
 A BGZF archive is a series of concatenated BGZF blocks. Each BGZF block
 is itself a spec-compliant gzip archive which contains an "extra field"
@@ -497,7 +515,7 @@ required by RFC1952):
 
 BGZF files support random access through the BAM file index. To achieve
 this, the BAM file index uses \emph{virtual file offsets} into the BGZF
-file. Each virtual file offset is 64 bits, defined as: {\tt
+file. Each virtual file offset is an unsigned 64-bit integer, defined as: {\tt
   coffset\char60\char60 16\char124uoffset}, where {\tt coffset} is an
 unsigned byte offset into the BGZF file to the beginning of a BGZF
 block, and {\tt uoffset} is an unsigned byte offset into the
@@ -506,15 +524,8 @@ offsets can be compared, but subtraction between virtual file offsets
 and addition between a virtual offset and an integer are both
 disallowed.
 
-It is worth noting that there is a known bug in the Java {\sf
-  GZIPInputStream} class that concatenated gzip archives cannot be
-successfully decompressed by this class. BGZF files can be created and
-manipulated using the built-in Java {\sf util.zip} package, but naive
-use of {\sf GZIPInputStream} on a BGZF file will not work due to this
-bug.
-
 \subsection{The BAM format}
-BAM is compressed in the BGZF format. All integers in BAM are
+BAM is compressed in the BGZF format. All multi-byte numbers in BAM are
 little-endian, regardless of the machine endianness. The format is
 formally described in the following table where values in brackets are
 the default when the corresponding information is not available; an
@@ -546,15 +557,22 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf read\_name} & Read name, {\tt NULL} terminated (\underline{\sf QNAME} plus a tailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACGTN}'$\to0,1,2,4,8,15$; high nybble first (1st base in the highest 4-bit of the 1st byte) & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$; other characters mapped to `{\tt N}'; high nybble first (1st base in the highest 4-bit of the 1st byte) & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
   & \multicolumn{5}{c|}{\textcolor{gray}{\it List of auxiliary data (until the end of the alignment block)}} \\\cline{3-6}
   & & {\sf tag} & Two-character tag & {\tt char[2]} & \\\cline{3-6}
-  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZH}. An integer may be stored as `{\tt cCsSiI}' depending on the magnitude of the integer. In SAM, all integer types are mapped to `{\tt i}'. & {\tt char} & \\\cline{3-6}
-  & & {\sf value} & Tag value & by {\sf val\_type} &\\
+  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZHB}\footnotemark[1]$^,$\footnotemark[2] & {\tt char} & \\\cline{3-6}
+  & & {\sf value} & Tag value & (by {\sf val\_type}) &\\
   \cline{1-6}
 \end{tabular}}
 \end{table}
+\footnotetext[1]{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
+	{\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t} and {\tt uint32\_t}, respectively. In SAM, all integer types are mapped to {\tt int32\_t}.}
+\footnotetext[2]{BAM uses two types `{\tt H}' and `{\tt B}' to store a byte string. When type {\tt H} is in use,
+	the byte string is stored as a {\tt NULL}-terminated Hex string. When type {\tt B} is in use,
+	the first 4 bytes in `{\sf value}', in the little-endian byte order, gives the number of bytes in the byte string;
+	the byte string is kept in the following bytes. Both BAM type `{\tt H}' and `{\tt B}' are mapped to
+	a single SAM type `{\tt H}'.}
 
 \pagebreak
 
