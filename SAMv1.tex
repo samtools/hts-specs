@@ -312,26 +312,32 @@ fields in the SAM format:
 \end{enumerate}
 
 \subsection{The alignment section: optional fields}
-All optional fields are presented in the {\tt TAG:TYPE:VALUE} format
-where {\tt TAG} is a two-character string that matches {\tt
-  /[A-Za-z][A-Za-z0-9]/}, and {\tt TYPE} is a casesensitive single letter which
+All optional fields follow the {\tt TAG:TYPE:VALUE} format
+where {\tt TAG} is a two-character string that matches {\tt /[A-Za-z][A-Za-z0-9]/}.
+Each {\tt TAG} can only appear once in one alignment line. A {\tt TAG}
+containing lowercase letters are reserved for end users.
+In an optional field, {\tt TYPE} is a single casesensitive letter which
 defines the format of {\tt VALUE}:
 \begin{center}\small
 \begin{tabular}{cll}
 \hline
-{\bf Type} & {\bf Regexp matching {\tt VALUE}} & {\bf Descrption} \\
+{\bf Type} & {\bf Regexp matching {\tt VALUE}} & {\bf Description} \\
 \hline
 A & {\tt [!-\char126]} & Printable character \\
 i & {\tt [-+]?[0-9]+} & Singed 32-bit integer \\
 f & {\tt [-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?} & Single-precision floating number \\
 Z & {\tt [\,\,\,!-\char126]+} & Printable string, including space\\
 H & {\tt [0-9A-F]+} & Byte array in the Hex format\footnotemark[1]\\
+B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)+} & Integer or numeric array\\
 \hline
 \end{tabular}
 \footnotetext[1]{For example, a byte array {\tt \{0x1a,0xe3,0x1\}} corresponds to a Hex string `{\tt 1AE301}'.}
 \end{center}
-Each {\tt TAG} can only appear once in one alignment line. A {\tt TAG}
-containing lowercase letters are reserved for end users.
+For an integer or numeric array (type `{\tt B}'), the first letter indicates the type of numbers
+in the following comma separated array. The letter can be one of `{\tt cCsSiIf}', corresponding to
+{\tt int\_8}, {\tt uint8\_t}, {\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t}, {\tt uint32\_t}
+and {\tt float}, respectively\footnotemark[2].
+\footnotetext[2]{Explicit typing helps to reduce the file size when SAM is converted to BAM.}
 
 {Predefined tags are shown in the following table. You can
   freely add new tags, and if a new tag may be of general interest, you
@@ -571,12 +577,12 @@ underlined word in uppercase denotes a field in the SAM format.
 \end{tabular}}
 \end{table}
 \footnotetext[1]{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
-	{\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t} and {\tt uint32\_t}, respectively. In SAM, all integer types are mapped to {\tt int32\_t}.}
-\footnotetext[2]{BAM uses two types `{\tt H}' and `{\tt B}' to store a byte string. When type {\tt H} is in use,
-	the byte string is stored as a {\tt NULL}-terminated Hex string. When type {\tt B} is in use,
-	the first 4 bytes in `{\sf value}', in the little-endian byte order, gives the number of bytes in the byte string;
-	the byte string is kept in the following bytes. Both BAM type `{\tt H}' and `{\tt B}' are mapped to
-	a single SAM type `{\tt H}'.}
+	{\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t} and {\tt uint32\_t}, respectively. In SAM, all single integer types are mapped to {\tt int32\_t}.}
+\footnotetext[2]{A `{\tt B}'-typed (array) tag--value pair is stored as follows. The first two bytes keep the two-character tag. The 3rd byte is always `{\tt B}'.
+	The 4th byte, matching {\tt /\char94[cCsSiIf]\$/}, indicates the type of an element in the array.
+	Bytes from 5 to 8 encode a little-endian 32-bit integer which gives the number of elements in the array.
+	Bytes starting from the 9th store the array in the little-endian byte order; the length of the
+	bytes is determined by the type and the length of the array.}
 
 \pagebreak
 
