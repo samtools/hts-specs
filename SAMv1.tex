@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.3-r954)}
+\title{The SAM Format Specification (v1.4-r955)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -95,8 +95,8 @@ two-letter record type code. In the header, each line is TAB-delimited
 and except the {\tt @CO} lines, each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
 is a two-letter string that defines the content and the format of {\tt
   VALUE}. Each header line should match: {\tt
-  /\char94@[A-Za-z][A-Za-z](\char92t[A-Za-z][A-Za-z]:[
-  -\char126])+\$/}. Tags containing lowercase letters are reserved for
+  /\char94@[A-Za-z][A-Za-z](\char92t[A-Za-z][A-Za-z0-9]:[
+  -\char126])+\$/} or {\tt /\char94@CO\char92t.*/}. Tags containing lowercase letters are reserved for
 end users.
 
 The following table give the defined record types and tags. Tags with
@@ -335,9 +335,10 @@ B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)+} & Integer or
 \end{center}
 For an integer or numeric array (type `{\tt B}'), the first letter indicates the type of numbers
 in the following comma separated array. The letter can be one of `{\tt cCsSiIf}', corresponding to
-{\tt int\_8}, {\tt uint8\_t}, {\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t}, {\tt uint32\_t}
-and {\tt float}, respectively\footnotemark[2].
-\footnotetext[2]{Explicit typing helps to reduce the file size when SAM is converted to BAM.}
+{\tt int8\_t} (signed 8-bit integer), {\tt uint8\_t} (unsigned 8-bit integer), {\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t}, {\tt uint32\_t}
+and {\tt float}, respectively\footnotemark[2]. During import/export, the element type
+may be changed if the new type is also compatible with the array.
+\footnotetext[2]{Explicit typing eases format parsing and helps to reduce the file size when SAM is converted to BAM.}
 
 {Predefined tags are shown in the following table. You can
   freely add new tags, and if a new tag may be of general interest, you
@@ -581,7 +582,7 @@ underlined word in uppercase denotes a field in the SAM format.
 \footnotetext[2]{A `{\tt B}'-typed (array) tag--value pair is stored as follows. The first two bytes keep the two-character tag. The 3rd byte is always `{\tt B}'.
 	The 4th byte, matching {\tt /\char94[cCsSiIf]\$/}, indicates the type of an element in the array.
 	Bytes from 5 to 8 encode a little-endian 32-bit integer which gives the number of elements in the array.
-	Bytes starting from the 9th store the array in the little-endian byte order; the length of the
+	Bytes starting from the 9th store the array in the little-endian byte order; the number of these
 	bytes is determined by the type and the length of the array.}
 
 \pagebreak
