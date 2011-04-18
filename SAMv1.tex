@@ -192,10 +192,8 @@ fields in the SAM format:
 \end{center}
 
 \begin{enumerate}
-\item {\sf QNAME}: Query template NAME. Reads/fragments having identical {\sf QNAME} are regarded to come from the same
-	template\footnote{To save disk space, one may use the same {\sf QNAME} for all reads. However, in this case
-	all reads will be considered to come from a single template, which leads to loss of information and may
-	cause problems to other utilities.}.
+\item {\sf QNAME}: Query template NAME. Reads/fragments having identical {\sf QNAME}
+	are regarded to come from the same template. A {\sf QNAME} `{\tt *}' indicates the information is unavailable.
 \item {\sf FLAG}: bitwise FLAG. Each bit is explained in the following
   table:
   \begin{center}\small
@@ -274,7 +272,7 @@ fields in the SAM format:
   \item For mRNA-to-genome alignment, an {\tt N} operation represents an
     intron. For other types of alignments, the interpretation of {\tt N}
     is not defined.
-  \item Sum of lengths of the {\tt M/I/S/=/X} operations ought to equal
+  \item Sum of lengths of the {\tt M/I/S/=/X} operations shall equal
     the length of {\sf SEQ}.
   \end{itemize}
 \item {\sf RNEXT}: Reference sequence name of the NEXT fragment in the
@@ -345,7 +343,7 @@ may be changed if the new type is also compatible with the array.
 {Predefined tags are shown in the following table. You can
   freely add new tags, and if a new tag may be of general interest, you
   can email {\tt samtools-devel@lists.sourceforge.net} to add the new tag
-  to the specification. Note that tags started with `{\tt X}', `{\tt Y}'
+  to the specification. Note that tags starting with `{\tt X}', `{\tt Y}'
   and `{\tt Z}' or tags containing lowercase letters in either position are reserved for local use and will not be formally
   defined in any future version of this specification.}
 \begin{center}\small
@@ -562,26 +560,27 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed by the {\sf reg2bin()} function in Section~\ref{sec:code}; {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_qname}}; {\sf bin} is computed by the {\sf reg2bin()} function in Section~\ref{sec:code}; {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}}; {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}. & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next fragment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next fragment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf read\_name} & Read name, {\tt NULL} terminated (\underline{\sf QNAME} plus a tailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf qname} & Read name\footnotemark[1], {\tt NULL} terminated (\underline{\sf QNAME} plus a tailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$; other characters mapped to `{\tt N}'; high nybble first (1st base in the highest 4-bit of the 1st byte) & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
   & \multicolumn{5}{c|}{\textcolor{gray}{\it List of auxiliary data (until the end of the alignment block)}} \\\cline{3-6}
   & & {\sf tag} & Two-character tag & {\tt char[2]} & \\\cline{3-6}
-  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZHB}\footnotemark[1]$^,$\footnotemark[2] & {\tt char} & \\\cline{3-6}
+  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZHB}\footnotemark[2]$^,$\footnotemark[3] & {\tt char} & \\\cline{3-6}
   & & {\sf value} & Tag value & (by {\sf val\_type}) &\\
   \cline{1-6}
 \end{tabular}}
 \end{table}
-\footnotetext[1]{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
+\footnotetext[1]{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
+\footnotetext[2]{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
 	{\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t} and {\tt uint32\_t}, respectively. In SAM, all single integer types are mapped to {\tt int32\_t}.}
-\footnotetext[2]{A `{\tt B}'-typed (array) tag--value pair is stored as follows. The first two bytes keep the two-character tag. The 3rd byte is always `{\tt B}'.
+\footnotetext[3]{A `{\tt B}'-typed (array) tag--value pair is stored as follows. The first two bytes keep the two-character tag. The 3rd byte is always `{\tt B}'.
 	The 4th byte, matching {\tt /\char94[cCsSiIf]\$/}, indicates the type of an element in the array.
 	Bytes from 5 to 8 encode a little-endian 32-bit integer which gives the number of elements in the array.
 	Bytes starting from the 9th store the array in the little-endian byte order; the number of these
