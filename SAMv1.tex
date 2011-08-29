@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.4-r962)}
+\title{The SAM Format Specification (v1.4-r983)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -364,7 +364,7 @@ may be changed if the new type is also compatible with the array.
   {\tt E2} & Z & The 2nd most likely base calls. Same encoding and same length as {\sf QUAL}.\\
   {\tt FI} & i & The index of fragment in the template.\\
   {\tt FS} & Z & Fragment suffix.\\
-  {\tt FZ} & H & Flow signal intensities on the original strand of the read, stored as {\tt (uint16\_t) round(value * 100.0)}. \\
+  {\tt FZ} & B,S & Flow signal intensities on the original strand of the read, stored as {\tt (uint16\_t) round(value * 100.0)}. \\
   {\tt LB} & Z & Library. Value to be consistent with the header {\tt RG-LB} tag if {\tt @RG} is present.\\
   {\tt H0} & i & Number of perfect hits\\
   {\tt H1} & i & Number of 1-difference hits (see also {\tt NM})\\
