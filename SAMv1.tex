@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.4-r983)}
+\title{The SAM Format Specification (v1.4-r985)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -68,13 +68,13 @@ r001  83 ref 37 30 9M         =  7 -39 CAGCGCCAT         *
 \begin{description}
 \item[Template] A DNA/RNA sequence part of which is sequenced on a
   sequencing machine or assembled from raw sequences.
-\item[Fragment] A contiguous (sub)sequence on a template which is
-  sequenced or assembled. For sequencing data, fragments are indexed by
-  the order in which they are sequenced. For fragments of an assembled
+\item[Segment] A contiguous (sub)sequence on a template which is
+  sequenced or assembled. For sequencing data, segments are indexed by
+  the order in which they are sequenced. For segments of an assembled
   sequence, they are indexed by the order of the leftmost coordinate on
   the assembled sequence.
 \item[Read] A raw sequence that comes off a sequencing machine. A read
-  may consist of multiple fragments.
+  may consist of multiple segments, which are sometimes called \emph{subreads}.
 \item[1-based coordinate system] A coordinate system where the first
   base of a sequence is one. In this coordinate system, a region is
   specified by a closed interval. For example, the region between the
@@ -182,17 +182,17 @@ fields in the SAM format:
   4 & {\sf POS} & Int & {\tt [0,2$^{29}$-1]} & 1-based leftmost mapping POSition \\
   5 & {\sf MAPQ} & Int & {\tt [0,2$^8$-1]} & MAPping Quality \\
   6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
-  7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next fragment\\
-  8 & {\sf PNEXT} & Int & {\tt [0,2$^{29}$-1]} & Position of the mate/next fragment \\
+  7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next segment\\
+  8 & {\sf PNEXT} & Int & {\tt [0,2$^{29}$-1]} & Position of the mate/next segment \\
   9 & {\sf TLEN} & Int & {\tt [-2$^{29}$+1,2$^{29}$-1]} & observed Template LENgth \\
-  10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & fragment SEQuence\\
+  10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & segment SEQuence\\
   11 & {\sf QUAL} & String & {\tt [!-\char126]+} & ASCII of Phred-scaled base QUALity+33 \\
   \hline
 \end{tabular}
 \end{center}
 
 \begin{enumerate}
-\item {\sf QNAME}: Query template NAME. Reads/fragments having identical {\sf QNAME}
+\item {\sf QNAME}: Query template NAME. Reads/segments having identical {\sf QNAME}
 	are regarded to come from the same template. A {\sf QNAME} `{\tt *}' indicates the information is unavailable.
 \item {\sf FLAG}: bitwise FLAG. Each bit is explained in the following
   table:
@@ -201,14 +201,14 @@ fields in the SAM format:
   \hline
   Bit & Description\\
   \hline
-  0x1 &  template having multiple fragments in sequencing \\
-  0x2 &  each fragment properly aligned according to the aligner \\
-  0x4 &  fragment unmapped \\
-  0x8 &  next fragment in the template unmapped \\
+  0x1 &  template having multiple segments in sequencing \\
+  0x2 &  each segment properly aligned according to the aligner \\
+  0x4 &  segment unmapped \\
+  0x8 &  next segment in the template unmapped \\
   0x10 &  {\sf SEQ} being reverse complemented \\
-  0x20 &  {\sf SEQ} of the next fragment in the template being reversed \\
-  0x40 &  the first fragment in the template \\
-  0x80 &  the last fragment in the template \\
+  0x20 &  {\sf SEQ} of the next segment in the template being reversed \\
+  0x40 &  the first segment in the template \\
+  0x80 &  the last segment in the template \\
   0x100 &  secondary alignment\\
   0x200 &  not passing quality controls \\
   0x400 &  PCR or optical duplicate \\
@@ -216,13 +216,13 @@ fields in the SAM format:
   \end{tabular}
   \end{center}
   \begin{itemize}
-  \item Bit 0x4 is the only reliable place to tell whether the fragment
+  \item Bit 0x4 is the only reliable place to tell whether the segment
     is unmapped. If 0x4 is set, no assumptions can be made about {\sf
       RNAME}, {\sf POS}, {\sf CIGAR}, {\sf MAPQ}, bits 0x2, 0x10 and
-    0x100 and the bit 0x20 of the next fragment in the template.
-  \item If 0x40 and 0x80 are both set, the fragment is part of a linear
-    template, but it is neither the first nor the last fragment. If both
-    0x40 and 0x80 are unset, the index of the fragment in the template
+    0x100 and the bit 0x20 of the next segment in the template.
+  \item If 0x40 and 0x80 are both set, the segment is part of a linear
+    template, but it is neither the first nor the last segment. If both
+    0x40 and 0x80 are unset, the index of the segment in the template
     is unknown. This may happen for a non-linear template or the index
     is lost in data processing.
   \item Bit 0x100 marks the alignment not to be used in certain analyses
@@ -232,8 +232,8 @@ fields in the SAM format:
   \end{itemize}
 \item {\sf RNAME}: Reference sequence NAME of the alignment. If {\tt
     @SQ} header lines are present, {\sf RNAME} (if not `*') must be
-  present in one of the {\tt SQ-SN} tag. An unmapped fragment without
-  coordinate has a `*' at this field. However, an unmapped fragment may
+  present in one of the {\tt SQ-SN} tag. An unmapped segment without
+  coordinate has a `*' at this field. However, an unmapped segment may
   also have an ordinary coordinate such that it can be placed at a
   desired position after sorting. If {\sf RNAME} is `*', no assumptions
   can be made about {\sf POS} and {\sf CIGAR}.
@@ -275,30 +275,30 @@ fields in the SAM format:
   \item Sum of lengths of the {\tt M/I/S/=/X} operations shall equal
     the length of {\sf SEQ}.
   \end{itemize}
-\item {\sf RNEXT}: Reference sequence name of the NEXT fragment in the
-  template. For the last fragment, the next fragment is the first
-  fragment in the template. If {\tt @SQ} header lines are present, {\sf
+\item {\sf RNEXT}: Reference sequence name of the NEXT segment in the
+  template. For the last segment, the next segment is the first
+  segment in the template. If {\tt @SQ} header lines are present, {\sf
     RNEXT} (if not `*' or `=') must be present in one of the {\tt SQ-SN}
   tag. This field is set as `*' when the information is unavailable, and
   set as `=' if {\sf RNEXT} is identical {\sf RNAME}. If not `=' and the
-  next fragment in the template has one primary mapping (see also bit
+  next segment in the template has one primary mapping (see also bit
   0x100 in {\sf FLAG}), this field is identical to {\sf RNAME} of the
-  next fragment.  If the next fragment has multiple primary mappings, no
+  next segment.  If the next segment has multiple primary mappings, no
   assumptions can be made about {\sf RNEXT} and {\sf PNEXT}.  If {\sf
     RNEXT} is `*', no assumptions can be made on {\sf PNEXT} and bit
   0x20.
-\item {\sf PNEXT}: Position of the NEXT fragment in the template. Set as
+\item {\sf PNEXT}: Position of the NEXT segment in the template. Set as
   0 when the information is unavailable. This field equals {\sf POS} of
-  the next fragment. If {\sf PNEXT} is 0, no assumptions can be made on
+  the next segment. If {\sf PNEXT} is 0, no assumptions can be made on
   {\sf RNEXT} and bit 0x20.
-\item {\sf TLEN}: signed observed Template LENgth. If all fragments are
+\item {\sf TLEN}: signed observed Template LENgth. If all segments are
   mapped to the same reference, the unsigned observed template length
   equals the number of bases from the leftmost mapped base to the
-  rightmost mapped base. The leftmost fragment has a plus sign and the
-  rightmost has a minus sign. The sign of fragments in the middle is
-  undefined. It is set as 0 for single-fragment template or when the
+  rightmost mapped base. The leftmost segment has a plus sign and the
+  rightmost has a minus sign. The sign of segments in the middle is
+  undefined. It is set as 0 for single-segment template or when the
   information is unavailable.
-\item {\sf SEQ}: fragment SEQuence. This field can be a `*' when the
+\item {\sf SEQ}: segment SEQuence. This field can be a `*' when the
   sequence is not stored. If not a `*', the length of the sequence must
   equal the sum of lengths of {\tt M/I/S/=/X} operations in {\sf CIGAR}.
   An `=' denotes the base is identical to the reference base. No
@@ -352,8 +352,9 @@ may be changed if the new type is also compatible with the array.
   {\bf Tag\footnotemark[1]} & {\bf Type} & {\bf Description} \\
   \hline
   {\tt X?} & ? & Reserved fields for end users (together with {\tt Y?} and {\tt Z?}) \\
-  {\tt AM} & i & The smallest template-independent mapping quality of fragments in the rest \\
+  {\tt AM} & i & The smallest template-independent mapping quality of segments in the rest \\
   {\tt AS} & i & Alignment score generated by aligner \\
+  {\tt BC} & Z & Barcode sequence \\
   {\tt BQ} & Z & Offset to base alignment quality (BAQ), of the same length as the read sequence.
   At the $i$-th read base, ${\rm BAQ}_i=Q_i-({\rm BQ}_i-64)$ where $Q_i$ is the $i$-th base quality. \\
   {\tt CC} & Z & Reference name of the next hit; "=" for the same chromosome \\
@@ -362,8 +363,8 @@ may be changed if the new type is also compatible with the array.
   {\tt CQ} & Z & Color read quality on the original strand of the read. Same encoding as {\sf QUAL}; same length as {\tt CS}.\\
   {\tt CS} & Z & Color read sequence on the original strand of the read. The primer base must be included.\\
   {\tt E2} & Z & The 2nd most likely base calls. Same encoding and same length as {\sf QUAL}.\\
-  {\tt FI} & i & The index of fragment in the template.\\
-  {\tt FS} & Z & Fragment suffix.\\
+  {\tt FI} & i & The index of segment in the template.\\
+  {\tt FS} & Z & Segment suffix.\\
   {\tt FZ} & B,S & Flow signal intensities on the original strand of the read, stored as {\tt (uint16\_t) round(value * 100.0)}. \\
   {\tt LB} & Z & Library. Value to be consistent with the header {\tt RG-LB} tag if {\tt @RG} is present.\\
   {\tt H0} & i & Number of perfect hits\\
@@ -372,7 +373,7 @@ may be changed if the new type is also compatible with the array.
   {\tt HI} & i & Query hit index, indicating the alignment record is the i-th one stored in SAM\\
   {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
   {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([A-Z]|\char92\char94[A-Z]+)[0-9]+)*}\footnotemark[2]\\
-  {\tt MQ} & i & Mapping quality of the mate/next fragment \\
+  {\tt MQ} & i & Mapping quality of the mate/next segment \\
   {\tt NH} & i & Number of reported alignments that contains the query in the current record\\
   {\tt NM} & i & Edit distance to the reference, including ambiguous bases but excluding clipping\\
   {\tt OQ} & Z & Original base quality (usually before recalibration). Same encoding as {\sf QUAL}.\\
@@ -381,13 +382,13 @@ may be changed if the new type is also compatible with the array.
   {\tt PG} & Z & Program. Value matches the header {\tt PG-ID} tag if {\tt @PG} is present. \\
   {\tt PQ} & i & Phred likelihood of the template, conditional on both the mapping being correct \\
   {\tt PU} & Z & Platform unit. Value to be consistent with the header {\tt RG-PU} tag if {\tt @RG} is present.\\
-  {\tt Q2} & Z & Phred quality of the mate/next fragment. Same encoding as {\sf QUAL}.\\
-  {\tt R2} & Z & Sequence of the mate/next fragment in the template. \\
+  {\tt Q2} & Z & Phred quality of the mate/next segment. Same encoding as {\sf QUAL}.\\
+  {\tt R2} & Z & Sequence of the mate/next segment in the template. \\
   {\tt RG} & Z & Read group. Value matches the header {\tt RG-ID} tag if {\tt @RG} is present in the header. \\
   {\tt SM} & i & Template-independent mapping quality \\
-  {\tt TC} & i & The number of fragments in the template.\\
+  {\tt TC} & i & The number of segments in the template.\\
   {\tt U2} & Z & Phred probility of the 2nd call being wrong conditional on the best being wrong. The same encoding as {\sf QUAL}. \\
-  {\tt UQ} & i & Phred likelihood of the fragment, conditional on the mapping being correct \\
+  {\tt UQ} & i & Phred likelihood of the segment, conditional on the mapping being correct \\
   \hline
 \end{tabular}
 \end{center}
@@ -428,7 +429,7 @@ specific software package for it to function properly.
   \item For a unmapped paired-end or mate-pair read whose mate is
     mapped, the unmapped read should have {\sf RNAME} and {\sf POS}
     identical to its mate.
-  \item If all fragments in a template are unmapped, their {\sf RNAME}
+  \item If all segments in a template are unmapped, their {\sf RNAME}
     should be set as `*' and {\sf POS} as 0.
   \item If {\sf POS} plus the sum of lengths of {\tt M/=/X/D/N}
     operations in {\sf CIGAR} exceeds the length specified in the {\tt
@@ -437,18 +438,18 @@ specific software package for it to function properly.
   \end{enumerate}
 \item Multiple mapping
   \begin{enumerate}[label*=\arabic*]
-  \item When one fragment is present in multiple records, only one
+  \item When one segment is present in multiple records, only one
     record should have the secondary alignment flag bit (0x100)
     unset. {\sf RNEXT} and {\sf PNEXT} point to the primary alignment of
-    the next fragment.
+    the next segment.
   \item {\sf SEQ} and {\sf QUAL} of secondary alignments should be set
     to `*' to reduce the file size.
   \end{enumerate}
-%\item There should be no overlap between fragments of a read\footnote{Few/no
+%\item There should be no overlap between segments of a read\footnote{Few/no
 %  existing aligners follow this practice.}.
 \item Optional tags:
   \begin{enumerate}[label*=\arabic*]
-  \item If the template has more than 2 fragments, the {\tt TC} tag
+  \item If the template has more than 2 segments, the {\tt TC} tag
     should be present.
   \item The {\tt NM} tag should be present.
   \end{enumerate}
@@ -563,8 +564,8 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed by the {\sf reg2bin()} function in Section~\ref{sec:code}; {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}}; {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}. & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next fragment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next fragment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf read\_name} & Read name\footnotemark[1], {\tt NULL} terminated (\underline{\sf QNAME} plus a tailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
