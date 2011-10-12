@@ -382,12 +382,12 @@ may be changed if the new type is also compatible with the array.
   {\tt OC} & Z & Original CIGAR (usually before realignment) \\
   {\tt PG} & Z & Program. Value matches the header {\tt PG-ID} tag if {\tt @PG} is present. \\
   {\tt PQ} & i & Phred likelihood of the template, conditional on both the mapping being correct \\
-  {\tt PT} & Z & Read annotations of the padded read sequence\footnotemark[3]\\
+  {\tt PT} & Z & Read annotations for parts of the padded read sequence\footnotemark[4]\\
   {\tt PU} & Z & Platform unit. Value to be consistent with the header {\tt RG-PU} tag if {\tt @RG} is present.\\
   {\tt Q2} & Z & Phred quality of the mate/next segment. Same encoding as {\sf QUAL}.\\
   {\tt R2} & Z & Sequence of the mate/next segment in the template. \\
   {\tt RG} & Z & Read group. Value matches the header {\tt RG-ID} tag if {\tt @RG} is present in the header. \\
-  {\tt RT} & Z & Read annotations of the unpadded read sequence\footnotemark[3]\\
+  {\tt RT} & Z & Read annotations for the entire read\footnotemark[4]\\
   {\tt SM} & i & Template-independent mapping quality \\
   {\tt TC} & i & The number of segments in the template.\\
   {\tt U2} & Z & Phred probility of the 2nd call being wrong conditional on the best being wrong. The same encoding as {\sf QUAL}. \\
@@ -405,15 +405,25 @@ may be changed if the new type is also compatible with the array.
   deletion from the reference; the deleted sequence is AC; the last 6
   bases are matches. The {\tt MD} field ought to match the {\sf CIGAR}
   string.}
-\footnotetext[3]{The value of the {\tt PT} tag takes the format of ``{\tt
-(start|end|strand|key|freetext)(|start|end|strand|key|freetext)*}'', where {\tt
-start} and {\tt end} are \emph{padded} 1-based positions, {\tt strand} indicates the orientation of the annotation
-w.r.t. the read (`{\tt +}' for forward strand, `{\tt -}' for reverse
-complement, `{\tt .}' for not stranded or `{\tt ?}' for stranded but strand
-unknown), and {\tt key} and {\tt freetext} contain only printable characters
-(according to C's {\tt isprint()} marcro) with the separator `{\tt |}' and
-potentially other control characters in the URL percent encoding. Tag {\tt RT}
-is in the same format except that {\tt start} and {\tt end} are \emph{unpadded} positions.}
+\footnotetext[3]{The {\tt PT} tag value has the format ``{\tt
+(start|end|strand|key|value)(|start|end|strand|key|value)*}'',
+where {\tt start} and {\tt end} are \emph{padded} 1-based positions
+(between one and the padded length of the read defined as the sum of the
+{\tt M/I/D/P/S/=/X} {\sf CIGAR} operators, i.e. {\sf SEQ} length plus
+any pads), {\tt strand} indicates the orientation of the annotation with
+respect to the reference (`{\tt +}' for forward strand, `{\tt -}' for
+reverse complement, `{\tt .}' for not stranded or `{\tt ?}' for stranded
+but strand unknown -- as in GFF3), and {\tt key} and {\tt value} are
+free text containing only printable characters (according to C's
+{\tt isprint()} macro with the C locale) with URL percent encoding
+used for the separators `{\tt |}' giving `{\tt \%2C}', and tab giving
+`{\tt \%09}', and the percentage sign `{\tt \%}' giving `{\tt \%2C}',
+and likewise for other control characters. Note any editing of the
+CIGAR string may require updating the `{\tt PT}' tag coordinates,
+or even invalidate them.}
+\footnotetext[4]{The {\tt RT} tag value has the format ``{\tt
+(key|value)(|key|value)*}'', where the {\tt key} and {\tt value}
+are defined as for the `{\tt PT}' tag, but apply to the whole read.}
 
 \pagebreak
 
@@ -474,14 +484,14 @@ specific software package for it to function properly.
 \subsection{Unpadded versus padded representation}
 
 To describe alignments, we can regard the reference sequence with no respect to
-alignments against it.  Such a reference sequence is called an \emph{unpadded
-reference}. A position on an unpadded reference, referred to as an
-\emph{unpadded position}, is not affected alignments at all. When we use
+other alignments against it.  Such a reference sequence is called an
+\emph{unpadded reference}. A position on an unpadded reference, referred to
+as an \emph{unpadded position}, is not affected by any alignments. When we use
 unpadded references and positions to describe alignments, we say we are using
 the \emph{unpadded representation}.
 
-Alternatively, to describe the same alignments, we can regard the reference
-sequence to contain pads that make room for sequences inserted to the
+Alternatively, to describe the same alignments, we can modify the reference
+sequence to contain pads that make room for sequences inserted relative to the
 reference. A pad is effectively a gap and conventionally represented by an
 asterisk `*'.  A reference sequence containing pads is called a \emph{padded
 reference}. A position which counts the *'s is referred to as a \emph{padded
@@ -495,8 +505,8 @@ are convertible to each other with no loss of any information. The unpadded
 representation is more common due to the convenience of a fixed coordinate system,
 while the padded representation has the advantage that alignments can be simply
 described by the start and end coordinates without using complex CIGAR strings.
-We traditionally use the padded representation for {\it de novo} assembly. The ACE
-assembly format uses the padded representation exclusively.
+SAM traditionally uses the padded representation for {\it de novo} assembly.
+The ACE assembly format uses the padded representation exclusively.
 
 \subsection{Padded SAM}
 
@@ -504,18 +514,19 @@ The SAM format is typically used to describe alignments against an unpadded
 reference sequence, but it is also able to describe alignments against a padded
 reference. In the latter case, we say we are using a \emph{padded SAM}. A padded
 SAM is a valid SAM, but with the difference that the reference and positions in
-use are padded. There may be more than one ways to describe the padded
+use are padded. There may be more than one way to describe the padded
 representation. We recommend the following.
 
 In a padded SAM, alignments and coordinates are described with respect to the
-padded reference sequence. Different from the traditional padded representation
-where we also put *'s in the query sequences, we do not write *'s in the {\sf
-SEQ} field of the SAM format\footnote{Writing *'s in the {\sf SEQ} field is
-frequently more convenient, but it causes concerns of backward compatibility.}. Instead,
-we describe pads in the query sequences as deletions from the padded reference
-using {\sf CIGAR}. In a padded SAM, the insertion and padding CIGAR operations
-(`{\tt I}' and `{\tt P}') are not used because the padded reference already
-considers all the insertions.
+padded reference sequence. Unlike traditional padded representations like
+the ACE file format where pads/gaps are recorded in reads using *'s, we do
+not write *'s in the {\sf SEQ} field of the SAM format\footnote{Writing
+pads/gaps as *'s in the {\sf SEQ} field might have been more convenient, but
+this caused concerns for backward compatibility.}. Instead, we describe pads
+in the query sequences as deletions from the padded reference using the
+{\sf CIGAR} `{\tt D}' operation. In a padded SAM, the insertion and padding
+CIGAR operations (`{\tt I}' and `{\tt P}') are not used because the padded
+reference already considers all the insertions.
 
 The following shows the padded SAM for the example alignment in Section~\ref{sec:example}.
 Notably, the length of {\tt ref} is 47 instead of 45. {\sf POS} of the last
@@ -542,7 +553,8 @@ sequence and the reference annotations in SAM when necessary. For a reference
 sequence in SAM, {\sf QNAME} should be identical to {\sf RNAME}, {\sf POS} set
 to 1 and {\sf FLAG} to 516 (filtered and unmapped); for an annotation, {\sf
 FLAG} should be set to 768 (filtered and secondary) with no restriction to {\sf
-QNAME}.
+QNAME}. Dummy reads for annotation would typically have an `{\tt RT}' tag to
+hold the annotation information.
 
 \pagebreak
 
