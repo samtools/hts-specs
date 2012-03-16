@@ -839,7 +839,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed by the {\sf reg2bin()} function in Section~\ref{sec:code}; {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed from the mapping position\footnotemark[4]; {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}}; {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}. & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
@@ -864,6 +864,16 @@ underlined word in uppercase denotes a field in the SAM format.
 	Bytes from 5 to 8 encode a little-endian 32-bit integer which gives the number of elements in the array.
 	Bytes starting from the 9th store the array in the little-endian byte order; the number of these
 	bytes is determined by the type and the length of the array.}
+\footnotetext[4]{BIN is calculated using the {\sf reg2bin()} function
+in Section~\ref{sec:code}. For mapped reads this uses {\sf POS-1}
+(i.e. 0-based left position) and the alignment end point using the
+alignment length from the {\sf CIGAR} string. For unmapped reads
+(e.g. paired end reads where only one part is mapped, see
+Section~\ref{sec-recommended-practice}) treat the alignment as
+being length one. Note unmapped reads with {\sf POS} $0$ (which
+becomes $-1$ in BAM) therefore use {\sf reg2bin(-1, 0)} which
+is $4680$. 
+}
 
 \pagebreak
 
@@ -966,23 +976,43 @@ saved.
   \multicolumn{7}{|c|}{\textcolor{gray}{\it List of indices (n=n\_ref)}} \\\cline{2-7}
   & \multicolumn{3}{l|}{\sf n\_bin} & \# distinct bins (for the binning index) & {\tt int32\_t} & \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of distinct bins (n=n\_bin)}} \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf bin} & Distinct bin & {\tt uint32\_t} & \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf bin} & Distinct bin (range $0$ to $37449$ inclusive) & {\tt uint32\_t} & \\\cline{3-7}
   & & \multicolumn{2}{l|}{\sf n\_chunk} & \# chunks & {\tt int32\_t} & \\\cline{3-7}
   & & \multicolumn{5}{c|}{\textcolor{gray}{\it List of chunks (n=n\_chunk)}} \\\cline{4-7}
   & & & {\sf chunk\_beg} & (Virtual) file offset of the start of the chunk & {\tt uint64\_t} & \\\cline{4-7}
-  & & & {\sf chunk\_end} & (Virtual) file offset of the end of the chunk & {\tt uint64\_t} & \\\cline{2-7}
+  & & & {\sf chunk\_end} & (Virtual) file offset of the end of the chunk & {\tt uint64\_t} & \\
+  \cline{3-7}
+  & \multicolumn{6}{c|}{\textcolor{gray}{\it Optional dummy entry for idxstats (included in n\_bin)}} \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf bin} & Dummy bin number & {\tt uint32\_t} & 37450 \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf n\_chunk} & \# chunks & {\tt int32\_t} & 2 \\\cline{3-7}
+  & & \multicolumn{5}{c|}{\textcolor{gray}{\it First chunk for dummy bin}} \\\cline{4-7}
+  & & & {\sf unmapped\_beg} & (Virtual) file offset of the start of unmapped but placed & {\tt uint64\_t} & \\\cline{4-7}
+  & & & {\sf unmapped\_end} & (Virtual) file offset of the end of unmapped but placed & {\tt uint64\_t} & \\\cline{4-7}
+  & & \multicolumn{5}{c|}{\textcolor{gray}{\it Second chunk for dummy bin}} \\\cline{4-7}
+  & & & {\sf mapped\_count} & Number of mapped read-segments for this reference & {\tt uint64\_t} & \\\cline{4-7}
+  & & & {\sf unmapped\_count} & Number of unmapped read-segments for this reference & {\tt uint64\_t} & \\\cline{2-7}
   & \multicolumn{3}{l|}{\sf n\_intv} & \# 16kbp intervals (for the linear index) & {\tt int32\_t} & \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of intervals (n=n\_intv)}} \\\cline{3-7}
   & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\
   \cline{1-7}
+  \multicolumn{4}{|l|}{\sf unplaced\_count} & (Optional) \# of unmapped unplaced reads ({\sf RNAME} *) & {\tt uint64\_t} & \\\cline{1-7}
+  \cline{1-7}
 \end{tabular}}
 \end{table}
+
+Samtools 0.1.8 introduced the {\tt samtools idxstats} command producing a summary
+of the number of mapped and unmapped read-segments per reference, and any unmapped
+unplaced read-segments (see Section~\ref{sec-recommended-practice}).
+This uses additional fields recorded in the BAI file by {\tt samtools index}.
+These optional fields are two entries ({\sf n\_chunk} $= 2$) for each reference
+under an entry for dummy {\sf bin} $37450$, and the trailing {\sf unplaced\_count}
+field at the end of the file.
 
 \subsection{C source code for computing bin number and overlapping bins}\label{sec:code}
 
 {\small
 \begin{verbatim}
-/* calculate bin given an alignment covering [beg,end) (zero-based, half-close-half-open) */
+/* calculate bin given an alignment covering [beg,end) (zero-based, half-closed-half-open) */
 int reg2bin(int beg, int end)
 {
     --end;
