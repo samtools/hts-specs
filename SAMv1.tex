@@ -437,7 +437,7 @@ specific software package for it to function properly.
 
 \begin{enumerate}
 \item The header section
-  \begin{enumerate}[label*=\arabic*]
+  \begin{enumerate}[label=\arabic*]
   \item The {\tt @HD} line should be present with the {\tt SO} tag specified.
   \item The {\tt @SQ} lines should be present if reads have been mapped.
   \item When a {\tt RG} tag appears anywhere in the alignment section,
@@ -450,7 +450,7 @@ specific software package for it to function properly.
 \item Adjacent CIGAR operations should be different.
 \item No alignments should be assigned mapping quality 255.
 \item Unmapped reads
-  \begin{enumerate}[label*=\arabic*]
+  \begin{enumerate}[label=\arabic*]
   \item For a unmapped paired-end or mate-pair read whose mate is
     mapped, the unmapped read should have {\sf RNAME} and {\sf POS}
     identical to its mate.
@@ -462,7 +462,7 @@ specific software package for it to function properly.
     equal to {\sf RNAME}, the alignment should be unmapped.
   \end{enumerate}
 \item Multiple mapping
-  \begin{enumerate}[label*=\arabic*]
+  \begin{enumerate}[label=\arabic*]
   \item When one segment is present in multiple records, only one
     record should have the secondary alignment flag bit (0x100)
     unset. {\sf RNEXT} and {\sf PNEXT} point to the primary alignment of
@@ -473,7 +473,7 @@ specific software package for it to function properly.
 %\item There should be no overlap between segments of a read\footnote{Few/no
 %  existing aligners follow this practice.}.
 \item Optional tags:
-  \begin{enumerate}[label*=\arabic*]
+  \begin{enumerate}[label=\arabic*]
   \item If the template has more than 2 segments, the {\tt TC} tag
     should be present.
   \item The {\tt NM} tag should be present.
