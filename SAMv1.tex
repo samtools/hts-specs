@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.4-r994)}
+\title{The SAM Format Specification (v1.4-rXXX)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -316,7 +316,7 @@ All optional fields follow the {\tt TAG:TYPE:VALUE} format
 where {\tt TAG} is a two-character string that matches {\tt /[A-Za-z][A-Za-z0-9]/}.
 Each {\tt TAG} can only appear once in one alignment line. A {\tt TAG}
 containing lowercase letters are reserved for end users.
-In an optional field, {\tt TYPE} is a single casesensitive letter which
+In an optional field, {\tt TYPE} is a single case-sensitive letter which
 defines the format of {\tt VALUE}:
 \begin{center}\small
 \begin{tabular}{cll}
@@ -408,36 +408,55 @@ may be changed if the new type is also compatible with the array.
   deletion from the reference; the deleted sequence is AC; the last 6
   bases are matches. The {\tt MD} field ought to match the {\sf CIGAR}
   string.}
-\footnotetext[3]{The {\tt CT} tag value has the format ``{\tt
-(key|value)(|key|value)*}'', where the {\tt key} and {\tt value}
-are defined as for the `{\tt PT}' tag, but apply to the whole read.}
-\footnotetext[4]{The {\tt PT} tag value has the format ``{\tt
-(start|end|strand|key|value)(|start|end|strand|key|value)*}'',
-where {\tt start} and {\tt end} are \emph{padded} 1-based positions
-(between one and the padded length of the read defined as the sum of the
-{\tt M/I/D/P/S/=/X} {\sf CIGAR} operators, i.e. {\sf SEQ} length plus
-any pads), {\tt strand} indicates the orientation of the annotation with
-respect to the reference (`{\tt +}' for forward strand, `{\tt -}' for
-reverse complement, `{\tt .}' for not stranded or `{\tt ?}' for stranded
-but strand unknown -- as in GFF3), and {\tt key} and {\tt value} are
-free text containing only printable characters (according to C's
-{\tt isprint()} macro with the C locale) with URL percent encoding
-used for the separators `{\tt |}' giving `{\tt \%2C}', and tab giving
-`{\tt \%09}', and the percentage sign `{\tt \%}' giving `{\tt \%2C}',
-and likewise for other control characters. Note any editing of the
-CIGAR string may require updating the `{\tt PT}' tag coordinates,
-or even invalidate them.}
+\footnotetext[3]{The {\tt CT} tag is intended primarily for annotation
+dummy reads, and consists of a \emph{strand}, \emph{type} and zero or
+more \emph{key}=\emph{value} pairs, each separated with semicolons.
+The \emph{strand} field has four values as in GFF3, and supplements FLAG
+bit 0x10 to allow unstranded (`{\tt .}'), and stranded but unknown strand
+(`{\tt ?}') annotation. For these and annotation on the forward strand
+(\emph{strand} set to `{\tt +}'), do not set FLAG bit 0x10. For
+annotation on the reverse strand, set the \emph{strand} to `{\tt -}'
+and set FLAG bit 0x10. The \emph{type} and any \emph{keys} and their
+optional \emph{values} are all percent encoded according to
+RFC3986 to escape meta-characters `{\tt =}', `{\tt \%}', `{\tt ;}',
+`{\tt |}' or non-printable characters not matched by the isprint()
+macro (with the C locale). For example a percent sign becomes
+`{\tt \%2C}'. The CT record matches:
+``{\tt \emph{strand};\emph{type}(;\emph{key}(=\emph{value}))*}''.
+%NOTE - This leaves open the possibility of allowing multiple such
+%entries for a single CT tag to be combined with | as in the PT tag.
+}%End of CT tag footnote
+\footnotetext[4]{The {\tt PT} tag value has the format of a series of
+tags separated by {\tt |}, each annotating a sub-region of the read.
+Each tag consists of \emph{start}, \emph{end}, \emph{strand},
+\emph{type} and zero or more \emph{key}=\emph{value} pairs, each
+separated with semicolons. \emph{Start} and \emph{end} are 1-based
+positions between one and the sum of the {\tt M/I/D/P/S/=/X}
+{\sf CIGAR} operators, i.e. {\sf SEQ} length plus any pads.  Note
+any editing of the CIGAR string may require updating the `{\tt PT}'
+tag coordinates, or even invalidate them.
+As in GFF3, \emph{strand} is one of `{\tt +}' for forward strand tags,
+`{\tt -}' for reverse strand, `{\tt .}' for unstranded or `{\tt ?}'
+for stranded but unknown strand.
+The \emph{type} and any \emph{keys} and their optional \emph{values}
+are all percent encoded as in the {\tt CT} tag.
+Formally the entire PT record matches:
+ ``{\tt \emph{start};\emph{end};\emph{strand};\emph{type}(;\emph{key}(=\emph{value}))*(\char92|\emph{start};\emph{end};\emph{strand};\emph{type}(;\emph{key}(=\emph{value}))*)*}''.
+ }%End of PT tag footnote
+
+
 
 \pagebreak
 
 \section{Recommended Practice for the SAM Format}
-This section describes the best practice for representating data in the
+\label{sec-recommended-practice}
+This section describes the best practice for representing data in the
 SAM format. They are not required in general, but may be required by a
 specific software package for it to function properly.
 
 \begin{enumerate}
 \item The header section
-  \begin{enumerate}[label*=\arabic*]
+  \begin{enumerate}[label=\arabic*]
   \item The {\tt @HD} line should be present with the {\tt SO} tag specified.
   \item The {\tt @SQ} lines should be present if reads have been mapped.
   \item When a {\tt RG} tag appears anywhere in the alignment section,
@@ -450,7 +469,7 @@ specific software package for it to function properly.
 \item Adjacent CIGAR operations should be different.
 \item No alignments should be assigned mapping quality 255.
 \item Unmapped reads
-  \begin{enumerate}[label*=\arabic*]
+  \begin{enumerate}[label=\arabic*]
   \item For a unmapped paired-end or mate-pair read whose mate is
     mapped, the unmapped read should have {\sf RNAME} and {\sf POS}
     identical to its mate.
@@ -462,7 +481,7 @@ specific software package for it to function properly.
     equal to {\sf RNAME}, the alignment should be unmapped.
   \end{enumerate}
 \item Multiple mapping
-  \begin{enumerate}[label*=\arabic*]
+  \begin{enumerate}[label=\arabic*]
   \item When one segment is present in multiple records, only one
     record should have the secondary alignment flag bit (0x100)
     unset. {\sf RNEXT} and {\sf PNEXT} point to the primary alignment of
@@ -473,10 +492,47 @@ specific software package for it to function properly.
 %\item There should be no overlap between segments of a read\footnote{Few/no
 %  existing aligners follow this practice.}.
 \item Optional tags:
-  \begin{enumerate}[label*=\arabic*]
+  \begin{enumerate}[label=\arabic*]
   \item If the template has more than 2 segments, the {\tt TC} tag
     should be present.
   \item The {\tt NM} tag should be present.
+  \end{enumerate}
+\item Annotation dummy reads:
+  These have {\sf SEQ} set to {\tt *}, {\sf FLAG} bits 0x100 and 0x200
+  set (secondary and filtered), and a {\tt CT} tag.
+  \begin{enumerate}[label=\arabic*]
+%Repeating what is in the tag's footnote:
+%  \item If the {\tt CT} tag's \emph{strand} is {\tt -}, FLAG bit 0x10
+%  (reverse complemented) should be set, and otherwise not set.
+  \item If you wish to store free text in a {\tt CT} tag, use the
+  \emph{key} value {\tt Note} (uppercase N) to match GFF3.
+  \item Multi-segment annotation (e.g. a gene with introns) should be
+  described with multiple lines in SAM (like a multi-segment read).
+  Where there is a clear biological direction (e.g. a gene), the first
+  segment ({\sf FLAG} bit 0x40) is used for the first section (e.g. the
+  $5'$ end of the gene). Thus a GenBank entry location like
+  {\tt complement(join(85052..85354,} {\tt 85441..85621,} {\tt 6097..86284))}
+  would have three lines in SAM with a common {\sf QNAME}: %And three lines in GFF3 too.
+    \begin{enumerate}
+    \item The $5'$ fragment {\sf FLAG}  883, {\sf POS} 86097, {\sf CIGAR} {\tt 188M}, and tags {\tt FI:i:1} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x40 + 0x100 + 0x200
+    \item Middle fragment {\sf FLAG} 819, {\sf POS} 85441, {\sf CIGAR} {\tt 181M}, and tags {\tt FI:i:2} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x100 + 0x200
+    \item The $3'$ fragment {\sf FLAG} 947, {\sf POS} 85052, {\sf CIGAR} {\tt 303M}, and tags {\tt FI:i:3} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x80 + 0x100 + 0x200
+    \end{enumerate}
+  \item If converting GFF3 to SAM, store any \emph{key}, \emph{values}
+  from column 9 in the {\tt CT} tag, except for the unique ID which
+  is used for the QNAME. GFF3 columns 1 (seqid), 4 (start) and 5 (end)
+  are encoded using SAM columns RNAME, POS and CIGAR to hold the length.
+  GFF3 columns 3 (type) and 7 (strand) are stored explicitly in the
+  {\tt CT} tag. Remaining GFF3 columns 2 (source), 6 (score), and
+  8 (phase) are stored in the {\tt CT} tag using \emph{key} values
+  {\tt FSource}, {\tt FScore} and {\tt FPhase} (uppercase keys are
+  restricted in GFF3, so these names avoid clashes). Split location
+  features are described with multiple lines in GFF3, and similarly
+  become multi-segment dummy reads in SAM, with the {\sf RNEXT} and
+  {\sf PNEXT} columns filled in appropriately. In the absence of a
+  convention in SAM/BAM for reads wrapping the origin of a circular
+  genome, any GFF3 feature line wrapping the origin must be split into
+  two segments in SAM.
   \end{enumerate}
 \end{enumerate}
 
@@ -542,8 +598,8 @@ three alignments are all shifted by 2. {\sf CIGAR} of alignments bridging the
 @SQ SN:ref LN:47
 ref  516 ref  1  0 14M2D31M   *  0   0 AGCATGTTAGATAAGATAGCTGTGCTAGTAGGCAGTCAGCGCCAT *
 r001 163 ref  7 30 14M1D3M    = 39  41 TTAGATAAAGGATACTG *
-*    768 ref  8 30 1M         *  0   0 *                 *  CO:Z:a wrong consensus base
-r002   0 ref  9 30 3S6M1D5M   *  0   0 AAAAGATAAGGATA    *  PT:Z:1|4|+|comment|homopolymer
+*    768 ref  8 30 1M         *  0   0 *                 *  CT:Z:.;Warning;Note=Ref wrong?
+r002   0 ref  9 30 3S6M1D5M   *  0   0 AAAAGATAAGGATA    *  PT:Z:1;4;+;homopolymer
 r003   0 ref  9 30 5H6M       *  0   0 AGCTAA            *  NM:i:1
 r004   0 ref 18 30 6M14N5M    *  0   0 ATAGCTTCAGC       *
 r003  16 ref 31 30 6H5M       *  0   0 TAGGC             *  NM:i:0
@@ -557,7 +613,7 @@ sequence in SAM, {\sf QNAME} should be identical to {\sf RNAME}, {\sf POS} set
 to 1 and {\sf FLAG} to 516 (filtered and unmapped); for an annotation, {\sf
 FLAG} should be set to 768 (filtered and secondary) with no restriction to {\sf
 QNAME}. Dummy reads for annotation would typically have an `{\tt CT}' tag to
-hold the annotation information.
+hold the annotation information, see Section~\ref{sec-recommended-practice}.
 
 \pagebreak
 
