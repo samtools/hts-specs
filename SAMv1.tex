@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.4-rXXX)}
+\title{The SAM Format Specification (v1.5-r45)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -44,20 +44,20 @@ ref      AGCATGTTAGATAA**GATAGCTGTGCTAGTAGGCAGTCAGCGCCAT
 +r003       gcctaAGCTAA
 +r004                     ATAGCT..............TCAGC
 -r003                            ttagctTAGGC
--r001/2                                        CAGCGCCAT
+-r001/2                                        CAGCGGCAT
 \end{verbatim}
 \end{framed}
 The corresponding SAM format is:
 \begin{framed}\small
 \begin{verbatim}
-@HD VN:1.3 SO:coordinate
+@HD VN:1.5 SO:coordinate
 @SQ SN:ref LN:45
-r001 163 ref  7 30 8M2I4M1D3M = 37  39 TTAGATAAAGGATACTG *
-r002   0 ref  9 30 3S6M1P1I4M *  0   0 AAAAGATAAGGATA    *
-r003   0 ref  9 30 5H6M       *  0   0 AGCTAA            *   NM:i:1
-r004   0 ref 16 30 6M14N5M    *  0   0 ATAGCTTCAGC       *
-r003  16 ref 29 30 6H5M       *  0   0 TAGGC             *   NM:i:0
-r001  83 ref 37 30 9M         =  7 -39 CAGCGCCAT         *
+r001  163 ref  7 30 8M2I4M1D3M = 37  39 TTAGATAAAGGATACTG *
+r002    0 ref  9 30 3S6M1P1I4M *  0   0 AAAAGATAAGGATA    *
+r003    0 ref  9 30 5S6M       *  0   0 GCCTAAGCTAA       * SA:Z:ref,29,-,6H5M,17,0;
+r004    0 ref 16 30 6M14N5M    *  0   0 ATAGCTTCAGC       *
+r003 2064 ref 29 17 6H5M       *  0   0 TAGGC             * SA:Z:ref,9,+,5S6M,30,1;
+r001   83 ref 37 30 9M         =  7 -39 CAGCGCCAT         * NM:i:1
 \end{verbatim}
 \end{framed}
 
@@ -69,25 +69,46 @@ r001  83 ref 37 30 9M         =  7 -39 CAGCGCCAT         *
 \item[Template] A DNA/RNA sequence part of which is sequenced on a
   sequencing machine or assembled from raw sequences.
 \item[Segment] A contiguous (sub)sequence on a template which is
-  sequenced or assembled. For sequencing data, segments are indexed by
-  the order in which they are sequenced. For segments of an assembled
-  sequence, they are indexed by the order of the leftmost coordinate on
-  the assembled sequence.
+  sequenced or assembled.
+  %For segments of an assembled
+  %sequence, they are indexed by the order of the leftmost coordinate on
+  %the assembled sequence.
 \item[Read] A raw sequence that comes off a sequencing machine. A read
   may consist of multiple segments, which are sometimes called \emph{subreads}.
+  For sequencing data, reads are indexed by the order in which they are sequenced.
+\item[Canonical alignment] An alignment typically derived from the
+  Smith-Waterman algorithm (SW). A canonical alignment usually does not contain
+  long gaps, confined by SW.
+\item[Chimeric alignment] An alignment consisting of two or more canonical
+  alignments without large overlaps between them.\footnotemark[1]
+\item[Split alignment] A co-linear chimeric alignment where its canonical
+  components are strictly non-overlapping. In the SAM format, each line
+  describes a canonical alignment or a split alignment.
 \item[1-based coordinate system] A coordinate system where the first
   base of a sequence is one. In this coordinate system, a region is
   specified by a closed interval. For example, the region between the
-  3rd and the 7th bases inclusive is $[3,7]$. The SAM, GFF and Wiggle
+  3rd and the 7th bases inclusive is $[3,7]$. The SAM, VCF, GFF and Wiggle
   formats are using the 1-based coordinate system.
 \item[0-based coordinate system] A coordinate system where the first
   base of a sequence is zero. In this coordinate system, a region is
   specified by a half-closed-half-open interval. For example, the region
-  between the 3rd and the 7th bases inclusive is $[2,7)$. The BAM, BED,
+  between the 3rd and the 7th bases inclusive is $[2,7)$. The BAM, BCFv2, BED,
   and PSL formats are using the 0-based coordinate system.
 \item[Phred scale] Given a probability $0<p\le 1$, the phred scale of $p$
   equals $-10\log_{10}p$, rounded to the closest integer.
 \end{description}
+
+\footnotetext[1]{A chimeric alignment is primarily caused by structural
+variations, gene fusions and misassemblies. It is more frequent given longer
+reads. For a chimeric alignment, its canonical components are largely
+non-overlapping; each canonical alignment may have high mapping quality and is
+informative in SNP/INDEL calling. A read may also have \emph{multiple mappings}
+which also occupy multiple lines in a SAM.  In contrast to a chimeric
+alignment, multiple mappings are caused by repeats.  They are less frequent
+given longer reads. If a read has multiple mappings, all these mappings are
+almost entirely overlapping with each other; except the single-best optimal
+mapping, all the other mappings get mapping quality $<$Q3
+and are ignored by most standard SNP/INDEL callers.}
 
 \subsection{The header section}
 Each header line begins with character `{\tt @}' followed by a
@@ -114,7 +135,7 @@ The following table give the defined record types and tags. Tags with
   key is the {\sf RNAME} field, with order defined by the order of {\tt @SQ} lines in the header.  The
   minor sort key is the {\sf POS} field.  For alignments with equal {\sf RNAME} and {\sf POS}, order is
   arbitrary.  All alignments with `{\tt *}' in {\sf RNAME} field follow alignments with some other
-  value but otherwise are in arbitrary order.\\\cline{1-3}
+  value but otherwise are in arbitrary order.\\\cline{1-3}\pagebreak\cline{1-3}
   \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. The order of {\tt @SQ} lines defines the alignment sorting order.\\\cline{2-3}
   & {\tt SN}* & Reference sequence name. Each {\tt @SQ} line must have a unique {\tt SN} tag. The value of this
   field is used in the
@@ -124,7 +145,7 @@ The following table give the defined record types and tags. Tags with
   & {\tt M5} & MD5 checksum of the sequence in the uppercase, excluding spaces but including pads (as `*'s).\\\cline{2-3}
   & {\tt SP} & Species.\\\cline{2-3}
   & {\tt UR} & URI of the sequence.  This value may start with one of the standard
-  protocols, e.g http: or ftp:.  If it does not start with one of these protocols, it is assumed to be a file-system path.\\\cline{1-3}\pagebreak\cline{1-3}
+  protocols, e.g http: or ftp:.  If it does not start with one of these protocols, it is assumed to be a file-system path.\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @RG} & Read group. Unordered multiple {\tt @RG} lines are allowed.\\\cline{2-3}
   & {\tt ID}* & Read group identifier. Each {\tt @RG} line must have a unique {\tt ID}. The value of {\tt ID}
   is used in the RG tags of alignment records. Must be unique among all read groups in header section.  Read group IDs may be modified when merging SAM files in order to handle collisions.\\\cline{2-3}
@@ -165,11 +186,12 @@ The following table give the defined record types and tags. Tags with
 \end{center}
 
 \subsection{The alignment section: mandatory fields}
-Each alignment line has 11 mandatory fields. These fields always appear
-in the same order and must be present, but their values can be `0' or
-`*' (depending on the field) if the corresponding information is
-unavailable. The following table gives an overview of the mandatory
-fields in the SAM format:
+In the SAM format, each alignment line typically represents a canonical
+alignment or a split alignment of a read or a contig. Each line has 11
+mandatory fields. These fields always appear in the same order and must be
+present, but their values can be `0' or `*' (depending on the field) if the
+corresponding information is unavailable. The following table gives an overview
+of the mandatory fields in the SAM format:
 \begin{center}
 \small
 \begin{tabular}{rllll}
@@ -182,8 +204,8 @@ fields in the SAM format:
   4 & {\sf POS} & Int & {\tt [0,2$^{31}$-1]} & 1-based leftmost mapping POSition \\
   5 & {\sf MAPQ} & Int & {\tt [0,2$^8$-1]} & MAPping Quality \\
   6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
-  7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next segment\\
-  8 & {\sf PNEXT} & Int & {\tt [0,2$^{29}$-1]} & Position of the mate/next segment \\
+  7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next read\\
+  8 & {\sf PNEXT} & Int & {\tt [0,2$^{29}$-1]} & Position of the mate/next read \\
   9 & {\sf TLEN} & Int & {\tt [-2$^{29}$+1,2$^{29}$-1]} & observed Template LENgth \\
   10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & segment SEQuence\\
   11 & {\sf QUAL} & String & {\tt [!-\char126]+} & ASCII of Phred-scaled base QUALity+33 \\
@@ -193,7 +215,10 @@ fields in the SAM format:
 
 \begin{enumerate}
 \item {\sf QNAME}: Query template NAME. Reads/segments having identical {\sf QNAME}
-	are regarded to come from the same template. A {\sf QNAME} `{\tt *}' indicates the information is unavailable.
+	are regarded to come from the same template. A {\sf QNAME} `{\tt *}'
+	indicates the information is unavailable.  In a SAM file, a read may occupy
+	multiple alignment lines, when its alignment is chimeric or when multiple
+	mappings are given.
 \item {\sf FLAG}: bitwise FLAG. Each bit is explained in the following
   table:
   \begin{center}\small
@@ -209,24 +234,31 @@ fields in the SAM format:
   0x20 &  {\sf SEQ} of the next segment in the template being reversed \\
   0x40 &  the first segment in the template \\
   0x80 &  the last segment in the template \\
-  0x100 &  secondary alignment\\
+  0x100 &  secondary alignment \\
   0x200 &  not passing quality controls \\
   0x400 &  PCR or optical duplicate \\
+  0x800 &  supplementary alignment \\
   \hline
   \end{tabular}
   \end{center}
   \begin{itemize}
-  \item Bit 0x4 is the only reliable place to tell whether the segment
+  \item For each read/contig in a SAM file, it is required that one and only
+	one line associated with the read satisfies \mbox{`{\sf FLAG} {\tt \& 0x900
+	== 0}'}. This line is called the \emph{primary line} of the read.
+  \item Bit 0x100 marks the alignment not to be used in certain analyses
+    when the tools in use are aware of this bit. It is typically used to
+	flag alternative mappings when multiple mappings are presented in a SAM.
+  \item Bit 0x800 indicates that the corresponding alignment line is part of
+    a chimeric alignment. A line flagged with 0x800 is called as a \emph{supplementary line}.
+  \item Bit 0x4 is the only reliable place to tell whether the read
     is unmapped. If 0x4 is set, no assumptions can be made about {\sf
-      RNAME}, {\sf POS}, {\sf CIGAR}, {\sf MAPQ}, bits 0x2, 0x10 and
-    0x100 and the bit 0x20 of the next segment in the template.
-  \item If 0x40 and 0x80 are both set, the segment is part of a linear
-    template, but it is neither the first nor the last segment. If both
-    0x40 and 0x80 are unset, the index of the segment in the template
+      RNAME}, {\sf POS}, {\sf CIGAR}, {\sf MAPQ}, bits 0x2, 0x10, 0x100
+    and 0x800, and the bit 0x20 of the previous read in the template.
+  \item If 0x40 and 0x80 are both set, the read is part of a linear
+    template, but it is neither the first nor the last read. If both
+    0x40 and 0x80 are unset, the index of the read in the template
     is unknown. This may happen for a non-linear template or the index
     is lost in data processing.
-  \item Bit 0x100 marks the alignment not to be used in certain analyses
-    when the tools in use are aware of this bit.
   \item If 0x1 is unset, no assumptions can be made about 0x2, 0x8,
     0x20, 0x40 and 0x80.
   \end{itemize}
@@ -275,21 +307,21 @@ fields in the SAM format:
   \item Sum of lengths of the {\tt M/I/S/=/X} operations shall equal
     the length of {\sf SEQ}.
   \end{itemize}
-\item {\sf RNEXT}: Reference sequence name of the NEXT segment in the
-  template. For the last segment, the next segment is the first
-  segment in the template. If {\tt @SQ} header lines are present, {\sf
+\item {\sf RNEXT}: Reference sequence name of the NEXT read in the
+  template. For the last read, the next read is the first
+  read in the template. If {\tt @SQ} header lines are present, {\sf
     RNEXT} (if not `*' or `=') must be present in one of the {\tt SQ-SN}
   tag. This field is set as `*' when the information is unavailable, and
   set as `=' if {\sf RNEXT} is identical {\sf RNAME}. If not `=' and the
-  next segment in the template has one primary mapping (see also bit
+  next read in the template has one primary mapping (see also bit
   0x100 in {\sf FLAG}), this field is identical to {\sf RNAME} of the
-  next segment.  If the next segment has multiple primary mappings, no
+  next segment.  If the next read has multiple primary mappings, no
   assumptions can be made about {\sf RNEXT} and {\sf PNEXT}.  If {\sf
     RNEXT} is `*', no assumptions can be made on {\sf PNEXT} and bit
   0x20.
-\item {\sf PNEXT}: Position of the NEXT segment in the template. Set as
+\item {\sf PNEXT}: Position of the NEXT read in the template. Set as
   0 when the information is unavailable. This field equals {\sf POS} of
-  the next segment. If {\sf PNEXT} is 0, no assumptions can be made on
+  the next read. If {\sf PNEXT} is 0, no assumptions can be made on
   {\sf RNEXT} and bit 0x20.
 \item {\sf TLEN}: signed observed Template LENgth. If all segments are
   mapped to the same reference, the unsigned observed template length
@@ -327,18 +359,18 @@ A & {\tt [!-\char126]} & Printable character \\
 i & {\tt [-+]?[0-9]+} & Singed 32-bit integer \\
 f & {\tt [-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?} & Single-precision floating number \\
 Z & {\tt [\,\,\,!-\char126]+} & Printable string, including space\\
-H & {\tt [0-9A-F]+} & Byte array in the Hex format\footnotemark[1]\\
+H & {\tt [0-9A-F]+} & Byte array in the Hex format\footnotemark[2]\\
 B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)+} & Integer or numeric array\\
 \hline
 \end{tabular}
-\footnotetext[1]{For example, a byte array {\tt \{0x1a,0xe3,0x1\}} corresponds to a Hex string `{\tt 1AE301}'.}
+\footnotetext[2]{For example, a byte array {\tt \{0x1a,0xe3,0x1\}} corresponds to a Hex string `{\tt 1AE301}'.}
 \end{center}
 For an integer or numeric array (type `{\tt B}'), the first letter indicates the type of numbers
 in the following comma separated array. The letter can be one of `{\tt cCsSiIf}', corresponding to
 {\tt int8\_t} (signed 8-bit integer), {\tt uint8\_t} (unsigned 8-bit integer), {\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t}, {\tt uint32\_t}
-and {\tt float}, respectively\footnotemark[2]. During import/export, the element type
+and {\tt float}, respectively\footnotemark[3]. During import/export, the element type
 may be changed if the new type is also compatible with the array.
-\footnotetext[2]{Explicit typing eases format parsing and helps to reduce the file size when SAM is converted to BAM.}
+\footnotetext[3]{Explicit typing eases format parsing and helps to reduce the file size when SAM is converted to BAM.}
 
 {Predefined tags are shown in the following table. You can
   freely add new tags, and if a new tag may be of general interest, you
@@ -348,9 +380,9 @@ may be changed if the new type is also compatible with the array.
   are reserved for local use and will not be formally
   defined in any future version of this specification.}
 \begin{center}\small
-\begin{tabular}{ccp{12.5cm}}
+\begin{longtable}{ccp{12.5cm}}
   \hline
-  {\bf Tag\footnotemark[1]} & {\bf Type} & {\bf Description} \\
+  {\bf Tag\footnotemark[4]} & {\bf Type} & {\bf Description} \\
   \hline
   {\tt X?} & ? & Reserved fields for end users (together with {\tt Y?} and {\tt Z?}) \\
   {\tt AM} & i & The smallest template-independent mapping quality of segments in the rest \\
@@ -364,7 +396,7 @@ may be changed if the new type is also compatible with the array.
   {\tt CP} & i & Leftmost coordinate of the next hit \\ 
   {\tt CQ} & Z & Color read quality on the original strand of the read. Same encoding as {\sf QUAL}; same length as {\tt CS}.\\
   {\tt CS} & Z & Color read sequence on the original strand of the read. The primer base must be included.\\
-  {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features\footnotemark[3].\\
+  {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features\footnotemark[5].\\
   {\tt E2} & Z & The 2nd most likely base calls. Same encoding and same length as {\sf QUAL}.\\
   {\tt FI} & i & The index of segment in the template.\\
   {\tt FS} & Z & Segment suffix.\\
@@ -375,7 +407,7 @@ may be changed if the new type is also compatible with the array.
   {\tt H2} & i & Number of 2-difference hits \\
   {\tt HI} & i & Query hit index, indicating the alignment record is the i-th one stored in SAM\\
   {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
-  {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([A-Z]|\char92\char94[A-Z]+)[0-9]+)*}\footnotemark[2]\\
+  {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([A-Z]|\char92\char94[A-Z]+)[0-9]+)*}\footnotemark[6]\\
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
   {\tt NH} & i & Number of reported alignments that contains the query in the current record\\
   {\tt NM} & i & Edit distance to the reference, including ambiguous bases but excluding clipping\\
@@ -384,23 +416,26 @@ may be changed if the new type is also compatible with the array.
   {\tt OC} & Z & Original CIGAR (usually before realignment) \\
   {\tt PG} & Z & Program. Value matches the header {\tt PG-ID} tag if {\tt @PG} is present. \\
   {\tt PQ} & i & Phred likelihood of the template, conditional on both the mapping being correct \\
-  {\tt PT} & Z & Read annotations for parts of the padded read sequence\footnotemark[4]\\
+  {\tt PT} & Z & Read annotations for parts of the padded read sequence\footnotemark[7]\\
   {\tt PU} & Z & Platform unit. Value to be consistent with the header {\tt RG-PU} tag if {\tt @RG} is present.\\
   {\tt QT} & Z & Phred quality of the barcode sequence in the {\tt BC} (or {\tt RT}) tag. Same encoding as {\sf QUAL}. \\
   {\tt Q2} & Z & Phred quality of the mate/next segment sequence in the {\tt R2} tag. Same encoding as {\sf QUAL}.\\
   {\tt R2} & Z & Sequence of the mate/next segment in the template. \\
   {\tt RG} & Z & Read group. Value matches the header {\tt RG-ID} tag if {\tt @RG} is present in the header. \\
   {\tt RT} & Z & Deprecated alternative to {\tt BC} tag originally used at Sanger. \\
+  {\tt SA} & Z & Other canonical alignments in a chimeric alignment, in the format of: (\emph{rname},\emph{pos},\emph{strand},\emph{CIGAR},\emph{mapQ},\emph{NM};)+.
+    Each element in the semi-colon delimited list represents a part of the chimeric alignment. Conventionally, at a supplementary line,
+	the first element points to the primary line.\\
   {\tt SM} & i & Template-independent mapping quality \\
   {\tt TC} & i & The number of segments in the template.\\
   {\tt U2} & Z & Phred probility of the 2nd call being wrong conditional on the best being wrong. The same encoding as {\sf QUAL}. \\
   {\tt UQ} & i & Phred likelihood of the segment, conditional on the mapping being correct \\
   \hline
-\end{tabular}
+\end{longtable}
 \end{center}
-\footnotetext[1]{The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt MF}, {\tt S2}
+\footnotetext[4]{The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt MF}, {\tt S2}
   and {\tt SQ} are reserved for backward compatibility.}
-\footnotetext[2]{The MD field aims to achieve SNP/indel calling without looking at
+\footnotetext[5]{The MD field aims to achieve SNP/indel calling without looking at
   the reference. For example, a string `{\tt 10A5\char94AC6}' means from
   the leftmost reference base in the alignment, there are 10 matches
   followed by an A on the reference which is different from the aligned
@@ -408,7 +443,7 @@ may be changed if the new type is also compatible with the array.
   deletion from the reference; the deleted sequence is AC; the last 6
   bases are matches. The {\tt MD} field ought to match the {\sf CIGAR}
   string.}
-\footnotetext[3]{The {\tt CT} tag is intended primarily for annotation
+\footnotetext[6]{The {\tt CT} tag is intended primarily for annotation
 dummy reads, and consists of a \emph{strand}, \emph{type} and zero or
 more \emph{key}=\emph{value} pairs, each separated with semicolons.
 The \emph{strand} field has four values as in GFF3, and supplements FLAG
@@ -426,7 +461,7 @@ macro (with the C locale). For example a percent sign becomes
 %NOTE - This leaves open the possibility of allowing multiple such
 %entries for a single CT tag to be combined with | as in the PT tag.
 }%End of CT tag footnote
-\footnotetext[4]{The {\tt PT} tag value has the format of a series of
+\footnotetext[7]{The {\tt PT} tag value has the format of a series of
 tags separated by {\tt |}, each annotating a sub-region of the read.
 Each tag consists of \emph{start}, \emph{end}, \emph{strand},
 \emph{type} and zero or more \emph{key}=\emph{value} pairs, each
@@ -484,8 +519,8 @@ specific software package for it to function properly.
   \begin{enumerate}[label=\arabic*]
   \item When one segment is present in multiple records, only one
     record should have the secondary alignment flag bit (0x100)
-    unset. {\sf RNEXT} and {\sf PNEXT} point to the primary alignment of
-    the next segment.
+    unset. {\sf RNEXT} and {\sf PNEXT} point to the primary line of
+    the next read in the template.
   \item {\sf SEQ} and {\sf QUAL} of secondary alignments should be set
     to `*' to reduce the file size.
   \end{enumerate}
@@ -656,7 +691,7 @@ standard-compliant extensions:
 
 On disk, a full BGZF file is (all integers are little endian as is
 required by RFC1952):
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 {\small
 \begin{tabular}{|l|l|l|l|l|r|}
@@ -703,7 +738,7 @@ formally described in the following table where values in brackets are
 the default when the corresponding information is not available; an
 underlined word in uppercase denotes a field in the SAM format.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 {\small
 \begin{tabular}{|l|l|l|p{8.15cm}|l|r|}
@@ -814,7 +849,7 @@ Suppose we have a genome shorter than 144kbp. we can design a binning
 scheme which consists of three types of bins: bin 0 spans 0-144kbp, bin
 1, 2 and 3 span 48kbp and bins from 4 to 12 span 16kbp each:
 
-\begin{table}[h]
+\begin{table}[ht]
   \centering
   {\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
     \cline{1-9}
@@ -838,7 +873,7 @@ alone, we need to visit the alignment at [40k,49k] as it belongs to bin
 saved.
 
 \subsection{The BAM indexing format}
-\begin{table}[h]
+\begin{table}[ht]
 {\small
 \begin{tabular}{|l|l|l|l|l|l|r|}
   \cline{1-7}
