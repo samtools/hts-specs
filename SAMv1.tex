@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.5-r45)}
+\title{The SAM Format Specification (v1.5-r46)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -57,7 +57,7 @@ r002    0 ref  9 30 3S6M1P1I4M *  0   0 AAAAGATAAGGATA    *
 r003    0 ref  9 30 5S6M       *  0   0 GCCTAAGCTAA       * SA:Z:ref,29,-,6H5M,17,0;
 r004    0 ref 16 30 6M14N5M    *  0   0 ATAGCTTCAGC       *
 r003 2064 ref 29 17 6H5M       *  0   0 TAGGC             * SA:Z:ref,9,+,5S6M,30,1;
-r001   83 ref 37 30 9M         =  7 -39 CAGCGCCAT         * NM:i:1
+r001   83 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
 \end{verbatim}
 \end{framed}
 
@@ -68,47 +68,58 @@ r001   83 ref 37 30 9M         =  7 -39 CAGCGCCAT         * NM:i:1
 \begin{description}
 \item[Template] A DNA/RNA sequence part of which is sequenced on a
   sequencing machine or assembled from raw sequences.
+
 \item[Segment] A contiguous (sub)sequence on a template which is
   sequenced or assembled.
-  %For segments of an assembled
-  %sequence, they are indexed by the order of the leftmost coordinate on
-  %the assembled sequence.
+
 \item[Read] A raw sequence that comes off a sequencing machine. A read
-  may consist of multiple segments, which are sometimes called \emph{subreads}.
-  For sequencing data, reads are indexed by the order in which they are sequenced.
-\item[Canonical alignment] An alignment typically derived from the
-  Smith-Waterman algorithm (SW). A canonical alignment usually does not contain
-  long gaps, confined by SW.
-\item[Chimeric alignment] An alignment consisting of two or more canonical
-  alignments without large overlaps between them.\footnotemark[1]
-\item[Split alignment] A co-linear chimeric alignment where its canonical
-  components are strictly non-overlapping. In the SAM format, each line
-  describes a canonical alignment or a split alignment.
+  may consist of multiple segments. For sequencing data, reads are indexed by
+  the order in which they are sequenced.
+
+\item[Simple alignment] A alignment of a read to a single locus on the
+  reference, where the alignment may have short insertions/deletions but does not
+  have long gaps (e.g. due to introns or structural variation).
+
+\item[Chimeric alignment] An alignment consisting of two or more simple
+  alignments to different loci on the reference where the alignments do not
+  have large overlaps on the read.\footnotemark[1]
+
+\item[Split alignment] A co-linear chimeric alignment made up of simple
+  alignments that are strictly non-overlapping.  A split alignment is
+  represented compactly using the cigar N operator.  In the SAM format, a
+  single line can describe either a simple alignment or a split alignment.
+
+\item[Multiple mapping] A set of simple alignments that align approximately the
+  same portion of a read to multiple loci on the reference.
+
 \item[1-based coordinate system] A coordinate system where the first
   base of a sequence is one. In this coordinate system, a region is
   specified by a closed interval. For example, the region between the
   3rd and the 7th bases inclusive is $[3,7]$. The SAM, VCF, GFF and Wiggle
   formats are using the 1-based coordinate system.
+
 \item[0-based coordinate system] A coordinate system where the first
   base of a sequence is zero. In this coordinate system, a region is
   specified by a half-closed-half-open interval. For example, the region
   between the 3rd and the 7th bases inclusive is $[2,7)$. The BAM, BCFv2, BED,
   and PSL formats are using the 0-based coordinate system.
+
 \item[Phred scale] Given a probability $0<p\le 1$, the phred scale of $p$
   equals $-10\log_{10}p$, rounded to the closest integer.
+
 \end{description}
 
 \footnotetext[1]{A chimeric alignment is primarily caused by structural
-variations, gene fusions and misassemblies. It is more frequent given longer
+variations, gene fusions, misassemblies or RNA-seq. It is more frequent given longer
 reads. For a chimeric alignment, its canonical components are largely
 non-overlapping; each canonical alignment may have high mapping quality and is
 informative in SNP/INDEL calling. A read may also have \emph{multiple mappings}
 which also occupy multiple lines in a SAM.  In contrast to a chimeric
-alignment, multiple mappings are caused by repeats.  They are less frequent
+alignment, multiple mappings are caused primarily by repeats.  They are less frequent
 given longer reads. If a read has multiple mappings, all these mappings are
 almost entirely overlapping with each other; except the single-best optimal
 mapping, all the other mappings get mapping quality $<$Q3
-and are ignored by most standard SNP/INDEL callers.}
+and are ignored by most SNP/INDEL callers.}
 
 \subsection{The header section}
 Each header line begins with character `{\tt @}' followed by a
@@ -122,6 +133,9 @@ end users.
 
 The following table give the defined record types and tags. Tags with
 `*' are required when the record type is present.
+
+\pagebreak
+
 \begin{center}
 \small
 \begin{longtable}{|l|l|p{13.5cm}|}
@@ -135,7 +149,7 @@ The following table give the defined record types and tags. Tags with
   key is the {\sf RNAME} field, with order defined by the order of {\tt @SQ} lines in the header.  The
   minor sort key is the {\sf POS} field.  For alignments with equal {\sf RNAME} and {\sf POS}, order is
   arbitrary.  All alignments with `{\tt *}' in {\sf RNAME} field follow alignments with some other
-  value but otherwise are in arbitrary order.\\\cline{1-3}\pagebreak\cline{1-3}
+  value but otherwise are in arbitrary order.\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. The order of {\tt @SQ} lines defines the alignment sorting order.\\\cline{2-3}
   & {\tt SN}* & Reference sequence name. Each {\tt @SQ} line must have a unique {\tt SN} tag. The value of this
   field is used in the
@@ -307,20 +321,19 @@ of the mandatory fields in the SAM format:
   \item Sum of lengths of the {\tt M/I/S/=/X} operations shall equal
     the length of {\sf SEQ}.
   \end{itemize}
-\item {\sf RNEXT}: Reference sequence name of the NEXT read in the
+\item {\sf RNEXT}: Reference sequence name of the primary alignment of the NEXT read in the
   template. For the last read, the next read is the first
   read in the template. If {\tt @SQ} header lines are present, {\sf
     RNEXT} (if not `*' or `=') must be present in one of the {\tt SQ-SN}
   tag. This field is set as `*' when the information is unavailable, and
   set as `=' if {\sf RNEXT} is identical {\sf RNAME}. If not `=' and the
   next read in the template has one primary mapping (see also bit
-  0x100 in {\sf FLAG}), this field is identical to {\sf RNAME} of the
-  next segment.  If the next read has multiple primary mappings, no
-  assumptions can be made about {\sf RNEXT} and {\sf PNEXT}.  If {\sf
+  0x100 in {\sf FLAG}), this field is identical to {\sf RNAME} at the primary line of the
+  next read.  If {\sf
     RNEXT} is `*', no assumptions can be made on {\sf PNEXT} and bit
   0x20.
-\item {\sf PNEXT}: Position of the NEXT read in the template. Set as
-  0 when the information is unavailable. This field equals {\sf POS} of
+\item {\sf PNEXT}: Position of the primary alignment of the NEXT read in the template. Set as
+  0 when the information is unavailable. This field equals {\sf POS} at the primary line of
   the next read. If {\sf PNEXT} is 0, no assumptions can be made on
   {\sf RNEXT} and bit 0x20.
 \item {\sf TLEN}: signed observed Template LENgth. If all segments are
@@ -517,10 +530,10 @@ specific software package for it to function properly.
   \end{enumerate}
 \item Multiple mapping
   \begin{enumerate}[label=\arabic*]
-  \item When one segment is present in multiple records, only one
-    record should have the secondary alignment flag bit (0x100)
-    unset. {\sf RNEXT} and {\sf PNEXT} point to the primary line of
-    the next read in the template.
+  \item When one segment is present in multiple lines to represent a multiple
+	mapping of the segment, only one of these records should have the secondary
+	alignment flag bit (0x100) unset. {\sf RNEXT} and {\sf PNEXT} point to the
+	primary line of the next read in the template.
   \item {\sf SEQ} and {\sf QUAL} of secondary alignments should be set
     to `*' to reduce the file size.
   \end{enumerate}
