@@ -4,6 +4,7 @@
 \usepackage{framed}
 \usepackage{enumitem}
 \usepackage{longtable}
+\usepackage[pdfborder={0 0 0}]{hyperref}
 
 \addtolength{\textwidth}{3.4cm}
 \addtolength{\hoffset}{-1.7cm}
@@ -12,11 +13,20 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.5-r49)}
-\author{The SAM Format Specification Working Group}
 \begin{document}
 
+\input{SAMv1.ver}
+\title{Sequence Alignment/Map Format Specification}
+\author{The SAM/BAM Format Specification Working Group}
+\date{\headdate}
 \maketitle
+\begin{quote}\small
+The master version of this document can be found at
+\url{https://github.com/samtools/sam-spec}.
+This printing is version~\commitdesc\ from that repository,
+last modified on the date shown above.
+\end{quote}
+\vspace*{1em}
 
 
 \section{The SAM Format Specification}
