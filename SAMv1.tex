@@ -12,7 +12,7 @@
 
 \makeindex
 
-\title{The SAM Format Specification (v1.5-r48)}
+\title{The SAM Format Specification (v1.5-r49)}
 \author{The SAM Format Specification Working Group}
 \begin{document}
 
@@ -75,21 +75,38 @@ r001   83 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
   may consist of multiple segments. For sequencing data, reads are indexed by
   the order in which they are sequenced.
 
-\item[Simple alignment] A alignment of a read to a single locus on the
-  reference, where the alignment may have short insertions/deletions but does not
-  have long gaps (e.g. due to introns or structural variation).
+\item[Linear alignment]
+  An alignment of a read to a single reference sequence that may include
+  insertions, deletions, skips and clipping, but may not include direction
+  changes (i.e. one portion of the alignment on forward strand and another
+  portion of alignment on reverse strand). A linear alignment can be
+  represented in a single SAM record.
+%  A alignment of a read to a single locus on the reference, where the
+%  alignment may have short insertions/deletions but does not have long gaps
+%  (e.g. due to introns or structural variation).
 
-\item[Chimeric alignment] An alignment consisting of two or more simple
-  alignments to different loci on the reference where the alignments do not
-  have large overlaps on the read.\footnotemark[1]
+\item[Chimeric alignment]
+  An alignment of a read that cannot be represented as a linear alignment. A
+  chimeric alignment is represented as a set of linear alignments that do not
+  have large overlaps.  Typically, one of the linear alignments in a chimeric
+  alignment is considered the ``representative'' alignment, and the others are
+  called ``supplementary'' and are distinguished by the supplementary alignment
+  flag.  All the SAM records in a chimeric alignment have the same {\sf QNAME}
+  and the same values for 0x40 and 0x80 flags (see Section 1.4). The decision
+  regarding which linear alignment is representative is arbitrary.
 
-\item[Split alignment] A co-linear chimeric alignment made up of simple
-  alignments that are strictly non-overlapping.  A split alignment is
-  represented compactly using the cigar N operator.  In the SAM format, a
-  single line can describe either a simple alignment or a split alignment.
+\item[Read alignment]
+  A linear alignment or a chimeric alignment that is the complete
+  representation of the alignment of the read.
 
-\item[Multiple mapping] A set of simple alignments that align approximately the
-  same portion of a read to multiple loci on the reference.
+\item[Multiple mapping]
+  The correct placement of a read may be ambiguous, e.g. due to repeats.  In
+  this case, there may be multiple read alignments for the same read.  One of
+  these alignments is considered primary.  All the other alignments have the
+  secondary alignment flag set in the SAM records that represent them.  All the
+  SAM records have the same {\sf QNAME} and the same values for 0x40 and 0x80
+  flags.  Typically the alignment designated primary is the best alignment, but
+  the decision may be arbitrary.\footnotemark[1]
 
 \item[1-based coordinate system] A coordinate system where the first
   base of a sequence is one. In this coordinate system, a region is
@@ -110,11 +127,9 @@ r001   83 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
 
 \footnotetext[1]{A chimeric alignment is primarily caused by structural
 variations, gene fusions, misassemblies, RNA-seq or experimental protocols. It is more frequent given longer
-reads. For a chimeric alignment, its canonical components are largely
-non-overlapping; each canonical alignment may have high mapping quality and is
-informative in SNP/INDEL calling. A read may also have \emph{multiple mappings}
-which also occupy multiple lines in a SAM.  In contrast to a chimeric
-alignment, multiple mappings are caused primarily by repeats.  They are less frequent
+reads. For a chimeric alignment, the linear alignments consisting of the aligment are largely
+non-overlapping; each linear alignment may have high mapping quality and is
+informative in SNP/INDEL calling. In contrast, multiple mappings are caused primarily by repeats.  They are less frequent
 given longer reads. If a read has multiple mappings, all these mappings are
 almost entirely overlapping with each other; except the single-best optimal
 mapping, all the other mappings get mapping quality $<$Q3
@@ -132,8 +147,6 @@ end users.
 
 The following table give the defined record types and tags. Tags with
 `*' are required when the record type is present.
-
-\pagebreak
 
 \begin{center}
 \small
@@ -199,8 +212,8 @@ The following table give the defined record types and tags. Tags with
 \end{center}
 
 \subsection{The alignment section: mandatory fields}
-In the SAM format, each alignment line typically represents a canonical
-alignment or a split alignment of a read or a contig. Each line has 11
+In the SAM format, each alignment line typically represents the linear
+alignment of a segment. Each line has 11
 mandatory fields. These fields always appear in the same order and must be
 present, but their values can be `0' or `*' (depending on the field) if the
 corresponding information is unavailable. The following table gives an overview
