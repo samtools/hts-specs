@@ -1,5 +1,5 @@
-SAM/BAM and related file format specifications
-==============================================
+SAM/BAM and related specifications
+==================================
 
 Alignment data files
 --------------------
@@ -19,11 +19,11 @@ The Variant Call Format and its textual and binary encodings are described on th
 
 **BCFv2.tex** is an in-progress non-canonical incomplete TeX conversion of the official [BCF2 specification][g1k-bcf2].  **BCFv2_qref.tex** is a quick reference describing just the layout of data within BCF2 files.
 
-[ena-cram]:	http://www.ebi.ac.uk/ena/about/cram_toolkit
-[g1k-bcf2]:	http://www.1000genomes.org/wiki/analysis/variant-call-format/bcf-binary-vcf-version-2
-[g1k-vcf]:	http://www.1000genomes.org/wiki/Analysis/variant-call-format
-[htslib]:	/samtools/htslib/
-[samtools]:	/samtools/samtools/
-[tabix]:	/samtools/tabix/
+[ena-cram]:   http://www.ebi.ac.uk/ena/about/cram_toolkit
+[g1k-bcf2]:   http://www.1000genomes.org/wiki/analysis/variant-call-format/bcf-binary-vcf-version-2
+[g1k-vcf]:    http://www.1000genomes.org/wiki/Analysis/variant-call-format
+[htslib]:     https://github.com/samtools/htslib/
+[samtools]:   https://github.com/samtools/samtools/
+[tabix]:      https://github.com/samtools/tabix/
 
 <!-- vim:set linebreak: -->
