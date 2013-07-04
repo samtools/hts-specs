@@ -22,8 +22,8 @@ The Variant Call Format and its textual and binary encodings are described on th
 [ena-cram]:   http://www.ebi.ac.uk/ena/about/cram_toolkit
 [g1k-bcf2]:   http://www.1000genomes.org/wiki/analysis/variant-call-format/bcf-binary-vcf-version-2
 [g1k-vcf]:    http://www.1000genomes.org/wiki/Analysis/variant-call-format
-[htslib]:     https://github.com/samtools/htslib/
-[samtools]:   https://github.com/samtools/samtools/
-[tabix]:      https://github.com/samtools/tabix/
+[htslib]:     https://github.com/samtools/htslib
+[samtools]:   https://github.com/samtools/samtools
+[tabix]:      https://github.com/samtools/tabix
 
 <!-- vim:set linebreak: -->
