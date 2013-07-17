@@ -11,6 +11,7 @@ pdf: $(PDFS)
 .SUFFIXES: .tex .pdf
 .tex.pdf:
 	pdflatex $<
+	while grep -q 'Warning.*Rerun' $*.log; do pdflatex $< || exit; done
 
 
 mostlyclean:
