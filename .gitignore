@@ -1,6 +1,8 @@
 *.aux
 *.idx
 *.log
+*.out
+*.ver
 
 *.dvi
 *.pdf
