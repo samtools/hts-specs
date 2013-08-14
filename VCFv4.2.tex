@@ -51,10 +51,10 @@ A single `fileformat' field is always required, must be the first line in the fi
 \end{verbatim}
 
 \subsubsection{Information field format}
-INFO fields should be described as follows (all keys are required):
+INFO fields should be described as follows (first four keys are required, source and version are recommended):
 
 \begin{verbatim}
-##INFO=<ID=ID,Number=number,Type=type,Description=”description”>
+##INFO=<ID=ID,Number=number,Type=type,Description=”description”,Source="source",Version="version">
 \end{verbatim}
 
 Possible Types for INFO fields are: Integer, Float, Flag, Character, and String. The Number entry is an Integer that describes the number of values that can be included with the INFO field. For example, if the INFO field contains a single number, then this value should be $1$; if the INFO field describes a pair of numbers, then this value should be $2$ and so on. There are also certain special characters used to define special cases:
@@ -66,7 +66,7 @@ Possible Types for INFO fields are: Integer, Float, Flag, Character, and String.
   \item If the number of possible values varies, is unknown, or is unbounded, then this value should be `.'.
 \end{itemize}
 
-The `Flag' type indicates that the INFO field does not contain a Value entry, and hence the Number should be $0$ in this case. The Description value must be surrounded by double-quotes. Double-quote character can be escaped with backslash $\backslash$ and backslash as $\backslash\backslash$.
+The `Flag' type indicates that the INFO field does not contain a Value entry, and hence the Number should be $0$ in this case. The Description value must be surrounded by double-quotes. Double-quote character can be escaped with backslash $\backslash$ and backslash as $\backslash\backslash$. Source and Version values likewise should be surrounded by double-quotes and specify the annotation source (case-insensitive, e.g. "dbsnp") and exact version (e.g. "138"), respectively for computational use.
 
 \subsubsection{Filter field format}
 FILTERs that have been applied to the data should be described as follows:
