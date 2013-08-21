@@ -1,10 +1,12 @@
 all: pdf
 
 PDFS =	BCFv1_qref.pdf \
-	BCFv2.pdf BCFv2_qref.pdf \
+	BCFv2_qref.pdf \
 	CSIv1.pdf \
 	SAMv1.pdf \
-	tabix.pdf
+	tabix.pdf \
+	VCFv4.1.pdf \
+	VCFv4.2.pdf
 
 pdf: $(PDFS)
 
@@ -21,7 +23,7 @@ SAMv1.pdf: SAMv1.tex SAMv1.ver
 
 
 mostlyclean:
-	-rm -f *.aux *.idx *.log *.out *.ver
+	-rm -f *.aux *.idx *.log *.out *.toc *.ver
 
 clean: mostlyclean
 	-rm -f $(PDFS)

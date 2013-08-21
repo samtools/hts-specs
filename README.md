@@ -13,15 +13,13 @@ The **tabix.tex** and **CSIv1.tex** quick references summarize more recent index
 Variant calling data files
 --------------------------
 
-The Variant Call Format and its textual and binary encodings are described on the [1000 Genomes wiki][g1k-vcf].
+**VCFv4.1.tex** and **VCFv4.2.tex** are the canonical specifications for the Variant Call Format and its textual (VCF) and binary encodings (BCF 2.x).
 
 **BCFv1_qref.tex** summarizes the obsolete BCF1 format historically produced by [samtools].  This format is no longer recommended for use, as it has been superseded by the more widely-implemented BCF2.
 
-**BCFv2.tex** is an in-progress non-canonical incomplete TeX conversion of the official [BCF2 specification][g1k-bcf2].  **BCFv2_qref.tex** is a quick reference describing just the layout of data within BCF2 files.
+**BCFv2_qref.tex** is a quick reference describing just the layout of data within BCF2 files.
 
 [ena-cram]:   http://www.ebi.ac.uk/ena/about/cram_toolkit
-[g1k-bcf2]:   http://www.1000genomes.org/wiki/analysis/variant-call-format/bcf-binary-vcf-version-2
-[g1k-vcf]:    http://www.1000genomes.org/wiki/Analysis/variant-call-format
 [htslib]:     https://github.com/samtools/htslib
 [samtools]:   https://github.com/samtools/samtools
 [tabix]:      https://github.com/samtools/tabix
