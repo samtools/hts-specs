@@ -2,6 +2,7 @@
 *.idx
 *.log
 *.out
+*.toc
 *.ver
 
 *.dvi
