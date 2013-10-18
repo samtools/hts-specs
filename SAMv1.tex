@@ -241,8 +241,8 @@ of the mandatory fields in the SAM format:
   5 & {\sf MAPQ} & Int & {\tt [0,2$^8$-1]} & MAPping Quality \\
   6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
   7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next read\\
-  8 & {\sf PNEXT} & Int & {\tt [0,2$^{29}$-1]} & Position of the mate/next read \\
-  9 & {\sf TLEN} & Int & {\tt [-2$^{29}$+1,2$^{29}$-1]} & observed Template LENgth \\
+  8 & {\sf PNEXT} & Int & {\tt [0,2$^{31}$-1]} & Position of the mate/next read \\
+  9 & {\sf TLEN} & Int & {\tt [-2$^{31}$+1,2$^{31}$-1]} & observed Template LENgth \\
   10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & segment SEQuence\\
   11 & {\sf QUAL} & String & {\tt [!-\char126]+} & ASCII of Phred-scaled base QUALity+33 \\
   \hline
