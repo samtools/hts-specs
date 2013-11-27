@@ -4,14 +4,14 @@ SAM/BAM and related specifications
 Quick links
 -----------
 
-**HTS-spec GitHub page**
-**SAMv1.pdf**
-**BCFv1.pdf**
-**BCFv2.1.pdf**
-**CSIv1.pdf**
-**tabix.pdf**
-**VCFv4.1.pdf**
-**VCFv4.2.pdf**
+[HTS-spec GitHub page]
+[SAMv1.pdf]
+[BCFv1.pdf]
+[BCFv2.1.pdf]
+[CSIv1.pdf]
+[tabix.pdf]
+[VCFv4.1.pdf]
+[VCFv4.2.pdf]
 
 Alignment data files
 --------------------
