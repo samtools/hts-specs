@@ -4,14 +4,14 @@ SAM/BAM and related specifications
 Quick links
 -----------
 
-[HTS-spec GitHub page]
-[SAMv1.pdf]
-[BCFv1.pdf]
-[BCFv2.1.pdf]
-[CSIv1.pdf]
-[tabix.pdf]
-[VCFv4.1.pdf]
-[VCFv4.2.pdf]
+[HTS-spec GitHub page](http://samtools.github.io/hts-specs/)  
+[SAMv1.pdf](http://samtools.github.io/hts-specs/SAMv1.pdf)  
+[BCFv1.pdf](http://samtools.github.io/hts-specs/BCFv1_qref.pdf)  
+[BCFv2.1.pdf](http://samtools.github.io/hts-specs/BCFv2_qref.pdf)  
+[CSIv1.pdf](http://samtools.github.io/hts-specs/CSIv1.pdf)  
+[tabix.pdf](http://samtools.github.io/hts-specs/tabix.pdf)  
+[VCFv4.1.pdf](http://samtools.github.io/hts-specs/VCFv4.1.pdf)  
+[VCFv4.2.pdf](http://samtools.github.io/hts-specs/VCFv4.2.pdf)  
 
 Alignment data files
 --------------------
@@ -35,13 +35,5 @@ Variant calling data files
 [htslib]:     https://github.com/samtools/htslib
 [samtools]:   https://github.com/samtools/samtools
 [tabix]:      https://github.com/samtools/tabix
-[SAMv1.pdf]:    http://samtools.github.io/hts-specs/SAMv1.pdf
-[BCFv1.pdf]:    http://samtools.github.io/hts-specs/BCFv1_qref.pdf
-[BCFv2.1.pdf]:  http://samtools.github.io/hts-specs/BCFv2_qref.pdf
-[CSIv1.pdf]:    http://samtools.github.io/hts-specs/CSIv1.pdf
-[tabix.pdf]:    http://samtools.github.io/hts-specs/tabix.pdf
-[VCFv4.1.pdf]:  http://samtools.github.io/hts-specs/VCFv4.1.pdf
-[VCFv4.2.pdf]:  http://samtools.github.io/hts-specs/VCFv4.2.pdf
-[HTS-spec GitHub page]:  http://samtools.github.io/hts-specs/
 
 <!-- vim:set linebreak: -->
