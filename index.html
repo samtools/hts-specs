@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Hts-specs by samtools</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Hts-specs</h1>
+        <p>Specifications of SAM/BAM and related high-throughput sequencing file formats</p>
+
+        <p class="view"><a href="https://github.com/samtools/hts-specs">View the Project on GitHub <small>samtools/hts-specs</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/samtools/hts-specs/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/samtools/hts-specs/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/samtools/hts-specs">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="sambam-and-related-specifications" class="anchor" href="#sambam-and-related-specifications"><span class="octicon octicon-link"></span></a>SAM/BAM and related specifications</h1>
+
+<h2>
+<a name="alignment-data-files" class="anchor" href="#alignment-data-files"><span class="octicon octicon-link"></span></a>Alignment data files</h2>
+
+<p><strong>SAMv1.tex</strong> is the canonical specification for the SAM (Sequence Alignment/Map) format, BAM (its binary equivalent), and the BAI format for indexing BAM files.</p>
+
+<p>The CRAM format is described at <a href="http://www.ebi.ac.uk/ena/about/cram_toolkit">ENA's CRAM toolkit page</a>.</p>
+
+<p>The <strong>tabix.tex</strong> and <strong>CSIv1.tex</strong> quick references summarize more recent index formats: the <a href="https://github.com/samtools/tabix">tabix</a> tool indexes generic textual genome position-sorted files, while CSI is <a href="https://github.com/samtools/htslib">htslib</a>'s successor to the BAI index format.</p>
+
+<h2>
+<a name="variant-calling-data-files" class="anchor" href="#variant-calling-data-files"><span class="octicon octicon-link"></span></a>Variant calling data files</h2>
+
+<p><strong>VCFv4.1.tex</strong> and <strong>VCFv4.2.tex</strong> are the canonical specifications for the Variant Call Format and its textual (VCF) and binary encodings (BCF 2.x).</p>
+
+<p><strong>BCFv1_qref.tex</strong> summarizes the obsolete BCF1 format historically produced by <a href="https://github.com/samtools/samtools">samtools</a>.  This format is no longer recommended for use, as it has been superseded by the more widely-implemented BCF2.</p>
+
+<p><strong>BCFv2_qref.tex</strong> is a quick reference describing just the layout of data within BCF2 files.</p>
+
+
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/samtools">samtools</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
