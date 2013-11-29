@@ -54,7 +54,7 @@ A single `fileformat' field is always required, must be the first line in the fi
 INFO fields should be described as follows (all keys are required):
 
 \begin{verbatim}
-##INFO=<ID=ID,Number=number,Type=type,Description=”description”>
+##INFO=<ID=ID,Number=number,Type=type,Description="description">
 \end{verbatim}
 
 Possible Types for INFO fields are: Integer, Float, Flag, Character, and String. The Number entry is an Integer that describes the number of values that can be included with the INFO field. For example, if the INFO field contains a single number, then this value should be $1$; if the INFO field describes a pair of numbers, then this value should be $2$ and so on. If the field has one value per alternate allele then this value should be `A'; if the field has one value for each possible genotype (more relevant to the FORMAT tags) then this value should be `G'.  If the number of possible values varies, is unknown, or is unbounded, then this value should be `.'. The `Flag' type indicates that the INFO field does not contain a Value entry, and hence the Number should be $0$ in this case. The Description value must be surrounded by double-quotes. Double-quote character can be escaped with backslash $\backslash$ and backslash as $\backslash\backslash$.
@@ -63,14 +63,14 @@ Possible Types for INFO fields are: Integer, Float, Flag, Character, and String.
 FILTERs that have been applied to the data should be described as follows:
 
 \begin{verbatim}
-##FILTER=<ID=ID,Description=”description”>
+##FILTER=<ID=ID,Description="description">
 \end{verbatim}
 
 \subsubsection{Individual format field format}
 Likewise, Genotype fields specified in the FORMAT field should be described as follows:
 
 \begin{verbatim}
-##FORMAT=<ID=ID,Number=number,Type=type,Description=”description”>
+##FORMAT=<ID=ID,Number=number,Type=type,Description="description">
 \end{verbatim}
 
 Possible Types for FORMAT fields are: Integer, Float, Character, and String (this field is otherwise defined precisely as the INFO field).
@@ -144,14 +144,14 @@ If genotype data is present in the file, these are followed by a FORMAT column h
 
 \subsection{Data lines}
 \subsubsection{Fixed fields}
-There are 8 fixed fields per record. All data lines are tab-delimited. In all cases, missing values are specified with a dot (”.”). Fixed fields are:
+There are 8 fixed fields per record. All data lines are tab-delimited. In all cases, missing values are specified with a dot (`.'). Fixed fields are:
 
 \begin{enumerate}
   \item CHROM - chromosome: An identifier from the reference genome or an angle-bracketed ID String (``$<$ID$>$'') pointing to a contig in the assembly file (cf. the \#\#assembly line in the header). All entries for a specific CHROM should form a contiguous block within the VCF file. The colon symbol (:) must be absent from all chromosome names to avoid parsing errors when dealing with breakends. (String, no white-space permitted, Required).
   \item POS - position: The reference position, with the 1st base having position 1. Positions are sorted numerically, in increasing order, within each reference sequence CHROM.   It is permitted to have multiple records with the same POS. Telomeres are indicated by using positions 0 or N+1, where N is the length of the corresponding chromosome or contig.   (Integer, Required)
   \item ID - identifier: Semi-colon separated list of unique identifiers where available. If this is a dbSNP variant it is encouraged to use the rs number(s). No identifier should be present in more than one data record. If there is no identifier available, then the missing value should be used. (String, no white-space or semi-colons permitted)
   \item REF - reference base(s): Each base must be one of A,C,G,T,N (case insensitive). Multiple bases are permitted. The value in the POS field refers to the position of the first base in the String. For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the event (which must be reflected in the POS field), unless the event occurs at position 1 on the contig in which case it must include the base after the event; this padding base is not required (although it is permitted) for e.g. complex substitutions or other events where all alleles have at least one base represented in their Strings.  If any of the ALT alleles is a symbolic allele (an angle-bracketed ID String ``$<$ID$>$'') then the padding base is required and POS denotes the coordinate of the base preceding the polymorphism. Tools processing VCF files are not required to preserve case in the allele Strings. (String, Required).
-  \item ALT - alternate base(s): Comma separated list of alternate non-reference alleles called on at least one of the samples. Options are base Strings made up of the bases A,C,G,T,N, (case insensitive) or an angle-bracketed ID String (”$<$ID$>$”) or a breakend replacement string as described in the section on breakends. If there are no alternative alleles, then the missing value should be used.  Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.  (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
+  \item ALT - alternate base(s): Comma separated list of alternate non-reference alleles called on at least one of the samples. Options are base Strings made up of the bases A,C,G,T,N, (case insensitive) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends. If there are no alternative alleles, then the missing value should be used.  Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.  (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
   \item QUAL - quality: Phred-scaled quality score for the assertion made in ALT. i.e. $-10log_{10}$ prob(call in ALT is wrong). If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant). High QUAL scores indicate high confidence calls. Although traditionally people use integer phred scores, this field is permitted to be a floating point to enable higher resolution for low confidence calls if desired.  If unknown, the missing value should be specified. (Numeric)
   \item FILTER - filter status: PASS if this position has passed all filters, i.e. a call is made at this position. Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g. ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples. `0' is reserved and should not be used as a filter String. If filters have not been applied, then this field should be set to the missing value. (String, no white-space or semi-colons permitted)
   \item INFO - additional information: (String, no white-space, semi-colons, or equals-signs permitted; commas are permitted only as delimiters for lists of values) INFO fields are encoded as a semicolon-separated series of short keys with optional values in the format: $<$key$>$=$<$data$>$[,data]. Arbitrary keys are permitted, although the following sub-fields are reserved (albeit optional):
@@ -224,41 +224,41 @@ When the INFO keys reserved for encoding structural variants are used for imprec
 The following INFO keys are reserved for encoding structural variants. In general, when these keys are used by imprecise variants, the values should be best estimates. When a key reflects a property of a single alt allele (e.g. SVLEN), then when there are multiple alt alleles there will be multiple values for the key corresponding to each alelle (e.g. SVLEN=-100,-110 for a deletion with two distinct alt alleles).
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description=“Imprecise structural variation”>
-##INFO=<ID=NOVEL,Number=0,Type=Flag,Description=“Indicates a novel structural variation”>
-##INFO=<ID=END,Number=1,Type=Integer,Description=“End position of the variant described in this record”>
+##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
+##INFO=<ID=NOVEL,Number=0,Type=Flag,Description="Indicates a novel structural variation">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
 \end{verbatim}
 \normalsize
 For precise variants, END is POS + length of REF allele - 1, and the for imprecise variants the corresponding best estimate.
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=SVTYPE,Number=1,Type=String,Description=“Type of structural variant”>
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
 \end{verbatim}
 \normalsize
 Value should be one of DEL, INS, DUP, INV, CNV, BND. This key can be derived from the REF/ALT fields but is useful for filtering.
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=SVLEN,Number=.,Type=Integer,Description=“Difference in length between REF and ALT alleles”>
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
 \end{verbatim}
 \normalsize
 One value for each ALT allele. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values.
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=CIPOS,Number=2,Type=Integer,Description=“Confidence interval around POS for imprecise variants”>
-##INFO=<ID=CIEND,Number=2,Type=Integer,Description=“Confidence interval around END for imprecise variants”>
-##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description=“Length of base pair identical micro-homology at event breakpoints”>
-##INFO=<ID=HOMSEQ,Number=.,Type=String,Description=“Sequence of base pair identical micro-homology at event breakpoints”>
-##INFO=<ID=BKPTID,Number=.,Type=String,Description=“ID of the assembled alternate allele in the assembly file”>
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
+##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=BKPTID,Number=.,Type=String,Description="ID of the assembled alternate allele in the assembly file">
 \end{verbatim}
 \normalsize
 For precise variants, the consensus sequence the alternate allele assembly is derivable from the REF and ALT fields. However, the alternate allele assembly file may contain additional information about the characteristics of the alt allele contigs.
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=MEINFO,Number=4,Type=String,Description=“Mobile element info of the form NAME,START,END,POLARITY”>
-##INFO=<ID=METRANS,Number=4,Type=String,Description=“Mobile element transduction info of the form CHR,START,END,POLARITY”>
-##INFO=<ID=DGVID,Number=1,Type=String,Description=“ID of this element in Database of Genomic Variation”>
-##INFO=<ID=DBVARID,Number=1,Type=String,Description=“ID of this element in DBVAR”>
-##INFO=<ID=DBRIPID,Number=1,Type=String,Description=“ID of this element in DBRIP”>
+##INFO=<ID=MEINFO,Number=4,Type=String,Description="Mobile element info of the form NAME,START,END,POLARITY">
+##INFO=<ID=METRANS,Number=4,Type=String,Description="Mobile element transduction info of the form CHR,START,END,POLARITY">
+##INFO=<ID=DGVID,Number=1,Type=String,Description="ID of this element in Database of Genomic Variation">
+##INFO=<ID=DBVARID,Number=1,Type=String,Description="ID of this element in DBVAR">
+##INFO=<ID=DBRIPID,Number=1,Type=String,Description="ID of this element in DBRIP">
 ##INFO=<ID=MATEID,Number=.,Type=String,Description="ID of mate breakends">
 ##INFO=<ID=PARID,Number=1,Type=String,Description="ID of partner breakend">
 ##INFO=<ID=EVENT,Number=1,Type=String,Description="ID of event associated to breakend">
@@ -274,12 +274,12 @@ For precise variants, the consensus sequence the alternate allele assembly is de
 \section{FORMAT keys used for structural variants}
 \footnotesize
 \begin{verbatim}
-##FORMAT=<ID=CN,Number=1,Type=Integer,Description=“Copy number genotype for imprecise events”>
-##FORMAT=<ID=CNQ,Number=1,Type=Float,Description=“Copy number genotype quality for imprecise events”>
-##FORMAT=<ID=CNL,Number=.,Type=Float,Description=“Copy number genotype likelihood for imprecise events”>
-##FORMAT=<ID=NQ,Number=1,Type=Integer,Description=“Phred style probability score that the variant is novel”>
-##FORMAT=<ID=HAP,Number=1,Type=Integer,Description=“Unique haplotype identifier”>
-##FORMAT=<ID=AHAP,Number=1,Type=Integer,Description=“Unique identifier of ancestral haplotype”>
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
+##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
+##FORMAT=<ID=CNL,Number=.,Type=Float,Description="Copy number genotype likelihood for imprecise events">
+##FORMAT=<ID=NQ,Number=1,Type=Integer,Description="Phred style probability score that the variant is novel">
+##FORMAT=<ID=HAP,Number=1,Type=Integer,Description="Unique haplotype identifier">
+##FORMAT=<ID=AHAP,Number=1,Type=Integer,Description="Unique identifier of ancestral haplotype">
 \end{verbatim}
 \normalsize
 These keys are analogous to GT/GQ/GL and are provided for genotyping imprecise events by copy number (either because there is an unknown number of alternate alleles or because the haplotypes cannot be determined). CN specifies the integer copy number of the variant in this sample. CNQ is encoded as a phred quality $-10log_{10}$ p(copy number genotype call is wrong). CNL specifies a list of $log_{10}$ likelihoods for each potential copy number, starting from zero. When possible, GT/GQ/GL should be used instead of (or in addition to) these keys.
@@ -1240,7 +1240,7 @@ For example, suppose I have two samples, each with a FORMAT field X.  Sample A h
 Note that this means that it's illegal to encode a vector VCF field with missing values; the BCF2 codec should signal an error in this case.
 
 \vspace{0.3cm}
-A \textbf{Genotype (GT) field} is encoded in a typed integer vector (can be 8, 16, or even 32 bit if necessary) with the number of elements equal to the maximum ploidy among all samples at a site.  For one individual, each integer in the vector is organized as ‘(allele+1) $<< 1 \mid$ phased’ where allele is set to -1 if the allele in GT is a dot ‘.’ (thus the higher bits are all 0).  The vector is padded with missing values if the GT having fewer ploidy.
+A \textbf{Genotype (GT) field} is encoded in a typed integer vector (can be 8, 16, or even 32 bit if necessary) with the number of elements equal to the maximum ploidy among all samples at a site.  For one individual, each integer in the vector is organized as $(allele+1) << 1 \mid phased$ where allele is set to -1 if the allele in GT is a dot `.' (thus the higher bits are all 0).  The vector is padded with missing values if the GT having fewer ploidy.
 
 Examples:
 
