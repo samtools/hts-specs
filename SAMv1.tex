@@ -766,6 +766,12 @@ offsets can be compared, but subtraction between virtual file offsets
 and addition between a virtual offset and an integer are both
 disallowed.
 
+All BGZF files (including BAM files) should by convention finish with
+a specific empty BGZF block, encoded with default compression,
+which serves as a 28 byte end-of-file (EOF) marker. In hex this is
+\texttt{"1f 8b 08 04 00 00 00 00 00 ff 06 00 42 43 02 00 1b 00 03 00 00 00 00 00 00 00 00 00"}.
+The absence of this EOF marker should trigger a warning or error.
+
 \subsection{The BAM format}
 BAM is compressed in the BGZF format. All multi-byte numbers in BAM are
 little-endian, regardless of the machine endianness. The format is
