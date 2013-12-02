@@ -808,8 +808,7 @@ underlined word in uppercase denotes a field in the SAM format.
   \cline{1-6}
 \end{tabular}}
 
-Note that popular BAM software assumes that blocks decompress to less than
-$2^{16}$ bytes.
+Note that BGZF requires that blocks uncompress to less than $2^{16}$ bytes.
 
 \end{table}
 \footnotetext[1]{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
