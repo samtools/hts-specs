@@ -702,7 +702,7 @@ manipulated using the built-in Java {\sf util.zip} package, but naive
 use of {\sf GZIPInputStream} on a BGZF file will not work due to this
 bug.}.
 
-A BGZF archive is a series of concatenated BGZF blocks. Each BGZF block
+A BGZF file is a series of concatenated BGZF blocks. Each BGZF block
 is itself a spec-compliant gzip archive which contains an "extra field"
 in the format described in RFC1952. The gzip file format allows the
 inclusion of application-specific extra fields and these are ignored by
@@ -724,8 +724,8 @@ standard-compliant extensions:
   BGZF block minus one.
 \end{enumerate}
 
-On disk, a full BGZF file is (all integers are little endian as is
-required by RFC1952):
+On disk, a complete BGZF file is a series of blocks as shown in the following
+table.  (All integers are little endian as is required by RFC1952.)
 \begin{table}[ht]
 \centering
 {\small
