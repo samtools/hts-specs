@@ -425,7 +425,7 @@ may be changed if the new type is also compatible with the array.
   {\tt BC} & Z & Barcode sequence, with any quality scores stored in the {\tt QT} tag. \\
   {\tt BQ} & Z & Offset to base alignment quality (BAQ), of the same length as the read sequence.
   At the $i$-th read base, ${\rm BAQ}_i=Q_i-({\rm BQ}_i-64)$ where $Q_i$ is the $i$-th base quality. \\
-  {\tt CC} & Z & Reference name of the next hit; "=" for the same chromosome \\
+  {\tt CC} & Z & Reference name of the next hit; `{\tt =}' for the same chromosome \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM})\\
   {\tt CO} & Z & Free-text comments \\
   {\tt CP} & i & Leftmost coordinate of the next hit \\ 
@@ -703,7 +703,7 @@ use of {\sf GZIPInputStream} on a BGZF file will not work due to this
 bug.}.
 
 A BGZF archive is a series of concatenated BGZF blocks. Each BGZF block
-is itself a spec-compliant gzip archive which contains an "extra field"
+is itself a spec-compliant gzip archive which contains an ``extra field''
 in the format described in RFC1952. The gzip file format allows the
 inclusion of application-specific extra fields and these are ignored by
 compliant decompression implementation. The gzip specification also
@@ -765,6 +765,15 @@ uncompressed data stream represented by that BGZF block. Virtual file
 offsets can be compared, but subtraction between virtual file offsets
 and addition between a virtual offset and an integer are both
 disallowed.
+
+All BGZF files (including BAM files) should by convention finish with
+a specific empty BGZF block, encoded with default compression,
+which serves as a 28 byte end-of-file (EOF) marker. In hex this is
+\texttt{"1f 8b 08 04 00 00 00 00 00 ff 06 00 42 43 02 00 1b 00 03 00 00 00 00 00 00 00 00 00"}.
+The absence of this EOF marker should trigger a warning or error
+when opening a BGZF file where random access is available.
+When reading a streamed BGZF file, ideally this EOF check should
+be performed when the end of the stream is reached.
 
 \subsection{The BAM format}
 BAM is compressed in the BGZF format. All multi-byte numbers in BAM are
