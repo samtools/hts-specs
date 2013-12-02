@@ -788,7 +788,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf name} & Reference sequence name; {\tt NULL} terminated & {\tt char[{\sf l\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of alignments (until the end of the file)}} \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record (excluding this field) & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
   & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed by the {\sf reg2bin()} function in Section~\ref{sec:code}; {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
@@ -807,6 +807,10 @@ underlined word in uppercase denotes a field in the SAM format.
   & & {\sf value} & Tag value & (by {\sf val\_type}) &\\
   \cline{1-6}
 \end{tabular}}
+
+Note that popular BAM software assumes that blocks decompress to less than
+$2^{16}$ bytes.
+
 \end{table}
 \footnotetext[1]{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
 \footnotetext[2]{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
