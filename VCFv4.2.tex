@@ -393,8 +393,8 @@ This is a SNP since its only single base substitution and there are only two all
 \begin{tabular}{ | l | l | l | }
 \hline
 Example & Sequence & Alteration \\ \hline
-Ref & a t C g a & C is the reference base \\ \hline
-$1$   & a t \ t g a & C base is a T in some individuals \\ \hline
+Ref & \verb|a t C g a| & C is the reference base \\ \hline
+$1$ & \verb|a t T g a| & C base is a T in some individuals \\ \hline
 \end{tabular}
 
 \subsubsection{Insertion VCF record}
@@ -413,8 +413,8 @@ This is a insertion since the reference base C is being replaced by C [the refer
 \begin{tabular}{ | l | l | l | }
 \hline
 Example & Sequence & Alteration \\ \hline
-Ref & a t C  \ - \ - \ - \ g a & C is the reference base \\ \hline
-$1$ & a t C T A G g a & following the C base is an insertion of 3 bases \\ \hline
+Ref & \verb|a t C - - - g a| & C is the reference base \\ \hline
+$1$ & \verb|a t C T A G g a| & following the C base is an insertion of 3 bases \\ \hline
 \end{tabular}
 
 \subsubsection{Deletion VCF record}
@@ -433,8 +433,8 @@ This is a deletion of two reference bases since the reference allele TCG is bein
 \begin{tabular}{ | l | l | l | }
 \hline
 Example & Sequence & Alteration \\ \hline
-Ref & a t C g a & C is the reference base \\ \hline
-$1$ & a t \ - \ - a & following the T base is a deletion of 2 bases \\ \hline
+Ref & \verb|a T C G a| & T is the (first) reference base \\ \hline
+$1$ & \verb|a T - - a| & following the T base is a deletion of 2 bases \\ \hline
 \end{tabular}
 
 \subsubsection{Mixed VCF record for a microsatellite}
@@ -443,7 +443,7 @@ Suppose I receive the following VCF record:
 \vspace{0.3cm}
 \begin{tabular}{ l l l l l l l l}
 	\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-	$20$ & $4$ & . & CGC & G,GCGCG & . & PASS & DP=100 \\
+	$20$ & $4$ & . & GCG & G,GCGCG & . & PASS & DP=100 \\
 \end{tabular}
 \vspace{0.3cm}
 
@@ -453,9 +453,9 @@ This is a mixed type record containing a 2 base insertion and a 2 base deletion.
 \begin{tabular}{ | l | l | l | }
 \hline
 Example & Sequence & Alteration \\ \hline
-Ref & a t c g c g \ - - a & C is the reference base \\ \hline
-$1$ & a t c g \ -  -  - - \ a & following the C base is a deletion of 2 bases \\ \hline
-$2$ & a t c g c g c g a & following the C base is a insertion of 2 bases \\ \hline
+Ref & \verb|a t c G C G - - a| & G is the (first) reference base \\ \hline
+$1$ & \verb|a t c G - - - - a| & following the G base is a deletion of 2 bases \\ \hline
+$2$ & \verb|a t c G C G C G a| & following the G base is a insertion of 2 bases \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
@@ -465,9 +465,9 @@ Note that in all of these examples dashes have been added to make the haplotypes
 \begin{tabular}{ | l | l | l | }
 \hline
 Example & Sequence & Alteration \\ \hline
-Ref & a t c g \ - - c g a & C is the reference base \\ \hline
-$1$ & a t c g \ - - - - \ a & following the C base is a deletion of 2 bases \\ \hline
-$2$ & a t c g c g c g a & following the C base is a insertion of 2 bases \\ \hline
+Ref & \verb|a t c G - - C G a| & G is the (first) reference base \\ \hline
+$1$ & \verb|a t c G - - - - a| & following the G base is a deletion of 2 bases \\ \hline
+$2$ & \verb|a t c G C G C G a| & following the G base is a insertion of 2 bases \\ \hline
 \end{tabular}
 
 \subsection{Encoding Structural Variants}
