@@ -3,11 +3,21 @@
 \usepackage{graphicx}
 \usepackage{lscape}
 \usepackage[margin=0.75in]{geometry}
+\usepackage[pdfborder={0 0 0}]{hyperref}
 
 \begin{document}
+\input{VCFv4.1.ver}
 \title{The Variant Call Format (VCF) Version 4.1 Specification}
+\date{\headdate}
 \maketitle
-\tableofcontents
+\begin{quote}\small
+The master version of this document can be found at
+\url{https://github.com/samtools/hts-specs}.\\
+This printing is version~\commitdesc\ from that repository,
+last modified on the date shown above.
+\end{quote}
+\vspace*{1em}
+
 \section{The VCF specification}
 VCF is a text file format (most likely stored in a compressed manner). It contains meta-information lines, a header line, and then data lines each containing information about a position in the genome.
 The format also has the ability to contain genotype information on samples for each position.

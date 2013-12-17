@@ -11,12 +11,14 @@ PDFS =	BCFv1_qref.pdf \
 pdf: $(PDFS)
 
 SAMv1.pdf: SAMv1.tex SAMv1.ver
+VCFv4.1.pdf: VCFv4.1.tex VCFv4.1.ver
+VCFv4.2.pdf: VCFv4.2.tex VCFv4.2.ver
 
 
 .SUFFIXES: .tex .pdf .ver
 .tex.pdf:
 	pdflatex $<
-	while grep -q 'Warning.*Rerun' $*.log; do pdflatex $< || exit; done
+	while grep -q 'Rerun to get [a-z-]* right' $*.log; do pdflatex $< || exit; done
 
 .tex.ver:
 	echo "@newcommand*@commitdesc{`git describe --always --dirty`}@newcommand*@headdate{`git rev-list -n1 --format=%aD HEAD $< | sed '1d;s/.*, *//;s/ *[0-9]*:.*//'`}" | tr @ \\ > $@
