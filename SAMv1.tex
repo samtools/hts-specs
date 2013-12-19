@@ -426,7 +426,7 @@ may be changed if the new type is also compatible with the array.
   {\tt BC} & Z & Barcode sequence, with any quality scores stored in the {\tt QT} tag. \\
   {\tt BQ} & Z & Offset to base alignment quality (BAQ), of the same length as the read sequence.
   At the $i$-th read base, ${\rm BAQ}_i=Q_i-({\rm BQ}_i-64)$ where $Q_i$ is the $i$-th base quality. \\
-  {\tt CC} & Z & Reference name of the next hit; "=" for the same chromosome \\
+  {\tt CC} & Z & Reference name of the next hit; `{\tt =}' for the same chromosome \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM})\\
   {\tt CO} & Z & Free-text comments \\
   {\tt CP} & i & Leftmost coordinate of the next hit \\ 
@@ -704,7 +704,7 @@ use of {\sf GZIPInputStream} on a BGZF file will not work due to this
 bug.}.
 
 A BGZF file is a series of concatenated BGZF blocks. Each BGZF block
-is itself a spec-compliant gzip archive which contains an "extra field"
+is itself a spec-compliant gzip archive which contains an ``extra field''
 in the format described in RFC1952. The gzip file format allows the
 inclusion of application-specific extra fields and these are ignored by
 compliant decompression implementation. The gzip specification also
@@ -756,6 +756,8 @@ table.  (All integers are little endian as is required by RFC1952.)
 \end{tabular}}
 \end{table}
 
+\subsubsection{Random access}
+
 BGZF files support random access through the BAM file index. To achieve
 this, the BAM file index uses \emph{virtual file offsets} into the BGZF
 file. Each virtual file offset is an unsigned 64-bit integer, defined as: {\tt
@@ -766,6 +768,50 @@ uncompressed data stream represented by that BGZF block. Virtual file
 offsets can be compared, but subtraction between virtual file offsets
 and addition between a virtual offset and an integer are both
 disallowed.
+
+\subsubsection{End-of-file marker}
+
+An end-of-file (EOF) trailer or marker block should be written at the end
+of BGZF files, so that unintended file truncation can be easily detected.
+The EOF marker block is a particular empty\footnotemark\ BGZF block
+encoded with the default {\sf zlib} compression level setttings,
+and consists of the following 28~hexadecimal bytes:
+\begin{center}
+\texttt{1f 8b 08 04 00 00 00 00 00 ff 06 00 42 43 02 00 1b 00 03 00 00 00 00 00 00 00 00 00}
+\end{center}
+
+\footnotetext{Empty in the sense of having been formed by compressing
+a data block of length zero.}
+
+\noindent
+The presence of this EOF marker at the end of a BGZF file indicates that the
+immediately following physical EOF is the end of the file as intended by the
+program that wrote it.
+Empty BGZF blocks are not otherwise special; in particular, the presence of
+an EOF marker block does not by itself signal end of file.\footnotemark
+
+\footnotetext{An implementation that supports reopening a BAM file in append
+mode could produce a file by writing headers and alignment records to it,
+closing it (adding an EOF marker); then reopening it for append, writing
+more alignment records, and closing it (adding an EOF marker).
+The resulting BAM file would contain an embedded insignificant EOF~marker
+block that should be effectively ignored when it is read.}
+
+The absence of this final EOF marker should trigger a warning or error
+soon after opening a BGZF file where random access is available.\footnotemark\
+When reading a BGZF file in sequential streaming fashion, ideally this
+EOF check should be performed when the end of the stream is reached.
+Checking that the final BGZF block in the file decompresses to empty
+or checking that the last 28 bytes of the file are exactly the bytes
+above are both sufficent tests; each is likely more convenient in
+different circumstances.
+
+\footnotetext{It is useful to produce a diagnostic at the beginning of
+reading a file, so that interactive users can abort lengthy analysis of
+potentially-corrupted files.  Of course, this is only possible if the
+stream in question supports random access.}
+
+\pagebreak
 
 \subsection{The BAM format}
 BAM is compressed in the BGZF format. All multi-byte numbers in BAM are
