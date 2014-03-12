@@ -117,10 +117,9 @@ the left.
 Let's consider the following example. The table below shows a sequence of write 
 operations: 
 
-\begin{tabular}{|>{\raggedright}p{85pt}|>{\raggedright}p{104pt}|>{\raggedright}p{59pt}|>{\raggedright}p{88pt}|>{\raggedright}p{70pt}|}
+\begin{tabular}{|l|l|l|l|l|}
 \hline
-\textbf{operation order} & \textbf{buffer state before} & \textbf{written bits} & \textbf{buffer 
-state after} & \textbf{issued bytes}\tabularnewline
+\textbf{Operation order} & \textbf{Buffer state before} & \textbf{Written bits} & \textbf{Buffer state after} & \textbf{Issued bytes}\tabularnewline
 \hline
 1 & 0x0 & 1 & 0x1 & -\tabularnewline
 \hline
@@ -136,19 +135,16 @@ After flushing the above bit stream the following bytes are written: 0xB0 0x70.
 Please note that the last byte was 0x7 before shifting to the left and became 0x70 
 after that:
 
-\texttt{>}echo \texttt{"}obase=16; ibase=2; 00000111\texttt{"} \textbar{} bc
-
-7
-
-\texttt{>}echo \texttt{"}obase=16; ibase=2; 01110000\texttt{"} \textbar{} bc
-
-70
+\texttt{> echo "obase=16; ibase=2; 00000111" \textbar{} bc\\
+7\\
+\\
+> echo "obase=16; ibase=2; 01110000" \textbar{} bc\\
+70}
 
 And the whole bit sequence: 
 
-\texttt{>}echo \texttt{"}obase=2; ibase=16; B070\texttt{"} \textbar{} bc
-
-1011000001110000
+\texttt{> echo "obase=2; ibase=16; B070" \textbar{} bc\\
+1011000001110000}
 
 When reading the bits from the bit sequence it must be known that only 12 bits 
 are meaningful and the bit stream should not be read after that. 
@@ -217,7 +213,7 @@ values.
 
 Subexponential encoding example: 
 
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\begin{tabular}{|l|l|l|}
 \hline
 \textbf{Value} & \textbf{Type} & \textbf{Name}\tabularnewline
 \hline
@@ -248,7 +244,7 @@ offset = 0x0 = 0
 A map is a collection of keys and associated values. A map with N keys is written 
 as follows: 
 
-\begin{tabular}{|>{\raggedright}p{79pt}|>{\raggedright}p{41pt}|>{\raggedright}p{41pt}|>{\raggedright}p{41pt}|>{\raggedright}p{41pt}|>{\raggedright}p{41pt}|>{\raggedright}p{41pt}|>{\raggedright}p{41pt}|}
+\begin{tabular}{|l|l|l|l|l|l|l|l|}
 \hline
 size in bytes & N & key 1 & value 1 & key ... & value ... & key N & value N\tabularnewline
 \hline
@@ -278,7 +274,7 @@ Encodings may have parameters of different data types, for example the external
 encoding has only one parameter, integer id of the external block. The following 
 encodings are defined: 
 
-\begin{tabular}{|>{\raggedright}p{112pt}|>{\raggedright}p{15pt}|>{\raggedright}p{157pt}|>{\raggedright}p{130pt}|}
+\begin{tabular}{|l|l|>{\raggedright}p{155pt}|>{\raggedright}p{160pt}|}
 \hline
 \textbf{Codec} & \textbf{ID} & \textbf{Parameters} & \textbf{Comment}\tabularnewline
 \hline
@@ -383,7 +379,7 @@ Pic.5 Data blocks are divided into core and external data blocks.
 Each CRAM file starts with a fixed length (26 bytes) definition with the following 
 fields:
 
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\begin{tabular}{|l|l|l|}
 \hline
 \textbf{Data type} & \textbf{Name} & \textbf{Value}\tabularnewline
 \hline
@@ -402,10 +398,9 @@ byte[20] & file id & CRAM file identifier (e.g. file name or SHA1 checksum)\tabu
 The file definition is followed by one or more containers with the following header 
 structure where the container content is stored in the `blocks' field:
 
-\textbf{Data typeNameValue}
-
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\begin{tabular}{|l|>{\raggedright}p{120pt}|>{\raggedright}p{260pt}|}
 \hline
+\textbf{Data type} & \textbf{Name} & \textbf{Value}
 \tabularnewline
 \hline
 int32 & length & byte size of the container data (blocks)\tabularnewline
@@ -450,10 +445,9 @@ Containers consist of one or more blocks. Block compression is applied independe
 and in addition to any encodings used to compress data within the block. The block 
 have the following header structure with the data stored in the `block data' field:
 
-\textbf{Data typeNameValue}
-
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\begin{tabular}{|l|>{\raggedright}p{120pt}|>{\raggedright}p{260pt}|}
 \hline
+\textbf{Data type} & \textbf{Name} & \textbf{Value}
 \tabularnewline
 \hline
 byte & method & the block compression method: \linebreak{}
@@ -548,7 +542,7 @@ encoding map and tag encoding map.
 The preservation map contains information about which data was preserved in the 
 CRAM file. It is stored as a map with byte[2] keys:
 
-\begin{tabular}{|>{\raggedright}p{111pt}|>{\raggedright}p{87pt}|>{\raggedright}p{101pt}|>{\raggedright}p{119pt}|}
+\begin{tabular}{|l|l|>{\raggedright}p{100pt}|>{\raggedright}p{220pt}|}
 \hline
 \textbf{Key} & \textbf{Value data type} & \textbf{Name} & \textbf{Value}\tabularnewline
 \hline
@@ -571,7 +565,7 @@ section\tabularnewline
 Each data series has an encoding. These encoding are stored in a map with byte[2] 
 keys:
 
-\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{119pt}|}
+\begin{tabular}{|l|l|>{\raggedright}p{100pt}|>{\raggedright}p{220pt}|}
 \hline
 \textbf{Key} & \textbf{Value data type} & \textbf{Name} & \textbf{Value}\tabularnewline
 \hline
@@ -675,10 +669,9 @@ big endian integer and are written as ITF8. For example, 3-byte representation
 of OQ:Z is \{0x4F, 0x51, 0x5A\} and these bytes are intepreted as the integer 0x004F515A. 
 The integer is finally written as ITF8.
 
-\textbf{KeyValue data typeNameValue}
-
-\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{119pt}|}
+\begin{tabular}{|l|l|l|>{\raggedright}p{160pt}|}
 \hline
+\textbf{Key} & \textbf{Value data type} & \textbf{Name} & \textbf{Value}
 \tabularnewline
 \hline
 TAG NAME 1:TAG TYPE 1 & encoding\texttt{<}byte[ ]\texttt{>} & read tag 1 & tag values 
@@ -704,7 +697,7 @@ any other types of reads.
 
 The slice header block contains the following fields.
 
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\begin{tabular}{|l|l|>{\raggedright}p{200pt}|}
 \hline
 \textbf{Data type} & \textbf{Name} & \textbf{Value}\tabularnewline
 \hline
@@ -740,10 +733,9 @@ or more CRAM records. Please note that one byte could hold more then one CRAM re
 as a minimal CRAM record could be just a few bits long. The core data block has 
 the following fields:
 
-\textbf{Data typeNameValue}
-
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\begin{tabular}{|l|>{\raggedright}p{120pt}|>{\raggedright}p{260pt}|}
 \hline
+\textbf{Data type} & \textbf{Name} & \textbf{Value}
 \tabularnewline
 \hline
 bit[ ] & CRAM record 1 & The first CRAM record\tabularnewline
@@ -783,12 +775,12 @@ start set to 4542278.
 
 Here is a complete content of the EOF container explained in detail:
 
-\begin{tabular}{|>{\raggedright}p{108pt}|>{\raggedright}p{53pt}|>{\raggedright}p{153pt}|>{\raggedright}p{105pt}|}
+\begin{tabular}{|l|l|>{\raggedright}p{150pt}|>{\raggedright}p{180pt}|}
 \hline
 \textbf{hex bytes} & \textbf{data type} & \textbf{decimal value} & \textbf{field 
 name}\tabularnewline
 \hline
-C\textit{ontainer header} &  &  & \tabularnewline
+\multicolumn{4}{|l|}{\textit{Container header}}\tabularnewline
 \hline
 0b 00 00 00 & integer & 11 & size of blocks data\tabularnewline
 \hline
@@ -808,7 +800,7 @@ e0 45 4f 46 & itf8 & 4542278 & alignment start\tabularnewline
 \hline
 00 & array & 0 & landmarks\tabularnewline
 \hline
-C\textit{ompression header block} &  &  & \tabularnewline
+\multicolumn{4}{|l|}{\textit{Compression header block}}\tabularnewline
 \hline
 00 & byte & 0 (RAW) & compression method\tabularnewline
 \hline
@@ -820,7 +812,7 @@ C\textit{ompression header block} &  &  & \tabularnewline
 \hline
 06 & itf8 & 6 & uncompressed size\tabularnewline
 \hline
-C\textit{ompression header} &  &  & \tabularnewline
+\multicolumn{4}{|l|}{\textit{Compression header}}\tabularnewline
 \hline
 01 & itf8 & 1 & preservation map byte size\tabularnewline
 \hline
@@ -1155,15 +1147,11 @@ required and UR (URI for the sequence fasta optionally gzipped file) field is st
 advised. The rule for calculating MD5 is to remove any non-base symbols (like \textbackslash{}n, 
 sequence name or length and spaces) and upper case the rest. Here are some examples: 
 
-\texttt{>} samtools faidx human\_g1k\_v37.fasta 1 \textbar{} grep -v '\textasciicircum{}\texttt{>}' 
-\textbar{} tr -d '\textbackslash{}n' \textbar{} tr a-z A-Z \textbar{} md5sum -
+\texttt{> samtools faidx human\_g1k\_v37.fasta 1 \textbar{} grep -v '\textasciicircum{}>' \textbar{} tr -d '\textbackslash{}n' \textbar{} tr a-z A-Z \textbar{} md5sum -\\
+1b22b98cdeb4a9304cb5d48026a85128  -}
 
-1b22b98cdeb4a9304cb5d48026a85128  -
-
-\texttt{>} samtools faidx human\_g1k\_v37.fasta 1:10-20 \textbar{} grep -v '\textasciicircum{}\texttt{>}' 
-\textbar{} tr -d '\textbackslash{}n' \textbar{} tr a-z A-Z \textbar{} md5sum -
-
-0f2a4865e3952676ffad2c3671f14057  -
+\texttt{> samtools faidx human\_g1k\_v37.fasta 1:10-20 \textbar{}grep -v '\textasciicircum{}\texttt{>}' \textbar{}tr -d '\textbackslash{}n' \textbar{}tr a-z A-Z \textbar{}md5sum -\\
+0f2a4865e3952676ffad2c3671f14057  -}
 
 Please note that the latter calculates the checksum for 11 bases from position 
 10 (inclusive) to 20 (inclusive) and the bases are counted 1-based, so the first 
@@ -1520,11 +1508,12 @@ k=2}\tabularnewline
 \hline
 \end{tabular}
 
-\subsubsection*{arameters}
+\subsubsection*{Parameters}
 
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
 \hline
-\textbf{Data type} & \textbf{Name} & \textbf{Comment}\tabularnewline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
+\tabularnewline
 \hline
 itf8 & offset & offset is added to each value\tabularnewline
 \hline
@@ -1560,10 +1549,9 @@ the length of the new codeword is equal to the length of the old codeword.
 
 \subsubsection*{Parameters}
 
-\textbf{Data typeNameComment}
-
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
 \hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
 \tabularnewline
 \hline
 itf8[ ] & alphabet & list of all encoded values\tabularnewline
@@ -1584,10 +1572,9 @@ Byte arrays are captured length-first, meaning that the length of every array is
 written using an additional encoding. For example this could be a golomb encoding. 
 The parameter for BYTE\_ARRAY\_LEN are listed below:
 
-\textbf{Data typeNameComment}
-
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
 \hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
 \tabularnewline
 \hline
 encoding\texttt{<}int\texttt{>} & lengths encoding & an encoding describing how 
@@ -1604,10 +1591,9 @@ Byte arrays are captured as a sequence of bytes teminated by a special stop byte
 example this could be a golomb encoding. The parameter for BYTE\_ARRAY\_STOP are 
 listed below:
 
-\textbf{Data typeNameComment}
-
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
 \hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
 \tabularnewline
 \hline
 byte & stop byte & a special byte treated as a delimiter\tabularnewline
