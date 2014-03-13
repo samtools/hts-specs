@@ -645,17 +645,17 @@ SC & encoding\texttt{<}byte[ ]\texttt{>} & soft clip & soft clipped bases\tabula
 The TL (tag list) data series represents combined information about the number 
 of tags in a record and their ids. 
 
-Let L\textsubscript{i}=\{T\textsubscript{i0}, T\textsubscript{i1}, ..., T\textsubscript{ix}\} 
-be sorted list of all tag ids for a record R\textsubscript{i}, where i is the sequential 
-record index and T\textsubscript{ij} denotes j-th tag id in the record. We recommend 
-alphabetical sort order. The list of unique L\textsubscript{i} is assigned sequential 
+Let $L_{i}=\{T_{i0}, T_{i1}, \ldots, T_{ix}\}$
+be sorted list of all tag ids for a record $R_{i}$, where $i$ is the sequential 
+record index and $T_{ij}$ denotes $j$-th tag id in the record. We recommend 
+alphabetical sort order. The list of unique $L_{i}$ is assigned sequential 
 integer numbers starting with 0. These integer numbers represent the TL data series. 
-The sorted list of unique L\textsubscript{i} is stored as the TD value in the preservation 
+The sorted list of unique $L_{i}$ is stored as the TD value in the preservation 
 map. Using TD, an integer from the TL data series can be mapped back into a list 
 of tag ids. 
 
-The TD is written as byte array consisting of L\textsubscript{i} values separated 
-with \textbackslash{}0. Each L\textsubscript{i} value is written as a sequence 
+The TD is written as byte array consisting of $L_{i}$ values separated 
+with \textbackslash{}0. Each $L_{i}$ value is written as a sequence 
 of 3 bytes: tag id followed by tag value type. For example AMiOQz\textbackslash{}0OQz\textbackslash{}0, 
 where the TD consists of just two values: integer 0 for tags \{AM:i,OQ:z\} and 
 1 for tag \{OQ:z\}.
@@ -1304,24 +1304,24 @@ required for beta coding to capture the value.
 
 1. Write it in binary.
 
-2. Subtract 1 from the number of bits written in step 1 and prepend that many zeros.
+2. Subtract $1$ from the number of bits written in step 1 and prepend that many zeros.
 
 3. An equivalent way to express the same process:
 
-4. Separate the integer into the highest power of 2 it contains (2N) and the remaining 
-N binary digits of the integer.
+4. Separate the integer into the highest power of $2$ it contains ($2N$) and the remaining 
+$N$ binary digits of the integer.
 
-5. Encode N in unary; that is, as N zeroes followed by a one.
+5. Encode $N$ in unary; that is, as $N$ zeroes followed by a one.
 
-6. Append the remaining N binary digits to this representation of N.
+6. Append the remaining $N$ binary digits to this representation of $N$.
 
 \subsubsection*{Decoding}
 
 1. Read and count 0s from the stream until you reach the first 1. Call this count 
-of zeroes N.
+of zeroes $N$.
 
 2. Considering the one that was reached to be the first digit of the integer, with 
-a value of 2N, read the remaining N digits of the integer.
+a value of $2N$, read the remaining $N$ digits of the integer.
 
 \subsubsection*{Examples}
 
@@ -1356,13 +1356,13 @@ itf8 & offset & offset is added to each value\tabularnewline
 \emph{Golomb encoding} is a prefix encoding optimal for representation of random 
 positive numbers following geometric distribution. 
 
-1. Fix the parameter \textit{M} to an integer value.
+1. Fix the parameter $M$ to an integer value.
 
-2. For \textit{N}, the number to be encoded, find
+2. For $N$, the number to be encoded, find
 
-a. quotient = \textit{q} = int[\textit{N}/\textit{M}]
+a. quotient $q = \lfloor N/M \rfloor$
 
-b. remainder = \textit{r} = \textit{N} modulo \textit{M}
+b. remainder $r = N \bmod M$
 
 3. Generate Codeword
 
@@ -1371,24 +1371,20 @@ where
 
 b. Quotient Code (in unary coding)
 
-i. Write a \textit{q}-length string of 1 bits
+i. Write a $q$-length string of 1 bits
 
 ii. Write a 0 bit
 
 c. Remainder Code (in truncated binary encoding)
 
-i. If \textit{M} is power of 2, code remainder as binary format. So log\textsubscript{2} 
-(M) bits are needed. (Rice code)  
+i. If $M$ is power of 2, code remainder as binary format. So $log_{2}(M)$ bits are needed. (Rice code)  
 
-ii. If \textit{M} is not a power of 2, set b=[log\textsubscript{2}(M)]
+ii. If $M$ is not a power of 2, set $b=\lceil log_{2}(M) \rceil$
 
-1. If r\texttt{<}2\textsuperscript{b}-M code \textit{r} as plain binary using \textit{b}-1 
-bits.
+1. If $r < 2^{b}-M$ code $r$ as plain binary using $b-1$ bits.
 
-2. If r
-\includegraphics[width=8pt, height=15pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig008.png}
-2\textsuperscript{b} code the number r+2\textsuperscript{b} in plain binary representation 
-using \textit{b} bits.
+2. If $r \ge 2^{b}$ code the number $r+2^{b}$ in plain binary representation 
+using $b$ bits.
 
 \subsubsection*{Examples}
 
@@ -1430,47 +1426,46 @@ coding can be replaced with bit shift operators.
 
 \subsubsection*{Definition}
 
-Subexponential coding is parametrized by a non-nengative integer \textit{k}. The 
-main feature of the subexponential code is its length. For integers \textit{n \texttt{<} 
-2k+1} the code length increases linearly with \textit{n}, but for larger \textit{n}, 
+Subexponential coding is parametrized by a non-nengative integer $k$. The 
+main feature of the subexponential code is its length. For integers $n < 2k+1$
+the code length increases linearly with $n$, but for larger $n$ 
 it increases logarithmically.
 
 \subsubsection*{Encoding}
 
 1. Determine the group index i using the following rules: 
 
-a. - if n \texttt{<} 2\textsuperscript{k} , then i = 0. 
+a. -- if $n < 2^{k}$, then $i = 0$. 
 
-b. - if n $\ge$ 2\textsuperscript{k} , then determine i such that 2\textsuperscript{i+k-1} 
-$\le$ n \texttt{<} 2\textsuperscript{i+k} .
+b. -- if $n \ge 2^{k}$ , then determine $i$ such that $2^{i+k-1} \le n < 2^{i+k}$
 
-2. Form the prefix of i 1s.
+2. Form the prefix of $i$ 1s.
 
 3. Insert the separator 0.
 
-4. Form the tail: express the value of (n - 2\textsuperscript{i+k-1}) as a 
-(i + k - 1)-bit binary number if i \texttt{>} 0 and n as a k-bit binary number 
+4. Form the tail: express the value of $(n - 2^{i+k-1})$ as a 
+$(i + k - 1)$-bit binary number if $i > 0$ and $n$ as a $k$-bit binary number 
 otherwise.
 
 \subsubsection*{Decoding}
 
-1. Let i be the number of leading 1s (prefix) in the codeword.
+1. Let $i$ be the number of leading 1s (prefix) in the codeword.
 
 2. Form a run of 0s of length
 
-a. 0, if i = 0
+a. $0$, if $i = 0$
 
-b. 2\textsuperscript{i+k-1}, otherwise
+b. $2^{i+k-1}$, otherwise
 
 3. Skip the next 0 (separator).
 
-4. Compute the length of the tail, c\textsubscript{tail} as
+4. Compute the length of the tail, $c_{tail}$ as
 
-a. k, if i = 0
+a. $k$, if $i = 0$
 
-b. k + i - 1, if i $\ge$ 1
+b. $k + i - 1$, if $i \ge 1$
 
-5. The next c\textsubscript{tail} bits are the tail. Form a run of 0s of length 
+5. The next $c_{tail}$ bits are the tail. Form a run of 0s of length 
 represented by the tail.
 
 6. Append 1 to the run of 0s.
