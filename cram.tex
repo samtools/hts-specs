@@ -51,13 +51,15 @@ This specification describes the CRAM 2.0 format.
 
 CRAM has the following major objectives:
 
-1. Significantly better lossless compression than BAM
+\begin{enumerate}
+\item Significantly better lossless compression than BAM
 
-2. Full compatibility with BAM
+\item Full compatibility with BAM
 
-3. Effortless transition to CRAM from using BAM files
+\item Effortless transition to CRAM from using BAM files
 
-4. Support for controlled loss of BAM data
+\item Support for controlled loss of BAM data
+\end{enumerate}
 
 The first three objectives allow users to take immediate advantage of the CRAM 
 format while offering a smooth transition path from using BAM files. The fourth 
@@ -84,25 +86,29 @@ below.
 
 \subsection{\textbf{Logical data types}}
 
-\subsubsection*{Boolean}
-
-Boolean is either `true' (numerical 1) or `false' (numerical 0).
-
-\subsubsection*{Byte}
-
+\begin{description}
+\item[Byte]\ \newline
 Signed byte (8 bits).
 
-\subsubsection*{Integer}
+\item[Integer]\ \newline
+Signed 32-bit integer. 
 
-Signed 32-bit integer.
+\item[Long]\ \newline
+Signed 64-bit integer. 
 
-\subsubsection*{Long}
+\item[Array]\ \newline
+An array of any logical data type: \texttt{<}type\texttt{>}[ ] 
+\end{description}
 
-Signed 64-bit integer.
-
-\textbf{Array}
-
-An array of any logical data type: \texttt{<}type\texttt{>}[ ]
+% \begin{tabular}{ll}
+% \textbf{Byte}    & Signed byte (8 bits).  \\
+% \\
+% \textbf{Integer} & Signed 32-bit integer. \\
+% \\
+% \textbf{Long}    & Signed 64-bit integer. \\
+% \\
+% \textbf{Array}   & An array of any logical data type: \texttt{<}type\texttt{>}[ ] \\
+% \end{tabular}
 
 \subsection{\textbf{Writing bits to a bit stream}}
 
@@ -166,20 +172,18 @@ of bits to read.
 The interpretation of byte stream is straightforward. CRAM uses little \emph{endiannes} 
 for bytes when applicable and defines the following storage data types:
 
-\subsubsection*{Boolean (bool)}
+\begin{description}
 
+\item[Boolean (bool)]\ \newline
 Boolean is written as 1-byte with 0x0 being `false' and 0x1 being `true'.
 
-\subsubsection*{Integer (int32)}
-
+\item[Integer (int32)]\ \newline
 Signed 32-bit integer, written as 4 bytes in little-endian byte order.
 
-\subsubsection*{Long (int64)}
-
+\item[Long (int64)]\ \newline
 Signed 64-bit integer, written as 8 bytes in little-endian byte order.
 
-\subsubsection*{ITF-8 integer (itf8)}
-
+\item[ITF-8 integer (itf8)]\ \newline
 This is an alternative way to write an integer value. The idea is similar to UTF-8 
 encoding and therefore this encoding is called ITF-8 (Integer Transformation Format 
 - 8 bit). 
@@ -189,17 +193,17 @@ The most significant bits of the first byte have special meaning and are called
 the number of bytes the follow. To accommodate 32 bits such representation requires 
 5 bytes with only 4 lower bits used in the last byte 5.
 
-\subsubsection*{LTF-8 long or (ltf8)}
-
+\item[LTF-8 long or (ltf8)]\ \newline
 See ITF-8 for more details. The only difference between ITF-8 and LTF-8 is the 
 number of bytes used to encode a single value. To do so 64 bits are required and 
 this can be done with 9 byte at most with the first byte consisting of just 1s 
 or 0xFF value. 
 
-\subsubsection*{Array ([ ])}
-
+\item[{Array ([ ])}]\ \newline
 Array length is written first as integer (itf8), followed by the elements of the 
 array. 
+\end{description}
+
 
 \subsubsection*{Encoding}
 
@@ -525,12 +529,14 @@ The BAM header is stored in a single block within the first container.
 
 The following constraints apply to the BAM header: 
 
-$\bullet$ The SQ:MD5 checksum is required unless the reference sequence has been embedded 
+\begin{itemize}
+\item The SQ:MD5 checksum is required unless the reference sequence has been embedded 
 into the file.
 
-$\bullet$ At least one RG record is required.
+\item At least one RG record is required.
 
-$\bullet$ The HD:SO sort order is always POS.
+\item The HD:SO sort order is always POS.
+\end{itemize}
 
 \subsection{\textbf{Compression header block}}
 
@@ -1142,7 +1148,8 @@ CRAM format is natively based upon usage of reference sequences even though in
 some cases they are not required. In contrast to BAM format CRAM format has strict 
 rules about reference sequences. 
 
-1. M5 (sequence MD5 checksum) field of @SQ sequence record in the BAM header is 
+\begin{enumerate}
+\item M5 (sequence MD5 checksum) field of @SQ sequence record in the BAM header is 
 required and UR (URI for the sequence fasta optionally gzipped file) field is strongly 
 advised. The rule for calculating MD5 is to remove any non-base symbols (like \textbackslash{}n, 
 sequence name or length and spaces) and upper case the rest. Here are some examples: 
@@ -1157,16 +1164,17 @@ Please note that the latter calculates the checksum for 11 bases from position
 10 (inclusive) to 20 (inclusive) and the bases are counted 1-based, so the first 
 base position is 1. 
 
-2. All CRAM reader implementations are expected to check for reference MD5 checksums 
+\item All CRAM reader implementations are expected to check for reference MD5 checksums 
 and report any missing or mismatching entries. Consequently, all writer implementations 
 are expected to ensure that all checksums are injected or checked during compression 
 time. 
 
-3. In some cases reads may be mapped beyond the reference sequence. All out of 
+\item In some cases reads may be mapped beyond the reference sequence. All out of 
 range reference bases are all assumed to be `N'. 
 
-4. MD5 checksum bytes in slice header should be ignored for unmapped or multiref 
+\item MD5 checksum bytes in slice header should be ignored for unmapped or multiref 
 slices. 
+\end{enumerate}
 
 \section{\textbf{Indexing}}
 
@@ -1191,17 +1199,19 @@ byte offset and slice byte offset inside the container.
 
 A CRAM index is a gzipped tab delimited file containing the following columns:
 
-1. Sequence id
+\begin{enumerate}
+\item Sequence id
 
-2. Alignment start
+\item Alignment start
 
-3. Alignment span
+\item Alignment span
 
-4. Container start byte offset in the file
+\item Container start byte offset in the file
 
-5. Slice start byte offset in the container data (`blocks')
+\item Slice start byte offset in the container data (`blocks')
 
-6. Slice bytes
+\item Slice bytes
+\end{enumerate}
 
 Each line represents a slice in the CRAM file. Please note that all slices must 
 be listed in index file.
@@ -1302,26 +1312,30 @@ required for beta coding to capture the value.
 
 \subsubsection*{Encoding}
 
-1. Write it in binary.
+\begin{enumerate}
+\item Write it in binary.
 
-2. Subtract $1$ from the number of bits written in step 1 and prepend that many zeros.
+\item Subtract $1$ from the number of bits written in step 1 and prepend that many zeros.
 
-3. An equivalent way to express the same process:
+\item An equivalent way to express the same process:
 
-4. Separate the integer into the highest power of $2$ it contains ($2N$) and the remaining 
+\item Separate the integer into the highest power of $2$ it contains ($2N$) and the remaining 
 $N$ binary digits of the integer.
 
-5. Encode $N$ in unary; that is, as $N$ zeroes followed by a one.
+\item Encode $N$ in unary; that is, as $N$ zeroes followed by a one.
 
-6. Append the remaining $N$ binary digits to this representation of $N$.
+\item Append the remaining $N$ binary digits to this representation of $N$.
+\end{enumerate}
 
 \subsubsection*{Decoding}
 
-1. Read and count 0s from the stream until you reach the first 1. Call this count 
+\begin{enumerate}
+\item Read and count 0s from the stream until you reach the first 1. Call this count 
 of zeroes $N$.
 
-2. Considering the one that was reached to be the first digit of the integer, with 
+\item Considering the one that was reached to be the first digit of the integer, with 
 a value of $2N$, read the remaining $N$ digits of the integer.
+\end{enumerate}
 
 \subsubsection*{Examples}
 
@@ -1356,35 +1370,47 @@ itf8 & offset & offset is added to each value\tabularnewline
 \emph{Golomb encoding} is a prefix encoding optimal for representation of random 
 positive numbers following geometric distribution. 
 
-1. Fix the parameter $M$ to an integer value.
+\begin{enumerate}
+\item Fix the parameter $M$ to an integer value.
 
-2. For $N$, the number to be encoded, find
+\item For $N$, the number to be encoded, find
 
-a. quotient $q = \lfloor N/M \rfloor$
+\begin{enumerate}
+\item quotient $q = \lfloor N/M \rfloor$
 
-b. remainder $r = N \bmod M$
+\item remainder $r = N \bmod M$
+\end{enumerate}
 
-3. Generate Codeword
+\item Generate Codeword
 
-a. The Code format : \texttt{<}Quotient Code\texttt{>}\texttt{<}Remainder Code\texttt{>}, 
+\begin{enumerate}
+\item The Code format : \texttt{<}Quotient Code\texttt{>}\texttt{<}Remainder Code\texttt{>}, 
 where
 
-b. Quotient Code (in unary coding)
+\item Quotient Code (in unary coding)
 
-i. Write a $q$-length string of 1 bits
+\begin{enumerate}
+\item Write a $q$-length string of 1 bits
 
-ii. Write a 0 bit
+\item Write a 0 bit
+\end{enumerate}
 
-c. Remainder Code (in truncated binary encoding)
+\item Remainder Code (in truncated binary encoding)
 
-i. If $M$ is power of 2, code remainder as binary format. So $log_{2}(M)$ bits are needed. (Rice code)  
+\begin{enumerate}
+\item If $M$ is power of 2, code remainder as binary format. So $log_{2}(M)$ bits are needed. (Rice code)  
 
-ii. If $M$ is not a power of 2, set $b=\lceil log_{2}(M) \rceil$
+\item If $M$ is not a power of 2, set $b=\lceil log_{2}(M) \rceil$
 
-1. If $r < 2^{b}-M$ code $r$ as plain binary using $b-1$ bits.
+\begin{enumerate}
+\item If $r < 2^{b}-M$ code $r$ as plain binary using $b-1$ bits.
 
-2. If $r \ge 2^{b}$ code the number $r+2^{b}$ in plain binary representation 
+\item If $r \ge 2^{b}$ code the number $r+2^{b}$ in plain binary representation 
 using $b$ bits.
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
 
 \subsubsection*{Examples}
 
@@ -1433,44 +1459,54 @@ it increases logarithmically.
 
 \subsubsection*{Encoding}
 
-1. Determine the group index i using the following rules: 
+\begin{enumerate}
+\item Determine the group index i using the following rules: 
 
-a. -- if $n < 2^{k}$, then $i = 0$. 
+\begin{enumerate}
+\item if $n < 2^{k}$, then $i = 0$. 
 
-b. -- if $n \ge 2^{k}$ , then determine $i$ such that $2^{i+k-1} \le n < 2^{i+k}$
+\item if $n \ge 2^{k}$ , then determine $i$ such that $2^{i+k-1} \le n < 2^{i+k}$
+\end{enumerate}
 
-2. Form the prefix of $i$ 1s.
+\item Form the prefix of $i$ 1s.
 
-3. Insert the separator 0.
+\item Insert the separator 0.
 
-4. Form the tail: express the value of $(n - 2^{i+k-1})$ as a 
+\item Form the tail: express the value of $(n - 2^{i+k-1})$ as a 
 $(i + k - 1)$-bit binary number if $i > 0$ and $n$ as a $k$-bit binary number 
 otherwise.
+\end{enumerate}
 
 \subsubsection*{Decoding}
 
-1. Let $i$ be the number of leading 1s (prefix) in the codeword.
+\begin{enumerate}
+\item Let $i$ be the number of leading 1s (prefix) in the codeword.
 
-2. Form a run of 0s of length
+\item Form a run of 0s of length
 
-a. $0$, if $i = 0$
+\begin{enumerate}
+\item $0$, if $i = 0$
 
-b. $2^{i+k-1}$, otherwise
+\item $2^{i+k-1}$, otherwise
+\end{enumerate}
 
-3. Skip the next 0 (separator).
+\item Skip the next 0 (separator).
 
-4. Compute the length of the tail, $c_{tail}$ as
+\item Compute the length of the tail, $c_{tail}$ as
 
-a. $k$, if $i = 0$
+\begin{enumerate}
+\item $k$, if $i = 0$
 
-b. $k + i - 1$, if $i \ge 1$
+\item $k + i - 1$, if $i \ge 1$
+\end{enumerate}
 
-5. The next $c_{tail}$ bits are the tail. Form a run of 0s of length 
+\item The next $c_{tail}$ bits are the tail. Form a run of 0s of length 
 represented by the tail.
 
-6. Append 1 to the run of 0s.
+\item Append 1 to the run of 0s.
 
-7. Go to step 1 to process the next codeword.
+\item Go to step 1 to process the next codeword.
+\end{enumerate}
 
 \subsubsection*{Examples}
 
