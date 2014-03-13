@@ -315,8 +315,8 @@ A CRAM file starts with a fixed length file definition followed by one or more
 containers. The BAM header is stored in the first container.
 
 %%\begin{figure}[htbp]
-\includegraphics[width=356pt, height=31pt, keepaspectratio=true]{CRAMFIleFormat2-1-fig001.png}
-%%\caption{This should be the caption for \texttt{CRAMFIleFormat2-1-fig001.png}.}
+\includegraphics[width=356pt, height=31pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig001.png}
+%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig001.png}.}
 %%\end{figure}
 
 Pic.1 CRAM file starts with a file definition followed by the BAM header and other 
@@ -326,8 +326,8 @@ Containers consist of one or more blocks. By convention, the BAM header is store
 in the first container within a single block. This is known as the BAM header block.
 
 %%\begin{figure}[htbp]
-\includegraphics[width=354pt, height=103pt, keepaspectratio=true]{CRAMFIleFormat2-1-fig002.png}
-%%\caption{This should be the caption for \texttt{CRAMFIleFormat2-1-fig002.png}.}
+\includegraphics[width=354pt, height=103pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig002.png}
+%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig002.png}.}
 %%\end{figure}
 
 Pic.2 The BAM header is stored in the first container.
@@ -337,8 +337,8 @@ block starts with a block header. All data in CRAM is stored within blocks after
 the block header.
 
 %%\begin{figure}[htbp]
-\includegraphics[width=356pt, height=154pt, keepaspectratio=true]{CRAMFIleFormat2-1-fig003.png}
-%%\caption{This should be the caption for \texttt{CRAMFIleFormat2-1-fig003.png}.}
+\includegraphics[width=356pt, height=154pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig003.png}
+%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig003.png}.}
 %%\end{figure}
 
 Pic.3 Container and block structure. All data in CRAM files is stored in blocks.
@@ -346,8 +346,8 @@ Pic.3 Container and block structure. All data in CRAM files is stored in blocks.
 The first block in each container is the compression header block:
 
 %%\begin{figure}[htbp]
-\includegraphics[width=354pt, height=103pt, keepaspectratio=true]{CRAMFIleFormat2-1-fig004.png}
-%%\caption{This should be the caption for \texttt{CRAMFIleFormat2-1-fig004.png}.}
+\includegraphics[width=354pt, height=103pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig004.png}
+%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig004.png}.}
 %%\end{figure}
 
 Pic.4 Compression header is the first block in the container.
@@ -357,8 +357,8 @@ slice may contain, for example, a contiguous region of alignment data. Slices be
 with a slice header block and are followed by one or more data blocks:
 
 %%\begin{figure}[htbp]
-\includegraphics[width=374pt, height=137pt, keepaspectratio=true]{CRAMFIleFormat2-1-fig005.png}
-%%\caption{This should be the caption for \texttt{CRAMFIleFormat2-1-fig005.png}.}
+\includegraphics[width=374pt, height=137pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig005.png}
+%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig005.png}.}
 %%\end{figure}
 
 Pic.5 Containers are logically organised into slices.
@@ -368,8 +368,8 @@ at least one core data block immediately after the slice header block. The core
 data block may be followed by one or more external data blocks.
 
 %%\begin{figure}[htbp]
-\includegraphics[width=392pt, height=149pt, keepaspectratio=true]{CRAMFIleFormat2-1-fig006.png}
-%%\caption{This should be the caption for \texttt{CRAMFIleFormat2-1-fig006.png}.}
+\includegraphics[width=392pt, height=149pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig006.png}
+%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig006.png}.}
 %%\end{figure}
 
 Pic.5 Data blocks are divided into core and external data blocks. 
@@ -752,8 +752,8 @@ Relationship between core data block and external data blocks is shown in the fo
 picture: 
 
 %%\begin{figure}[htbp]
-\includegraphics[width=451pt, height=350pt, keepaspectratio=true]{CRAMFIleFormat2-1-fig007.png}
-%%\caption{This should be the caption for \texttt{CRAMFIleFormat2-1-fig007.png}.}
+\includegraphics[width=451pt, height=350pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig007.png}
+%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig007.png}.}
 %%\end{figure}
 
 Pic.3 Relationship between core data block and external data blocks.
@@ -1386,7 +1386,7 @@ ii. If \textit{M} is not a power of 2, set b=[log\textsubscript{2}(M)]
 bits.
 
 2. If r
-\includegraphics[width=8pt, height=15pt, keepaspectratio=true]{CRAMFIleFormat2-1-fig008.png}
+\includegraphics[width=8pt, height=15pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig008.png}
 2\textsuperscript{b} code the number r+2\textsuperscript{b} in plain binary representation 
 using \textit{b} bits.
 
