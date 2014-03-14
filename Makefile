@@ -2,6 +2,7 @@ all: pdf
 
 PDFS =	BCFv1_qref.pdf \
 	BCFv2_qref.pdf \
+	CRAMv2.1.pdf \
 	CSIv1.pdf \
 	SAMv1.pdf \
 	tabix.pdf \
@@ -10,6 +11,7 @@ PDFS =	BCFv1_qref.pdf \
 
 pdf: $(PDFS)
 
+CRAMv2.1.pdf: CRAMv2.1.tex CRAMv2.1.ver
 SAMv1.pdf: SAMv1.tex SAMv1.ver
 VCFv4.1.pdf: VCFv4.1.tex VCFv4.1.ver
 VCFv4.2.pdf: VCFv4.2.tex VCFv4.2.ver

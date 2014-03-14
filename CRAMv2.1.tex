@@ -23,20 +23,29 @@
 \setlength{\parindent}{0cm}
 \setlength{\parskip}{0.18cm}
 \usepackage[hmargin=2cm,vmargin=2.5cm,bindingoffset=0.0cm]{geometry}
+\usepackage[pdfborder={0 0 0}]{hyperref}
 \begin{document}
 
 
 
+\input{CRAMv2.1.ver}
 \title{CRAM format specification (version 2.1)}
 \author{cram-dev@ebi.ac.uk}
-\date{\today}
+\date{\headdate}
 \maketitle
+
+\begin{quote}\small
+The master version of this document can be found at
+\url{https://github.com/samtools/hts-specs}.\\
+This printing is version~\commitdesc\ from that repository,
+last modified on the date shown above.
+\end{quote}
 
 \begin{center}
 \textit{license: Apache 2.0}
 \end{center}
+\vspace*{1em}
 
-\newpage\tableofcontents\newpage
 \section{\textbf{Overview}}
 
 This specification describes the CRAM 2.1 format. 
