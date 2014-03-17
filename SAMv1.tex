@@ -359,13 +359,22 @@ of the mandatory fields in the SAM format:
   0 when the information is unavailable. This field equals {\sf POS} at the primary line of
   the next read. If {\sf PNEXT} is 0, no assumptions can be made on
   {\sf RNEXT} and bit 0x20.
-\item {\sf TLEN}: signed observed Template LENgth. If all segments are
+\item {\sf TLEN}: signed observed Template LENgth. If all segments in a template are
   mapped to the same reference, the unsigned observed template length
-  equals the number of bases from the leftmost mapped base to the
-  rightmost mapped base. The leftmost segment has a plus sign and the
-  rightmost has a minus sign. The sign of segments in the middle is
-  undefined. It is set as 0 for single-segment template or when the
-  information is unavailable.
+  equals the length of the reference sequence from the leftmost mapped base to the
+  rightmost mapped base (i.e. it could be calculated as: pos.right - pos.left + 1).
+  A sign character (`+' or `-') should be prepended to any non-zero 
+  unsigned observed template length to form {\sf TLEN}. 
+  The leftmost segment should have a plus sign, the rightmost 
+  segment should have a minus sign, and the sign of segments 
+  in the middle is undefined. 
+  If all segments have the same leftmost mapped position, the 
+  implementation should designate one as the leftmost segment, one as 
+  the rightmost segment, and others (if any) as middle segments. 
+  TLEN should be set to 0 when information on template length is unavailable, 
+  such as for a single-segment template or when the first or last 
+  segment of a multi-segment template is unmapped or are mapped to 
+  different references.
 \item {\sf SEQ}: segment SEQuence. This field can be a `*' when the
   sequence is not stored. If not a `*', the length of the sequence must
   equal the sum of lengths of {\tt M/I/S/=/X} operations in {\sf CIGAR}.
