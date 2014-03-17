@@ -362,7 +362,8 @@ of the mandatory fields in the SAM format:
 \item {\sf TLEN}: signed observed Template LENgth. If all segments in a template are
   mapped to the same reference, the unsigned observed template length
   equals the length of the reference sequence from the leftmost mapped base to the
-  rightmost mapped base (i.e. it could be calculated as: pos.right - pos.left + 1).
+  rightmost mapped base (i.e. it could be calculated as: pos.right - pos.left + 1). 
+  Mapped bases should not include soft-clipped bases. 
   A sign character (`+' or `-') should be prepended to any non-zero 
   unsigned observed template length to form {\sf TLEN}. 
   The leftmost segment should have a plus sign, the rightmost 
