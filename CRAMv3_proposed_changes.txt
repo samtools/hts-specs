@@ -1,0 +1,31 @@
+1. New read features:
+Code	Data type	Data series	Description
+A	byte[], byte[]	BA, QS	a stretch of bases and quality scores
+a	byte[]	BA	a stretch of bases
+b	byte[]	QS	a stretch of quality scores
+
+2. Allow compression on the file header block. 
+
+3. Block compression methods: 
+   1. raw: method id=0
+   2. gzip: method id=1
+   3. bzip2: method id=2
+   4. lzma: method id=3
+   5. xz?: method id=4
+
+4. Checksums:
+   1. Append CRC32 to container header
+   2. Append CRC32 to block
+
+Note: this changes the EOF marker to: 
+0f 00 00 00 ff ff ff ff ff e0 45 4f 46 00 00 
+00 00 01 00 69 ad 1a c6
+
+5. New codecs:
+   1. INTERLEAVED, id=10
+   2. DEMULTIPLEXED, id=11
+   3. RANS, id=12
+
+6. Frequency tables:
+   1. Order 0: array of frequencies as itf8
+   2. Order 1: array of bytes (alphabet) + gamma encoded frequencies of all combinations by 2
