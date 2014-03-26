@@ -243,7 +243,7 @@ of the mandatory fields in the SAM format:
   6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
   7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next read\\
   8 & {\sf PNEXT} & Int & {\tt [0,2$^{31}$-1]} & Position of the mate/next read \\
-  9 & {\sf TLEN} & Int & {\tt [-2$^{31}$+1,2$^{31}$-1]} & observed Template LENgth \\
+  9 & {\sf ISIZE} & Int & {\tt [-2$^{31}$+1,2$^{31}$-1]} & Implementation-Specific Integer, Zero Else \\
   10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & segment SEQuence\\
   11 & {\sf QUAL} & String & {\tt [!-\char126]+} & ASCII of Phred-scaled base QUALity+33 \\
   \hline
@@ -359,13 +359,11 @@ of the mandatory fields in the SAM format:
   0 when the information is unavailable. This field equals {\sf POS} at the primary line of
   the next read. If {\sf PNEXT} is 0, no assumptions can be made on
   {\sf RNEXT} and bit 0x20.
-\item {\sf TLEN}: signed observed Template LENgth. If all segments are
-  mapped to the same reference, the unsigned observed template length
-  equals the number of bases from the leftmost mapped base to the
-  rightmost mapped base. The leftmost segment has a plus sign and the
-  rightmost has a minus sign. The sign of segments in the middle is
-  undefined. It is set as 0 for single-segment template or when the
-  information is unavailable.
+\item {\sf ISIZE}: an Implementation-Specific Integer, Zero Else. 
+  A signed integer field ranging from {\tt [-2$^{31}$+1]} to {\tt [2$^{31}$-1]}.
+  If an implementation chooses to use this field, it should 
+  specify the semantics that apply to it using the IS tag. 
+  If no IS tag is present, {\sf ISIZE} should be set to 0. 
 \item {\sf SEQ}: segment SEQuence. This field can be a `*' when the
   sequence is not stored. If not a `*', the length of the sequence must
   equal the sum of lengths of {\tt M/I/S/=/X} operations in {\sf CIGAR}.
@@ -443,6 +441,7 @@ may be changed if the new type is also compatible with the array.
   {\tt H2} & i & Number of 2-difference hits \\
   {\tt HI} & i & Query hit index, indicating the alignment record is the i-th one stored in SAM\\
   {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
+  {\tt IS} & Z & Implementation-specific description of the meaning of the ISIZE field for the current record\\
   {\tt MC} & Z & CIGAR string for mate/next segment\\
   {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([A-Z]|\char92\char94[A-Z]+)[0-9]+)*}\footnotemark[6]\\
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
@@ -844,7 +843,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf isize} & Implementation-Specific Integer, Zero Else ($=\underline{\sf ISIZE}$) & {\tt int32\_t} & [0] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf read\_name} & Read name\footnotemark[1], {\tt NULL} terminated (\underline{\sf QNAME} plus a tailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$; other characters mapped to `{\tt N}'; high nybble first (1st base in the highest 4-bit of the 1st byte) & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
