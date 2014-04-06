@@ -4,7 +4,7 @@
 \usepackage{framed}
 \usepackage{enumitem}
 \usepackage{longtable}
-\usepackage[pdfborder={0 0 0}]{hyperref}
+\usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
 
 \addtolength{\textwidth}{3.4cm}
 \addtolength{\hoffset}{-1.7cm}
@@ -116,7 +116,7 @@ r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
   secondary alignment flag set in the SAM records that represent them.  All the
   SAM records have the same {\sf QNAME} and the same values for 0x40 and 0x80
   flags.  Typically the alignment designated primary is the best alignment, but
-  the decision may be arbitrary.\footnotemark[1]
+  the decision may be arbitrary.\footnotemark
 
 \item[1-based coordinate system] A coordinate system where the first
   base of a sequence is one. In this coordinate system, a region is
@@ -135,7 +135,7 @@ r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
 
 \end{description}
 
-\footnotetext[1]{A chimeric alignment is primarily caused by structural
+\footnotetext{A chimeric alignment is primarily caused by structural
 variations, gene fusions, misassemblies, RNA-seq or experimental protocols. It is more frequent given longer
 reads. For a chimeric alignment, the linear alignments consisting of the aligment are largely
 non-overlapping; each linear alignment may have high mapping quality and is
@@ -395,18 +395,18 @@ A & {\tt [!-\char126]} & Printable character \\
 i & {\tt [-+]?[0-9]+} & Singed 32-bit integer \\
 f & {\tt [-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?} & Single-precision floating number \\
 Z & {\tt [\,\,\,!-\char126]+} & Printable string, including space\\
-H & {\tt [0-9A-F]+} & Byte array in the Hex format\footnotemark[2]\\
+H & {\tt [0-9A-F]+} & Byte array in the Hex format\footnotemark\\
 B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)+} & Integer or numeric array\\
 \hline
 \end{tabular}
-\footnotetext[2]{For example, a byte array {\tt \{0x1a,0xe3,0x1\}} corresponds to a Hex string `{\tt 1AE301}'.}
+\footnotetext{For example, a byte array {\tt \{0x1a,0xe3,0x1\}} corresponds to a Hex string `{\tt 1AE301}'.}
 \end{center}
 For an integer or numeric array (type `{\tt B}'), the first letter indicates the type of numbers
 in the following comma separated array. The letter can be one of `{\tt cCsSiIf}', corresponding to
 {\tt int8\_t} (signed 8-bit integer), {\tt uint8\_t} (unsigned 8-bit integer), {\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t}, {\tt uint32\_t}
-and {\tt float}, respectively\footnotemark[3]. During import/export, the element type
+and {\tt float}, respectively.\footnotemark\@ During import/export, the element type
 may be changed if the new type is also compatible with the array.
-\footnotetext[3]{Explicit typing eases format parsing and helps to reduce the file size when SAM is converted to BAM.}
+\footnotetext{Explicit typing eases format parsing and helps to reduce the file size when SAM is converted to BAM.}
 
 {Predefined tags are shown in the following table. You can
   freely add new tags, and if a new tag may be of general interest, you
@@ -418,7 +418,7 @@ may be changed if the new type is also compatible with the array.
 \begin{center}\small
 \begin{longtable}{ccp{12.5cm}}
   \hline
-  {\bf Tag\footnotemark[4]} & {\bf Type} & {\bf Description} \\
+  {\bf Tag\footnotemark} & {\bf Type} & {\bf Description} \\
   \hline
   {\tt X?} & ? & Reserved fields for end users (together with {\tt Y?} and {\tt Z?}) \\
   {\tt AM} & i & The smallest template-independent mapping quality of segments in the rest \\
@@ -432,7 +432,7 @@ may be changed if the new type is also compatible with the array.
   {\tt CP} & i & Leftmost coordinate of the next hit \\ 
   {\tt CQ} & Z & Color read quality on the original strand of the read. Same encoding as {\sf QUAL}; same length as {\tt CS}.\\
   {\tt CS} & Z & Color read sequence on the original strand of the read. The primer base must be included.\\
-  {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features\footnotemark[5].\\
+  {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features.\footnotemark\\
   {\tt E2} & Z & The 2nd most likely base calls. Same encoding and same length as {\sf QUAL}.\\
   {\tt FI} & i & The index of segment in the template.\\
   {\tt FS} & Z & Segment suffix.\\
@@ -444,7 +444,7 @@ may be changed if the new type is also compatible with the array.
   {\tt HI} & i & Query hit index, indicating the alignment record is the i-th one stored in SAM\\
   {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
   {\tt MC} & Z & CIGAR string for mate/next segment\\
-  {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([A-Z]|\char92\char94[A-Z]+)[0-9]+)*}\footnotemark[6]\\
+  {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([A-Z]|\char92\char94[A-Z]+)[0-9]+)*}\footnotemark\\
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
   {\tt NH} & i & Number of reported alignments that contains the query in the current record\\
   {\tt NM} & i & Edit distance to the reference, including ambiguous bases but excluding clipping\\
@@ -453,7 +453,7 @@ may be changed if the new type is also compatible with the array.
   {\tt OC} & Z & Original CIGAR (usually before realignment) \\
   {\tt PG} & Z & Program. Value matches the header {\tt PG-ID} tag if {\tt @PG} is present. \\
   {\tt PQ} & i & Phred likelihood of the template, conditional on both the mapping being correct \\
-  {\tt PT} & Z & Read annotations for parts of the padded read sequence\footnotemark[7]\\
+  {\tt PT} & Z & Read annotations for parts of the padded read sequence\footnotemark\\
   {\tt PU} & Z & Platform unit. Value to be consistent with the header {\tt RG-PU} tag if {\tt @RG} is present.\\
   {\tt QT} & Z & Phred quality of the barcode sequence in the {\tt BC} (or {\tt RT}) tag. Same encoding as {\sf QUAL}. \\
   {\tt Q2} & Z & Phred quality of the mate/next segment sequence in the {\tt R2} tag. Same encoding as {\sf QUAL}.\\
@@ -470,17 +470,11 @@ may be changed if the new type is also compatible with the array.
   \hline
 \end{longtable}
 \end{center}
-\footnotetext[4]{The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt MF}, {\tt S2}
+\addtocounter{footnote}{-3}
+\footnotetext{The {\tt GS}, {\tt GC}, {\tt GQ}, {\tt MF}, {\tt S2}
   and {\tt SQ} are reserved for backward compatibility.}
-\footnotetext[5]{The MD field aims to achieve SNP/indel calling without looking at
-  the reference. For example, a string `{\tt 10A5\char94AC6}' means from
-  the leftmost reference base in the alignment, there are 10 matches
-  followed by an A on the reference which is different from the aligned
-  read base; the next 5 reference bases are matches followed by a 2bp
-  deletion from the reference; the deleted sequence is AC; the last 6
-  bases are matches. The {\tt MD} field ought to match the {\sf CIGAR}
-  string.}
-\footnotetext[6]{The {\tt CT} tag is intended primarily for annotation
+\stepcounter{footnote}
+\footnotetext{The {\tt CT} tag is intended primarily for annotation
 dummy reads, and consists of a \emph{strand}, \emph{type} and zero or
 more \emph{key}=\emph{value} pairs, each separated with semicolons.
 The \emph{strand} field has four values as in GFF3, and supplements FLAG
@@ -498,7 +492,16 @@ macro (with the C locale). For example a percent sign becomes
 %NOTE - This leaves open the possibility of allowing multiple such
 %entries for a single CT tag to be combined with | as in the PT tag.
 }%End of CT tag footnote
-\footnotetext[7]{The {\tt PT} tag value has the format of a series of
+\stepcounter{footnote}
+\footnotetext{The {\tt MD} field aims to achieve SNP/indel calling without
+looking at the reference. For example, a string `{\tt 10A5\char94AC6}' means
+from the leftmost reference base in the alignment, there are 10 matches
+followed by an A on the reference which is different from the aligned read
+base; the next 5 reference bases are matches followed by a 2bp deletion from
+the reference; the deleted sequence is AC; the last 6~bases are matches.
+The {\tt MD} field ought to match the {\sf CIGAR} string.}
+\stepcounter{footnote}
+\footnotetext{The {\tt PT} tag value has the format of a series of
 tags separated by {\tt |}, each annotating a sub-region of the read.
 Each tag consists of \emph{start}, \emph{end}, \emph{strand},
 \emph{type} and zero or more \emph{key}=\emph{value} pairs, each
@@ -651,9 +654,9 @@ representation. We recommend the following.
 In a padded SAM, alignments and coordinates are described with respect to the
 padded reference sequence. Unlike traditional padded representations like
 the ACE file format where pads/gaps are recorded in reads using *'s, we do
-not write *'s in the {\sf SEQ} field of the SAM format\footnote{Writing
+not write *'s in the {\sf SEQ} field of the SAM format.\footnote{Writing
 pads/gaps as *'s in the {\sf SEQ} field might have been more convenient, but
-this caused concerns for backward compatibility.}. Instead, we describe pads
+this caused concerns for backward compatibility.} Instead, we describe pads
 in the query sequences as deletions from the padded reference using the
 {\sf CIGAR} `{\tt D}' operation. In a padded SAM, the insertion and padding
 CIGAR operations (`{\tt I}' and `{\tt P}') are not used because the padded
@@ -697,12 +700,12 @@ BGZF is block compression implemented on top of the standard gzip file
 format. The goal of BGZF is to provide good compression while allowing
 efficient random access to the BAM file for indexed queries. The BGZF
 format is `gunzip compatible', in the sense that a compliant gunzip
-utility can decompress a BGZF compressed file\footnote{It is worth noting that there is a known bug in the Java {\sf
+utility can decompress a BGZF compressed file.\footnote{It is worth noting that there is a known bug in the Java {\sf
   GZIPInputStream} class that concatenated gzip archives cannot be
 successfully decompressed by this class. BGZF files can be created and
 manipulated using the built-in Java {\sf util.zip} package, but naive
 use of {\sf GZIPInputStream} on a BGZF file will not work due to this
-bug.}.
+bug.}
 
 A BGZF file is a series of concatenated BGZF blocks. Each BGZF block
 is itself a spec-compliant gzip archive which contains an ``extra field''
@@ -845,21 +848,24 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf read\_name} & Read name\footnotemark[1], {\tt NULL} terminated (\underline{\sf QNAME} plus a tailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf read\_name} & Read name,\footnotemark\ {\tt NULL} terminated (\underline{\sf QNAME} plus a tailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$; other characters mapped to `{\tt N}'; high nybble first (1st base in the highest 4-bit of the 1st byte) & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
   & \multicolumn{5}{c|}{\textcolor{gray}{\it List of auxiliary data (until the end of the alignment block)}} \\\cline{3-6}
   & & {\sf tag} & Two-character tag & {\tt char[2]} & \\\cline{3-6}
-  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZHB}\footnotemark[2]$^,$\footnotemark[3] & {\tt char} & \\\cline{3-6}
+  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZHB}\footnotemark$^,$\footnotemark & {\tt char} & \\\cline{3-6}
   & & {\sf value} & Tag value & (by {\sf val\_type}) &\\
   \cline{1-6}
 \end{tabular}}
 \end{table}
-\footnotetext[1]{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
-\footnotetext[2]{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
+\addtocounter{footnote}{-2}
+\footnotetext{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
+\stepcounter{footnote}
+\footnotetext{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
 	{\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t} and {\tt uint32\_t}, respectively. In SAM, all single integer types are mapped to {\tt int32\_t}.}
-\footnotetext[3]{A `{\tt B}'-typed (array) tag--value pair is stored as follows. The first two bytes keep the two-character tag. The 3rd byte is always `{\tt B}'.
+\stepcounter{footnote}
+\footnotetext{A `{\tt B}'-typed (array) tag--value pair is stored as follows. The first two bytes keep the two-character tag. The 3rd byte is always `{\tt B}'.
 	The 4th byte, matching {\tt /\char94[cCsSiIf]\$/}, indicates the type of an element in the array.
 	Bytes from 5 to 8 encode a little-endian 32-bit integer which gives the number of elements in the array.
 	Bytes starting from the 9th store the array in the little-endian byte order; the number of these
@@ -900,9 +906,9 @@ falls outside the required region. This strategy saves half of the seek
 calls in average.
 
 In BAM, each bin may span $2^{29}$, $2^{26}$, $2^{23}$, $2^{20}$,
-$2^{17}$ or $2^{14}$ bp\footnote{Due to a limitation in the current indexing
+$2^{17}$ or $2^{14}$ bp.\footnote{Due to a limitation in the current indexing
 scheme, a chromosome sequence longer than $2^{29}-1$ is not supported during
-indexing.}. Bin 0 spans a 512Mbp region, bins 1--8 span 64Mbp, 9--72 8Mbp,
+indexing.} Bin 0 spans a 512Mbp region, bins 1--8 span 64Mbp, 9--72 8Mbp,
 73--584 1Mbp, 585--4680 128Kbp and bins 4681--37449
 span 16Kbp regions.
 
