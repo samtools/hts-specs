@@ -1034,27 +1034,34 @@ Bundle Copy Number & 1 & 3 & 1 \\
 Haplotype quality & 30 & 40 & 40 \\
 \end{tabular}
 
-\subsection{Representing unknown or unspecified alternate alleles}
-Inspired by the gVCF file format (\url{https://support.basespace.illumina.com/knowledgebase/articles/147078-gvcf-file}),
-it is necessary, primarily in clinical settings, to report sequencing data evidence for both variant and non-variant
-positions in the genome. The convention adopted here is to represent reference evidence as likelihoods against an
+{\color{red}
+\subsection{Representing unspecified alleles and REF-only blocks (gVCF)}
+In order to report sequencing data evidence for both variant and non-variant
+positions in the genome, the VCF specification allows to represent blocks of reference-only calls in a single record
+using the END INFO tag, an idea originally introduced by the gVCF file format\footnote{\url{https://support.basespace.illumina.com/knowledgebase/articles/147078-gvcf-file}}.
+The convention adopted here is to represent reference evidence as likelihoods against an
 unknown alternate allele. Think of this as the likelihood for reference as compared to any other possible alternate
-allele (both SNP, indel, or otherwise). The symbolic alternate allele $<$NON_REF$>$ is used to represent this
+allele (both SNP, indel, or otherwise). A symbolic alternate allele ($<$X$>$ in
+samtools and $<$NON\_REF$>$ in GATK implementation) is used to represent this
 unspecified alternate allele.
 
 Example records are given below:
+\scriptsize
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Sample \\
-1 & 1004370 & . & G & <NON_REF> & . & . & END=1004383 & GT:DP:GQ:MIN_DP:PL & 0/0:25:60:23:0,60,900 \\
-1 & 1004384 & . & C & <NON_REF> & . & . & END=1004388 & GT:DP:GQ:MIN_DP:PL & 0/0:25:45:25:0,42,630 \\
-1 & 1004389 & . & T & TC,<NON_REF> & 213.73 & . & . & GT:AD:DP:GQ:PL & 0/1:14,9,0:23:99:251,0,362,293,392,686 \\
-1 & 1004390 & . & C & <NON_REF> & . & . & END=1004390 & GT:DP:GQ:MIN_DP:PL & 0/0:26:0:26:0,0,315 \\
-1 & 1004391 & . & C & <NON_REF> & . & . & END=1004395 & GT:DP:GQ:MIN_DP:PL & 0/0:27:63:27:0,63,945 \\
-1 & 1004396 & . & G & C,<NON_REF> & 0 & . & . & GT:AD:DP:GQ:P & 0/0:22,2,0:24:52:0,52,953,66,958,972 \\
-1 & 1004397 & . & T & <NON_REF> & . & . & END=1004416 & GT:DP:GQ:MIN_DP:PL & 0/0:22:14:22:0,15,593 \\
+1 & 4370 & . & G & $<$X$>$ & . & . & END=4383 & GT:DP:GQ:MIN\_DP:PL & 0/0:25:60:23:0,60,900 \\
+1 & 4384 & . & C & $<$X$>$ & . & . & END=4388 & GT:DP:GQ:MIN\_DP:PL & 0/0:25:45:25:0,42,630 \\
+1 & 4389 & . & T & TC,$<$X$>$ & 213.73 & . & . & GT:DP:GQ:PL & 0/1:23:99:51,0,36,93,92,86 \\
+1 & 4390 & . & C & $<$X$>$ & . & . & END=4390 & GT:DP:GQ:MIN\_DP:PL & 0/0:26:0:26:0,0,315 \\
+1 & 4391 & . & C & $<$X$>$ & . & . & END=4395 & GT:DP:GQ:MIN\_DP:PL & 0/0:27:63:27:0,63,945 \\
+1 & 4396 & . & G & C,$<$X$>$ & 0 & . & . & GT:DP:GQ:P & 0/0:24:52:0,52,95,66,95,97 \\
+1 & 4397 & . & T & $<$X$>$ & . & . & END=4416 & GT:DP:GQ:MIN\_DP:PL & 0/0:22:14:22:0,15,593 \\
 \end{tabular}
 \end{flushleft}
+\normalsize
+}
+
 \pagebreak
 \section{BCF specification}
 
@@ -1646,5 +1653,31 @@ this will change in the near future.
 
 BCF2 files are expected to be indexed through the same index scheme,
 section~4 as BAM files and other block-compressed files with BGZF.
+
+{\color{red}
+\section{List of changes}
+
+\subsection{Changes between VCFv4.2 and VCFv4.3}
+
+\begin{itemize}
+\item VCF compliant implementations must support both LF and CR+LF newline conventions
+\item INFO and FORMAT tag names must match the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}
+\item Spaces are allowed in INFO field values
+\item Characters with special meaning (such as ';' in INFO, ':' in FORMAT, and '\%' in both) can be encoded using URL encoding
+\item Character encoding is declared by the \#\#fileencoding header line. Only encodings that are a superset of US-ASCII are allowed, the default encoding is UTF-8. Also sample names can be in UTF-8.
+\item The SAMPLE field can contain optional DOI URL for the source data file
+\item New reserved tag "CNP" analogous to "GP" was added. Both CNP and GP use 0 to 1 encoding, which is a change from previous phred-scaled GP.
+\item In order for VCF and BCF to have the same expressive power, we state explicitly that Integers and Floats are 32-bit numbers. Integers are signed.
+\item We state explicitly that zero length strings are not allowed, this includes the CHROM and ID column, INFO IDs, FILTER IDs and FORMAT IDs. Meta-information lines can be in any order, with the exception of \#\#fileformat which must come first. INFO, FILTER and FORMAT IDs must be unique within that type.
+\item A section about gVCF was added
+\end{itemize}
+
+\subsection{Changes between BCFv2.1 and BCFv2.2}
+\begin{itemize}
+\item BCF header lines can include optional IDX field
+\item We introduce end-of-vector byte and reserve 8 values for future use
+\item String vectors in BCF do not need to start with comma, as the number of values is indicated already in the definition of the tag in the header.
+\end{itemize}
+}
 
 \end{document}
