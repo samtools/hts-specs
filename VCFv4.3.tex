@@ -31,7 +31,7 @@ It contains meta-information lines {\color{red}(prefixed with "\#\#")}, a header
 line {\color{red}(prefixed with "\#")}, and data lines
 each containing information about a position in the genome and genotype
 information on samples for each position
-{\color{red}(text fields separated by tabs). Zero length fields are not allowed, a dot (".") can
+{\color{red}(text fields separated by tabs). Zero length fields are not allowed, a dot (".") should
 be used instead.
 In order to ensure interoperability across platforms, VCF compliant implementations must support
 both LF (\texttt{\textbackslash n}) and CR+LF (\texttt{\textbackslash r\textbackslash n}) newline conventions.  
@@ -106,7 +106,8 @@ INFO fields should be described as follows (first four keys are required, source
 \end{verbatim}
 
 Possible Types for INFO fields are: Integer {\color{red} (32-bit, signed)}, Float {\color{red} (32-bit)}, Flag, Character, and
-String.  The Number entry is an Integer that describes the number of values that
+String. {\color{red} For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in binary version, see \ref{BcfTypeEncoding}.}
+The Number entry is an Integer that describes the number of values that
 can be included with the INFO field. For example, if the INFO field contains a
 single number, then this value should be $1$; if the INFO field describes a
 pair of numbers, then this value should be $2$ and so on. There are also
@@ -288,6 +289,7 @@ As with the INFO field, there are several common, reserved keywords that are sta
   \item MQ : RMS mapping quality, similar to the version in the INFO field. (Integer)
 \end{itemize}
 
+
 If any of the fields is missing, it is replaced with the missing value. For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing. Trailing fields can be dropped (with the exception of the GT field, which should always be present if specified in the FORMAT field).
 
 See below for additional genotype fields used to encode structural variants. Additional Genotype fields can be defined in the meta-information. However, software support for such fields is not guaranteed.
@@ -300,6 +302,25 @@ VCF records use a single general system for representing genetic variation data 
   \item VCF record: a record holding all segregating alleles at a locus (as well as genotypes, if appropriate, for multiple individuals containing alleles at that locus).
 \end{itemize}
 VCF records use a simple haplotype representation for REF and ALT alleles to describe variant haplotypes at a locus. ALT haplotypes are constructed from the REF haplotype by taking the REF allele bases at the POS in the reference genotype and replacing them with the ALT bases. In essence, the VCF record specifies a-REF-t and the alternative haplotypes are a-ALT-t for each alternative allele.
+
+{\color{red}
+\subsection{VCF tag naming conventions}
+\begin{itemize}
+    \item The "L" suffix means "likelihood" as log-likelihood in the sampling
+    distribution, log10 Pr(Data$|$Model).  Likelihoods are represented as log10
+    scale, so has to be negative (e.g.~GL, CNL).  The likelihood can be also
+    represented in some cases as phred-scale in a separate tag (e.g.~PL).
+
+    \item The "P" suffix means "probability" as linear-scale probability in the
+    posterior distribution, which is Pr(Model$|$Data).  Examples are GP, CNP.
+
+    \item The "Q" suffix means "quality" as log-complementary-phred-scale posterior
+    probability, which is -10 * log10 Pr(Data$|$Model) where the model is the most
+    likely genotype that appears in the GT field.  Examples are GQ, CNQ.  The fixed
+    site-level QUAL field follows the same convention (represented as a
+    phred-scaled number).
+\end{itemize}
+}
 
 
 \section{INFO keys used for structural variants}
@@ -1154,7 +1175,8 @@ recoded. In order to avoid this costly operation, a new IDX field can be used
 to explicitly define the position which is dropped on BCF-to-VCF conversion. If
 not present, the implicit relative position is assumed. If the IDX field is
 present in one record, it must be present also in all other dictionary-defining
-records.
+records. The IDX tag is not necessary in newly created BCF files, but if
+present, the numbering must match the implicit dictionary of tags.
 }
 
 Note that the dictionary encoding has the magic prefix `s' here to indicate that the field's value is actually in the dictionary entry giving by the subsequent offset.  This representation isn't actually the one used in BCF2 records but it provides a clean visual guide for the above example.  Note also how the contig has been recoded as a offset into the list of contig declarations.
@@ -1251,6 +1273,7 @@ If there are no sample records (genotype data) in this VCF/BCF2 file, the size o
 
 
 \subsubsection{Type encoding}
+\label{BcfTypeEncoding}
 
 In BCF2 values are all strongly typed in the file.  The type information is encoded in a prefix byte before the value, which contains information about the low-level type of the value(s) such as int32 or float, as well as the number of elements in the value.  The encoding is as follows:
 
@@ -1670,6 +1693,7 @@ section~4 as BAM files and other block-compressed files with BGZF.
 \item In order for VCF and BCF to have the same expressive power, we state explicitly that Integers and Floats are 32-bit numbers. Integers are signed.
 \item We state explicitly that zero length strings are not allowed, this includes the CHROM and ID column, INFO IDs, FILTER IDs and FORMAT IDs. Meta-information lines can be in any order, with the exception of \#\#fileformat which must come first. INFO, FILTER and FORMAT IDs must be unique within that type.
 \item A section about gVCF was added
+\item A section about tag naming conventions was added
 \end{itemize}
 
 \subsection{Changes between BCFv2.1 and BCFv2.2}
