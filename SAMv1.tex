@@ -879,10 +879,20 @@ specified region without going through the whole alignments. BAM must be
 sorted by the reference ID and then the leftmost coordinate before
 indexing.
 
+This section describes the binning scheme underlying coordinate-sorted
+BAM indices and its implementation in the long-established BAI format.
+The CSI format documented elsewhere uses a similar binning scheme and
+can also be used to index BAM.\footnotemark
+
+\footnotetext{See \href{http://samtools.github.io/hts-specs/CSIv1.pdf}
+{\tt CSIv1.pdf} at \url{https://github.com/samtools/hts-specs}.
+This is a separate specification because CSI is also used to index other
+coordinate-sorted file formats in addition to BAM.}
+
 \subsection{Algorithm}
 \subsubsection{Basic binning index}
-The UCSC binning scheme was suggested by Richard Durbin and Lincoln
-Stein and is explained by Kent et al. (2002). In this scheme, each bin
+The UCSC binning scheme was suggested by Richard Durbin and Lincoln Stein
+and is explained in Kent {\it et al.}\footnotemark\ In this scheme, each bin
 represents a contiguous genomic region which is either fully contained
 in or non-overlapping with another bin; each alignment is associated
 with a bin which represents the smallest region containing the entire
@@ -890,6 +900,11 @@ alignment. The binning scheme is essentially a representation of
 R-tree. A distinct bin uniquely corresponds to a distinct internal node
 in a R-tree. Bin A is a child of Bin B if the region represented by A is
 contained in B.
+
+\footnotetext{W.~James Kent {\it et al.},
+{\bf The Human Genome Browser at UCSC}, {\sl Genome Res.}~2002~12: 996--1006;
+\href{http://dx.doi.org/doi:10.1101/gr.229102}{doi:10.1101/\linebreak[1]gr.229102};
+{\sc pmid:}12045153.  See in particular {\sl The Database}, p1003.}
 
 To find the alignments that overlap a specified region, we need to get
 the bins that overlap the region, and then test each alignment in the
@@ -905,12 +920,14 @@ their leftmost coordinates and stop seeking the rest when an alignment
 falls outside the required region. This strategy saves half of the seek
 calls in average.
 
-In BAM, each bin may span $2^{29}$, $2^{26}$, $2^{23}$, $2^{20}$,
-$2^{17}$ or $2^{14}$ bp.\footnote{Due to a limitation in the current indexing
-scheme, a chromosome sequence longer than $2^{29}-1$ is not supported during
-indexing.} Bin 0 spans a 512Mbp region, bins 1--8 span 64Mbp, 9--72 8Mbp,
-73--584 1Mbp, 585--4680 128Kbp and bins 4681--37449
-span 16Kbp regions.
+In the BAI format, each bin may span $2^{29}$, $2^{26}$, $2^{23}$, $2^{20}$,
+$2^{17}$ or $2^{14}$ bp. Bin 0 spans a 512Mbp region, bins 1--8 span 64Mbp,
+9--72 8Mbp, 73--584 1Mbp, 585--4680 128Kbp and bins 4681--37449 span 16Kbp
+regions.  This implies that this index format does not support reference
+chromosome sequences longer than $2^{29}-1$.
+
+The CSI format generalises the sizes of the bins, and supports reference
+sequences of the same length as are supported by SAM and BAM.
 
 \subsubsection{Reducing small chunks}
 Around the boundary of two adjacent bins, we may see many small chunks
@@ -934,7 +951,7 @@ With both binning and linear indices, we can retrieve alignments in most
 of regions with just one seek call.
 
 \subsubsection{A conceptual example}
-Suppose we have a genome shorter than 144kbp. we can design a binning
+Suppose we have a genome shorter than 144kbp. We can design a binning
 scheme which consists of three types of bins: bin 0 spans 0-144kbp, bin
 1, 2 and 3 span 48kbp and bins from 4 to 12 span 16kbp each:
 
@@ -961,7 +978,7 @@ alone, we need to visit the alignment at [40k,49k] as it belongs to bin
 64kbp and cannot overlap the specified region. A seek call can thus be
 saved.
 
-\subsection{The BAM indexing format}
+\subsection{The BAI index format for BAM files}
 \begin{table}[ht]
 {\small
 \begin{tabular}{|l|l|l|l|l|l|r|}
@@ -985,6 +1002,10 @@ saved.
 \end{table}
 
 \subsection{C source code for computing bin number and overlapping bins}\label{sec:code}
+The following functions compute bin numbers and overlaps for a BAI-style
+binning scheme with $6$~levels and a minimum bin size of $2^{14}$~bp.
+See the CSI specification for generalisations of these functions designed for
+binning schemes with arbitrary depth and sizes.
 
 {\small
 \begin{verbatim}
