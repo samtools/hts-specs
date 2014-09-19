@@ -89,13 +89,11 @@ A single `fileformat' field is always required, must be the first line in the fi
 
 {\color{red}
 \subsubsection{Character encoding}
-Character encoding is declared by the `fileencoding' header line.  Only
-encodings that are a superset of US-ASCII are allowed, the default encoding is
-UTF-8.
-
-\begin{verbatim}
-##fileencoding=UTF-8
-\end{verbatim}
+The character encoding of VCF files is UTF-8.  UTF-8 is a multi-byte 
+character encoding that is a strict superset of 7-bit ASCII and has the 
+property that none of the bytes in any multi-byte characters are 7-bit ASCII 
+bytes. As a result, most software that processes VCF files does not have 
+to be aware of the possible presence of multi-byte UTF-8 characters. 
 }
 
 \subsubsection{Information field format}
@@ -182,8 +180,7 @@ As with chromosomal sequences it is highly recommended (but not required) that t
 ##contig=<ID=ctg1,URL=ftp://somewhere.org/assembly.fa,...>
 \end{verbatim}
 \subsubsection{Sample field format}
-It is possible to define sample to genome mappings as shown below:\footnote{\color{red}Some description of SAMPLE would be nice. What 
-is Genomes, Mixture, $k$?}
+It is possible to define sample to genome mappings as shown below:
 \small
 {\color{red}
 \begin{verbatim}
@@ -223,17 +220,17 @@ There are 8 fixed fields per record. All data lines are tab-delimited. In all ca
 \begin{enumerate}
   \item CHROM - chromosome: An identifier from the reference genome or an angle-bracketed ID String (``$<$ID$>$'') pointing to a contig in the assembly file (cf. the \#\#assembly line in the header). All entries for a specific CHROM should form a contiguous block within the VCF file. The colon symbol (:) must be absent from all chromosome names to avoid parsing errors when dealing with breakends. (String, no white-space permitted, Required).
   \item POS - position: The reference position, with the 1st base having position 1. Positions are sorted numerically, in increasing order, within each reference sequence CHROM.   It is permitted to have multiple records with the same POS. Telomeres are indicated by using positions 0 or N+1, where N is the length of the corresponding chromosome or contig.   (Integer, Required)
-  \item ID - identifier: Semi-colon separated list of unique identifiers where available. If this is a dbSNP variant it is encouraged to use the rs number(s). No identifier should be present in more than one data record. If there is no identifier available, then the missing value should be used. (String, no white-space or semi-colons permitted)
+  \item ID - identifier: Semi-colon separated list of unique identifiers where available. If this is a dbSNP variant it is encouraged to use the rs number(s). No identifier should be present in more than one data record. If there is no identifier available, then the missing value should be used. (String, no white-space or semi-colons permitted, {\color{red}duplicate values not allowed.})
   \item REF - reference base(s): Each base must be one of A,C,G,T,N (case insensitive). Multiple bases are permitted. The value in the POS field refers to the position of the first base in the String. For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the event (which must be reflected in the POS field), unless the event occurs at position 1 on the contig in which case it must include the base after the event; this padding base is not required (although it is permitted) for e.g. complex substitutions or other events where all alleles have at least one base represented in their Strings.  If any of the ALT alleles is a symbolic allele (an angle-bracketed ID String ``$<$ID$>$'') then the padding base is required and POS denotes the coordinate of the base preceding the polymorphism. Tools processing VCF files are not required to preserve case in the allele Strings. (String, Required).
   \item ALT - alternate base(s): Comma separated list of alternate non-reference alleles called on at least one of the samples. Options are base Strings made up of the bases A,C,G,T,N,*, (case insensitive) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends. The `*' allele is reserved to indicate that the allele is missing due to a upstream deletion. If there are no alternative alleles, then the missing value should be used.  Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.  (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
   \item QUAL - quality: Phred-scaled quality score for the assertion made in ALT. i.e. $-10log_{10}$ prob(call in ALT is wrong). If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant). If unknown, the missing value should be specified. (Float)
-  \item FILTER - filter status: PASS if this position has passed all filters, i.e. a call is made at this position. Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g. ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples. `0' is reserved and should not be used as a filter String. If filters have not been applied, then this field should be set to the missing value. (String, no white-space or semi-colons permitted)
+  \item FILTER - filter status: PASS if this position has passed all filters, i.e. a call is made at this position. Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g. ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples. `0' is reserved and should not be used as a filter String. If filters have not been applied, then this field should be set to the missing value. (String, no white-space or semi-colons permitted, {\color{red}duplicate values not allowed.})
   \item INFO - additional information: (String, no semi-colons or
   equals-signs permitted; commas are permitted only as delimiters for lists of
   values; characters with special meaning can be encoded using URL encoding; space characters are allowed)
   INFO fields are encoded as a semicolon-separated series of short keys
   with optional values in the format: $<$key$>$=$<$data$>$[,data]. 
-  {\color{red} INFO keys must match the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}.}
+  {\color{red} INFO keys must match the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed.}
   Arbitrary keys are permitted, although the following sub-fields are reserved (albeit optional):
 \begin{itemize}
   \item AA : ancestral allele
@@ -261,7 +258,7 @@ Example for an INFO field: DP=154;MQ=52;H2. Keys without corresponding values ar
 \subsubsection{Genotype fields}
 If genotype information is present, then the same types of data must be present
 for all samples. First a FORMAT field is given specifying the data types and
-order ({\color{red} colon-separated FORMAT ids matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}}). This is followed by one data block per
+order ({\color{red} colon-separated FORMAT ids matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed}). This is followed by one data block per
 sample, with the colon-separated data corresponding to the types
 specified in the format. The first sub-field must always be the genotype (GT)
 if it is present.  There are no required sub-fields.
@@ -1687,11 +1684,12 @@ section~4 as BAM files and other block-compressed files with BGZF.
 \item INFO and FORMAT tag names must match the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}
 \item Spaces are allowed in INFO field values
 \item Characters with special meaning (such as ';' in INFO, ':' in FORMAT, and '\%' in both) can be encoded using URL encoding
-\item Character encoding is declared by the \#\#fileencoding header line. Only encodings that are a superset of US-ASCII are allowed, the default encoding is UTF-8. Also sample names can be in UTF-8.
+\item The character encoding of VCF files is UTF-8.
 \item The SAMPLE field can contain optional DOI URL for the source data file
 \item New reserved tag "CNP" analogous to "GP" was added. Both CNP and GP use 0 to 1 encoding, which is a change from previous phred-scaled GP.
 \item In order for VCF and BCF to have the same expressive power, we state explicitly that Integers and Floats are 32-bit numbers. Integers are signed.
 \item We state explicitly that zero length strings are not allowed, this includes the CHROM and ID column, INFO IDs, FILTER IDs and FORMAT IDs. Meta-information lines can be in any order, with the exception of \#\#fileformat which must come first. INFO, FILTER and FORMAT IDs must be unique within that type.
+\item We state explicitly that duplicate IDs, FILTER, INFO or FORMAT keys are not valid.
 \item A section about gVCF was added
 \item A section about tag naming conventions was added
 \end{itemize}
