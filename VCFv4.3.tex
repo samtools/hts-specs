@@ -181,13 +181,18 @@ As with chromosomal sequences it is highly recommended (but not required) that t
 \end{verbatim}
 \subsubsection{Sample field format}
 It is possible to define sample to genome mappings as shown below:
-\small
 {\color{red}
+\scriptsize
 \begin{verbatim}
-##SAMPLE=<ID=S_ID,Genomes=G1_ID;G2_ID; ...;GK_ID,Mixture=N1;N2; ...;NK,Description=S1;S2; ...;SK,DOI=url>
+##META=<ID=Assay,Type=String,Number=.,Values=[WholeGenome, Exome]>
+##META=<ID=Disease,Type=String,Number=.,Values=[None, Cancer]>
+##META=<ID=Ethnicity,Type=String,Number=.,Values=[AFR, CEU, ASN, MEX]>
+##META=<ID=Tissue,Type=String,Number=.,Values=[Blood, Breast, Colon, Lung, ?]>
+##SAMPLE=<ID=Sample1,Assay=WholeGenome,Ethnicity=AFR,Disease=None,Description="Patient germline genome from unaffected",DOI=url>
+##SAMPLE=<ID=Sample2,Assay=Exome,Ethnicity=CEU,Disease=Cancer,Tissue=Breast,Description="European patient exome from breast cancer">
 \end{verbatim}
 }
-\normalsize
+
 \subsubsection{Pedigree field format}
 It is possible to record relationships between genomes using the following syntax:
 \begin{verbatim}
