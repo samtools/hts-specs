@@ -1688,6 +1688,7 @@ section~4 as BAM files and other block-compressed files with BGZF.
 \item Characters with special meaning (such as ';' in INFO, ':' in FORMAT, and '\%' in both) can be encoded using URL encoding
 \item The character encoding of VCF files is UTF-8.
 \item The SAMPLE field can contain optional DOI URL for the source data file
+\item Introduced \#\#META header lines for defining phenotype metadata
 \item New reserved tag "CNP" analogous to "GP" was added. Both CNP and GP use 0 to 1 encoding, which is a change from previous phred-scaled GP.
 \item In order for VCF and BCF to have the same expressive power, we state explicitly that Integers and Floats are 32-bit numbers. Integers are signed.
 \item We state explicitly that zero length strings are not allowed, this includes the CHROM and ID column, INFO IDs, FILTER IDs and FORMAT IDs. Meta-information lines can be in any order, with the exception of \#\#fileformat which must come first. INFO, FILTER and FORMAT IDs must be unique within that type.
