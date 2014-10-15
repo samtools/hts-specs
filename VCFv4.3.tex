@@ -1447,7 +1447,16 @@ For example, suppose I have two samples, each with a FORMAT field X.  Sample A h
 Note that this means that it's illegal to encode a vector VCF field with missing values; the BCF2 codec should signal an error in this case.
 
 \vspace{0.3cm}
-A \textbf{Genotype (GT) field} is encoded in a typed integer vector (can be 8, 16, or even 32 bit if necessary) with the number of elements equal to the maximum ploidy among all samples at a site.  For one individual, each integer in the vector is organized as $(allele+1) << 1 \mid phased$ where allele is set to -1 if the allele in GT is a dot `.' (thus the higher bits are all 0).  The vector is padded with missing values if the GT having fewer ploidy.
+A \textbf{Genotype (GT) field} is encoded in a typed integer vector (can be 8,
+16, or even 32 bit if necessary) with the number of elements equal to the
+maximum ploidy among all samples at a site.  For one individual, each integer
+in the vector is organized as $(allele+1) << 1 \mid phased$ where allele is set
+to -1 if the allele in GT is a dot `.' (thus the higher bits are all 0).  
+{\color{red}
+The vector is padded with the end-of-vector values if the GT having fewer ploidy.
+We note specifically that except for the end-of-vector byte, no other negative
+values are allowed in the GT array.
+}
 
 Examples:
 
@@ -1701,6 +1710,7 @@ section~4 as BAM files and other block-compressed files with BGZF.
 \begin{itemize}
 \item BCF header lines can include optional IDX field
 \item We introduce end-of-vector byte and reserve 8 values for future use
+\item Clarified that except the end-of-vector byte, no other negative values are allowed in the GT array 
 \item String vectors in BCF do not need to start with comma, as the number of values is indicated already in the definition of the tag in the header.
 \end{itemize}
 }
