@@ -392,13 +392,19 @@ defines the format of {\tt VALUE}:
 {\bf Type} & {\bf Regexp matching {\tt VALUE}} & {\bf Description} \\
 \hline
 A & {\tt [!-\char126]} & Printable character \\
-i & {\tt [-+]?[0-9]+} & Singed 32-bit integer \\
+i & {\tt [-+]?[0-9]+} & Signed integer\footnotemark\\
 f & {\tt [-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?} & Single-precision floating number \\
 Z & {\tt [\,\,\,!-\char126]+} & Printable string, including space\\
 H & {\tt [0-9A-F]+} & Byte array in the Hex format\footnotemark\\
 B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)+} & Integer or numeric array\\
 \hline
 \end{tabular}
+\addtocounter{footnote}{-1}
+\footnotetext{The number of digits in an integer optional field is not
+explicitly limited in SAM.  However, BAM can represent values in the
+range~$[-2^{31},2^{32})$, so in practice this is the realistic range
+of values for SAM's `{\tt i}' as well.}
+\stepcounter{footnote}
 \footnotetext{For example, a byte array {\tt \{0x1a,0xe3,0x1\}} corresponds to a Hex string `{\tt 1AE301}'.}
 \end{center}
 For an integer or numeric array (type `{\tt B}'), the first letter indicates the type of numbers
@@ -873,7 +879,8 @@ is $4680$.}
 \footnotetext{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
 \stepcounter{footnote}
 \footnotetext{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
-	{\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t} and {\tt uint32\_t}, respectively. In SAM, all single integer types are mapped to {\tt int32\_t}.}
+{\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t} and {\tt uint32\_t}, respectively.
+In SAM, all single (i.e., non-array) integer types are stored as `{\tt i}', regardless of magnitude.}
 \stepcounter{footnote}
 \footnotetext{A `{\tt B}'-typed (array) tag--value pair is stored as follows. The first two bytes keep the two-character tag. The 3rd byte is always `{\tt B}'.
 	The 4th byte, matching {\tt /\char94[cCsSiIf]\$/}, indicates the type of an element in the array.
