@@ -4,6 +4,7 @@ PDFS =	BCFv1_qref.pdf \
 	BCFv2_qref.pdf \
 	CRAMv2.1.pdf \
 	CSIv1.pdf \
+	CSIv2.pdf \
 	SAMv1.pdf \
 	tabix.pdf \
 	VCFv4.1.pdf \
