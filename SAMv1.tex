@@ -118,6 +118,14 @@ r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
   flags.  Typically the alignment designated primary is the best alignment, but
   the decision may be arbitrary.\footnotemark
 
+\item[Template alignment]
+  A set of read alignments for all reads in the template.  In the case
+  of multiple mappings for a template, multiple template alignments
+  may exist.  All read alignments (whether chimeric or linear) within
+  a template alignment share the same value of the 0x100 flag
+  (secondary alignment).  Template alignments consisting of more than
+  2 segments must have the TC auxiliary tag present.
+
 \item[1-based coordinate system] A coordinate system where the first
   base of a sequence is one. In this coordinate system, a region is
   specified by a closed interval. For example, the region between the
@@ -296,6 +304,7 @@ of the mandatory fields in the SAM format:
     0x40 and 0x80 are unset, the index of the read in the template
     is unknown. This may happen for a non-linear template or the index
     is lost in data processing.
+  \item Bit 0x20 defines the next segment as per the definition in RNEXT and PNEXT.
   \item If 0x1 is unset, no assumptions can be made about 0x2, 0x8,
     0x20, 0x40 and 0x80.
   \end{itemize}
@@ -344,28 +353,30 @@ of the mandatory fields in the SAM format:
   \item Sum of lengths of the {\tt M/I/S/=/X} operations shall equal
     the length of {\sf SEQ}.
   \end{itemize}
-\item {\sf RNEXT}: Reference sequence name of the primary alignment of the NEXT read in the
-  template. For the last read, the next read is the first
-  read in the template. If {\tt @SQ} header lines are present, {\sf
-    RNEXT} (if not `*' or `=') must be present in one of the {\tt SQ-SN}
-  tag. This field is set as `*' when the information is unavailable, and
-  set as `=' if {\sf RNEXT} is identical {\sf RNAME}. If not `=' and the
-  next read in the template has one primary mapping (see also bit
-  0x100 in {\sf FLAG}), this field is identical to {\sf RNAME} at the primary line of the
-  next read.  If {\sf
-    RNEXT} is `*', no assumptions can be made on {\sf PNEXT} and bit
+\item {\sf RNEXT}: Reference sequence name of the NEXT read in this
+  template alignment, where NEXT is defined to be the next read in
+  template coordinates rather than mapping coordinates.  For the last
+  read, the next read is the first read in this template alignment.
+  Multiple template alignments may exist, with RNEXT/PNEXT forming a
+  circular list per template alignment.  If {\tt @SQ} header lines are
+  present, {\sf RNEXT} (if not `*' or `=') must be present in one of
+  the {\tt SQ-SN} tag. This field is set as `*' when the information
+  is unavailable, and set as `=' if {\sf RNEXT} is identical to {\sf
+    RNAME}.  If {\sf RNEXT} is `*', no assumptions can be made on {\sf
+    PNEXT} and bit 0x20.
+\item {\sf PNEXT}: Position of the NEXT read in this template
+  alignment.  Set as 0 when the information is unavailable. This field
+  equals {\sf POS} at the primary line of the next read. If {\sf
+    PNEXT} is 0, no assumptions can be made on {\sf RNEXT} and bit
   0x20.
-\item {\sf PNEXT}: Position of the primary alignment of the NEXT read in the template. Set as
-  0 when the information is unavailable. This field equals {\sf POS} at the primary line of
-  the next read. If {\sf PNEXT} is 0, no assumptions can be made on
-  {\sf RNEXT} and bit 0x20.
-\item {\sf TLEN}: signed observed Template LENgth. If all segments are
-  mapped to the same reference, the unsigned observed template length
-  equals the number of bases from the leftmost mapped base to the
-  rightmost mapped base. The leftmost segment has a plus sign and the
-  rightmost has a minus sign. The sign of segments in the middle is
-  undefined. It is set as 0 for single-segment template or when the
-  information is unavailable.
+\item {\sf TLEN}: signed observed Template LENgth.  If the first and
+  last segments of this template alignment are mapped to the same
+  reference, the unsigned observed template length equals the number
+  of bases from the leftmost mapped base to the rightmost mapped
+  base. The leftmost segment has a plus sign and the rightmost has a
+  minus sign. The sign of segments in the middle is undefined. It is
+  set as 0 for single-segment template or when the information is
+  unavailable.
 \item {\sf SEQ}: segment SEQuence. This field can be a `*' when the
   sequence is not stored. If not a `*', the length of the sequence must
   equal the sum of lengths of {\tt M/I/S/=/X} operations in {\sf CIGAR}.
@@ -434,7 +445,7 @@ may be changed if the new type is also compatible with the array.
   {\tt CS} & Z & Color read sequence on the original strand of the read. The primer base must be included.\\
   {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features.\footnotemark\\
   {\tt E2} & Z & The 2nd most likely base calls. Same encoding and same length as {\sf QUAL}.\\
-  {\tt FI} & i & The index of segment in the template.\\
+  {\tt FI} & i & The index of segment in the template, counting from 1 onwards.\\
   {\tt FS} & Z & Segment suffix.\\
   {\tt FZ} & B,S & Flow signal intensities on the original strand of the read, stored as {\tt (uint16\_t) round(value * 100.0)}. \\
   {\tt LB} & Z & Library. Value to be consistent with the header {\tt RG-LB} tag if {\tt @RG} is present.\\
@@ -464,7 +475,7 @@ may be changed if the new type is also compatible with the array.
     Each element in the semi-colon delimited list represents a part of the chimeric alignment. Conventionally, at a supplementary line,
 	the first element points to the primary line.\\
   {\tt SM} & i & Template-independent mapping quality \\
-  {\tt TC} & i & The number of segments in the template.\\
+  {\tt TC} & i & The number of segments in the template.  Mandatory for templates with more than two segments.\\
   {\tt U2} & Z & Phred probility of the 2nd call being wrong conditional on the best being wrong. The same encoding as {\sf QUAL}. \\
   {\tt UQ} & i & Phred likelihood of the segment, conditional on the mapping being correct \\
   \hline
@@ -559,8 +570,8 @@ specific software package for it to function properly.
   \begin{enumerate}[label=\arabic*]
   \item When one segment is present in multiple lines to represent a multiple
 	mapping of the segment, only one of these records should have the secondary
-	alignment flag bit (0x100) unset. {\sf RNEXT} and {\sf PNEXT} point to the
-	primary line of the next read in the template.
+	alignment flag bit (0x100) unset. Regardless of bit 0x100, {\sf RNEXT} and
+        {\sf PNEXT} point to the next segment in the current template alignment.
   \item {\sf SEQ} and {\sf QUAL} of secondary alignments should be set
     to `*' to reduce the file size.
   \end{enumerate}
