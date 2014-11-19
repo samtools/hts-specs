@@ -48,3 +48,5 @@ Note: this changes the EOF marker to:
    Option 1: itf8
    Option 2: gamma
    Option 3: rans
+   
+7. Content digests
