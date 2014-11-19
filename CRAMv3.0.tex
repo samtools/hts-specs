@@ -432,6 +432,8 @@ itf8 & number of blocks & the number of blocks\tabularnewline
 itf8[ ] & landmarks & Each integer value of this array is a byte offset into the 
 blocks byte array. Landmarks are used for random access indexing.\tabularnewline
 \hline
+byte[4] & crc32 & CRC32 hash of the all the preceding bytes in the container.\tabularnewline
+\hline
 byte[ ] & blocks & The blocks contained within the container.\tabularnewline
 \hline
 \end{tabular}
@@ -477,6 +479,8 @@ byte[ ] & block data & the data stored in the block:\linebreak{}
 $\bullet$ bit stream of CRAM records (core data block)\linebreak{}
 $\bullet$ byte stream (external data block)\linebreak{}
 $\bullet$ additional fields ( header blocks)\tabularnewline
+\hline
+byte[4] & CRC32 & CRC32 hash value for all preceding bytes in the block\tabularnewline
 \hline
 \end{tabular}
 
