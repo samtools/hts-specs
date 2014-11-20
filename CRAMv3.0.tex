@@ -312,6 +312,12 @@ GAMMA & 9 & int offset & Elias gamma coding\tabularnewline
 A more detailed description of all the above coding algorithms and their parameters 
 can be found in the \emph{Codings }section. 
 
+\section{\textbf{Checksums}}
+The checksumming is used to ensure data integrity. The following checksumming algorithms are used in CRAM.
+\subsection{\textbf{CRC32}}
+This is a cyclic redundancy checksum 32-bit long with the polynomial 0x04C11DB7. Please refer to \href{http://www.itu.int/rec/recommendation.asp?type=folders&lang=e&parent=T-REC-V.42}{ITU-T V.42} for more details.
+
+
 \section{\textbf{File structure}}
 
 The overall CRAM file structure is described in this section. Please refer to other 
