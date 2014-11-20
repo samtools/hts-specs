@@ -788,10 +788,7 @@ blocks.
 
 \section{\textbf{End of file marker}}
 
-A special container is used to mark the end of a file or stream. It is optional 
-in version preceding 2.1 but required in later versions. The idea is to provide 
-an easy and a quick way to detect that a CRAM file or stream is complete. The marker 
-is basically an empty container with ref seq id set to -1 (unaligned) and alignment 
+A special container is used to mark the end of a file or stream. It is required in version 3 or later. The idea is to provide an easy and a quick way to detect that a CRAM file or stream is complete. The marker is basically an empty container with ref seq id set to -1 (unaligned) and alignment 
 start set to 4542278.
 
 Here is a complete content of the EOF container explained in detail:
@@ -805,7 +802,7 @@ name}\tabularnewline
 \hline
 0b 00 00 00 & integer & 11 & size of blocks data\tabularnewline
 \hline
-ff ff ff ff ff & itf8 & -1 & ref seq id\tabularnewline
+ff ff ff ff f0 & itf8 & -1 & ref seq id\tabularnewline
 \hline
 e0 45 4f 46 & itf8 & 4542278 & alignment start\tabularnewline
 \hline
@@ -820,6 +817,8 @@ e0 45 4f 46 & itf8 & 4542278 & alignment start\tabularnewline
 01 & itf8 & 1 & block count\tabularnewline
 \hline
 00 & array & 0 & landmarks\tabularnewline
+\hline
+8b d7 72 2f & integer & 796055435 & container header CRC32\tabularnewline
 \hline
 \multicolumn{4}{|l|}{\textit{Compression header block}}\tabularnewline
 \hline
@@ -847,13 +846,14 @@ e0 45 4f 46 & itf8 & 4542278 & alignment start\tabularnewline
 \hline
 00 & itf8 & 0 & tag encoding map size\tabularnewline
 \hline
+ee 63 01 4b & integer & 1258382318 & block CRC32\tabularnewline
+\hline
 \end{tabular}
 
-When compiled together the EOF marker is exactly 30 bytes long and in hex representation 
+When compiled together the EOF marker is 38 bytes long and in hex representation 
 is:
 
-0b 00 00 00 ff ff ff ff ff e0 45 4f 46 00 00 00 00 01 00  00 01 00 06 06 01 00 
-01 00 01 00
+0f 00 00 00 ff ff ff ff 0f e0 45 4f 46 00 00 00 00 01 00 8b d7 72 2f 00 01 00 06 06 01 00 01 00 01 00 ee 63 01 4b
 
 \section{\textbf{Record structure}}
 
