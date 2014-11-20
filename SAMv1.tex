@@ -993,10 +993,8 @@ saved.
   & & & {\sf unmapped\_count} & Number of unmapped read-segments for this reference & {\tt uint64\_t} & \\\cline{2-7}
   & \multicolumn{3}{l|}{\sf n\_intv} & \# 16kbp intervals (for the linear index) & {\tt int32\_t} & \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of intervals (n=n\_intv)}} \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\
-  \cline{1-7}
-  \multicolumn{4}{|l|}{\sf n\_no\_coor} & (Optional) \# of unmapped unplaced reads ({\sf RNAME} *) & {\tt uint64\_t} & \\\cline{1-7}
-  \cline{1-7}
+  & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\\cline{1-7}
+  \multicolumn{4}{|l|}{{\sf n\_no\_coor} (optional)} & Number of unmapped unplaced reads ({\sf RNAME} *) & {\tt uint64\_t} & \\\cline{1-7}
 \end{tabular}}
 \end{table}
 
