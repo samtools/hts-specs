@@ -976,35 +976,46 @@ saved.
   \multicolumn{7}{|c|}{\textcolor{gray}{\it List of indices (n=n\_ref)}} \\\cline{2-7}
   & \multicolumn{3}{l|}{\sf n\_bin} & \# distinct bins (for the binning index) & {\tt int32\_t} & \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of distinct bins (n=n\_bin)}} \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf bin} & Distinct bin (range $0$ to $37449$ inclusive) & {\tt uint32\_t} & \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf bin} & Distinct bin & {\tt uint32\_t} & \\\cline{3-7}
   & & \multicolumn{2}{l|}{\sf n\_chunk} & \# chunks & {\tt int32\_t} & \\\cline{3-7}
   & & \multicolumn{5}{c|}{\textcolor{gray}{\it List of chunks (n=n\_chunk)}} \\\cline{4-7}
   & & & {\sf chunk\_beg} & (Virtual) file offset of the start of the chunk & {\tt uint64\_t} & \\\cline{4-7}
-  & & & {\sf chunk\_end} & (Virtual) file offset of the end of the chunk & {\tt uint64\_t} & \\
-  \cline{3-7}
-  & \multicolumn{6}{c|}{\textcolor{gray}{\it Optional dummy entry for idxstats (included in n\_bin)}} \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf bin} & Dummy bin number & {\tt uint32\_t} & 37450 \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf n\_chunk} & \# chunks & {\tt int32\_t} & 2 \\\cline{3-7}
-  & & \multicolumn{5}{c|}{\textcolor{gray}{\it First chunk for dummy bin}} \\\cline{4-7}
-  & & & {\sf unmapped\_beg} & (Virtual) file offset of the start of unmapped but placed & {\tt uint64\_t} & \\\cline{4-7}
-  & & & {\sf unmapped\_end} & (Virtual) file offset of the end of unmapped but placed & {\tt uint64\_t} & \\\cline{4-7}
-  & & \multicolumn{5}{c|}{\textcolor{gray}{\it Second chunk for dummy bin}} \\\cline{4-7}
-  & & & {\sf mapped\_count} & Number of mapped read-segments for this reference & {\tt uint64\_t} & \\\cline{4-7}
-  & & & {\sf unmapped\_count} & Number of unmapped read-segments for this reference & {\tt uint64\_t} & \\\cline{2-7}
+  & & & {\sf chunk\_end} & (Virtual) file offset of the end of the chunk & {\tt uint64\_t} & \\\cline{2-7}
   & \multicolumn{3}{l|}{\sf n\_intv} & \# 16kbp intervals (for the linear index) & {\tt int32\_t} & \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of intervals (n=n\_intv)}} \\\cline{3-7}
   & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\\cline{1-7}
-  \multicolumn{4}{|l|}{{\sf n\_no\_coor} (optional)} & Number of unmapped unplaced reads ({\sf RNAME} *) & {\tt uint64\_t} & \\\cline{1-7}
+  \multicolumn{4}{|l|}{{\sf n\_no\_coor} (optional)} & Number of unplaced unmapped reads ({\sf RNAME} *) & {\tt uint64\_t} & \\\cline{1-7}
 \end{tabular}}
 \end{table}
 
-Samtools 0.1.8 introduced the {\tt samtools idxstats} command producing a summary
-of the number of mapped and unmapped read-segments per reference, and any unmapped
-unplaced read-segments (see Section~\ref{sec-recommended-practice}).
-This uses additional fields recorded in the BAI file by {\tt samtools index}.
-These optional fields are two entries ({\sf n\_chunk} $= 2$) for each reference
-under an entry for dummy {\sf bin} $37450$, and the trailing {\sf unplaced\_count}
-field at the end of the file.
+The index file may optionally contain additional metadata providing a summary
+of the number of mapped and unmapped read-segments per reference sequence,
+and of any unplaced unmapped read-segments.\footnote{By \emph{placed unmapped
+read} we mean a read that is unmapped according to its {\sf FLAG} but whose
+{\sf RNAME} and~{\sf POS} fields are filled in, thus ``placing'' it on a
+reference sequence (see Section~\ref{sec-recommended-practice}).
+In contrast, \emph{unplaced} unmapped reads have~`*' and~0 for {\sf RNAME}
+and~{\sf POS}.}
+This is stored in an optional extra metadata pseudo-bin for each reference
+sequence, and in the optional trailing {\sf n\_no\_coor} field at the end of
+the file.
+
+The pseudo-bins appear in the references' lists of distinct bins as bin
+number~37450 (which is beyond the normal range) and are laid out so as to be
+compatible with real bins and their chunks:
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{|l|l|l|r|}
+  \hline
+  {\sf bin} & Magic bin number & {\tt uint32\_t} & 37450 \\\hline
+  {\sf n\_chunk} & \# chunks & {\tt int32\_t} & 2 \\\hline
+  {\sf unmapped\_beg} & (Virtual) file offset of the start of placed unmapped reads & {\tt uint64\_t} & \\\hline
+  {\sf unmapped\_end} & (Virtual) file offset of the end of placed unmapped reads & {\tt uint64\_t} & \\\hline
+  {\sf n\_mapped} & Number of mapped read-segments for this reference & {\tt uint64\_t} & \\\hline
+  {\sf n\_unmapped} & Number of unmapped read-segments for this reference & {\tt uint64\_t} & \\\hline
+\end{tabular}
+\end{table}
 
 \subsection{C source code for computing bin number and overlapping bins}\label{sec:code}
 
