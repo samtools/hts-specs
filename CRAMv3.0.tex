@@ -315,8 +315,9 @@ can be found in the \emph{Codings }section.
 \section{\textbf{Checksums}}
 The checksumming is used to ensure data integrity. The following checksumming algorithms are used in CRAM.
 \subsection{\textbf{CRC32}}
-This is a cyclic redundancy checksum 32-bit long with the polynomial 0x04C11DB7. Please refer to \href{http://www.itu.int/rec/recommendation.asp?type=folders&lang=e&parent=T-REC-V.42}{ITU-T V.42} for more details.
-
+This is a cyclic redundancy checksum 32-bit long with the polynomial 0x04C11DB7. Please refer to \href{http://www.itu.int/rec/recommendation.asp?type=folders&lang=e&parent=T-REC-V.42}{ITU-T V.42} for more details. The value of the CRC32 hash function is written as an integer.
+\subsection{\textbf{CRC32 sum}}
+CRC32 sum is a combination of CRC32 values by summing up all individual CRC32 values modulo 2\textsuperscript{32}. 
 
 \section{\textbf{File structure}}
 
@@ -438,7 +439,7 @@ itf8 & number of blocks & the number of blocks\tabularnewline
 itf8[ ] & landmarks & Each integer value of this array is a byte offset into the 
 blocks byte array. Landmarks are used for random access indexing.\tabularnewline
 \hline
-byte[4] & crc32 & CRC32 hash of the all the preceding bytes in the container.\tabularnewline
+int & crc32 & CRC32 hash of the all the preceding bytes in the container.\tabularnewline
 \hline
 byte[ ] & blocks & The blocks contained within the container.\tabularnewline
 \hline
@@ -578,6 +579,10 @@ SM & byte[5] & substitution matrix & substitution matrix\tabularnewline
 \hline
 TD & byte[ ] & tag ids dictionary & a list of lists of tag ids, see tag encoding 
 section\tabularnewline
+\hline
+BD & int & base digest & sum over all reads of CRC32 hashes of bases.\tabularnewline
+\hline
+SD & int & score digest & sum over all reads of CRC32 hashes of quality scores.\tabularnewline
 \hline
 \end{tabular}
 
@@ -1266,6 +1271,77 @@ of bytes.
 
 Strings, like read name, are translated into bytes according to UTF8 rules. In 
 most cases these should coincide with ASCII, making the translation trivial. 
+
+\subsection{\textbf{rANS codec}}
+
+\subsubsection*{Introduction}
+rANS codec is an arithmetic codec with some unusual properties. It is formally described in \href{http://arxiv.org/abs/1311.2540}{Asymmetric numeral systems: entropy coding combining speed of Huffman coding with compression rate of arithmetic coding}. In the context of CRAM compression rANS codec is used as an external encoding (block compression method).
+
+\subsubsection{\textbf{rANS compressed data structure}}
+A compressed data block consists of the following logical parts: 
+
+
+\begin{tabular}{|l|l|>{\raggedright}p{100pt}|>{\raggedright}p{220pt}|}
+\hline
+\textbf{Value data type} & \textbf{Name} & \textbf{Description}\tabularnewline
+\hline
+byte & order & the order of the codec, either 0 or 1\tabularnewline
+\hline
+int & compressed size & the size in bytes of the compressed blob\tabularnewline
+\hline
+int & data size & raw or uncompressed data size in bytes\tabularnewline
+\hline
+byte[] & frequency table & byte frequencies of input data written using RLE\tabularnewline
+\hline
+byte[] & compressed blob & compressed data\tabularnewline
+\hline
+\end{tabular}
+
+\subsubsection{\textbf{Frequency table}}
+Frequency table represents frequencies of events, for example for order-0 these are frequencies of individual bytes and for order-1 these are frequencies of all combinations of 2 bytes in the data. 
+Each frequency value is an integer number of event occurrences with the requirement of total sum of all frequencies in a table to be normalized to 4096.
+Frequency table is written using run-length encoding. This allows to reduce the byte size of frequency tables where the alphabet encoded has stretches of sequential values. A general description is: 
+\begin{itemize}
+  \item Sort frequencies by the alphabet order descending.
+  \item Write a single value with it's frequency as: \newline
+	\begin{tabular}{|c|c|c|}
+	\hline
+	\textbf{value} & \textbf{frequency} & \textbf{zero byte}\tabularnewline
+	\hline  
+	\end{tabular}
+  \item Write a stretch of continuous values and their frequencies as:
+	\newline
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+	\hline
+	\textbf{value1} & \textbf{frequency1} & \textbf{value2} & \textbf{rle counter=N-2} & \textbf{frequency2} &
+	\textbf{\ldots} & \textbf{frequencyN} & \textbf{zero
+	byte}\tabularnewline
+	\hline 
+	\end{tabular}
+\item Frequency table is finished with a zero byte.
+\end{itemize}
+Frequencies are written as itf-8. For example, consider the following
+frequency table not normalized for simplicity:
+
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Value} & \textbf{Frequency} \tabularnewline
+\hline
+A & 10\tabularnewline
+\hline
+B & 20\tabularnewline
+\hline
+C & 30\tabularnewline
+\hline
+E & 40\tabularnewline
+\hline
+\end{tabular}
+
+The written byte sequence is: 0x41 0x0A 0x42 0x01 0x14 0x1E 0x00 0x45 0x28 0x00
+
+The order-1 frequency table is a 2-dimensional array of frequencies. It is
+written in a row-first manner. Each row is similar to order-0 table except for
+values written as 2 bytes instead of one.
 
 \subsection{\textbf{Codings}}
 
