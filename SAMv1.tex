@@ -842,7 +842,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed by the {\sf reg2bin()} function in Section~\ref{sec:code}; {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed from the mapping position;\footnotemark\ {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}}; {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}. & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
@@ -859,7 +859,17 @@ underlined word in uppercase denotes a field in the SAM format.
   \cline{1-6}
 \end{tabular}}
 \end{table}
-\addtocounter{footnote}{-2}
+\addtocounter{footnote}{-3}
+\footnotetext{{\sf BIN} is calculated using the {\sf reg2bin()} function
+in Section~\ref{sec:code}. For mapped reads this uses {\sf POS-1}
+(i.e.,~0-based left position) and the alignment end point using the
+alignment length from the {\sf CIGAR} string. For unmapped reads
+(e.g.,~paired end reads where only one part is mapped, see
+Section~\ref{sec-recommended-practice}) treat the alignment as
+being length one. Note unmapped reads with {\sf POS} $0$ (which
+becomes $-1$ in BAM) therefore use {\sf reg2bin(-1, 0)} which
+is $4680$.}
+\stepcounter{footnote}
 \footnotetext{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
 \stepcounter{footnote}
 \footnotetext{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
@@ -922,7 +932,7 @@ calls in average.
 
 In the BAI format, each bin may span $2^{29}$, $2^{26}$, $2^{23}$, $2^{20}$,
 $2^{17}$ or $2^{14}$ bp. Bin 0 spans a 512Mbp region, bins 1--8 span 64Mbp,
-9--72 8Mbp, 73--584 1Mbp, 585--4680 128Kbp and bins 4681--37449 span 16Kbp
+9--72 8Mbp, 73--584 1Mbp, 585--4680 128Kbp, and bins 4681--37448 span 16Kbp
 regions.  This implies that this index format does not support reference
 chromosome sequences longer than $2^{29}-1$.
 
@@ -996,9 +1006,38 @@ saved.
   & & & {\sf chunk\_end} & (Virtual) file offset of the end of the chunk & {\tt uint64\_t} & \\\cline{2-7}
   & \multicolumn{3}{l|}{\sf n\_intv} & \# 16kbp intervals (for the linear index) & {\tt int32\_t} & \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of intervals (n=n\_intv)}} \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\
-  \cline{1-7}
+  & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\\cline{1-7}
+  \multicolumn{4}{|l|}{{\sf n\_no\_coor} (optional)} & Number of unplaced unmapped reads ({\sf RNAME} *) & {\tt uint64\_t} & \\\cline{1-7}
 \end{tabular}}
+\end{table}
+
+The index file may optionally contain additional metadata providing a summary
+of the number of mapped and unmapped read-segments per reference sequence,
+and of any unplaced unmapped read-segments.\footnote{By \emph{placed unmapped
+read} we mean a read that is unmapped according to its {\sf FLAG} but whose
+{\sf RNAME} and~{\sf POS} fields are filled in, thus ``placing'' it on a
+reference sequence (see Section~\ref{sec-recommended-practice}).
+In contrast, \emph{unplaced} unmapped reads have~`*' and~0 for {\sf RNAME}
+and~{\sf POS}.}
+This is stored in an optional extra metadata pseudo-bin for each reference
+sequence, and in the optional trailing {\sf n\_no\_coor} field at the end of
+the file.
+
+The pseudo-bins appear in the references' lists of distinct bins as bin
+number~37450 (which is beyond the normal range) and are laid out so as to be
+compatible with real bins and their chunks:
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{|l|l|l|r|}
+  \hline
+  {\sf bin} & Magic bin number & {\tt uint32\_t} & 37450 \\\hline
+  {\sf n\_chunk} & \# chunks & {\tt int32\_t} & 2 \\\hline
+  {\sf unmapped\_beg} & (Virtual) file offset of the start of placed unmapped reads & {\tt uint64\_t} & \\\hline
+  {\sf unmapped\_end} & (Virtual) file offset of the end of placed unmapped reads & {\tt uint64\_t} & \\\hline
+  {\sf n\_mapped} & Number of mapped read-segments for this reference & {\tt uint64\_t} & \\\hline
+  {\sf n\_unmapped} & Number of unmapped read-segments for this reference & {\tt uint64\_t} & \\\hline
+\end{tabular}
 \end{table}
 
 \subsection{C source code for computing bin number and overlapping bins}\label{sec:code}
@@ -1009,7 +1048,7 @@ binning schemes with arbitrary depth and sizes.
 
 {\small
 \begin{verbatim}
-/* calculate bin given an alignment covering [beg,end) (zero-based, half-close-half-open) */
+/* calculate bin given an alignment covering [beg,end) (zero-based, half-closed-half-open) */
 int reg2bin(int beg, int end)
 {
     --end;
