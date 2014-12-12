@@ -805,7 +805,7 @@ name}\tabularnewline
 \hline
 \multicolumn{4}{|l|}{\textit{Container header}}\tabularnewline
 \hline
-0b 00 00 00 & integer & 11 & size of blocks data\tabularnewline
+0f 00 00 00 & integer & 15 & size of blocks data\tabularnewline
 \hline
 ff ff ff ff f0 & itf8 & -1 & ref seq id\tabularnewline
 \hline
@@ -1342,6 +1342,14 @@ The written byte sequence is: 0x41 0x0A 0x42 0x01 0x14 0x1E 0x00 0x45 0x28 0x00
 The order-1 frequency table is a 2-dimensional array of frequencies. It is
 written in a row-first manner. Each row is similar to order-0 table except for
 values written as 2 bytes instead of one.
+
+\subsubsection{\textbf{Parallel flows}}
+rANS compression is split between 4 independent flows. Each flow codes it's part of the incoming data. The data is split between the flows based on their index, the first flow gets the first quarter of the data and so on.
+
+\subsubsection{\textbf{Edge cases}}
+For data under 4 bytes only order-0 compression is applied.
+
+
 
 \subsection{\textbf{Codings}}
 
