@@ -5,6 +5,12 @@
 \usepackage[margin=0.75in]{geometry}
 \usepackage[pdfborder={0 0 0}]{hyperref}
 
+\usepackage{listings}
+\lstset{
+   basicstyle=\ttfamily,
+   mathescape
+}
+
 \usepackage{color}
 \renewcommand{\thefootnote}{\color{red}\fnsymbol{footnote}}
 
@@ -279,7 +285,25 @@ As with the INFO field, there are several common, reserved keywords that are sta
 	\end{itemize}
   \item DP : read depth at this position for this sample (Integer)
   \item FT : sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field). Again, use PASS to indicate that all filters have been passed, a semi-colon separated list of codes for filters that fail, or `.' to indicate that filters have not been applied. These values should be described in the meta-information in the same way as FILTERs (String, no white-space or semi-colons permitted)
-  \item GL : genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields. In presence of the GT field the same ploidy is expected and the canonical order is used; without GT field, diploidy is assumed. If A is the allele in REF and B,C,... are the alleles as ordered in ALT, the ordering of genotypes for the likelihoods is given by: F(j/k) = (k*(k+1)/2)+j.  In other words, for biallelic sites the ordering is: AA,AB,BB; for triallelic sites the ordering is: AA,AB,BB,AC,BC,CC, etc.  For example: GT:GL 0/1:-323.03,-99.29,-802.53 (Floats)
+  \item GL : genotype likelihoods comprised of comma separated floating point
+  $log_{10}$-scaled likelihoods for all possible genotypes given the set of
+  alleles defined in the REF and ALT fields. {\color{red} In presence of the GT field the
+  same ploidy is expected; without GT field, diploidy is assumed. 
+  If A is the allele in REF and B,C,... are the alleles as ordered in ALT, the
+  ordering of genotypes for the likelihoods is
+  AA,AB,BB for biallelic sites; AA,AB,BB,AC,BC,CC for triallelic sites, etc.
+
+  In general case of ploidy P and N alternate alleles (0 is the REF and 1..N
+  the alternate alleles), the ordering of genotypes for the likelihoods can
+  be expressed by the following pseudocode with variable number of nested loops:
+  \begin{lstlisting}
+    for $a_1 = 0\ldots N$
+    $\ldots$
+    for $a_P = 0\ldots a_{P-1}$
+        println $a_1 a_2 \ldots a_P$
+  \end{lstlisting}}
+
+  For example: GT:GL 0/1:-323.03,-99.29,-802.53 (Floats) 
   \item GLE : genotype likelihoods of heterogeneous ploidy, used in presence of uncertain copy number. For example: GLE=0:-75.22,1:-223.42,0/0:-323.03,1/0:-99.29,1/1:-802.53 (String)
   \item PL : the phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) (Integers)
   \item GP : {\color{red} genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities (Float)}
