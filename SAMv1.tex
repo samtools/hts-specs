@@ -5,6 +5,7 @@
 \usepackage{enumitem}
 \usepackage{longtable}
 \usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
+\usepackage{amsmath}
 
 \addtolength{\textwidth}{3.4cm}
 \addtolength{\hoffset}{-1.7cm}
@@ -70,6 +71,11 @@ r003 2064 ref 29 17 6H5M       *  0   0 TAGGC             * SA:Z:ref,9,+,5S6M,30
 r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
 \end{verbatim}
 \end{framed}
+Remark that
+$\text{99} = \text{0x63} = \text{0x400}|\text{0x20}|\text{0x2}|\text{0x1}$,
+$\text{2064} = \text{0x810} = \text{0x800}|\text{0x10}$, and
+$\text{147} = \text{0x93} = \text{0x80}|\text{0x10}|\text{0x2}|\text{0x1}$.
+
 
 \pagebreak
 
@@ -589,9 +595,9 @@ specific software package for it to function properly.
   {\tt complement(join(85052..85354,} {\tt 85441..85621,} {\tt 6097..86284))}
   would have three lines in SAM with a common {\sf QNAME}: %And three lines in GFF3 too.
     \begin{enumerate}
-    \item The $5'$ fragment {\sf FLAG}  883, {\sf POS} 86097, {\sf CIGAR} {\tt 188M}, and tags {\tt FI:i:1} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x40 + 0x100 + 0x200
-    \item Middle fragment {\sf FLAG} 819, {\sf POS} 85441, {\sf CIGAR} {\tt 181M}, and tags {\tt FI:i:2} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x100 + 0x200
-    \item The $3'$ fragment {\sf FLAG} 947, {\sf POS} 85052, {\sf CIGAR} {\tt 303M}, and tags {\tt FI:i:3} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x80 + 0x100 + 0x200
+    \item The $5'$ fragment {\sf FLAG}  883 ($= \text{0x200}|\text{0x100}|\text{0x40}|\text{0x20}|\text{0x10}|\text{0x2}|\text{0x1}$), {\sf POS} 86097, {\sf CIGAR} {\tt 188M}, and tags {\tt FI:i:1} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x40 + 0x100 + 0x200
+    \item Middle fragment {\sf FLAG} 819 ($= \text{0x200}|\text{0x100}|\text{0x20}|\text{0x10}|\text{0x2}|\text{0x1}$), {\sf POS} 85441, {\sf CIGAR} {\tt 181M}, and tags {\tt FI:i:2} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x100 + 0x200
+    \item The $3'$ fragment {\sf FLAG} 947($= \text{0x200}|\text{0x100}|\text{0x80}|\text{0x20}|\text{0x10}|\text{0x2}|\text{0x1}$), {\sf POS} 85052, {\sf CIGAR} {\tt 303M}, and tags {\tt FI:i:3} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x80 + 0x100 + 0x200
     \end{enumerate}
   \item If converting GFF3 to SAM, store any \emph{key}, \emph{values}
   from column 9 in the {\tt CT} tag, except for the unique ID which
