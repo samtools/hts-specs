@@ -697,7 +697,9 @@ hold the annotation information, see Section~\ref{sec-recommended-practice}.
 \subsection{The BGZF compression format}
 
 BGZF is block compression implemented on top of the standard gzip file
-format. The goal of BGZF is to provide good compression while allowing
+format.\footnote{L.~Peter Deutsch, {\bf GZIP file format specification
+version~4.3}, \href{http://tools.ietf.org/html/rfc1952}{\sl RFC 1952}.}
+The goal of BGZF is to provide good compression while allowing
 efficient random access to the BAM file for indexed queries. The BGZF
 format is `gunzip compatible', in the sense that a compliant gunzip
 utility can decompress a BGZF compressed file.\footnote{It is worth noting that there is a known bug in the Java {\sf
@@ -707,7 +709,8 @@ manipulated using the built-in Java {\sf util.zip} package, but naive
 use of {\sf GZIPInputStream} on a BGZF file will not work due to this
 bug.}
 
-A BGZF file is a series of concatenated BGZF blocks. Each BGZF block
+A BGZF file is a series of concatenated BGZF blocks, each no larger
+than~64Kb before or after compression. Each BGZF block
 is itself a spec-compliant gzip archive which contains an ``extra field''
 in the format described in RFC1952. The gzip file format allows the
 inclusion of application-specific extra fields and these are ignored by
@@ -759,6 +762,13 @@ table.  (All integers are little endian as is required by RFC1952.)
   \cline{1-6}
 \end{tabular}}
 \end{table}
+
+The random access method to be described next limits the uncompressed
+contents of each BGZF block to a maximum of $2^{16}$~bytes of data.
+Thus while {\sf ISIZE} is stored as a {\tt uint32\_t} as per the gzip format,
+in BGZF it is limited to the range~$[0,65536]$.
+{\sf BSIZE} can represent BGZF block sizes in the range~$[1,65536]$, though
+typically {\sf BSIZE} will be rather less than~{\sf ISIZE} due to compression.
 
 \subsubsection{Random access}
 
@@ -842,7 +852,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed by the {\sf reg2bin()} function in Section~\ref{sec:code}; {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed from the mapping position;\footnotemark\ {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}}; {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}. & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
@@ -859,7 +869,17 @@ underlined word in uppercase denotes a field in the SAM format.
   \cline{1-6}
 \end{tabular}}
 \end{table}
-\addtocounter{footnote}{-2}
+\addtocounter{footnote}{-3}
+\footnotetext{{\sf BIN} is calculated using the {\sf reg2bin()} function
+in Section~\ref{sec:code}. For mapped reads this uses {\sf POS-1}
+(i.e.,~0-based left position) and the alignment end point using the
+alignment length from the {\sf CIGAR} string. For unmapped reads
+(e.g.,~paired end reads where only one part is mapped, see
+Section~\ref{sec-recommended-practice}) treat the alignment as
+being length one. Note unmapped reads with {\sf POS} $0$ (which
+becomes $-1$ in BAM) therefore use {\sf reg2bin(-1, 0)} which
+is $4680$.}
+\stepcounter{footnote}
 \footnotetext{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
 \stepcounter{footnote}
 \footnotetext{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
@@ -879,10 +899,20 @@ specified region without going through the whole alignments. BAM must be
 sorted by the reference ID and then the leftmost coordinate before
 indexing.
 
+This section describes the binning scheme underlying coordinate-sorted
+BAM indices and its implementation in the long-established BAI format.
+The CSI format documented elsewhere uses a similar binning scheme and
+can also be used to index BAM.\footnotemark
+
+\footnotetext{See \href{http://samtools.github.io/hts-specs/CSIv1.pdf}
+{\tt CSIv1.pdf} at \url{https://github.com/samtools/hts-specs}.
+This is a separate specification because CSI is also used to index other
+coordinate-sorted file formats in addition to BAM.}
+
 \subsection{Algorithm}
 \subsubsection{Basic binning index}
-The UCSC binning scheme was suggested by Richard Durbin and Lincoln
-Stein and is explained by Kent et al. (2002). In this scheme, each bin
+The UCSC binning scheme was suggested by Richard Durbin and Lincoln Stein
+and is explained in Kent {\it et al.}\footnotemark\ In this scheme, each bin
 represents a contiguous genomic region which is either fully contained
 in or non-overlapping with another bin; each alignment is associated
 with a bin which represents the smallest region containing the entire
@@ -890,6 +920,11 @@ alignment. The binning scheme is essentially a representation of
 R-tree. A distinct bin uniquely corresponds to a distinct internal node
 in a R-tree. Bin A is a child of Bin B if the region represented by A is
 contained in B.
+
+\footnotetext{W.~James Kent {\it et al.},
+{\bf The Human Genome Browser at UCSC}, {\sl Genome Res.}~2002~12: 996--1006;
+\href{http://dx.doi.org/doi:10.1101/gr.229102}{doi:10.1101/\linebreak[1]gr.229102};
+{\sc pmid:}12045153.  See in particular {\sl The Database}, p1003.}
 
 To find the alignments that overlap a specified region, we need to get
 the bins that overlap the region, and then test each alignment in the
@@ -905,12 +940,14 @@ their leftmost coordinates and stop seeking the rest when an alignment
 falls outside the required region. This strategy saves half of the seek
 calls in average.
 
-In BAM, each bin may span $2^{29}$, $2^{26}$, $2^{23}$, $2^{20}$,
-$2^{17}$ or $2^{14}$ bp.\footnote{Due to a limitation in the current indexing
-scheme, a chromosome sequence longer than $2^{29}-1$ is not supported during
-indexing.} Bin 0 spans a 512Mbp region, bins 1--8 span 64Mbp, 9--72 8Mbp,
-73--584 1Mbp, 585--4680 128Kbp and bins 4681--37449
-span 16Kbp regions.
+In the BAI format, each bin may span $2^{29}$, $2^{26}$, $2^{23}$, $2^{20}$,
+$2^{17}$ or $2^{14}$ bp. Bin 0 spans a 512Mbp region, bins 1--8 span 64Mbp,
+9--72 8Mbp, 73--584 1Mbp, 585--4680 128Kbp, and bins 4681--37448 span 16Kbp
+regions.  This implies that this index format does not support reference
+chromosome sequences longer than $2^{29}-1$.
+
+The CSI format generalises the sizes of the bins, and supports reference
+sequences of the same length as are supported by SAM and BAM.
 
 \subsubsection{Reducing small chunks}
 Around the boundary of two adjacent bins, we may see many small chunks
@@ -934,7 +971,7 @@ With both binning and linear indices, we can retrieve alignments in most
 of regions with just one seek call.
 
 \subsubsection{A conceptual example}
-Suppose we have a genome shorter than 144kbp. we can design a binning
+Suppose we have a genome shorter than 144kbp. We can design a binning
 scheme which consists of three types of bins: bin 0 spans 0-144kbp, bin
 1, 2 and 3 span 48kbp and bins from 4 to 12 span 16kbp each:
 
@@ -943,7 +980,7 @@ scheme which consists of three types of bins: bin 0 spans 0-144kbp, bin
   {\small\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
     \cline{1-9}
     \multicolumn{9}{|c|}{0 (0--144kbp)}\\\cline{1-9}
-    \multicolumn{3}{|c|}{1 (0--48kbp)} & \multicolumn{3}{c|}{2 (48--96kbp)} & \multicolumn{3}{c|}{1 (96--144kbp)} \\\cline{1-9}
+    \multicolumn{3}{|c|}{1 (0--48kbp)} & \multicolumn{3}{c|}{2 (48--96kbp)} & \multicolumn{3}{c|}{3 (96--144kbp)} \\\cline{1-9}
     4 (0--16k) & 5 (16--32k) & 6 (32--48k) & 7 (48--64k) & 8 (64--80k) & 9 (80--96k) & 10 & 11 & 12 \\
     \cline{1-9}
   \end{tabular}}
@@ -961,7 +998,7 @@ alone, we need to visit the alignment at [40k,49k] as it belongs to bin
 64kbp and cannot overlap the specified region. A seek call can thus be
 saved.
 
-\subsection{The BAM indexing format}
+\subsection{The BAI index format for BAM files}
 \begin{table}[ht]
 {\small
 \begin{tabular}{|l|l|l|l|l|l|r|}
@@ -979,16 +1016,49 @@ saved.
   & & & {\sf chunk\_end} & (Virtual) file offset of the end of the chunk & {\tt uint64\_t} & \\\cline{2-7}
   & \multicolumn{3}{l|}{\sf n\_intv} & \# 16kbp intervals (for the linear index) & {\tt int32\_t} & \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of intervals (n=n\_intv)}} \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\
-  \cline{1-7}
+  & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\\cline{1-7}
+  \multicolumn{4}{|l|}{{\sf n\_no\_coor} (optional)} & Number of unplaced unmapped reads ({\sf RNAME} *) & {\tt uint64\_t} & \\\cline{1-7}
 \end{tabular}}
 \end{table}
 
+The index file may optionally contain additional metadata providing a summary
+of the number of mapped and unmapped read-segments per reference sequence,
+and of any unplaced unmapped read-segments.\footnote{By \emph{placed unmapped
+read} we mean a read that is unmapped according to its {\sf FLAG} but whose
+{\sf RNAME} and~{\sf POS} fields are filled in, thus ``placing'' it on a
+reference sequence (see Section~\ref{sec-recommended-practice}).
+In contrast, \emph{unplaced} unmapped reads have~`*' and~0 for {\sf RNAME}
+and~{\sf POS}.}
+This is stored in an optional extra metadata pseudo-bin for each reference
+sequence, and in the optional trailing {\sf n\_no\_coor} field at the end of
+the file.
+
+The pseudo-bins appear in the references' lists of distinct bins as bin
+number~37450 (which is beyond the normal range) and are laid out so as to be
+compatible with real bins and their chunks:
+
+\begin{table}[ht]
+\centering\small
+\begin{tabular}{|l|l|l|r|}
+  \hline
+  {\sf bin} & Magic bin number & {\tt uint32\_t} & 37450 \\\hline
+  {\sf n\_chunk} & \# chunks & {\tt int32\_t} & 2 \\\hline
+  {\sf unmapped\_beg} & (Virtual) file offset of the start of placed unmapped reads & {\tt uint64\_t} & \\\hline
+  {\sf unmapped\_end} & (Virtual) file offset of the end of placed unmapped reads & {\tt uint64\_t} & \\\hline
+  {\sf n\_mapped} & Number of mapped read-segments for this reference & {\tt uint64\_t} & \\\hline
+  {\sf n\_unmapped} & Number of unmapped read-segments for this reference & {\tt uint64\_t} & \\\hline
+\end{tabular}
+\end{table}
+
 \subsection{C source code for computing bin number and overlapping bins}\label{sec:code}
+The following functions compute bin numbers and overlaps for a BAI-style
+binning scheme with $6$~levels and a minimum bin size of $2^{14}$~bp.
+See the CSI specification for generalisations of these functions designed for
+binning schemes with arbitrary depth and sizes.
 
 {\small
 \begin{verbatim}
-/* calculate bin given an alignment covering [beg,end) (zero-based, half-close-half-open) */
+/* calculate bin given an alignment covering [beg,end) (zero-based, half-closed-half-open) */
 int reg2bin(int beg, int end)
 {
     --end;
