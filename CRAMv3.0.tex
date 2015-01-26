@@ -1274,8 +1274,32 @@ most cases these should coincide with ASCII, making the translation trivial.
 
 \subsection{\textbf{rANS codec}}
 
-\subsubsection*{Introduction}
-rANS codec is an arithmetic codec with some unusual properties. It is formally described in \href{http://arxiv.org/abs/1311.2540}{Asymmetric numeral systems: entropy coding combining speed of Huffman coding with compression rate of arithmetic coding}. In the context of CRAM compression rANS codec is used as an external encoding (block compression method).
+rANS is the range-coder variant of the Asymmetric Numerical
+System\footnote{J. Duda, \textit{Asymmetric numeral systems: entropy
+    coding combining speed of Huffman coding with compression rate of
+    arithmetic coding}, \url{http://arxiv.org/abs/1311.2540}}.
+
+The structure of the external rANS codec consists of several
+components: meta-data consisting of compression-order, and compressed
+and uncompressed sizes; normalised frequencies of the alphabet systems
+to be encoded, either in Order-0 or Order-1 context; and the rANS
+encoded byte stream itself.
+
+Here "Order" refers to the number of bytes of context used in
+computing the frequencies. It will be 0 or 1.  Ignoring punctuation
+and space, an Order-0 analysis of English text may observe that `e' is
+the most common letter (12-13\%), and that `u' occurs only around 2.5\%
+of the time.  If instead we consider the frequency of a letter in the
+context of one previous letter (Order-1) then these statistics change
+considerably;  we know that if the previous letter was `q' then `e'
+becomes a rare letter while `u' is the most likely.
+
+These observed frequencies are directly related to the amount of
+storage required to encode a symbol (e.g. an alphabet
+letter)\footnote{ C.E. Shannon, \textit{A Mathematical Theory of
+    Communication}, Bell System Technical Journal, vol. 27,
+    pp. 379-423, 623-656, July, October, 1948}.
+
 
 \subsubsection{\textbf{rANS compressed data structure}}
 A compressed data block consists of the following logical parts: 
@@ -1298,58 +1322,317 @@ byte[] & compressed blob & compressed data\tabularnewline
 \end{tabular}
 
 \subsubsection{\textbf{Frequency table}}
-Frequency table represents frequencies of events, for example for order-0 these are frequencies of individual bytes and for order-1 these are frequencies of all combinations of 2 bytes in the data. 
-Each frequency value is an integer number of event occurrences with the requirement of total sum of all frequencies in a table to be normalized to 4096.
-Frequency table is written using run-length encoding. This allows to reduce the byte size of frequency tables where the alphabet encoded has stretches of sequential values. A general description is: 
-\begin{itemize}
-  \item Sort frequencies by the alphabet order descending.
-  \item Write a single value with it's frequency as: \newline
-	\begin{tabular}{|c|c|c|}
-	\hline
-	\textbf{value} & \textbf{frequency} & \textbf{zero byte}\tabularnewline
-	\hline  
-	\end{tabular}
-  \item Write a stretch of continuous values and their frequencies as:
-	\newline
-	\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
-	\hline
-	\textbf{value1} & \textbf{frequency1} & \textbf{value2} & \textbf{rle counter=N-2} & \textbf{frequency2} &
-	\textbf{\ldots} & \textbf{frequencyN} & \textbf{zero
-	byte}\tabularnewline
-	\hline 
-	\end{tabular}
-\item Frequency table is finished with a zero byte.
-\end{itemize}
-Frequencies are written as itf-8. For example, consider the following
-frequency table not normalized for simplicity:
 
-\begin{tabular}{|l|l|}
+The alphabet used here is simply byte values, so a maximum of 256
+symbols as some values may not be present.
+
+The symbol frequency table indicates which symbols are present and
+what their relative frequencies are.  The total sum of symbol
+frequencies are normalised to add up to 4095.
+
+Formally, this is an ordered alphabet $\mathbb{A}$ containing symbols $s$ where
+$s_{i}$ with the $i$-th symbol in $\mathbb{A}$, occuring with the frequency $freq_{i}$.
+
+\textbf{Order-0 encoding}
+
+The normalised symbol frequencies are then written out as \{symbol,
+frequency\} pairs in ascending order of symbol (0 to 255 inclusive).
+If a symbol has a frequency of 0 then it is omitted.
+
+To avoid storing long consecutive runs of symbols if all are present
+(eg a-z in a long piece of English text) we use run-length-encoding on
+the alphabet symbols.  If two consecutive symbols have non-zero
+frequencies then a counter of how many other non-zero frequency
+consecutive symbols is output directly after the second consecutive
+symbol, with that many symbols being subsequently omitted. 
+
+For example for non-zero frequency symbols `a', `b', `c', `d' and `e'
+we would write out symbol `a', `b' and the value 3 (to indicate `c',
+`d' and `e' are also present).
+
+The frequency is output after every symbol (whether explicit or
+implicit) using ITF8 encoding. This means that frequencies 0-127 are
+encoded in 1 byte while frequencies 128-4095 are encoded in 2 bytes.
+
+Finally the symbol 0 is written out to indicate the end of the
+symbol-frequency table.
+
+As an example, take the string \texttt{abracadabra}.
+
+\begin{minipage}[t]{0.5\textwidth}
+Symbol frequency:
+\\[8pt]
+\begin{tabular}{ |r|r| }
 \hline
-\textbf{Value} & \textbf{Frequency} \tabularnewline
+Symbol & Frequency\\
 \hline
-A & 10\tabularnewline
-\hline
-B & 20\tabularnewline
-\hline
-C & 30\tabularnewline
-\hline
-E & 40\tabularnewline
+a & 5 \\
+b & 2 \\
+c & 1 \\
+d & 1 \\
+r & 2 \\
 \hline
 \end{tabular}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+Normalised to sum to 4095:
+\\[8pt]
+\begin{tabular}{ |r|r|}
+\hline
+Symbol & Frequency\\
+\hline
+a & 1863 \\
+b &  744 \\
+c &  372 \\
+d &  372 \\
+r &  744 \\
+\hline
+\end{tabular}
+\end{minipage}
 
-The written byte sequence is: 0x41 0x0A 0x42 0x01 0x14 0x1E 0x00 0x45 0x28 0x00
-
-The order-1 frequency table is a 2-dimensional array of frequencies. It is
-written in a row-first manner. Each row is similar to order-0 table except for
-values written as 2 bytes instead of one.
-
-\subsubsection{\textbf{Parallel flows}}
-rANS compression is split between 4 independent flows. Each flow codes it's part of the incoming data. The data is split between the flows based on their index, the first flow gets the first quarter of the data and so on.
-
-\subsubsection{\textbf{Edge cases}}
-For data under 4 bytes only order-0 compression is applied.
+Encoded as:
+\begin{verbatim}
+0x61      0x87 0x47      # `a'           <1863>
+0x62 0x02 0x82 0xe8      # `b' <+2: c,d>  <744>
+          0x81 0x74      # `c' (implicit) <372> 
+          0x81 0x74      # `d' (implicit) <372> 
+0x72      0x82 0xe8      # `r'            <744> 
+0x00                     # <0>          
+\end{verbatim}
 
 
+\textbf{Order-1 encoding}
+
+To encode Order-1 statistics typically requires a larger table as for
+an $N$ sized alphabet we need to potentially store an $N$x$N$ matrix.
+We store these as a series of Order-0 tables.
+
+We start with the outer context byte, emitting the symbol if it is
+non-zero frequency.  We perform the same run-length-encoding as we
+use for the Order-0 table and end the contexts with a nul byte.  After
+each context byte we emit the Order-0 table relating to that context.
+
+One last caveat is that we have no context for the first byte in the
+data stream (infact for 4 equally spaced starting points, see
+``interleaving" below).  We use the ASCII value (`\textbackslash0') as
+the starting context and so need to consider this in our frequency
+table.
+
+Consider \texttt{abracadabraabracadabraabracadabraabracadabra} as
+example input.
+
+\begin{minipage}[t]{0.5\textwidth}
+Observed Order-1 frequencies:
+\\[8pt]
+\begin{tabular}{ |r|r|r| }
+\hline
+Context & Symbol & Frequency\\
+\hline
+\textbackslash0 & a & 4 \\
+\hline
+a & a & 3 \\
+  & b & 8 \\
+  & c & 4 \\
+  & d & 4 \\
+\hline
+b & r & 8 \\
+\hline
+c & a & 4 \\
+\hline
+d & a & 4 \\
+\hline
+r & a & 8 \\
+\hline
+\end{tabular}
+\end{minipage}
+\begin{minipage}[t]{0.5\textwidth}
+Normalised (per Order-0 statistics):
+\\[8pt]
+\begin{tabular}{ |r|r|r|}
+\hline
+Context & Symbol & Frequency\\
+\hline
+\textbackslash0 & a & 4095 \\
+\hline
+a & a &  646 \\
+  & b & 1725 \\
+  & c &  862 \\
+  & d &  862 \\
+\hline
+b & r & 4095 \\
+\hline
+c & a & 4095 \\
+\hline
+d & a & 4095 \\
+\hline
+r & a & 4095 \\
+\hline
+\end{tabular}
+\end{minipage}
+
+
+Encoded as:
+\begin{verbatim}
+0x00                 # `\0' context
+0x61      0x8f 0xff  # a  <4095>
+0x00                 # end of Order-0 table
+
+0x61                 # `a' context
+0x61      0x82 0x86  # a            <646>
+0x62 0x02 0x86 0xbd  # b <+2: c,d> <1725>
+          0x83 0x5e  # c (implicit) <862>
+          0x83 0x5e  # d (implicit) <862>
+0x00                 # end of Order-0 table
+
+0x62 0x02            # `b' context, <+2: c, d>
+0x72      0x8f 0xff  # r <4095>
+0x00                 # end of Order-0 table
+
+                     # `c' context (implicit)
+0x61      0x8f 0xff  # a <4095>
+0x00                 # end of Order-0 table
+
+                     # `d' context (implicit)
+0x61      0x8f 0xff  # a <4095>
+0x00                 # end of Order-0 table
+
+0x72                 # `r' context
+0x61      0x8f 0xff  # a <4095>
+0x00                 # end of Order-0 table
+
+0x00                 # end of contexts
+\end{verbatim}
+
+
+\subsubsection{rANS entropy encoding}
+
+The encoder takes a symbol $s$ and a current state $x$ (initially zero) to
+produce a new state $x'$ with function $C$.
+
+{
+\setlength{\parindent}{1cm}
+\indent $x' = C(s,x)$
+}
+
+The decoding function $D$ is the inverse of $C$ such that $C(D(x)) = x$.
+
+{
+\setlength{\parindent}{1cm}
+\indent $D(x') = (s,x)$
+}
+
+The entire encoded message can be viewed as a series of nested $C$
+operations, with decoding yielding the symbols in reverse order, much
+like popping items off a stack.  This is where the asymmetric part of
+ANS comes from.
+
+As we encode into $x$ the value will grow, so for efficiency we ensure
+that it always fits within known bounds. This is governed by
+
+{
+\setlength{\parindent}{1cm}
+\indent $L \leq x < bL-1$
+}
+
+
+where $b$ is the base and $L$ is the lower-bound.
+
+We ensure this property is true before every use of $C$ and after every
+use of $D$.  Finally to end the stream we flush any remaining data out
+by storing the end state of $x$.
+
+
+\textbf{Implementation specifics}
+
+We use an unsigned 32-bit integer to hold $x$. In encoding it is
+initialised to zero. For decoding it is read little-endian from the
+input stream.
+
+Recall $freq_{i}$ is the frequency of the $i$-th symbol $s_{i}$ in alphabet
+$\mathbb{A}$.  We define $cfreq_i$ to be cumulative frequency of all symbols
+up to but not including $s_{i}$:
+
+{
+\setlength{\parindent}{1cm}
+$ cfreq_{i} = \left\{
+\begin{array}{l l}
+0 & \quad \textrm{if $i < 1$} \\
+cfreq_{i-1} + freq_{i-1} & \quad \textrm{if $i \geq 1$}
+\end{array}
+\right. $
+% \\*[8pt]
+% \indent $cfreq_{i} = \displaystyle \sum_{j=0}^{i-1} freq_j$
+}
+
+
+We have a reverse lookup table $cfreq\_to\_sym_c$ from 0 to 4095
+(0xfff) that maps a cumulative frequency $c$ to a symbol $s$.
+
+{
+\setlength{\parindent}{1cm}
+\indent   $cfreq\_to\_sym_c = s_{i} \quad | \quad c: \enskip cfreq_i \leq c <
+cfreq_i + freq_i$
+% \\*[8pt]
+% \indent   $cfreq\_to\_sym_c = s_{i} ,
+% \quad \forall c \in [cfreq_i, cfreq_i + freq_i)$
+}
+
+
+The $x' = C(s,x)$ function used for the ${i}-th symbol ${s} is:
+
+{
+\setlength{\parindent}{1cm}
+\indent    $x' = (x/freq_i) * \mathtt{0x1000} + cfreq_i + (x\%freq_i)$
+}
+
+The $D(x') = (s,x)$ function used to produce the $i$-th symbol $s$ and
+a new state $x$ is:
+
+{
+\setlength{\parindent}{1cm}
+\indent    $c = x' \& \mathtt{0xfff}$\\*
+\indent    $s_{i} = cfreq\_to\_sym_{c}$\\*
+\indent    $x = freq_{i} (x' / \mathtt{0x1000}) + c - cfreq_{i}$
+}
+
+Most of these operations can be implemented as bit-shifts and bit-AND,
+with the encoder modulus being implemented as a multiplication by the
+reciprocal, computed once only per alphabet symbol.
+
+We use $L = \mathtt{0x800000}$ and $b = 256$, permitting us to flush out one byte
+at a time (encoded and decoded in reverse order).
+
+Before every encode $C(s,x)$ we renormalise $x$, shifting out the bottom 8
+bits of $x$ until $x < \mathtt{0x80000} * freq_i$.  After finishing encoding we
+flush 4 more bytes (lowest 8-bits first) from $x$.
+
+After every decoded $D(x')$ we renormalise $x'$, shifting in the bottom 8
+bits until $x \geq \mathtt{0x800000}$.
+
+
+\textbf{Interleaving}
+
+For efficiency, we interleave 4 separate rANS codecs at the same
+time\footnote{F. Giesen, \textit{Interleaved entropy coders},
+  \url{http://arxiv.org/abs/1402.3392}}.  For the Order-0 codecs these
+simply encode or decode the 4 neighbouring bytes in cyclic fashion
+using interleaved codec 1, 2, 3 and 4, sharing the same output buffer
+(so the output bytes get interleaved).
+
+For the Order-1 codec we cannot do this as we need to know the
+previous byte value as the context for the next byte.  Therefore split
+the input data into 4 approximately equal sized
+fragments\footnote{This was why the `\textbackslash0' $\to$ `a'
+  context in the example above had a frequency of 4 instead of 1.}
+starting at $0$, $\lfloor{}len/4\rfloor{}*1$,
+$\lfloor{}len/4\rfloor{}*2$ and $\lfloor{}len/4\rfloor{}*3$.  Each
+Order-1 codec operates in a cyclic fashion as with Order-0, all
+starting with 0 as their state and sharing the same output buffer. Any
+remainder, when the input buffer is not divisible by 4, is encoded at
+the end by the 4th encoder.
+
+We do not permit Order-1 encoding of data streams smaller than 4
+bytes.
 
 \subsection{\textbf{Codings}}
 
