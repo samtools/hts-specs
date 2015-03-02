@@ -289,8 +289,14 @@ of the mandatory fields in the SAM format:
     a chimeric alignment. A line flagged with 0x800 is called as a \emph{supplementary line}.
   \item Bit 0x4 is the only reliable place to tell whether the read
     is unmapped. If 0x4 is set, no assumptions can be made about {\sf
-      RNAME}, {\sf POS}, {\sf CIGAR}, {\sf MAPQ}, bits 0x2, 0x10, 0x100
-    and 0x800, and the bit 0x20 of the previous read in the template.
+      RNAME}, {\sf POS}, {\sf CIGAR}, {\sf MAPQ}, and bits 0x2, 0x100,
+    and 0x800.
+  \item Bit 0x10 indicates whether {\sf SEQ} has been reverse complemented
+    and {\sf QUAL} reversed.
+    When bit~0x4 is unset, this corresponds to the strand to which the
+    segment has been mapped.
+    When 0x4 is set, this indicates whether the unmapped read is stored
+    in its original orientation as it came off the sequencing machine.
   \item If 0x40 and 0x80 are both set, the read is part of a linear
     template, but it is neither the first nor the last read. If both
     0x40 and 0x80 are unset, the index of the read in the template
@@ -554,6 +560,9 @@ specific software package for it to function properly.
     operations in {\sf CIGAR} exceeds the length specified in the {\tt
       LN} field of the {\tt @SQ} header line (if exists) with an SN
     equal to {\sf RNAME}, the alignment should be unmapped.
+  \item Unmapped reads should be stored in the orientation in which they came
+    off the sequencing machine and have their {\sf reverse} flag bit~(0x10)
+    correspondingly unset.
   \end{enumerate}
 \item Multiple mapping
   \begin{enumerate}[label=\arabic*]
