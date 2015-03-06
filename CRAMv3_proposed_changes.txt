@@ -21,8 +21,7 @@ q	byte[]	QS	a stretch of quality scores
    2. Append CRC32 to block
 
 Note: this changes the EOF marker to: 
-0f 00 00 00 ff ff ff ff ff e0 45 4f 46 00 00 
-00 00 01 00 69 ad 1a c6
+0f 00 00 00 ff ff ff ff 0f e0 45 4f 46 00 00 00 00 01 00 8b d7 72 2f 00 01 00 06 06 01 00 01 00 01 00 ee 63 01 4b
 
 5. New codecs:
    1. INTERLEAVED, id=10
