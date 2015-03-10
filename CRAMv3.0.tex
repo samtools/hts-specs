@@ -1167,6 +1167,10 @@ or as an array similar to read bases.\tabularnewline
 0x4 & has mate downstream & tells if the next segment should be expected further 
 in the stream\tabularnewline
 \hline
+0x8 & decode sequence as ``*'' & informs the decoder that the sequence
+is unknown and that any encoded reference differences are present only to
+recreate the CIGAR string.\tabularnewline
+\hline
 \end{tabular}
 
 \section{\textbf{Reference sequences}}
