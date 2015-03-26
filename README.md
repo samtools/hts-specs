@@ -8,6 +8,7 @@ Quick links
 [HTS-spec GitHub page](http://samtools.github.io/hts-specs/)  
 [SAMv1.pdf](http://samtools.github.io/hts-specs/SAMv1.pdf)  
 [CRAMv2.1.pdf](http://samtools.github.io/hts-specs/CRAMv2.1.pdf)  
+[CRAMv3.pdf](http://samtools.github.io/hts-specs/CRAMv3.pdf)  
 [BCFv1.pdf](http://samtools.github.io/hts-specs/BCFv1_qref.pdf)  
 [BCFv2.1.pdf](http://samtools.github.io/hts-specs/BCFv2_qref.pdf)  
 [CSIv1.pdf](http://samtools.github.io/hts-specs/CSIv1.pdf)  
@@ -21,9 +22,9 @@ Alignment data files
 **SAMv1.tex** is the canonical specification for the SAM (Sequence Alignment/Map) format, BAM (its binary equivalent), and the BAI format for indexing BAM files.
 These formats are discussed on the [samtools-devel mailing list][samdev-ml].
 
-**CRAMv2.1.tex** is the canonical specification for the CRAM format.
+**CRAMv2.1.tex** and **CRAMv3.tex** are the canonical specifications for the CRAM format.
 Further details can be found at [ENA's CRAM toolkit page][ena-cram].
-CRAM discussions can be found on the [cram-dev mailing list][cramdev-ml].
+CRAM discussions can also be found on the [samtools-devel mailing list][samdev-ml].
 
 The **tabix.tex** and **CSIv1.tex** quick references summarize more recent index formats: the [tabix] tool indexes generic textual genome position-sorted files, while CSI is [htslib]'s successor to the BAI index format.
 
@@ -43,7 +44,6 @@ These formats are discussed on the [vcftools-spec mailing list][vcfspec-ml].
 [tabix]:      https://github.com/samtools/tabix
 
 [samdev-ml]:  https://lists.sourceforge.net/lists/listinfo/samtools-devel
-[cramdev-ml]: https://listserver.ebi.ac.uk/mailman/listinfo/cram-dev
 [vcfspec-ml]: https://lists.sourceforge.net/lists/listinfo/vcftools-spec
 
 <!-- vim:set linebreak: -->
