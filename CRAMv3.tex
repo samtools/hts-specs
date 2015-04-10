@@ -580,10 +580,6 @@ SM & byte[5] & substitution matrix & substitution matrix\tabularnewline
 TD & byte[ ] & tag ids dictionary & a list of lists of tag ids, see tag encoding 
 section\tabularnewline
 \hline
-BD & int & base digest & sum over all reads of CRC32 hashes of bases.\tabularnewline
-\hline
-SD & int & score digest & sum over all reads of CRC32 hashes of quality scores.\tabularnewline
-\hline
 \end{tabular}
 
 \subsubsection*{Data series encodings}
@@ -750,7 +746,38 @@ reference sequence bases or -1 for none\tabularnewline
 byte[16] & reference md5 & MD5 checksum of the reference bases within the slice 
 boundaries or 16 \textbackslash{}0 bytes for unmapped or unsorted reads\tabularnewline
 \hline
+byte[] & optional tags & a series of tag,type,value tuples encoded as
+per BAM auxiliary fields.\tabularnewline
+\hline
 \end{tabular}
+
+The optional tags are encoded in the same manner as BAM tags.  I.e. a
+series of binary encoded tags contatenated together wheere each tag
+consists of a 2 byte key (matching [A-Za-z][A-Za-z0-9]) followed by a
+1 byte type ([AfZHcCsSiIB]) followed by a string of bytes in a format
+defined by the type.
+
+Tags starting in a capital letter are reserved while lowercase ones or
+those starting with X, Y or Z are user definable.  Any tag not
+understood by a decoder should be skipped over without producing an
+error.
+
+Reserved tags are defined as follows:
+
+\begin{tabular}{|l|l|>{\raggedright}p{325pt}|}
+\hline
+\textbf{Tag type} & \textbf{BAM format} & \textbf{Meaning}\tabularnewline
+\hline
+BD & i & Sum over all reads of the CRC32 hash of sequence base.  This
+may be used to validate round-trips in and out of CRAM.
+calls\tabularnewline
+\hline
+SD & i & Sum over all reads of the CRC32 hash of quality scores. (If
+the quality string is ``*'' in SAM then the hash is of the BAM encoded
+version - a string of bytes with value 255.)\tabularnewline
+\hline
+\end{tabular}
+
 
 \subsection{\textbf{Core data block}}
 
