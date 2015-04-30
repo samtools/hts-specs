@@ -57,7 +57,14 @@ ref      AGCATGTTAGATAA**GATAGCTGTGCTAGTAGGCAGTCAGCGCCAT
 -r001/2                                        CAGCGGCAT
 \end{verbatim}
 \end{framed}
-The corresponding SAM format is:
+The corresponding SAM format is:\footnote{The values in the
+{\sf FLAG} column correspond to bitwise flags as follows:
+99 = 0x63: first\slash next is reverse-complemented\slash
+properly aligned\slash multiple segments;
+0: no flags set, thus a mapped single segment;
+2064 = 0x810: supplementary\slash reverse-complemented;
+147 = 0x93: last (second of a pair)\slash reverse-complemented\slash
+properly aligned\slash multiple segments.}
 \begin{framed}\small
 \begin{verbatim}
 @HD VN:1.5 SO:coordinate
@@ -263,25 +270,27 @@ of the mandatory fields in the SAM format:
 	indicates the information is unavailable.  In a SAM file, a read may occupy
 	multiple alignment lines, when its alignment is chimeric or when multiple
 	mappings are given.
-\item {\sf FLAG}: bitwise FLAG. Each bit is explained in the following
-  table:
+\item {\sf FLAG}: Combination of bitwise FLAGs.\footnote{The manipulation of
+bitwise flags is described at \href{http://en.wikipedia.org/wiki/Flag\_field}
+{Wikipedia (see ``Flag field'')} and elsewhere.}
+Each bit is explained in the following table:
   \begin{center}\small
-  \begin{tabular}{rl}
+  \begin{tabular}{rrl}
   \hline
-  Bit & Description\\
+  \multicolumn{2}{c}{Bit} & Description\\
   \hline
-  0x1 &  template having multiple segments in sequencing \\
-  0x2 &  each segment properly aligned according to the aligner \\
-  0x4 &  segment unmapped \\
-  0x8 &  next segment in the template unmapped \\
-  0x10 &  {\sf SEQ} being reverse complemented \\
-  0x20 &  {\sf SEQ} of the next segment in the template being reversed \\
-  0x40 &  the first segment in the template \\
-  0x80 &  the last segment in the template \\
-  0x100 &  secondary alignment \\
-  0x200 &  not passing quality controls \\
-  0x400 &  PCR or optical duplicate \\
-  0x800 &  supplementary alignment \\
+    1 &    0x1 & template having multiple segments in sequencing \\
+    2 &    0x2 & each segment properly aligned according to the aligner \\
+    4 &    0x4 & segment unmapped \\
+    8 &    0x8 & next segment in the template unmapped \\
+   16 &   0x10 & {\sf SEQ} being reverse complemented \\
+   32 &   0x20 & {\sf SEQ} of the next segment in the template being reverse complemented \\
+   64 &   0x40 & the first segment in the template \\
+  128 &   0x80 & the last segment in the template \\
+  256 &  0x100 & secondary alignment \\
+  512 &  0x200 & not passing quality controls \\
+ 1024 &  0x400 & PCR or optical duplicate \\
+ 2048 &  0x800 & supplementary alignment \\
   \hline
   \end{tabular}
   \end{center}
@@ -609,13 +618,14 @@ specific software package for it to function properly.
   Where there is a clear biological direction (e.g. a gene), the first
   segment ({\sf FLAG} bit 0x40) is used for the first section (e.g. the
   $5'$ end of the gene). Thus a GenBank entry location like
-  {\tt complement(join(85052..85354,} {\tt 85441..85621,} {\tt 6097..86284))}
+  {\tt complement(join(85052..85354, 85441..85621, 86097..86284))}
   would have three lines in SAM with a common {\sf QNAME}: %And three lines in GFF3 too.
-    \begin{enumerate}
-    \item The $5'$ fragment {\sf FLAG}  883, {\sf POS} 86097, {\sf CIGAR} {\tt 188M}, and tags {\tt FI:i:1} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x40 + 0x100 + 0x200
-    \item Middle fragment {\sf FLAG} 819, {\sf POS} 85441, {\sf CIGAR} {\tt 181M}, and tags {\tt FI:i:2} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x100 + 0x200
-    \item The $3'$ fragment {\sf FLAG} 947, {\sf POS} 85052, {\sf CIGAR} {\tt 303M}, and tags {\tt FI:i:3} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x80 + 0x100 + 0x200
-    \end{enumerate}
+    \begin{center}\begin{tabular}{llrcl}
+  & \multicolumn{1}{c}{\sf FLAG} & \multicolumn{1}{c}{\sf POS} & \sf CIGAR & \multicolumn{1}{c}{Optional fields} \\
+The $5'$ fragment & 883 (0x373) & 86097 & \tt 188M & \tt FI:i:1\quad TC:i:3 \\
+Middle fragment   & 819 (0x333) & 85441 & \tt 181M & \tt FI:i:2\quad TC:i:3 \\
+The $3'$ fragment & 947 (0x3B3) & 85052 & \tt 303M & \tt FI:i:3\quad TC:i:3
+    \end{tabular}\end{center}
   \item If converting GFF3 to SAM, store any \emph{key}, \emph{values}
   from column 9 in the {\tt CT} tag, except for the unique ID which
   is used for the QNAME. GFF3 columns 1 (seqid), 4 (start) and 5 (end)
