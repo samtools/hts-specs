@@ -1,15 +1,11 @@
 \documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
 \usepackage{color}
 \definecolor{gray}{rgb}{0.7,0.7,0.7}
 \usepackage{framed}
 \usepackage{enumitem}
 \usepackage{longtable}
 \usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
-
-\addtolength{\textwidth}{3.4cm}
-\addtolength{\hoffset}{-1.7cm}
-\addtolength{\textheight}{4cm}
-\addtolength{\voffset}{-2cm}
 
 \makeindex
 
@@ -249,7 +245,7 @@ of the mandatory fields in the SAM format:
   \hline
   {\bf Col} & {\bf Field} & {\bf Type} & {\bf Regexp/Range} & {\bf Brief description} \\
   \hline
-  1 & {\sf QNAME} & String & {\tt [!-?A-\char126]\{1,255\}} & Query template NAME\\
+  1 & {\sf QNAME} & String & \verb:[!-?A-~]{1,255}: & Query template NAME\\
   2 & {\sf FLAG} & Int & {\tt [0,2$^{16}$-1]} & bitwise FLAG \\
   3 & {\sf RNAME} & String & {\tt \char92*|[!-()+-\char60\char62-\char126][!-\char126]*} & Reference sequence NAME\\
   4 & {\sf POS} & Int & {\tt [0,2$^{31}$-1]} & 1-based leftmost mapping POSition \\
@@ -427,7 +423,7 @@ explicitly limited in SAM.  However, BAM can represent values in the
 range~$[-2^{31},2^{32})$, so in practice this is the realistic range
 of values for SAM's `{\tt i}' as well.}
 \stepcounter{footnote}
-\footnotetext{For example, a byte array {\tt \{0x1a,0xe3,0x1\}} corresponds to a Hex string `{\tt 1AE301}'.}
+\footnotetext{For example, a byte array $[{\tt 0x1a},{\tt 0xe3},{\tt 0x1}]$ corresponds to a Hex string `{\tt 1AE301}'.}
 \end{center}
 For an integer or numeric array (type `{\tt B}'), the first letter indicates the type of numbers
 in the following comma separated array. The letter can be one of `{\tt cCsSiIf}', corresponding to
@@ -469,7 +465,7 @@ may be changed if the new type is also compatible with the array.
   {\tt H0} & i & Number of perfect hits\\
   {\tt H1} & i & Number of 1-difference hits (see also {\tt NM})\\
   {\tt H2} & i & Number of 2-difference hits \\
-  {\tt HI} & i & Query hit index, indicating the alignment record is the i-th one stored in SAM\\
+  {\tt HI} & i & Query hit index, indicating the alignment record is the $i$-th one stored in SAM\\
   {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
   {\tt MC} & Z & CIGAR string for mate/next segment\\
   {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([A-Z]|\char92\char94[A-Z]+)[0-9]+)*}\footnotemark\\
@@ -488,8 +484,9 @@ may be changed if the new type is also compatible with the array.
   {\tt R2} & Z & Sequence of the mate/next segment in the template. \\
   {\tt RG} & Z & Read group. Value matches the header {\tt RG-ID} tag if {\tt @RG} is present in the header. \\
   {\tt RT} & Z & Deprecated alternative to {\tt BC} tag originally used at Sanger. \\
-  {\tt SA} & Z & Other canonical alignments in a chimeric alignment, in the format of: (\emph{rname},\emph{pos},\emph{strand},\emph{CIGAR},\emph{mapQ},\emph{NM};)+.
-    Each element in the semi-colon delimited list represents a part of the chimeric alignment. Conventionally, at a supplementary line,
+  {\tt SA} & Z & Other canonical alignments in a chimeric alignment, formatted as a semicolon-delimited list:
+    {\tt (}\emph{rname}{\tt ,}\emph{pos}{\tt ,}\emph{strand}{\tt ,}\emph{CIGAR}{\tt ,}\emph{mapQ}{\tt ,}\emph{NM}{\tt ;)}+.
+    Each element in the list represents a part of the chimeric alignment. Conventionally, at a supplementary line,
 	the first element points to the primary line.\\
   {\tt SM} & i & Template-independent mapping quality \\
   {\tt TC} & i & The number of segments in the template.\\
@@ -874,12 +871,12 @@ underlined word in uppercase denotes a field in the SAM format.
   \cline{1-6}
   \multicolumn{3}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf magic} & BAM magic string & {\tt char[4]} & {\tt BAM\char92 1}\\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf l\_text} & Length of the header text, including any {\tt NULL} padding & {\tt int32\_t} & \\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf text} & Plain header text in SAM; not necessarily {\tt NULL} terminated & {\tt char[{\sf l\_text}]} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf l\_text} & Length of the header text, including any {\tt NUL} padding & {\tt int32\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf text} & Plain header text in SAM; not necessarily {\tt NUL}-terminated & {\tt char[{\sf l\_text}]} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf n\_ref} & \# reference sequences & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of reference information (n=n\_ref)}} \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf l\_name} & Length of the reference name plus 1 (including {\tt NULL}) & {\tt int32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf name} & Reference sequence name; {\tt NULL} terminated & {\tt char[{\sf l\_name}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_name} & Length of the reference name plus 1 (including {\tt NUL}) & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf name} & Reference sequence name; {\tt NUL}-terminated & {\tt char[{\sf l\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of alignments (until the end of the file)}} \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record & {\tt int32\_t} & \\\cline{2-6}
@@ -891,7 +888,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf read\_name} & Read name,\footnotemark\ {\tt NULL} terminated (\underline{\sf QNAME} plus a tailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf read\_name} & Read name,\footnotemark\ {\tt NUL}-terminated (\underline{\sf QNAME} plus a trailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$; other characters mapped to `{\tt N}'; high nybble first (1st base in the highest 4-bit of the 1st byte) & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
