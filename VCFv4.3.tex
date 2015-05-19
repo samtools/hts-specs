@@ -105,9 +105,11 @@ to be aware of the possible presence of multi-byte UTF-8 characters.
 \subsubsection{Information field format}
 INFO fields should be described as follows (first four keys are required, source and version are recommended):
 
+{\scriptsize
 \begin{verbatim}
-##INFO=<ID=ID,Number=number,Type=type,Description="description",Source="source",Version="version">
+##INFO=<ID=ID,Number=number,Type=type,Description="description",Source="source",Version="version",ContentType="mime">
 \end{verbatim}
+}
 
 Possible Types for INFO fields are: Integer {\color{red} (32-bit, signed)}, Float {\color{red} (32-bit)}, Flag, Character, and
 String. {\color{red} For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in binary version, see \ref{BcfTypeEncoding}.}
@@ -125,6 +127,16 @@ certain special characters used to define special cases:
 \end{itemize}
 
 The `Flag' type indicates that the INFO field does not contain a Value entry, and hence the Number should be $0$ in this case. The Description value must be surrounded by double-quotes. Double-quote character can be escaped with backslash $\backslash$ and backslash as $\backslash\backslash$. Source and Version values likewise should be surrounded by double-quotes and specify the annotation source (case-insensitive, e.g. ``dbsnp'') and exact version (e.g. ``138''), respectively for computational use.
+
+{\color{red}
+The optional field `ContentType' is a MIME-type describing the type of data. Possible values are :
+\begin{itemize}
+  \item 'text/plain'
+  \item 'text/xml'
+  \item 'application/json'
+\end{itemize}
+If `ContentType' is unspecified, the default type is 'text/plain'. All other types imply that the value should be URL-decoded.
+}
 
 \subsubsection{Filter field format}
 FILTERs that have been applied to the data should be described as follows:
@@ -1106,6 +1118,48 @@ Example records are given below:
 \normalsize
 }
 
+{\color{red}
+\subsection{Storing complex structured data in the INFO field}
+An example with a JSON string stored in a INFO field is given below:
+\scriptsize
+\begin{flushleft}
+\begin{verbatim}
+(...)
+##INFO=<ID=PRED,Number=1,Type=String,Description="Ensembl Prediction",ContentType="application/json">
+(...)
+#CHROM	POS	ID	REF	ALT	QUAL 	FILTER	INFO
+1	873	.	C	T	.	.	PRED=%5B%7B%22input%22%3A%221%20873%20.%20C%20T%20.%20.%20.%22%2C%22assembly_name%22%3A%22GRCh37%22%2C%22end%22%3A873%2C%22seq_region_name%22%3A%221%22%2C%22strand%22%3A1%2C%22id%22%3Anull%2C%22intergenic_consequences%22%3A%5B%7B%22consequence_terms%22%3A%5B%22intergenic_variant%22%5D%2C%22variant_allele%22%3A%22T%22%7D%5D%2C%22allele_string%22%3A%22C%2FT%22%2C%22most_severe_consequence%22%3A%22intergenic_variant%22%2C%22start%22%3A873%7D%5D
+\end{verbatim}
+\end{flushleft}
+\normalsize
+
+Once URL-decoded, the JSON value of `PRED' is:
+\begin{verbatim}
+[
+    {
+        "allele_string": "C/T", 
+        "assembly_name": "GRCh37", 
+        "end": 873, 
+        "id": null, 
+        "input": "1 873 . C T . . .", 
+        "intergenic_consequences": [
+            {
+                "consequence_terms": [
+                    "intergenic_variant"
+                ], 
+                "variant_allele": "T"
+            }
+        ], 
+        "most_severe_consequence": "intergenic_variant", 
+        "seq_region_name": "1", 
+        "start": 873, 
+        "strand": 1
+    }
+]
+\end{verbatim}
+}
+
+
 \pagebreak
 \section{BCF specification}
 
@@ -1728,6 +1782,7 @@ section~4 as BAM files and other block-compressed files with BGZF.
 \item We state explicitly that duplicate IDs, FILTER, INFO or FORMAT keys are not valid.
 \item A section about gVCF was added, introduced the $<$*$>$ symbolic allele.
 \item A section about tag naming conventions was added
+\item INFO values can store complex structured data with `ContentType'.
 \end{itemize}
 
 \subsection{Changes between BCFv2.1 and BCFv2.2}

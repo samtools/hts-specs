@@ -1,3 +1,4 @@
+.PHONY: all pdf mostlyclean clean
 all: pdf
 
 PDFS =	BCFv1_qref.pdf \
