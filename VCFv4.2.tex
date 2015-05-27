@@ -515,7 +515,7 @@ VCF STRUCTURAL VARIANT EXAMPLE
 ##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
 ##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
 #CHROM POS     ID        REF              ALT          QUAL FILTER INFO                                                               FORMAT       NA00001
-1      2827694 rs2376870 CGTGGATGCGGGGAC  C            .    PASS   SVTYPE=DEL;END=2827762;HOMLEN=1;HOMSEQ=G;SVLEN=-68                 GT:GQ        1/1:13.9
+1      2827694 rs2376870 CGTGGATGCGGGGAC  C            .    PASS   SVTYPE=DEL;END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14                 GT:GQ        1/1:13.9
 2       321682 .         T                <DEL>        6    PASS   SVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62         GT:GQ        0/1:12
 2     14477084 .         C                <DEL:ME:ALU> 12   PASS   SVTYPE=DEL;END=14477381;SVLEN=-297;CIPOS=-22,18;CIEND=-12,32       GT:GQ        0/1:12
 3      9425916 .         C                <INS:ME:L1>  23   PASS   SVTYPE=INS;END=9425916;SVLEN=6027;CIPOS=-16,22                     GT:GQ        1/1:15
@@ -529,7 +529,7 @@ VCF STRUCTURAL VARIANT EXAMPLE
 The example shows in order:
 \begin{enumerate}
   \item A precise deletion with known breakpoint, a one base micro-homology, and a sample that is homozygous for the deletion.
-  \item An imprecise deletion of approximately 105 bp.
+  \item An imprecise deletion of approximately 205 bp.
   \item An imprecise deletion of an ALU element relative to the reference.
   \item An imprecise insertion of an L1 element relative to the reference.
   \item An imprecise duplication of approximately 21Kb. The sample genotype is copy number 3 (one extra copy of the duplicated sequence).

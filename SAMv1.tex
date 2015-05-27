@@ -1,15 +1,11 @@
 \documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
 \usepackage{color}
 \definecolor{gray}{rgb}{0.7,0.7,0.7}
 \usepackage{framed}
 \usepackage{enumitem}
 \usepackage{longtable}
 \usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
-
-\addtolength{\textwidth}{3.4cm}
-\addtolength{\hoffset}{-1.7cm}
-\addtolength{\textheight}{4cm}
-\addtolength{\voffset}{-2cm}
 
 \makeindex
 
@@ -22,7 +18,7 @@
 \maketitle
 \begin{quote}\small
 The master version of this document can be found at
-\url{https://github.com/samtools/hts-specs}.
+\url{https://github.com/samtools/hts-specs}.\\
 This printing is version~\commitdesc\ from that repository,
 last modified on the date shown above.
 \end{quote}
@@ -57,7 +53,14 @@ ref      AGCATGTTAGATAA**GATAGCTGTGCTAGTAGGCAGTCAGCGCCAT
 -r001/2                                        CAGCGGCAT
 \end{verbatim}
 \end{framed}
-The corresponding SAM format is:
+The corresponding SAM format is:\footnote{The values in the
+{\sf FLAG} column correspond to bitwise flags as follows:
+99 = 0x63: first\slash next is reverse-complemented\slash
+properly aligned\slash multiple segments;
+0: no flags set, thus a mapped single segment;
+2064 = 0x810: supplementary\slash reverse-complemented;
+147 = 0x93: last (second of a pair)\slash reverse-complemented\slash
+properly aligned\slash multiple segments.}
 \begin{framed}\small
 \begin{verbatim}
 @HD VN:1.5 SO:coordinate
@@ -70,8 +73,6 @@ r003 2064 ref 29 17 6H5M       *  0   0 TAGGC             * SA:Z:ref,9,+,5S6M,30
 r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
 \end{verbatim}
 \end{framed}
-
-\pagebreak
 
 \subsection{Terminologies and Concepts}
 
@@ -242,7 +243,7 @@ of the mandatory fields in the SAM format:
   \hline
   {\bf Col} & {\bf Field} & {\bf Type} & {\bf Regexp/Range} & {\bf Brief description} \\
   \hline
-  1 & {\sf QNAME} & String & {\tt [!-?A-\char126]\{1,255\}} & Query template NAME\\
+  1 & {\sf QNAME} & String & \verb:[!-?A-~]{1,255}: & Query template NAME\\
   2 & {\sf FLAG} & Int & {\tt [0,2$^{16}$-1]} & bitwise FLAG \\
   3 & {\sf RNAME} & String & {\tt \char92*|[!-()+-\char60\char62-\char126][!-\char126]*} & Reference sequence NAME\\
   4 & {\sf POS} & Int & {\tt [0,2$^{31}$-1]} & 1-based leftmost mapping POSition \\
@@ -263,25 +264,27 @@ of the mandatory fields in the SAM format:
 	indicates the information is unavailable.  In a SAM file, a read may occupy
 	multiple alignment lines, when its alignment is chimeric or when multiple
 	mappings are given.
-\item {\sf FLAG}: bitwise FLAG. Each bit is explained in the following
-  table:
+\item {\sf FLAG}: Combination of bitwise FLAGs.\footnote{The manipulation of
+bitwise flags is described at \href{http://en.wikipedia.org/wiki/Flag\_field}
+{Wikipedia (see ``Flag field'')} and elsewhere.}
+Each bit is explained in the following table:
   \begin{center}\small
-  \begin{tabular}{rl}
+  \begin{tabular}{rrl}
   \hline
-  Bit & Description\\
+  \multicolumn{2}{c}{Bit} & Description\\
   \hline
-  0x1 &  template having multiple segments in sequencing \\
-  0x2 &  each segment properly aligned according to the aligner \\
-  0x4 &  segment unmapped \\
-  0x8 &  next segment in the template unmapped \\
-  0x10 &  {\sf SEQ} being reverse complemented \\
-  0x20 &  {\sf SEQ} of the next segment in the template being reversed \\
-  0x40 &  the first segment in the template \\
-  0x80 &  the last segment in the template \\
-  0x100 &  secondary alignment \\
-  0x200 &  not passing quality controls \\
-  0x400 &  PCR or optical duplicate \\
-  0x800 &  supplementary alignment \\
+    1 &    0x1 & template having multiple segments in sequencing \\
+    2 &    0x2 & each segment properly aligned according to the aligner \\
+    4 &    0x4 & segment unmapped \\
+    8 &    0x8 & next segment in the template unmapped \\
+   16 &   0x10 & {\sf SEQ} being reverse complemented \\
+   32 &   0x20 & {\sf SEQ} of the next segment in the template being reverse complemented \\
+   64 &   0x40 & the first segment in the template \\
+  128 &   0x80 & the last segment in the template \\
+  256 &  0x100 & secondary alignment \\
+  512 &  0x200 & not passing quality controls \\
+ 1024 &  0x400 & PCR or optical duplicate \\
+ 2048 &  0x800 & supplementary alignment \\
   \hline
   \end{tabular}
   \end{center}
@@ -418,7 +421,7 @@ explicitly limited in SAM.  However, BAM can represent values in the
 range~$[-2^{31},2^{32})$, so in practice this is the realistic range
 of values for SAM's `{\tt i}' as well.}
 \stepcounter{footnote}
-\footnotetext{For example, a byte array {\tt \{0x1a,0xe3,0x1\}} corresponds to a Hex string `{\tt 1AE301}'.}
+\footnotetext{For example, a byte array $[{\tt 0x1a},{\tt 0xe3},{\tt 0x1}]$ corresponds to a Hex string `{\tt 1AE301}'.}
 \end{center}
 For an integer or numeric array (type `{\tt B}'), the first letter indicates the type of numbers
 in the following comma separated array. The letter can be one of `{\tt cCsSiIf}', corresponding to
@@ -460,7 +463,7 @@ may be changed if the new type is also compatible with the array.
   {\tt H0} & i & Number of perfect hits\\
   {\tt H1} & i & Number of 1-difference hits (see also {\tt NM})\\
   {\tt H2} & i & Number of 2-difference hits \\
-  {\tt HI} & i & Query hit index, indicating the alignment record is the i-th one stored in SAM\\
+  {\tt HI} & i & Query hit index, indicating the alignment record is the $i$-th one stored in SAM\\
   {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
   {\tt MC} & Z & CIGAR string for mate/next segment\\
   {\tt MD} & Z & String for mismatching positions. \emph{Regex}: {\tt [0-9]+(([A-Z]|\char92\char94[A-Z]+)[0-9]+)*}\footnotemark\\
@@ -479,8 +482,9 @@ may be changed if the new type is also compatible with the array.
   {\tt R2} & Z & Sequence of the mate/next segment in the template. \\
   {\tt RG} & Z & Read group. Value matches the header {\tt RG-ID} tag if {\tt @RG} is present in the header. \\
   {\tt RT} & Z & Deprecated alternative to {\tt BC} tag originally used at Sanger. \\
-  {\tt SA} & Z & Other canonical alignments in a chimeric alignment, in the format of: (\emph{rname},\emph{pos},\emph{strand},\emph{CIGAR},\emph{mapQ},\emph{NM};)+.
-    Each element in the semi-colon delimited list represents a part of the chimeric alignment. Conventionally, at a supplementary line,
+  {\tt SA} & Z & Other canonical alignments in a chimeric alignment, formatted as a semicolon-delimited list:
+    {\tt (}\emph{rname}{\tt ,}\emph{pos}{\tt ,}\emph{strand}{\tt ,}\emph{CIGAR}{\tt ,}\emph{mapQ}{\tt ,}\emph{NM}{\tt ;)}+.
+    Each element in the list represents a part of the chimeric alignment. Conventionally, at a supplementary line,
 	the first element points to the primary line.\\
   {\tt SM} & i & Template-independent mapping quality \\
   {\tt TC} & i & The number of segments in the template.\\
@@ -609,13 +613,14 @@ specific software package for it to function properly.
   Where there is a clear biological direction (e.g. a gene), the first
   segment ({\sf FLAG} bit 0x40) is used for the first section (e.g. the
   $5'$ end of the gene). Thus a GenBank entry location like
-  {\tt complement(join(85052..85354,} {\tt 85441..85621,} {\tt 6097..86284))}
+  {\tt complement(join(85052..85354, 85441..85621, 86097..86284))}
   would have three lines in SAM with a common {\sf QNAME}: %And three lines in GFF3 too.
-    \begin{enumerate}
-    \item The $5'$ fragment {\sf FLAG}  883, {\sf POS} 86097, {\sf CIGAR} {\tt 188M}, and tags {\tt FI:i:1} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x40 + 0x100 + 0x200
-    \item Middle fragment {\sf FLAG} 819, {\sf POS} 85441, {\sf CIGAR} {\tt 181M}, and tags {\tt FI:i:2} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x100 + 0x200
-    \item The $3'$ fragment {\sf FLAG} 947, {\sf POS} 85052, {\sf CIGAR} {\tt 303M}, and tags {\tt FI:i:3} and {\tt TC:i:3} %FLAG = 0x1 + 0x2 + 0x10 + 0x20 + 0x80 + 0x100 + 0x200
-    \end{enumerate}
+    \begin{center}\begin{tabular}{llrcl}
+  & \multicolumn{1}{c}{\sf FLAG} & \multicolumn{1}{c}{\sf POS} & \sf CIGAR & \multicolumn{1}{c}{Optional fields} \\
+The $5'$ fragment & 883 (0x373) & 86097 & \tt 188M & \tt FI:i:1\quad TC:i:3 \\
+Middle fragment   & 819 (0x333) & 85441 & \tt 181M & \tt FI:i:2\quad TC:i:3 \\
+The $3'$ fragment & 947 (0x3B3) & 85052 & \tt 303M & \tt FI:i:3\quad TC:i:3
+    \end{tabular}\end{center}
   \item If converting GFF3 to SAM, store any \emph{key}, \emph{values}
   from column 9 in the {\tt CT} tag, except for the unique ID which
   is used for the QNAME. GFF3 columns 1 (seqid), 4 (start) and 5 (end)
@@ -633,8 +638,6 @@ specific software package for it to function properly.
   two segments in SAM.
   \end{enumerate}
 \end{enumerate}
-
-\pagebreak
 
 \section{Guide for Describing Assembly Sequences in SAM}
 
@@ -864,12 +867,12 @@ underlined word in uppercase denotes a field in the SAM format.
   \cline{1-6}
   \multicolumn{3}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf magic} & BAM magic string & {\tt char[4]} & {\tt BAM\char92 1}\\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf l\_text} & Length of the header text, including any {\tt NULL} padding & {\tt int32\_t} & \\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf text} & Plain header text in SAM; not necessarily {\tt NULL} terminated & {\tt char[{\sf l\_text}]} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf l\_text} & Length of the header text, including any {\tt NUL} padding & {\tt int32\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf text} & Plain header text in SAM; not necessarily {\tt NUL}-terminated & {\tt char[{\sf l\_text}]} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf n\_ref} & \# reference sequences & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of reference information (n=n\_ref)}} \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf l\_name} & Length of the reference name plus 1 (including {\tt NULL}) & {\tt int32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf name} & Reference sequence name; {\tt NULL} terminated & {\tt char[{\sf l\_name}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_name} & Length of the reference name plus 1 (including {\tt NUL}) & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf name} & Reference sequence name; {\tt NUL}-terminated & {\tt char[{\sf l\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of alignments (until the end of the file)}} \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record & {\tt int32\_t} & \\\cline{2-6}
@@ -881,7 +884,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf read\_name} & Read name,\footnotemark\ {\tt NULL} terminated (\underline{\sf QNAME} plus a tailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf read\_name} & Read name,\footnotemark\ {\tt NUL}-terminated (\underline{\sf QNAME} plus a trailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$; other characters mapped to `{\tt N}'; high nybble first (1st base in the highest 4-bit of the 1st byte) & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
