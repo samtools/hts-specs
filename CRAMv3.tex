@@ -752,7 +752,7 @@ per BAM auxiliary fields.\tabularnewline
 \end{tabular}
 
 The optional tags are encoded in the same manner as BAM tags.  I.e. a
-series of binary encoded tags contatenated together wheere each tag
+series of binary encoded tags contatenated together where each tag
 consists of a 2 byte key (matching [A-Za-z][A-Za-z0-9]) followed by a
 1 byte type ([AfZHcCsSiIB]) followed by a string of bytes in a format
 defined by the type.
@@ -762,21 +762,26 @@ those starting with X, Y or Z are user definable.  Any tag not
 understood by a decoder should be skipped over without producing an
 error.
 
-Reserved tags are defined as follows:
+At present no tags are defined.
 
-\begin{tabular}{|l|l|>{\raggedright}p{325pt}|}
-\hline
-\textbf{Tag type} & \textbf{BAM format} & \textbf{Meaning}\tabularnewline
-\hline
-BD & i & Sum over all reads of the CRC32 hash of sequence base.  This
-may be used to validate round-trips in and out of CRAM.
-calls\tabularnewline
-\hline
-SD & i & Sum over all reads of the CRC32 hash of quality scores. (If
-the quality string is ``*'' in SAM then the hash is of the BAM encoded
-version - a string of bytes with value 255.)\tabularnewline
-\hline
-\end{tabular}
+% Details omitted until we fully work through all the corner cases,
+% such as seq/qual of *.
+%
+% Reserved tags are defined as follows:
+% 
+% \begin{tabular}{|l|l|>{\raggedright}p{325pt}|}
+% \hline
+% \textbf{Tag type} & \textbf{BAM format} & \textbf{Meaning}\tabularnewline
+% \hline
+% BD & i & Sum over all reads of the CRC32 hash of sequence base.  This
+% may be used to validate round-trips in and out of CRAM.
+% calls\tabularnewline
+% \hline
+% SD & i & Sum over all reads of the CRC32 hash of quality scores. (If
+% the quality string is ``*'' in SAM then the hash is of the BAM encoded
+% version - a string of bytes with value 255.)\tabularnewline
+% \hline
+% \end{tabular}
 
 
 \subsection{\textbf{Core data block}}
