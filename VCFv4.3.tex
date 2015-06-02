@@ -75,16 +75,20 @@ both LF (\texttt{\textbackslash n}) and CR+LF (\texttt{\textbackslash r\textback
 This example shows (in order): a good simple SNP, a possible SNP that has been filtered out because its quality is below 10, a site at which two alternate alleles are called, with one of them (T) being ancestral (possibly a reference sequencing error), a site that is called monomorphic reference (i.e. with no alternate alleles), and a microsatellite with two alternative alleles, one a deletion of 2 bases (TC), and the other an insertion of one base (T). Genotype data are given for three samples, two of which are phased and the third unphased, with per sample genotype quality, depth and haplotype qualities (the latter only for the phased samples) given as well as the genotypes. The microsatellite calls are unphased.
 \subsection{Meta-information lines}
 
+
 File meta-information is included after the \#\# string and must be key=value
-pairs.  It is strongly encouraged that information lines describing the
-\texttt{INFO}, \texttt{FILTER}, \texttt{FORMAT} and
-{\color{red}\texttt{contig}} entries used in the body of the VCF file be
-included in the meta-information section. Although they are optional, if these
-lines are present then they must be completely well-formed {\color{red} and 
-their ID must be unique within their type.
+pairs. Meta-information lines are optional, but if they are present then
+they must be completely well-formed. {\color{red} Note that BCF, the binary
+counterpart of VCF, requires that all entries are present.  It is strongly
+encouraged to include meta-information lines describing the entries used in the
+body of the VCF file.
+
+All structured lines that have their value enclosed within "$<>$" require an ID
+which must be unique within their type.
+
 Meta-information lines can be in any order with the exception of `fileformat`
-which must come first. Note that BCF, the binary counterpart of VCF, requires
-that all entries are present.}
+which must come first.}
+
 
 \subsubsection{File format}
 A single `fileformat' field is always required, must be the first line in the file, and details the VCF format version number. For example, for VCF version 4.2, this line should read:
@@ -95,6 +99,7 @@ A single `fileformat' field is always required, must be the first line in the fi
 
 {\color{red}
 \subsubsection{Character encoding}
+\label{character-encoding}
 The character encoding of VCF files is UTF-8.  UTF-8 is a multi-byte 
 character encoding that is a strict superset of 7-bit ASCII and has the 
 property that none of the bytes in any multi-byte characters are 7-bit ASCII 
@@ -201,13 +206,18 @@ It is possible to define sample to genome mappings as shown below:
 
 \subsubsection{Pedigree field format}
 It is possible to record relationships between genomes using the following syntax:
+{\color{red}
 \begin{verbatim}
-##PEDIGREE=<Name_0=G0-ID,Name_1=G1-ID,...,Name_N=GN-ID>
+##PEDIGREE=<ID=PedigreeID,Name_0=G0-ID,Name_1=G1-ID,...,Name_N=GN-ID>
 \end{verbatim}
-or a link to a database:
+}
+\noindent or a link to a database:
+{\color{red}
 \begin{verbatim}
-##pedigreeDB=<url>
+##pedigreeDB=URL
 \end{verbatim}
+}
+
 \subsection{Header line syntax}
 The header line names the 8 fixed, mandatory columns. These columns are as follows:
 
@@ -246,6 +256,7 @@ There are 8 fixed fields per record. All data lines are tab-delimited. In all ca
 \begin{itemize}
   \item AA : ancestral allele
   \item AC : allele count in genotypes, for each ALT allele, in the same order as listed
+  \item {\color{red}AD, ADF, ADR: read depths for each allele; total (AD), on the forward (ADF) and the reverse (ADR) strand (Integer, Number=R)}
   \item AF : allele frequency for each ALT allele in the same order as listed: use this when estimated from primary data, not called genotypes
   \item AN : total number of alleles in called genotypes
   \item BQ : RMS base quality at this position
@@ -278,13 +289,17 @@ As with the INFO field, there are several common, reserved keywords that are sta
 
 \begin{itemize}
 \renewcommand{\labelitemii}{$\circ$}
+  \item {\color{red}AD, ADF, ADR: per-sample read depths for each allele; total (AD), on the forward (ADF) and the reverse (ADR) strand (Integer, Number=R)}
+  \item DP : read depth at this position for this sample (Integer)
+  \item EC : comma separated list of expected alternate allele counts for each alternate allele in the same order as listed in the ALT field (typically used in association analyses) (Integers)
+  \item FT : sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field). Again, use PASS to indicate that all filters have been passed, a semi-colon separated list of codes for filters that fail, or `.' to indicate that filters have not been applied. These values should be described in the meta-information in the same way as FILTERs (String, no white-space or semi-colons permitted)
+  \item GQ : conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant) (Integer)
+  \item GP : {\color{red} genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities (Float)}
   \item GT : genotype, encoded as allele values separated by either of $/$ or $\mid$. The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on. For diploid calls examples could be $0/1$, $1\mid0$, or $1/2$, etc. For haploid calls, e.g. on Y, male non-pseudoautosomal X, or mitochondrion, only one allele value should be given; a triploid call might look like $0/0/1$. If a call cannot be made for a sample at a given locus, `.' should be specified for each missing allele in the GT field (for example `$./.$' for a diploid genotype and `.' for haploid genotype). The meanings of the separators are as follows (see the PS field below for more details on incorporating phasing information into the genotypes):
 	\begin{itemize}
 	  \item $/$ : genotype unphased
 	  \item $\mid$ : genotype phased
 	\end{itemize}
-  \item DP : read depth at this position for this sample (Integer)
-  \item FT : sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field). Again, use PASS to indicate that all filters have been passed, a semi-colon separated list of codes for filters that fail, or `.' to indicate that filters have not been applied. These values should be described in the meta-information in the same way as FILTERs (String, no white-space or semi-colons permitted)
   \item GL : genotype likelihoods comprised of comma separated floating point
   $log_{10}$-scaled likelihoods for all possible genotypes given the set of
   alleles defined in the REF and ALT fields. {\color{red} In presence of the GT field the
@@ -305,14 +320,11 @@ As with the INFO field, there are several common, reserved keywords that are sta
 
   For example: GT:GL 0/1:-323.03,-99.29,-802.53 (Floats) 
   \item GLE : genotype likelihoods of heterogeneous ploidy, used in presence of uncertain copy number. For example: GLE=0:-75.22,1:-223.42,0/0:-323.03,1/0:-99.29,1/1:-802.53 (String)
-  \item PL : the phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) (Integers)
-  \item GP : {\color{red} genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities (Float)}
-  \item GQ : conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant) (Integer)
   \item HQ : haplotype qualities, two comma separated phred qualities (Integers)
-  \item PS : phase set.  A phase set is defined as a set of phased genotypes to which this genotype belongs.  Phased genotypes for an individual that are on the same chromosome and have the same PS value are in the same phased set.  A phase set specifies multi-marker haplotypes for the phased genotypes in the set.  All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.  If the genotype in the GT field is unphased, the corresponding PS field is ignored.  The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required). (Non-negative 32-bit Integer)
-  \item PQ : phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set).  We note that we have not yet included the specific measure for precisely defining ``phasing quality''; our intention for now is simply to reserve the PQ tag for future use as a measure of phasing quality. (Integer)
-  \item EC : comma separated list of expected alternate allele counts for each alternate allele in the same order as listed in the ALT field (typically used in association analyses) (Integers)
   \item MQ : RMS mapping quality, similar to the version in the INFO field. (Integer)
+  \item PL : the phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) (Integers)
+  \item PQ : phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set).  We note that we have not yet included the specific measure for precisely defining ``phasing quality''; our intention for now is simply to reserve the PQ tag for future use as a measure of phasing quality. (Integer)
+  \item PS : phase set.  A phase set is defined as a set of phased genotypes to which this genotype belongs.  Phased genotypes for an individual that are on the same chromosome and have the same PS value are in the same phased set.  A phase set specifies multi-marker haplotypes for the phased genotypes in the set.  All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.  If the genotype in the GT field is unphased, the corresponding PS field is ignored.  The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required). (Non-negative 32-bit Integer)
 \end{itemize}
 
 
@@ -1383,7 +1395,7 @@ reserved & 0b0111 1111 1000 0000 0000 0000 0000 0111 & 0x7F800007 \\ \hline
 \end{tabular}
 
 \vspace{0.3cm}
-\textbf{Character} values are not explicitly typed in BCF2.  Instead, VCF Character values should be encoded by a single character string.  As with Strings, UNICODE characters are not supported.
+\textbf{Character} values are not explicitly typed in BCF2.  Instead, VCF Character values should be encoded by a single character string. {\color{red} See also \ref{character-encoding}.}
 
 \vspace{0.3cm}
 \textbf{Flags} values -- which can only appear in INFO fields -- in BCF2 should be encoded by any non-MISSING value.  The recommended best practice is to encode the value as an 1-element INT8 (type 0x11) with value of 1 to indicate present.  Because FLAG values can only be encoded in INFO fields, BCF2 provides no mechanism to encode FLAG values in genotypes, but could be easily extended to do so if allowed in a future VCF version.
@@ -1724,10 +1736,14 @@ section~4 as BAM files and other block-compressed files with BGZF.
 \item Introduced \#\#META header lines for defining phenotype metadata
 \item New reserved tag "CNP" analogous to "GP" was added. Both CNP and GP use 0 to 1 encoding, which is a change from previous phred-scaled GP.
 \item In order for VCF and BCF to have the same expressive power, we state explicitly that Integers and Floats are 32-bit numbers. Integers are signed.
-\item We state explicitly that zero length strings are not allowed, this includes the CHROM and ID column, INFO IDs, FILTER IDs and FORMAT IDs. Meta-information lines can be in any order, with the exception of \#\#fileformat which must come first. INFO, FILTER and FORMAT IDs must be unique within that type.
+\item We state explicitly that zero length strings are not allowed, this includes the CHROM and ID column, INFO IDs, FILTER IDs and FORMAT IDs. Meta-information lines can be in any order, with the exception of \#\#fileformat which must come first. 
+\item All header  lines of the form \#\#key=$<$ID=xxx,...$>$ must have an ID value
+that is unique for a given value of "key". All header lines whose value starts
+with "$<$" must have an ID field. Therefore, also \#\#PEDIGREE newly requires a unique ID.
 \item We state explicitly that duplicate IDs, FILTER, INFO or FORMAT keys are not valid.
 \item A section about gVCF was added, introduced the $<$*$>$ symbolic allele.
-\item A section about tag naming conventions was added
+\item A section about tag naming conventions was added.
+\item New reserved AD, ADF, and ADR INFO and FORMAT fields added.
 \end{itemize}
 
 \subsection{Changes between BCFv2.1 and BCFv2.2}
