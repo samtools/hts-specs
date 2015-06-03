@@ -300,25 +300,67 @@ As with the INFO field, there are several common, reserved keywords that are sta
 	  \item $/$ : genotype unphased
 	  \item $\mid$ : genotype phased
 	\end{itemize}
+
   \item GL : genotype likelihoods comprised of comma separated floating point
   $log_{10}$-scaled likelihoods for all possible genotypes given the set of
   alleles defined in the REF and ALT fields. {\color{red} In presence of the GT field the
   same ploidy is expected; without GT field, diploidy is assumed. 
-  If A is the allele in REF and B,C,... are the alleles as ordered in ALT, the
-  ordering of genotypes for the likelihoods is
-  AA,AB,BB for biallelic sites; AA,AB,BB,AC,BC,CC for triallelic sites, etc.
 
-  In general case of ploidy P and N alternate alleles (0 is the REF and 1..N
+  \textsc{Genotype Ordering.} In general case of ploidy P and N alternate alleles (0 is the REF and 1..N
   the alternate alleles), the ordering of genotypes for the likelihoods can
-  be expressed by the following pseudocode with variable number of nested loops:
+  be expressed by the following pseudocode with as many nested loops as ploidy:\footnote{\color{red}Note 
+    that we use inclusive \texttt{for} loop boundaries.}
+  \begingroup
+  \small
   \begin{lstlisting}
-    for $a_1 = 0\ldots N$
-    $\ldots$
-    for $a_P = 0\ldots a_{P-1}$
-        println $a_1 a_2 \ldots a_P$
-  \end{lstlisting}}
+  for $a_P = 0\ldots N$
+    for $a_{P-1} = 0\ldots a_P$
+        $\ldots$
+        for $a_1 = 0\ldots a_{2}$
+            println $a_1 a_2  \ldots  a_P$
+  \end{lstlisting}
+  \endgroup
 
-  For example: GT:GL 0/1:-323.03,-99.29,-802.53 (Floats) 
+  Alternatively, the same can be achieved recursively with the following pseudocode:
+  \begingroup
+  \small
+  \begin{lstlisting}
+    Ordering($P$, $N$, suffix=""):
+        for $a$ in $0\ldots N$
+            if ($P == 1$) println str($a$) + suffix
+            if ($P > 1$) Ordering($P$-1, $a$, str($a$) + suffix)
+  \end{lstlisting}
+  \endgroup
+
+  Conversely, the index of the value corresponding to the genotype $k_1\le k_2\le\ldots\le k_P$ is
+  \begingroup
+  \small
+  \begin{lstlisting}
+    Index($k_1/k_2/\ldots/k_P$) = $\sum_{m=1}^{P} {k_m + m - 1 \choose m}$
+  \end{lstlisting}
+  \endgroup
+
+  Examples:
+    \begin{itemize}
+    \item for $P$=2 and $N$=1, the ordering is 00,01,11
+    \item for $P$=2 and $N$=2, the ordering is 00,01,11,02,12,22
+    \item for $P$=3 and $N$=2, the ordering is 000, 001, 011, 111, 002, 012, 112, 022, 122, 222
+    \item for $P$=1, the index of the genotype $a$ is $a$
+    \item for $P$=2, the index of the genotype "$a/b$", where $a\le b$, is $b (b+1)/2 + a$
+    \item for $P$=2 and arbitrary $N$, the ordering can be easily derived from a triangular matrix
+            \newline
+            \hbox{\hskip5em\footnotesize
+            \begin{tabular}{l|llll}
+               $b\setminus a$ & 0 & 1 & 2 & 3 \\ \hline \\[-0.5em]
+               0   & 0 &   &   &   \\
+               1   & 1 & 2 &   &   \\
+               2   & 3 & 4 & 5 &   \\
+               3   & 6 & 7 & 8 & 9 
+            \end{tabular}
+            }
+    \end{itemize}
+  }
+
   \item GLE : genotype likelihoods of heterogeneous ploidy, used in presence of uncertain copy number. For example: GLE=0:-75.22,1:-223.42,0/0:-323.03,1/0:-99.29,1/1:-802.53 (String)
   \item HQ : haplotype qualities, two comma separated phred qualities (Integers)
   \item MQ : RMS mapping quality, similar to the version in the INFO field. (Integer)
