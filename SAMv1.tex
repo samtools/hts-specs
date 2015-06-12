@@ -103,8 +103,8 @@ r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
   alignment is considered the ``representative'' alignment, and the others are
   called ``supplementary'' and are distinguished by the supplementary alignment
   flag.  All the SAM records in a chimeric alignment have the same {\sf QNAME}
-  and the same values for 0x40 and 0x80 flags (see Section 1.4). The decision
-  regarding which linear alignment is representative is arbitrary.
+  and the same values for 0x40 and 0x80 flags (see Section~\ref{sec:alnrecord}).
+  The decision regarding which linear alignment is representative is arbitrary.
 
 \item[Read alignment]
   A linear alignment or a chimeric alignment that is the complete
@@ -230,7 +230,7 @@ The following table give the defined record types and tags. Tags with
 \end{longtable}
 \end{center}
 
-\subsection{The alignment section: mandatory fields}
+\subsection{The alignment section: mandatory fields}\label{sec:alnrecord}
 In the SAM format, each alignment line typically represents the linear
 alignment of a segment. Each line has 11
 mandatory fields. These fields always appear in the same order and must be
@@ -547,7 +547,7 @@ Formally the entire PT record matches:
 \pagebreak
 
 \section{Recommended Practice for the SAM Format}
-\label{sec-recommended-practice}
+\label{sec:recommended-practice}
 This section describes the best practice for representing data in the
 SAM format. They are not required in general, but may be required by a
 specific software package for it to function properly.
@@ -714,7 +714,7 @@ sequence in SAM, {\sf QNAME} should be identical to {\sf RNAME}, {\sf POS} set
 to 1 and {\sf FLAG} to 516 (filtered and unmapped); for an annotation, {\sf
 FLAG} should be set to 768 (filtered and secondary) with no restriction to {\sf
 QNAME}. Dummy reads for annotation would typically have an `{\tt CT}' tag to
-hold the annotation information, see Section~\ref{sec-recommended-practice}.
+hold the annotation information, see Section~\ref{sec:recommended-practice}.
 
 \pagebreak
 
@@ -901,7 +901,7 @@ in Section~\ref{sec:code}. For mapped reads this uses {\sf POS-1}
 (i.e.,~0-based left position) and the alignment end point using the
 alignment length from the {\sf CIGAR} string. For unmapped reads
 (e.g.,~paired end reads where only one part is mapped, see
-Section~\ref{sec-recommended-practice}) treat the alignment as
+Section~\ref{sec:recommended-practice}) treat the alignment as
 being length one. Note unmapped reads with {\sf POS} $0$ (which
 becomes $-1$ in BAM) therefore use {\sf reg2bin(-1, 0)} which
 is $4680$.}
@@ -1053,7 +1053,7 @@ of the number of mapped and unmapped read-segments per reference sequence,
 and of any unplaced unmapped read-segments.\footnote{By \emph{placed unmapped
 read} we mean a read that is unmapped according to its {\sf FLAG} but whose
 {\sf RNAME} and~{\sf POS} fields are filled in, thus ``placing'' it on a
-reference sequence (see Section~\ref{sec-recommended-practice}).
+reference sequence (see Section~\ref{sec:recommended-practice}).
 In contrast, \emph{unplaced} unmapped reads have~`*' and~0 for {\sf RNAME}
 and~{\sf POS}.}
 This is stored in an optional extra metadata pseudo-bin for each reference
