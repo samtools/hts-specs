@@ -361,7 +361,6 @@ As with the INFO field, there are several common, reserved keywords that are sta
     \end{itemize}
   }
 
-  \item GLE : genotype likelihoods of heterogeneous ploidy, used in presence of uncertain copy number. For example: GLE=0:-75.22,1:-223.42,0/0:-323.03,1/0:-99.29,1/1:-802.53 (String)
   \item HQ : haplotype qualities, two comma separated phred qualities (Integers)
   \item MQ : RMS mapping quality, similar to the version in the INFO field. (Integer)
   \item PL : the phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) (Integers)
@@ -1786,6 +1785,7 @@ with "$<$" must have an ID field. Therefore, also \#\#PEDIGREE newly requires a 
 \item A section about gVCF was added, introduced the $<$*$>$ symbolic allele.
 \item A section about tag naming conventions was added.
 \item New reserved AD, ADF, and ADR INFO and FORMAT fields added.
+\item Removed unused and ill-defined GLE FORMAT tag.
 \end{itemize}
 
 \subsection{Changes between BCFv2.1 and BCFv2.2}
