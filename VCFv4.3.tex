@@ -105,6 +105,11 @@ character encoding that is a strict superset of 7-bit ASCII and has the
 property that none of the bytes in any multi-byte characters are 7-bit ASCII 
 bytes. As a result, most software that processes VCF files does not have 
 to be aware of the possible presence of multi-byte UTF-8 characters. 
+
+\subsubsection{Data types}
+Data types supported by VCF are: Integer (32-bit, signed), Float (32-bit, formatted 
+to match the regular expression \texttt{\^{}[-+]?[0-9]*\textbackslash.?[0-9]+([eE][-+]?[0-9]+)?\$}, \texttt{NaN}, or \texttt{+/-Inf}), Flag, Character, and
+String. For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in the binary version, see \ref{BcfTypeEncoding}.
 }
 
 \subsubsection{Information field format}
@@ -114,8 +119,8 @@ INFO fields should be described as follows (first four keys are required, source
 ##INFO=<ID=ID,Number=number,Type=type,Description="description",Source="source",Version="version">
 \end{verbatim}
 
-Possible Types for INFO fields are: Integer {\color{red} (32-bit, signed)}, Float {\color{red} (32-bit)}, Flag, Character, and
-String. {\color{red} For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in binary version, see \ref{BcfTypeEncoding}.}
+Possible Types for INFO fields are: Integer, Float, Flag, Character, and
+String. 
 The Number entry is an Integer that describes the number of values that
 can be included with the INFO field. For example, if the INFO field contains a
 single number, then this value should be $1$; if the INFO field describes a
