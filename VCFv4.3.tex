@@ -310,6 +310,7 @@ missing values are specified with a dot (`.'). Fixed fields are:
   \item SOMATIC : indicates that the record is a somatic mutation, for cancer genomics
   \item VALIDATED : validated by follow-up experiment
   \item 1000G : membership in 1000 Genomes
+  \item $\ldots$ see Section~\ref{sv-info-keys} for a list of INFO keys reserved for structural variants.
 \end{itemize}
 \end{enumerate}
 The exact format of each INFO sub-field should be specified in the meta-information (as described above).
@@ -403,6 +404,7 @@ As with the INFO field, there are several common, reserved keywords that are sta
   \item PL : the phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) (Integers)
   \item PQ : phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set).  We note that we have not yet included the specific measure for precisely defining ``phasing quality''; our intention for now is simply to reserve the PQ tag for future use as a measure of phasing quality. (Integer)
   \item PS : phase set.  A phase set is defined as a set of phased genotypes to which this genotype belongs.  Phased genotypes for an individual that are on the same chromosome and have the same PS value are in the same phased set.  A phase set specifies multi-marker haplotypes for the phased genotypes in the set.  All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.  If the genotype in the GT field is unphased, the corresponding PS field is ignored.  The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required). (Non-negative 32-bit Integer)
+  \item $\ldots$ see Section~\ref{sv-format-keys} for a list of genotype keys reserved for structural variants.
 \end{itemize}
 
 
@@ -440,6 +442,7 @@ VCF records use a simple haplotype representation for REF and ALT alleles to des
 
 
 \section{INFO keys used for structural variants}
+\label{sv-info-keys}
 The following INFO keys are reserved for encoding structural variants. In general, when these keys are used by imprecise variants, the values should be best estimates. When a key reflects a property of a single alt allele (e.g. SVLEN), then when there are multiple alt alleles there will be multiple values for the key corresponding to each alelle (e.g. SVLEN=-100,-110 for a deletion with two distinct alt alleles).
 \footnotesize
 \begin{verbatim}
@@ -492,6 +495,7 @@ For precise variants, the consensus sequence the alternate allele assembly is de
 \normalsize
 
 \section{FORMAT keys used for structural variants}
+\label{sv-format-keys}
 \footnotesize
 \begin{verbatim}
 ##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
