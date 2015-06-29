@@ -98,18 +98,38 @@ A single `fileformat' line is always required, must be the first line in the fil
 \end{verbatim}
 
 {\color{red}
-\subsubsection{Character encoding}
+\subsubsection{Character encoding, non-printable characters and characters with special meaning}
 \label{character-encoding}
 The character encoding of VCF files is UTF-8.  UTF-8 is a multi-byte 
 character encoding that is a strict superset of 7-bit ASCII and has the 
 property that none of the bytes in any multi-byte characters are 7-bit ASCII 
 bytes. As a result, most software that processes VCF files does not have 
 to be aware of the possible presence of multi-byte UTF-8 characters. 
+Note that non-printable characters U+0000-U+0008, U+000B-U+000C, U+000E-U+001F are disallowed.
+Line separators must be CR+LF or LF and they are allowed only as line separators at
+end of line. Characters with special meaning must be represented using the (capitalized)
+percent encoding
+
+\begingroup\footnotesize
+\begin{tabular}{l l l}
+\%3A  &  :  & (colon)                \\
+\%3B  &  ;  & (semicolon)            \\
+\%3D  &  =  & (equal sign)           \\
+\%25  &  \% & (percent sign)         \\
+\%2C  &  ,  & (comma)                \\
+\%0D  & CR  &                        \\
+\%0A  & LF  &                        \\
+\%09  & TAB & 
+\end{tabular}
+\endgroup
+
 
 \subsubsection{Data types}
 Data types supported by VCF are: Integer (32-bit, signed), Float (32-bit, formatted 
 to match the regular expression \texttt{\^{}[-+]?[0-9]*\textbackslash.?[0-9]+([eE][-+]?[0-9]+)?\$}, \texttt{NaN}, or \texttt{+/-Inf}), Flag, Character, and
 String. For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in the binary version, see \ref{BcfTypeEncoding}.
+
+
 }
 
 \subsubsection{Information field format}
@@ -195,6 +215,8 @@ As with chromosomal sequences it is highly recommended (but not required) that t
 \begin{verbatim}
 ##contig=<ID=ctg1,URL=ftp://somewhere.org/assembly.fa,...>
 \end{verbatim}
+
+
 \subsubsection{Sample field format}
 It is possible to define sample to genome mappings as shown below:
 {\color{red}
@@ -237,11 +259,14 @@ The header line names the 8 fixed, mandatory columns. These columns are as follo
   \item INFO
 \end{enumerate}
 
-If genotype data is present in the file, these are followed by a FORMAT column header, then an arbitrary number of sample IDs. The header line is tab-delimited.
+If genotype data is present in the file, these are followed by a FORMAT column header, then an arbitrary number of sample IDs. The header line is tab-delimited
+{\color{red} and there should be no tab characters at the end of the line}.
 
 \subsection{Data lines}
 \subsubsection{Fixed fields}
-There are 8 fixed fields per record. All data lines are tab-delimited. In all cases, missing values are specified with a dot (`.'). Fixed fields are:
+There are 8 fixed fields per record. All data lines are tab-delimited
+{\color{red} with no tab character at the end of the line. The last data line should end with a line separator.} In all cases,
+missing values are specified with a dot (`.'). Fixed fields are:
 
 \begin{enumerate}
   \item CHROM - chromosome: An identifier from the reference genome or an angle-bracketed ID String (``$<$ID$>$'') pointing to a contig in the assembly file (cf. the \#\#assembly line in the header). All entries for a specific CHROM should form a contiguous block within the VCF file. The colon symbol (:) must be absent from all chromosome names to avoid parsing errors when dealing with breakends. (String, no white-space permitted, Required).
@@ -253,7 +278,7 @@ There are 8 fixed fields per record. All data lines are tab-delimited. In all ca
   \item FILTER - filter status: PASS if this position has passed all filters, i.e. a call is made at this position. Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g. ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples. `0' is reserved and should not be used as a filter String. If filters have not been applied, then this field should be set to the missing value. (String, no white-space or semi-colons permitted, {\color{red}duplicate values not allowed.})
   \item INFO - additional information: (String, no semi-colons or
   equals-signs permitted; commas are permitted only as delimiters for lists of
-  values; characters with special meaning can be encoded using URL encoding; space characters are allowed)
+  values; characters with special meaning can be encoded using the percent encoding, see Section~\ref{character-encoding}; space characters are allowed)
   INFO fields are encoded as a semicolon-separated series of short keys
   with optional values in the format: $<$key$>$=$<$data$>$[,data]. 
   {\color{red} INFO keys must match the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed.}
@@ -1776,7 +1801,7 @@ section~4 as BAM files and other block-compressed files with BGZF.
 \item VCF compliant implementations must support both LF and CR+LF newline conventions
 \item INFO and FORMAT tag names must match the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}
 \item Spaces are allowed in INFO field values
-\item Characters with special meaning (such as ';' in INFO, ':' in FORMAT, and '\%' in both) can be encoded using URL encoding
+\item Characters with special meaning (such as ';' in INFO, ':' in FORMAT, and '\%' in both) can be encoded using the percent encoding (see Section~\ref{character-encoding})
 \item The character encoding of VCF files is UTF-8.
 \item The SAMPLE field can contain optional DOI URL for the source data file
 \item Introduced \#\#META header lines for defining phenotype metadata
