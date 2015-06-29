@@ -210,12 +210,19 @@ Breakpoint assemblies for structural variations may use an external file:
 \end{verbatim}
 
 The URL field specifies the location of a fasta file containing breakpoint assemblies referenced in the VCF records for structural variants via the BKPTID INFO key.
+
 \subsubsection{Contig field format}
+\label{sec-contig-field}
 As with chromosomal sequences it is highly recommended (but not required) that the header include tags describing the contigs referred to in the VCF file. This furthermore allows these contigs to come from different files. The format is identical to that of a reference sequence, but with an additional URL tag to indicate where that sequence can be found. For example:.
 \begin{verbatim}
 ##contig=<ID=ctg1,URL=ftp://somewhere.org/assembly.fa,...>
 \end{verbatim}
 
+\noindent
+{\color{red}Valid contig names must follow the reference sequence names allowed by the SAM format,
+excluding the characters "\texttt{\textless\textgreater[]:*}". The contig names must not use a
+reserved symbolic allele name.
+}
 
 \subsubsection{Sample field format}
 It is possible to define sample to genome mappings as shown below:
@@ -1816,6 +1823,7 @@ with "$<$" must have an ID field. Therefore, also \#\#PEDIGREE newly requires a 
 \item A section about tag naming conventions was added.
 \item New reserved AD, ADF, and ADR INFO and FORMAT fields added.
 \item Removed unused and ill-defined GLE FORMAT tag.
+\item Chromosome names cannot use reserved symbolic alleles and contain characters used by breakpoints (Section~\ref{sec-contig-field}).
 \end{itemize}
 
 \subsection{Changes between BCFv2.1 and BCFv2.2}
