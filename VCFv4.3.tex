@@ -286,7 +286,7 @@ The header line names the 8 fixed, mandatory columns. These columns are as follo
 \end{enumerate}
 
 If genotype data is present in the file, these are followed by a FORMAT column header, then an arbitrary number of sample IDs. The header line is tab-delimited
-{\color{red} and there should be no tab characters at the end of the line}.
+{\color{red} and there must be no tab characters at the end of the line}.
 
 \subsection{Data lines}
 \subsubsection{Fixed fields}
@@ -316,7 +316,7 @@ missing values are specified with a dot (`.'). Fixed fields are:
   {\color{red}
   If the reference sequence contains IUPAC ambiguity codes not
   allowed by this specification (such as R = A/G), the ambiguous reference base 
-  can be reduced to a concrete base by using the one that is first alphabetically
+  must be reduced to a concrete base by using the one that is first alphabetically
   (thus R as a reference base is converted to A in VCF.)
   }
 
