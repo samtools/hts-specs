@@ -235,15 +235,14 @@ Subexponential encoding example:
 
 The first byte ``0x7'' is the codec id. 
 
-The second 4 bytes ``0x0 0x0 0x0 0xD'' denote the length of the bytes to follow 
-(13). 
+The next byte ``0x2'' denotes the length of the bytes to follow (2). 
 
-The subexponential encoding has 3 parameters: integer (itf8) K, int (itf8) offset 
-and boolean (bool) unary bit: 
+The subexponential encoding has 2 parameters: integer (itf8) offset and integer (itf8) K.
+
+offset = 0x0 = 0
 
 K = 0x1 = 1
 
-offset = 0x0 = 0
 
 \subsubsection*{Map}
 
@@ -1043,13 +1042,17 @@ The following codes are used to distinguish variations in read coordinates:
 \textbf{Feature code} & \textbf{Id} & \textbf{Data series type} & \textbf{Data 
 series name} & \textbf{Description}\tabularnewline
 \hline
-Bases & b (0x62) & byte[ ] & BA & a stretch of bases\tabularnewline
+Bases & b (0x62) & byte[ ] & BB & a stretch of bases\tabularnewline
 \hline
-Scores & q (0x71) & byte[ ] & QS & a stretch of scores\tabularnewline
+Scores & q (0x71) & byte[ ] & QQ & a stretch of scores\tabularnewline
 \hline
-Bases and scores & A (0x41) & byte[ ],byte[ ] & BA,QS & A a stretch of bases and
-quality scores score\tabularnewline
-\hline
+% Neither C nor Java implementations generator nor can decode the 'A'
+% feature code, but if they did they'd be BB/QQ and not BA/QS.  Best
+% to omit it from published spec for now?
+%
+% Bases and scores & A (0x41) & byte[ ],byte[ ] & BB,QQ & A a stretch of bases and
+% quality scores score\tabularnewline
+% \hline
 Read base & B (0x42) & byte,byte & BA,QS & A base and associated quality score\tabularnewline
 \hline
 Substitution & X (0x58) & byte & BS & base substitution codes, SAM operators X, 
@@ -1065,11 +1068,11 @@ Quality score & Q (0x51) & byte & QS & single quality score\tabularnewline
 \hline
 Reference skip & N (0x4E) & int & RS & number of skipped bases, SAM operator N\tabularnewline
 \hline
-Soft clip & S & byte[ ] & SC & soft clipped bases, SAM operator S\tabularnewline
+Soft clip & S (0x53) & byte[ ] & SC & soft clipped bases, SAM operator S\tabularnewline
 \hline
-Padding & P & int & PD & number of padded bases, SAM operator P\tabularnewline
+Padding & P (0x50) & int & PD & number of padded bases, SAM operator P\tabularnewline
 \hline
-Hard clip & H & int & HC & number of hard clipped bases, SAM operator H\tabularnewline
+Hard clip & H (0x48) & int & HC & number of hard clipped bases, SAM operator H\tabularnewline
 \hline
 \end{tabular}
 
