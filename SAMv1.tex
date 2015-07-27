@@ -147,17 +147,31 @@ mapping, all the other mappings get mapping quality $<$Q3
 and are ignored by most SNP/INDEL callers.}
 
 \subsection{The header section}
-Each header line begins with character `{\tt @}' followed by a
-two-letter record type code. In the header, each line is TAB-delimited
-and except the {\tt @CO} lines, each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
-is a two-letter string that defines the content and the format of {\tt
-  VALUE}. Each header line should match: {\tt
-  /\char94@[A-Za-z][A-Za-z](\char92t[A-Za-z][A-Za-z0-9]:[
-  -\char126]+)+\$/} or {\tt /\char94@CO\char92t.*/}. Tags containing lowercase letters are reserved for
-end users.
+Each header line begins with the character `{\tt @}' followed by
+one of the two-letter header record type codes defined in this section.
+In the header, each line is TAB-delimited and, apart from {\tt @CO} lines,
+each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
+is a two-character string that defines the format and content of {\tt VALUE}.
+Thus header lines match {\tt
+  /\char94@[A-Z][A-Z](\char92t[A-Za-z][A-Za-z0-9]:[
+  -\char126]+)+\$/} or {\tt /\char94@CO\char92t.*/}.
 
-The following table give the defined record types and tags. Tags with
-`*' are required when the record type is present.
+The following table describes the header record types that may be used
+and their predefined tags.
+Tags listed with `*' are required; e.g., every {\tt @SQ} header line must
+have {\tt SN} and {\tt LN} fields.
+As with alignment optional fields (see Section~\ref{sec:alnaux}),
+you can freely add new tags for further data fields.
+Tags containing lowercase letters are reserved for local use and will not be
+formally defined in any future version of this specification.%
+\footnote{Best practice is to use lowercase tags while designing and
+experimenting with new data field tags or for fields of local interest only.
+For new tags that are of general interest, raise an
+\href{https://github.com/samtools/hts-specs/issues}{{\tt hts-specs} issue}
+or email {\tt samtools-devel@lists.sourceforge.net} to have an uppercase
+equivalent added to the specification.
+This way collisions of the same uppercase tag being used with different
+meanings can be avoided.}
 
 \begin{center}
 \small
@@ -172,7 +186,7 @@ The following table give the defined record types and tags. Tags with
   key is the {\sf RNAME} field, with order defined by the order of {\tt @SQ} lines in the header.  The
   minor sort key is the {\sf POS} field.  For alignments with equal {\sf RNAME} and {\sf POS}, order is
   arbitrary.  All alignments with `{\tt *}' in {\sf RNAME} field follow alignments with some other
-  value but otherwise are in arbitrary order.\\\cline{1-3}
+  value but otherwise are in arbitrary order.\\\cline{2-3}
   & {\tt GO} & Grouping of alignments, indicating that similar alignment records
     are grouped together but the file is not necessarily sorted overall.
     \emph{Valid values}: {\tt none} (default), {\tt query} (alignments are
@@ -395,7 +409,7 @@ Each bit is explained in the following table:
   ought to equal the length of {\sf SEQ}.
 \end{enumerate}
 
-\subsection{The alignment section: optional fields}
+\subsection{The alignment section: optional fields}\label{sec:alnaux}
 All optional fields follow the {\tt TAG:TYPE:VALUE} format
 where {\tt TAG} is a two-character string that matches {\tt /[A-Za-z][A-Za-z0-9]/}.
 Each {\tt TAG} can only appear once in one alignment line. A {\tt TAG}
