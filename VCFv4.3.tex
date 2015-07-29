@@ -261,7 +261,10 @@ It is possible to define sample to genome mappings as shown below:
 It is possible to record relationships between genomes using the following syntax:
 {\color{red}
 \begin{verbatim}
-##PEDIGREE=<ID=PedigreeID,Name_0=G0-ID,Name_1=G1-ID,...,Name_N=GN-ID>
+##PEDIGREE=<ID=TumourSample,Original=GermlineID>
+##PEDIGREE=<ID=SomaticNonTumour,Original=GermlineID>
+##PEDIGREE=<ID=ChildID,Father=FatherID,Mother=MotherID>
+##PEDIGREE=<ID=SampleID,Name_1=Ancestor_1,...,Name_N=Ancestor_N>
 \end{verbatim}
 }
 \noindent or a link to a database:
@@ -269,7 +272,10 @@ It is possible to record relationships between genomes using the following synta
 \begin{verbatim}
 ##pedigreeDB=URL
 \end{verbatim}
+
+\noindent See \ref{PedigreeInDetail} for details.
 }
+
 
 \subsection{Header line syntax}
 The header line names the 8 fixed, mandatory columns. These columns are as follows:
@@ -321,7 +327,7 @@ missing values are specified with a dot (`.'). Fixed fields are:
   }
 
 
-  \item ALT - alternate base(s): Comma separated list of alternate non-reference alleles called on at least one of the samples. Options are base Strings made up of the bases A,C,G,T,N,*, (case insensitive) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends. The `*' allele is reserved to indicate that the allele is missing due to a upstream deletion. If there are no alternative alleles, then the missing value should be used.  Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.  (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
+  \item ALT - alternate base(s): Comma separated list of alternate non-reference alleles called on at least one of the samples. Options are base Strings made up of the bases A,C,G,T,N,*, (case insensitive) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends. The `*' allele is reserved to indicate that the allele is {\color{red}missing due to a an overlapping deletion}. If there are no alternative alleles, then the missing value should be used.  Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.  (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
   \item QUAL - quality: Phred-scaled quality score for the assertion made in ALT. i.e. $-10log_{10}$ prob(call in ALT is wrong). If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant). If unknown, the missing value should be specified. (Float)
   \item FILTER - filter status: PASS if this position has passed all filters, i.e. a call is made at this position. Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g. ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples. `0' is reserved and should not be used as a filter String. If filters have not been applied, then this field should be set to the missing value. (String, no white-space or semi-colons permitted, {\color{red}duplicate values not allowed.})
   \item INFO - additional information: (String, no semi-colons or
@@ -1121,6 +1127,7 @@ However, a more evolved algorithm could attempt actually deconvolving the two ge
 \normalsize
 
 \subsubsection{Clonal derivation relationships}
+\label{PedigreeInDetail}
 In cancer, each VCF file represents several genomes from a patient, but one genome is special in that it represents the germline genome of the patient. This genome is contrasted to a second genome, the cancer tumor genome. In the simplest case the VCF file for a single patient contains only these two genomes. This is assumed in most of the discussion of the sections below.
 
 In general there may be several tumor genomes from the same patient in the VCF file. Some of these may be secondary tumors derived from an original primary tumor. We suggest the derivation relationships between genomes in a cancer VCF file be represented in the header with PEDIGREE tags.
@@ -1129,15 +1136,19 @@ Analogously, there might also be several normal genomes from the same patient in
 
 The general format of a PEDIGREE line describing asexual, clonal derivation is:
 
+{\color{red}
 \begin{verbatim}
-PEDIGREE=<Derived=ID2,Original=ID1>
+PEDIGREE=<ID=DerivedID,Original=OriginalID>
 \end{verbatim}
+}
 
 This line asserts that the DNA in genome is asexually or clonally derived with mutations from the DNA in genome. This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e. there is one entry per of the form:
 
+{\color{red}
 \begin{verbatim}
-PEDIGREE=<Child=CHILD-GENOME-ID,Mother=MOTHER-GENOME-ID,Father=FATHER-GENOME-ID>
+PEDIGREE=<ID=ChildID,Mother=MotherID,Father=FatherID>
 \end{verbatim}
+}
 
 Let's consider a cancer patient VCF file with 4 genomes: germline, primary\_tumor, secondary\_tumor1, and secondary\_tumor2 as illustrated in Figure 10. The primary\_tumor is derived from the germline and the secondary tumors are each derived independently from the primary tumor, in all cases by clonal derivation with mutations. The PEDIGREE lines would look like:
 
@@ -1147,11 +1158,13 @@ Let's consider a cancer patient VCF file with 4 genomes: germline, primary\_tumo
 \caption{Pegigree example}
 \end{figure}
 
+{\color{red}
 \begin{verbatim}
-##PEDIGREE=<Derived=PRIMARY-TUMOR-GENOME-ID,Original=GERMLINE-GENOME-ID>
-##PEDIGREE=<Derived=SECONDARY1-TUMOR-GENOME-ID,Original=PRIMARY-TUMOR-GENOME-ID>
-##PEDIGREE=<Derived=SECONDARY2-TUMOR-GENOME-ID,Original=PRIMARY-TUMOR-GENOME-ID>
+##PEDIGREE=<ID=PrimaryTumorID,Original=GermlineID>
+##PEDIGREE=<ID=Secondary1TumorID,Original=PrimaryTumorID>
+##PEDIGREE=<ID=Secondary2TumorID,Original=PrimaryTumorID>
 \end{verbatim}
+}
 
 Alternately, if data on the genomes is compiled in a database, a simple pointer can be provided:
 
@@ -1161,11 +1174,13 @@ Alternately, if data on the genomes is compiled in a database, a simple pointer 
 
 The most general form of a pedigree line is:
 
+{\color{red}
 \begin{verbatim}
-##PEDIGREE=<Name_0=G0-ID,Name_1=G1-ID,...,Name_N=GN-ID>
+##PEDIGREE=<ID=SampleID,Name_1=Ancestor1,...,Name_N=AncestorN>
 \end{verbatim}
+}
 
-This means that the genome Name\_0 is derived from the N $\ge$ 1 genomes Name\_1, ..., Name\_N. Based on these derivation relationships two new pieces of information can be specified.
+This means that the genome SampleID is derived from the N $\ge$ 1 genomes Ancestor1, ..., AncestorN. Based on these derivation relationships two new pieces of information can be specified.
 
 Firstly, we wish to express the knowledge that a variant is novel to a genome, with respect to its parent genome. Ideally, this could be derived by simply comparing the features on either genomes. However, insufficient data or sample mixtures might prevent us from clearly determining at which stage a given variant appeared. This would be represented by a mutation quality score.
 
