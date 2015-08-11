@@ -326,8 +326,7 @@ Each bit is explained in the following table:
     0x40 and 0x80 are unset, the index of the read in the template
     is unknown. This may happen for a non-linear template or the index
     is lost in data processing.
-  \item If 0x1 is unset, no assumptions can be made about 0x2, 0x8,
-    0x20, 0x40 and 0x80.
+  \item If 0x1 is unset, 0x2, 0x8, 0x20, 0x40 and 0x80 must be unset.
   \end{itemize}
 \item {\sf RNAME}: Reference sequence NAME of the alignment. If {\tt
     @SQ} header lines are present, {\sf RNAME} (if not `*') must be
