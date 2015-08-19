@@ -328,6 +328,9 @@ Each bit is explained in the following table:
     is lost in data processing.
   \item If 0x1 is unset, no assumptions can be made about 0x2, 0x8,
     0x20, 0x40 and 0x80.
+  \item Bits that are not listed in the table are reserved for future use.
+    They should not be set when writing and should be ignored on reading
+    by current software.
   \end{itemize}
 \item {\sf RNAME}: Reference sequence NAME of the alignment. If {\tt
     @SQ} header lines are present, {\sf RNAME} (if not `*') must be
@@ -893,7 +896,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
   & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed from the mapping position;\footnotemark\ {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}}; {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}. & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}};\footnotemark\ {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}. & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
@@ -909,7 +912,7 @@ underlined word in uppercase denotes a field in the SAM format.
   \cline{1-6}
 \end{tabular}}
 \end{table}
-\addtocounter{footnote}{-3}
+\addtocounter{footnote}{-4}
 \footnotetext{{\sf BIN} is calculated using the {\sf reg2bin()} function
 in Section~\ref{sec:code}. For mapped reads this uses {\sf POS-1}
 (i.e.,~0-based left position) and the alignment end point using the
@@ -919,6 +922,9 @@ Section~\ref{sec:recommended-practice}) treat the alignment as
 being length one. Note unmapped reads with {\sf POS} $0$ (which
 becomes $-1$ in BAM) therefore use {\sf reg2bin(-1, 0)} which
 is $4680$.}
+\stepcounter{footnote}
+\footnotetext{As noted in Section~\ref{sec:alnrecord}, reserved {\sf FLAG} bits
+should be written as zero and ignored on reading by current software.}
 \stepcounter{footnote}
 \footnotetext{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
 \stepcounter{footnote}
