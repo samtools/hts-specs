@@ -73,6 +73,40 @@ both LF (\texttt{\textbackslash n}) and CR+LF (\texttt{\textbackslash r\textback
 \end{verbatim}
 \normalsize
 This example shows (in order): a good simple SNP, a possible SNP that has been filtered out because its quality is below 10, a site at which two alternate alleles are called, with one of them (T) being ancestral (possibly a reference sequencing error), a site that is called monomorphic reference (i.e. with no alternate alleles), and a microsatellite with two alternative alleles, one a deletion of 2 bases (TC), and the other an insertion of one base (T). Genotype data are given for three samples, two of which are phased and the third unphased, with per sample genotype quality, depth and haplotype qualities (the latter only for the phased samples) given as well as the genotypes. The microsatellite calls are unphased.
+
+{\color{red}
+\subsection{Character encoding, non-printable characters and characters with special meaning}
+\label{character-encoding}
+The character encoding of VCF files is UTF-8.  UTF-8 is a multi-byte 
+character encoding that is a strict superset of 7-bit ASCII and has the 
+property that none of the bytes in any multi-byte characters are 7-bit ASCII 
+bytes. As a result, most software that processes VCF files does not have 
+to be aware of the possible presence of multi-byte UTF-8 characters. 
+Note that non-printable characters U+0000-U+0008, U+000B-U+000C, U+000E-U+001F are disallowed.
+Line separators must be CR+LF or LF and they are allowed only as line separators at
+end of line.
+Characters with special meaning (such as field delimiters ';' in INFO 
+or ':' FORMAT fields) must be represented using the capitalized percent encoding:
+
+\begingroup\footnotesize
+\begin{tabular}{l l l}
+\%3A  &  :  & (colon)                \\
+\%3B  &  ;  & (semicolon)            \\
+\%3D  &  =  & (equal sign)           \\
+\%25  &  \% & (percent sign)         \\
+\%2C  &  ,  & (comma)                \\
+\%0D  & CR  &                        \\
+\%0A  & LF  &                        \\
+\%09  & TAB & 
+\end{tabular}
+\endgroup
+
+
+\subsection{Data types}
+Data types supported by VCF are: Integer (32-bit, signed), Float (32-bit, formatted 
+to match the regular expression \texttt{\^{}[-+]?[0-9]*\textbackslash.?[0-9]+([eE][-+]?[0-9]+)?\$}, \texttt{NaN}, or \texttt{+/-Inf}), Flag, Character, and
+String. For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in the binary version, see \ref{BcfTypeEncoding}.
+}
 \subsection{Meta-information lines}
 
 
@@ -108,40 +142,7 @@ A single `fileformat' line is always required, must be the first line in the fil
 ##fileformat=VCFv4.3
 \end{verbatim}
 
-{\color{red}
-\subsubsection{Character encoding, non-printable characters and characters with special meaning}
-\label{character-encoding}
-The character encoding of VCF files is UTF-8.  UTF-8 is a multi-byte 
-character encoding that is a strict superset of 7-bit ASCII and has the 
-property that none of the bytes in any multi-byte characters are 7-bit ASCII 
-bytes. As a result, most software that processes VCF files does not have 
-to be aware of the possible presence of multi-byte UTF-8 characters. 
-Note that non-printable characters U+0000-U+0008, U+000B-U+000C, U+000E-U+001F are disallowed.
-Line separators must be CR+LF or LF and they are allowed only as line separators at
-end of line. Characters with special meaning must be represented using the (capitalized)
-percent encoding
 
-\begingroup\footnotesize
-\begin{tabular}{l l l}
-\%3A  &  :  & (colon)                \\
-\%3B  &  ;  & (semicolon)            \\
-\%3D  &  =  & (equal sign)           \\
-\%25  &  \% & (percent sign)         \\
-\%2C  &  ,  & (comma)                \\
-\%0D  & CR  &                        \\
-\%0A  & LF  &                        \\
-\%09  & TAB & 
-\end{tabular}
-\endgroup
-
-
-\subsubsection{Data types}
-Data types supported by VCF are: Integer (32-bit, signed), Float (32-bit, formatted 
-to match the regular expression \texttt{\^{}[-+]?[0-9]*\textbackslash.?[0-9]+([eE][-+]?[0-9]+)?\$}, \texttt{NaN}, or \texttt{+/-Inf}), Flag, Character, and
-String. For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in the binary version, see \ref{BcfTypeEncoding}.
-
-
-}
 
 \subsubsection{Information field format}
 INFO fields should be described as follows (first four keys are required, source and version are recommended):
@@ -232,16 +233,21 @@ The URL field specifies the location of a fasta file containing breakpoint assem
 
 \subsubsection{Contig field format}
 \label{sec-contig-field}
-As with chromosomal sequences it is highly recommended (but not required) that the header include tags describing the contigs referred to in the VCF file. This furthermore allows these contigs to come from different files. The format is identical to that of a reference sequence, but with an additional URL tag to indicate where that sequence can be found. For example:.
+It is highly recommended (and required for BCF) that the header includes tags
+describing the contigs referred to in the VCF file. The structured \texttt{contig}
+field must include the ID attribute and typically includes also
+sequence length, MD5 checksum, URL tag to indicate where the sequence can be
+found, etc. For example: 
 \begin{verbatim}
-##contig=<ID=ctg1,URL=ftp://somewhere.org/assembly.fa,...>
+##contig=<ID=ctg1,length=81195210,URL=ftp://somewhere.org/assembly.fa,...>
 \end{verbatim}
 
 \noindent
-{\color{red}Valid contig names must follow the reference sequence names allowed by the SAM format,
-excluding the characters "\texttt{\textless\textgreater[]:*}". The contig names must not use a
-reserved symbolic allele name.
+{\color{red}Valid contig names must follow the reference sequence names allowed by the SAM format
+("{\tt [!-)+-\char60\char62-\char126][!-\char126]*}") excluding the characters "\texttt{\textless\textgreater[]:*}" to avoid clashes with
+symbolic alleles and breakend notation.  The contig names must not use a reserved symbolic allele name.
 }
+
 
 \subsubsection{Sample field format}
 It is possible to define sample to genome mappings as shown below:
