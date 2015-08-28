@@ -257,7 +257,7 @@ of the mandatory fields in the SAM format:
   \hline
   {\bf Col} & {\bf Field} & {\bf Type} & {\bf Regexp/Range} & {\bf Brief description} \\
   \hline
-  1 & {\sf QNAME} & String & \verb:[!-?A-~]{1,255}: & Query template NAME\\
+  1 & {\sf QNAME} & String & \verb:[!-?A-~]{1,254}: & Query template NAME\\
   2 & {\sf FLAG} & Int & {\tt [0,2$^{16}$-1]} & bitwise FLAG \\
   3 & {\sf RNAME} & String & {\tt \char92*|[!-()+-\char60\char62-\char126][!-\char126]*} & Reference sequence NAME\\
   4 & {\sf POS} & Int & {\tt [0,2$^{31}$-1]} & 1-based leftmost mapping POSition \\
