@@ -290,10 +290,12 @@ If genotype data is present in the file, these are followed by a FORMAT column h
 and there must be no tab characters at the end of the line.
 
 \subsection{Data lines}
-\subsubsection{Fixed fields}
-There are 8 fixed fields per record. All data lines are tab-delimited
+All data lines are tab-delimited
 with no tab character at the end of the line. The last data line should end with a line separator. In all cases,
-missing values are specified with a dot (`.'). Fixed fields are:
+missing values are specified with a dot (`.').
+
+\subsubsection{Fixed fields}
+There are 8 fixed fields per record.  Fixed fields are:
 
 \begin{enumerate}
   \item CHROM - chromosome: An identifier from the reference genome or an angle-bracketed ID String (``$<$ID$>$'') pointing to a contig in the assembly file (cf. the \#\#assembly line in the header). All entries for a specific CHROM should form a contiguous block within the VCF file. The colon symbol (:) must be absent from all chromosome names to avoid parsing errors when dealing with breakends. (String, no white-space permitted, Required).
