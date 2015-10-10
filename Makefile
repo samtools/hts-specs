@@ -8,7 +8,8 @@ PDFS =	BCFv1_qref.pdf \
 	SAMv1.pdf \
 	tabix.pdf \
 	VCFv4.1.pdf \
-	VCFv4.2.pdf
+	VCFv4.2.pdf \
+	VCFv4.3.pdf
 
 pdf: $(PDFS)
 
@@ -17,6 +18,7 @@ CRAMv3.pdf: CRAMv3.tex CRAMv3.ver
 SAMv1.pdf: SAMv1.tex SAMv1.ver
 VCFv4.1.pdf: VCFv4.1.tex VCFv4.1.ver
 VCFv4.2.pdf: VCFv4.2.tex VCFv4.2.ver
+VCFv4.3.pdf: VCFv4.3.tex VCFv4.3.ver
 
 
 .SUFFIXES: .tex .pdf .ver
