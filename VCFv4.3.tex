@@ -572,16 +572,19 @@ Ref & a t C g a & C is the reference base \\ \hline
 
 Representing these as VCF records would be done as follows:
 \begin{enumerate}
-  \item A SNP polymorphism of C/G $\rightarrow \{C,G\} \rightarrow$ C is the reference allele
-  \item A single base deletion of C $\rightarrow \{tC,t\} \rightarrow$ tC is the reference allele
-  \item A single base insertion of A $\rightarrow \{tC,tCA\} \rightarrow$ tC is the reference allele
+  \item A SNP polymorphism of C/G at position 3 where C is the reference base and G is the alternate base becomes REF=C, ALT=G
+  \item A single base deletion of C at position 3 becomes REF=TC, ALT=T
+  \item A single base insertion of A after position 3 becomes REF=C, ALT=CA
 \end{enumerate}
 
+Note that the positions must be sorted in increasing order:
+
+\vspace{0.5em}
 \begin{tabular}{ l l l l l l l l}
 	\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-	$20$ & $3$ & . & C & G & . & PASS & DP=100 \\
 	$20$ & $2$ & . & TC & T & . & PASS & DP=100 \\
-	$20$ & $2$ & . & TC & TCA & . & PASS & DP=100 \\
+	$20$ & $3$ & . & C & G & . & PASS & DP=100 \\
+	$20$ & $3$ & . & C & CA & . & PASS & DP=100 \\
 \end{tabular}
 
 \subsubsection{Example 2}
