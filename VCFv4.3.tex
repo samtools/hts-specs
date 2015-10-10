@@ -103,7 +103,8 @@ or ':' FORMAT fields) must be represented using the capitalized percent encoding
 \subsection{Data types}
 Data types supported by VCF are: Integer (32-bit, signed), Float (32-bit, formatted 
 to match the regular expression \texttt{\^{}[-+]?[0-9]*\textbackslash.?[0-9]+([eE][-+]?[0-9]+)?\$}, \texttt{NaN}, or \texttt{+/-Inf}), Flag, Character, and
-String. For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in the binary version, see \ref{BcfTypeEncoding}.
+String. For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in the binary version and therefore 
+are disallowed in both VCF and BCF, see \ref{BcfTypeEncoding}.
 
 \subsection{Meta-information lines}
 
