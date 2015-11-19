@@ -195,7 +195,7 @@ meanings can be avoided.}
   \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. The order of {\tt @SQ} lines defines the alignment sorting order.\\\cline{2-3}
   & {\tt SN}* & Reference sequence name. Each {\tt @SQ} line must have a unique {\tt SN} tag. The value of this
   field is used in the
-  alignment records in RNAME and PNEXT fields. Regular expression: {\tt [!-)+-\char60\char62-\char126][!-\char126]*}\\\cline{2-3}
+  alignment records in {\sf RNAME} and {\sf RNEXT} fields. Regular expression: {\tt [!-)+-\char60\char62-\char126][!-\char126]*}\\\cline{2-3}
   & {\tt LN}* & Reference sequence length. \emph{Range}: {\tt [1,2$^{31}$-1]}\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
   & {\tt M5} & MD5 checksum of the sequence in the uppercase, excluding spaces but including pads (as `*'s).\\\cline{2-3}
@@ -468,7 +468,7 @@ may be changed if the new type is also compatible with the array.
   {\tt CC} & Z & Reference name of the next hit; `{\tt =}' for the same chromosome \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM})\\
   {\tt CO} & Z & Free-text comments \\
-  {\tt CP} & i & Leftmost coordinate of the next hit \\ 
+  {\tt CP} & i & Leftmost coordinate of the next hit \\
   {\tt CQ} & Z & Color read quality on the original strand of the read. Same encoding as {\sf QUAL}; same length as {\tt CS}.\\
   {\tt CS} & Z & Color read sequence on the original strand of the read. The primer base must be included.\\
   {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features.\footnotemark\\
