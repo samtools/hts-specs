@@ -1,6 +1,7 @@
 \documentclass[8pt]{article}
 \usepackage{enumerate}
 \usepackage{graphicx}
+\usepackage{tabularx}
 \usepackage{lscape}
 \usepackage[margin=0.75in]{geometry}
 \usepackage[pdfborder={0 0 0}]{hyperref}
@@ -326,38 +327,45 @@ There are 8 fixed fields per record.  Fixed fields are:
   \item ALT - alternate base(s): Comma separated list of alternate non-reference alleles.  These alleles do not have to be called in any of the samples. Options are base Strings made up of the bases A,C,G,T,N,*, (case insensitive) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends. The `*' allele is reserved to indicate that the allele is missing due to a an overlapping deletion. If there are no alternative alleles, then the missing value must be used.  Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.  (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
   \item QUAL - quality: Phred-scaled quality score for the assertion made in ALT. i.e. $-10log_{10}$ prob(call in ALT is wrong). If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant). If unknown, the missing value must be specified. (Float)
   \item FILTER - filter status: PASS if this position has passed all filters, i.e. a call is made at this position. Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g. ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples. `0' is reserved and must not be used as a filter String. If filters have not been applied, then this field must be set to the missing value. (String, no white-space or semi-colons permitted, duplicate values not allowed.)
-  \item INFO - additional information: (String, no semi-colons or
-  equals-signs permitted; commas are permitted only as delimiters for lists of
+  \item INFO - additional information: (String, no semi-colons or equals-signs permitted; commas are permitted only as delimiters for lists of
   values; characters with special meaning can be encoded using the percent encoding, see Section~\ref{character-encoding}; space characters are allowed)
-  INFO fields are encoded as a semicolon-separated series of short keys
-  with optional values in the format: $<$key$>$=$<$data$>$[,data]. 
-  INFO keys must match the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed.
-  Arbitrary keys are permitted, although the following sub-fields are reserved (albeit optional):
-\begin{itemize}
-  \item AA : ancestral allele
-  \item AC : allele count in genotypes, for each ALT allele, in the same order as listed
-  \item AD, ADF, ADR: read depths for each allele; total (AD), on the forward (ADF) and the reverse (ADR) strand (Integer, Number=R)
-  \item AF : allele frequency for each ALT allele in the same order as listed: use this when estimated from primary data, not called genotypes
-  \item AN : total number of alleles in called genotypes
-  \item BQ : RMS base quality at this position
-  \item CIGAR : cigar string describing how to align an alternate allele to the reference allele
-  \item DB : dbSNP membership
-  \item DP : combined depth across samples, e.g. DP=154
-  \item END : end position of the variant described in this record (for use with symbolic alleles)
-  \item H2 : membership in hapmap2
-  \item H3 : membership in hapmap3
-  \item MQ : RMS mapping quality, e.g. MQ=52
-  \item MQ0 : Number of MAPQ == 0 reads covering this record
-  \item NS : Number of samples with data
-  \item SB : strand bias at this position
-  \item SOMATIC : indicates that the record is a somatic mutation, for cancer genomics
-  \item VALIDATED : validated by follow-up experiment
-  \item 1000G : membership in 1000 Genomes
-  \item $\ldots$ see Section~\ref{sv-info-keys} for a list of INFO keys reserved for structural variants.
-\end{itemize}
+  INFO fields are encoded as a semicolon-separated series of short keys with optional values in the format: $<$key$>$=$<$data$>$[,data].
+  INFO keys must match the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed. Arbitrary keys are permitted, although the sub-fields listed in Table~\ref{table:reserved-info} are reserved (albeit optional).
+
+  \begin{table}[htbp]
+    \centering
+    \begin{tabularx}{\textwidth}{ | l | l | l | X | }
+	Field		& Number	& Type		& Description \\ \hline
+	AA		& 1		& String	& Ancestral allele \\
+	AC		& A		& Integer	& Allele count in genotypes, for each ALT allele, in the same order as listed  \\
+	AD		& R		& Integer	& Total read depth for each allele \\
+	ADF		& R		& Integer	& Read depth for each allele on the forward strand \\
+	ADR		& R		& Integer	& Read depth for each allele on the reverse strand \\
+	AF		& A		& Float		& Allele frequency for each ALT allele in the same order as listed (estimated from primary data, not called genotypes) \\
+	AN		& 1		& Integer	& Total number of alleles in called genotypes \\
+	BQ   		& 1		& Float		& RMS base quality \\
+	CIGAR		& A		& String	& Cigar string describing how to align an alternate allele to the reference allele \\
+	DB		& 0		& Flag		& dbSNP membership \\
+	DP		& 1		& Integer	& Combined depth across samples \\
+	END		& 1		& Integer	& End position (for use with symbolic alleles) \\
+	H2		& 0		& Flag		& HapMap2 membership \\
+	H3		& 0		& Flag		& HapMap3 membership \\
+	MQ		& 1		& .		& RMS mapping quality \\
+	MQ0   		& 1		& Integer	& Number of MAPQ == 0 reads \\
+	NS		& 1		& Integer	& Number of samples with data \\
+	SB		& .		& .		& Strand bias \\
+	SOMATIC		& 0		& Flag		& Somatic mutation (for cancer genomics) \\
+	VALIDATED	& 0		& Flag		& Validated by follow-up experiment \\
+	1000G		& 0		& Flag		& 1000 Genomes membership \\
+    \end{tabularx}
+    \caption{Reserved INFO fields}
+    \label{table:reserved-info}
+  \end{table}
+
+  The exact format of each INFO sub-field should be specified in the meta-information (as described above).
+  Example for an INFO field: DP=154;MQ=52;H2. Keys without corresponding values may be used to indicate group membership (e.g. H2 indicates the SNP is found in HapMap 2). See Section~\ref{sv-info-keys} for additional reserved INFO sub-fields used to encode structural variants.
 \end{enumerate}
-The exact format of each INFO sub-field should be specified in the meta-information (as described above).
-Example for an INFO field: DP=154;MQ=52;H2. Keys without corresponding values may be used to indicate group membership (e.g. H2 indicates the SNP is found in HapMap 2). See below for additional reserved INFO sub-fields used to encode structural variants.
+
 \subsubsection{Genotype fields}
 If genotype information is present, then the same types of data must be present
 for all samples. First a FORMAT field is given specifying the data types and
