@@ -367,99 +367,107 @@ There are 8 fixed fields per record.  Fixed fields are:
 \end{enumerate}
   
 \subsubsection{Genotype fields}
-If genotype information is present, then the same types of data must be present
-for all samples. First a FORMAT field is given specifying the data types and
-order (colon-separated FORMAT ids matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed). This is followed by one data block per
-sample, with the colon-separated data corresponding to the types
-specified in the format. The first sub-field must always be the genotype (GT)
-if it is present.  There are no required sub-fields.
+If genotype information is present, then the same types of data must be present for all samples. First a FORMAT field is given specifying the data types and order (colon-separated FORMAT ids matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed). This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format. The first sub-field must always be the genotype (GT) if it is present. There are no required sub-fields. Additional Genotype fields can be defined in the meta-information, however, software support for such fields is not guaranteed.
 
-As with the INFO field, there are several common, reserved keywords that are standards across the community:
+If any of the fields is missing, it is replaced with the missing value. For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing. Trailing fields can be dropped, with the exception of the GT field, which should always be present if specified in the FORMAT field.
 
+See table~\ref{table:reserved-genotypes} for a list of common, reserved keywords that are standards across the community, and the following points for detailed explanations about the most complex among them. See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for structural variants.
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabularx}{\textwidth}{ | l | l | l | X | }
+      Field		& Number	& Type		& Description \\ \hline
+      AD		& R		& Integer	& Per-sample read depth for each allele \\
+      ADF		& R		& Integer	& Per-sample read depth for each allele on the forward strand \\
+      ADR		& R		& Integer	& Per-sample read depth for each allele on the reverse strand \\
+      DP		& 1		& Integer	& Per-sample read depth \\
+      EC		& A		& Integer	& Expected alternate allele counts for each alternate allele, in the same order as listed in the ALT field (typically used in association analyses) \\
+      FT		& 1		& String	& Filter indicating if this genotype was ``called''. More details in Subsection~\ref{para:genotype-FT} \\
+      GL		& G		& Float		& $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields. More details in Subsection~\ref{para:genotype-GL} \\
+      GP		& G		& Float		& Genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field (could be used to store imputed genotype probabilities) \\
+      GQ		& 1		& Float		& Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant) \\
+      GT   		& 1		& Integer	& Genotype, encoded as allele values separated by either of $/$ or $\mid$. \\
+      HQ		& 2		& Integer	& Haplotype (phred) qualities \\
+      MQ		& 1		& Integer	& RMS mapping quality \\
+      PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) \\
+      PQ		& ?		& Integer	& Phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set). More details in Subsection~\ref{para:genotype-PQ} \\
+      PS		& ?		& Integer (non-negative)	& Phase set, set of phased genotypes to which this genotype belongs \\
+  \end{tabularx}
+  \caption{Reserved genotype fields}
+  \label{table:reserved-genotypes}
+\end{table}
+  
+\paragraph{FT subfield} \label{para:genotype-FT}
+Sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field). Again, use PASS to indicate that all filters have been passed, a semi-colon separated list of codes for filters that fail, or `.' to indicate that filters have not been applied. No white-space or semi-colons are permitted in a filter name. These values should be described in the meta-information in the same way as FILTERs.
+
+\paragraph{GL subfield} \label{para:genotype-GL}
+Genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields. In presence of the GT field the same ploidy is expected; without GT field, diploidy is assumed. 
+
+\textsc{Genotype Ordering.} In general case of ploidy P and N alternate alleles (0 is the REF and 1..N the alternate alleles), the ordering of genotypes for the likelihoods can be expressed by the following pseudocode with as many nested loops as ploidy:\footnote{Note that we use inclusive \texttt{for} loop boundaries.}
+\begingroup
+\small
+\begin{lstlisting}
+for $a_P = 0\ldots N$
+  for $a_{P-1} = 0\ldots a_P$
+      $\ldots$
+      for $a_1 = 0\ldots a_{2}$
+	  println $a_1 a_2  \ldots  a_P$
+\end{lstlisting}
+\endgroup
+
+Alternatively, the same can be achieved recursively with the following pseudocode:
+\begingroup
+\small
+\begin{lstlisting}
+  Ordering($P$, $N$, suffix=""):
+      for $a$ in $0\ldots N$
+	  if ($P == 1$) println str($a$) + suffix
+	  if ($P > 1$) Ordering($P$-1, $a$, str($a$) + suffix)
+\end{lstlisting}
+\endgroup
+
+Conversely, the index of the value corresponding to the genotype $k_1\le k_2\le\ldots\le k_P$ is
+\begingroup
+\small
+\begin{lstlisting}
+  Index($k_1/k_2/\ldots/k_P$) = $\sum_{m=1}^{P} {k_m + m - 1 \choose m}$
+\end{lstlisting}
+\endgroup
+
+Examples:
 \begin{itemize}
-\renewcommand{\labelitemii}{$\circ$}
-  \item AD, ADF, ADR: per-sample read depths for each allele; total (AD), on the forward (ADF) and the reverse (ADR) strand (Integer, Number=R)
-  \item DP : read depth at this position for this sample (Integer)
-  \item EC : comma separated list of expected alternate allele counts for each alternate allele in the same order as listed in the ALT field (typically used in association analyses) (Integers)
-  \item FT : sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field). Again, use PASS to indicate that all filters have been passed, a semi-colon separated list of codes for filters that fail, or `.' to indicate that filters have not been applied. These values should be described in the meta-information in the same way as FILTERs (String, no white-space or semi-colons permitted)
-  \item GQ : conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant) (Integer)
-  \item GP : genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities (Float)
-  \item GT : genotype, encoded as allele values separated by either of $/$ or $\mid$. The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on. For diploid calls examples could be $0/1$, $1\mid0$, or $1/2$, etc. For haploid calls, e.g. on Y, male non-pseudoautosomal X, or mitochondrion, only one allele value should be given; a triploid call might look like $0/0/1$. If a call cannot be made for a sample at a given locus, `.' should be specified for each missing allele in the GT field (for example `$./.$' for a diploid genotype and `.' for haploid genotype). The meanings of the separators are as follows (see the PS field below for more details on incorporating phasing information into the genotypes):
-	\begin{itemize}
-	  \item $/$ : genotype unphased
-	  \item $\mid$ : genotype phased
-	\end{itemize}
-
-  \item GL : genotype likelihoods comprised of comma separated floating point
-  $log_{10}$-scaled likelihoods for all possible genotypes given the set of
-  alleles defined in the REF and ALT fields. In presence of the GT field the
-  same ploidy is expected; without GT field, diploidy is assumed. 
-
-  \textsc{Genotype Ordering.} In general case of ploidy P and N alternate alleles (0 is the REF and 1..N
-  the alternate alleles), the ordering of genotypes for the likelihoods can
-  be expressed by the following pseudocode with as many nested loops as ploidy:\footnote{Note that we use inclusive \texttt{for} loop boundaries.}
-  \begingroup
-  \small
-  \begin{lstlisting}
-  for $a_P = 0\ldots N$
-    for $a_{P-1} = 0\ldots a_P$
-        $\ldots$
-        for $a_1 = 0\ldots a_{2}$
-            println $a_1 a_2  \ldots  a_P$
-  \end{lstlisting}
-  \endgroup
-
-  Alternatively, the same can be achieved recursively with the following pseudocode:
-  \begingroup
-  \small
-  \begin{lstlisting}
-    Ordering($P$, $N$, suffix=""):
-        for $a$ in $0\ldots N$
-            if ($P == 1$) println str($a$) + suffix
-            if ($P > 1$) Ordering($P$-1, $a$, str($a$) + suffix)
-  \end{lstlisting}
-  \endgroup
-
-  Conversely, the index of the value corresponding to the genotype $k_1\le k_2\le\ldots\le k_P$ is
-  \begingroup
-  \small
-  \begin{lstlisting}
-    Index($k_1/k_2/\ldots/k_P$) = $\sum_{m=1}^{P} {k_m + m - 1 \choose m}$
-  \end{lstlisting}
-  \endgroup
-
-  Examples:
-    \begin{itemize}
-    \item for $P$=2 and $N$=1, the ordering is 00,01,11
-    \item for $P$=2 and $N$=2, the ordering is 00,01,11,02,12,22
-    \item for $P$=3 and $N$=2, the ordering is 000, 001, 011, 111, 002, 012, 112, 022, 122, 222
-    \item for $P$=1, the index of the genotype $a$ is $a$
-    \item for $P$=2, the index of the genotype "$a/b$", where $a\le b$, is $b (b+1)/2 + a$
-    \item for $P$=2 and arbitrary $N$, the ordering can be easily derived from a triangular matrix
-            \newline
-            \hbox{\hskip5em\footnotesize
-            \begin{tabular}{l|llll}
-               $b\setminus a$ & 0 & 1 & 2 & 3 \\ \hline \\[-0.5em]
-               0   & 0 &   &   &   \\
-               1   & 1 & 2 &   &   \\
-               2   & 3 & 4 & 5 &   \\
-               3   & 6 & 7 & 8 & 9 
-            \end{tabular}
-            }
-    \end{itemize}
-
-  \item HQ : haplotype qualities, two comma separated phred qualities (Integers)
-  \item MQ : RMS mapping quality, similar to the version in the INFO field. (Integer)
-  \item PL : the phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) (Integers)
-  \item PQ : phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set).  We note that we have not yet included the specific measure for precisely defining ``phasing quality''; our intention for now is simply to reserve the PQ tag for future use as a measure of phasing quality. (Integer)
-  \item PS : phase set.  A phase set is defined as a set of phased genotypes to which this genotype belongs.  Phased genotypes for an individual that are on the same chromosome and have the same PS value are in the same phased set.  A phase set specifies multi-marker haplotypes for the phased genotypes in the set.  All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.  If the genotype in the GT field is unphased, the corresponding PS field is ignored.  The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required). (Non-negative 32-bit Integer)
-  \item $\ldots$ see Section~\ref{sv-format-keys} for a list of genotype keys reserved for structural variants.
+\item for $P$=2 and $N$=1, the ordering is 00,01,11
+\item for $P$=2 and $N$=2, the ordering is 00,01,11,02,12,22
+\item for $P$=3 and $N$=2, the ordering is 000, 001, 011, 111, 002, 012, 112, 022, 122, 222
+\item for $P$=1, the index of the genotype $a$ is $a$
+\item for $P$=2, the index of the genotype "$a/b$", where $a\le b$, is $b (b+1)/2 + a$
+\item for $P$=2 and arbitrary $N$, the ordering can be easily derived from a triangular matrix
+  \newline
+  \hbox{\hskip5em\footnotesize
+  \begin{tabular}{l|llll}
+      $b\setminus a$ & 0 & 1 & 2 & 3 \\ \hline \\[-0.5em]
+      0   & 0 &   &   &   \\
+      1   & 1 & 2 &   &   \\
+      2   & 3 & 4 & 5 &   \\
+      3   & 6 & 7 & 8 & 9 
+  \end{tabular}
+  }
 \end{itemize}
 
+\paragraph{GT subfield} \label{para:genotype-GT}
+Genotype, encoded as allele values separated by either of $/$ or $\mid$. The allele values are 0 for the reference allele (REF field), 1 for the first allele listed in ALT, 2 for the second allele listed in ALT, and so on. For diploid calls examples could be $0/1$, $1\mid0$, $1/2$, etc. For haploid calls, e.g. on Y, male non-pseudoautosomal X, or mitochondrion, only one allele value should be given; a triploid call might look like $0/0/1$. If a call cannot be made for a sample at a given locus, `.' must be specified for each missing allele in the GT field (for example `$./.$' for a diploid genotype and `.' for haploid genotype). The meanings of the separators are as follows:
+\begin{itemize}
+  \item $/$ : genotype unphased
+  \item $\mid$ : genotype phased
+\end{itemize}
+See the PS subfield below for more details on incorporating phasing information into the genotypes.
 
-If any of the fields is missing, it is replaced with the missing value. For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing. Trailing fields can be dropped (with the exception of the GT field, which should always be present if specified in the FORMAT field).
+\paragraph{PQ subfield} \label{para:genotype-PQ}
+Phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set). Please note that we have not yet included the specific measure for precisely defining ``phasing quality''; our intention for now is simply to reserve the PQ tag for future use as a measure of phasing quality.
 
-See below for additional genotype fields used to encode structural variants. Additional Genotype fields can be defined in the meta-information. However, software support for such fields is not guaranteed.
+\paragraph{PS subfield} \label{para:genotype-PS}
+A phase set is defined as a set of phased genotypes to which this genotype belongs. Phased genotypes for an individual that are on the same chromosome and have the same PS value are in the same phased set. A phase set specifies multi-marker haplotypes for the phased genotypes in the set. All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.  If the genotype in the GT field is unphased, the corresponding PS field is ignored.  The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required).
+
 
 \section{Understanding the VCF format and the haplotype representation}
 VCF records use a single general system for representing genetic variation data composed of:
