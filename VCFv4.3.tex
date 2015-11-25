@@ -343,7 +343,7 @@ There are 8 fixed fields per record.  Fixed fields are:
 	AF		& A		& Float		& Allele frequency for each ALT allele in the same order as listed (estimated from primary data, not called genotypes) \\
 	AN		& 1		& Integer	& Total number of alleles in called genotypes \\
 	BQ   		& 1		& Float		& RMS base quality \\
-	CIGAR		& 1		& String	& Cigar string describing how to align an alternate allele to the reference allele \\
+	CIGAR		& A		& String	& Cigar string describing how to align an alternate allele to the reference allele \\
 	DB		& 0		& Flag		& dbSNP membership \\
 	DP		& 1		& Integer	& Combined depth across samples \\
 	END		& 1		& Integer	& End position (for use with symbolic alleles) \\
@@ -361,8 +361,9 @@ There are 8 fixed fields per record.  Fixed fields are:
     \label{table:reserved-info}
   \end{table}
 
-The exact format of each INFO sub-field should be specified in the meta-information (as described above).
-Example for an INFO field: DP=154;MQ=52;H2. Keys without corresponding values may be used to indicate group membership (e.g. H2 indicates the SNP is found in HapMap 2). See Section~\ref{sv-info-keys} for additional reserved INFO sub-fields used to encode structural variants.
+  The exact format of each INFO sub-field should be specified in the meta-information (as described above).
+  Example for an INFO field: DP=154;MQ=52;H2. Keys without corresponding values may be used to indicate group membership (e.g. H2 indicates the SNP is found in HapMap 2). See Section~\ref{sv-info-keys} for additional reserved INFO sub-fields used to encode structural variants.
+\end{enumerate}
 
 \subsubsection{Genotype fields}
 If genotype information is present, then the same types of data must be present
