@@ -390,8 +390,8 @@ See table~\ref{table:reserved-genotypes} for a list of common, reserved keywords
       HQ		& 2		& Integer	& Haplotype (phred) qualities \\
       MQ		& 1		& Integer	& RMS mapping quality \\
       PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) \\
-      PQ		& ?		& Integer	& Phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set). More details in Subsection~\ref{para:genotype-PQ} \\
-      PS		& ?		& Integer (non-negative)	& Phase set, set of phased genotypes to which this genotype belongs \\
+      PQ		& 1		& Integer	& Phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set). More details in Subsection~\ref{para:genotype-PQ} \\
+      PS		& 1		& Integer (non-negative)	& Phase set, set of phased genotypes to which this genotype belongs \\
   \end{tabularx}
   \caption{Reserved genotype fields}
   \label{table:reserved-genotypes}
