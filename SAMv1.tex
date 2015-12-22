@@ -248,6 +248,7 @@ or~{\sf RNEXT} fields.
 \emph{Regular expression}: \emph{name}{\tt (,}\emph{name}{\tt )*}
 where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
+  & {\tt DS} & Description.  UTF-8 encoding may be used.\\\cline{2-3}
   & {\tt M5} & MD5 checksum of the sequence.  See Section~\ref{sec:ref-md5}\\\cline{2-3}
   & {\tt SP} & Species.\\\cline{2-3}
   & {\tt UR} & URI of the sequence.  This value may start with one of the standard
@@ -1223,6 +1224,7 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item Add {\tt @SQ DS} header tag. (Jul 2018)
 \item Add {\tt @RG BC} header tag. (Apr 2018)
 \item Permit UTF-8 in a few header tags. (Mar 2018)
 \item\textbf{Add support for CIGAR strings with more than 65,535 operations.} (Nov 2017)
