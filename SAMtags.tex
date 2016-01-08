@@ -66,6 +66,7 @@ or
   {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features.\\
   {\tt E2} & Z & The 2nd most likely base calls \\
   {\tt FI} & i & The index of segment in the template \\
+  {\tt FT} & Z & Filter field, indicating the reason why this record has been modified\\ 
   {\tt FS} & Z & Segment suffix \\
   {\tt FZ} & B,S & Flow signal intensities \\
   {\tt GC} & ? & Reserved for backwards compatibility reasons \\
@@ -80,6 +81,7 @@ or
   {\tt MC} & Z & CIGAR string for mate/next segment\\
   {\tt MD} & Z & String for mismatching positions \\
   {\tt MF} & ? & Reserved for backwards compatibility reasons \\
+  {\tt MI} & Z & Molecular-barcode (corrected) sequence or identifier. May contain non sequence bases to encode more information (e.g., strandedness of original molecule) 
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
   {\tt NH} & i & Number of reported alignments that contains the query in the current record\\
   {\tt NM} & i & Edit distance to the reference \\
@@ -90,11 +92,13 @@ or
   {\tt PQ} & i & Phred likelihood of the template \\
   {\tt PT} & Z & Read annotations for parts of the padded read sequence \\
   {\tt PU} & Z & Platform unit \\
-  {\tt QT} & Z & Barcode ({\tt BC} or {\tt RT}) phred-scaled base qualities \\
-  {\tt Q2} & Z & Phred quality of the mate/next segment sequence in the {\tt R2} tag \\
+  {\tt QT} & Z & Phred quality of the sample-barcode sequence in the {\tt BC} (or {\tt RT}) tag. Same encoding as {\sf QUAL}. \\
+  {\tt QX} & Z & Phred quality of the molecular-barcode sequence in the {\tt RX} tag. Same encoding as {\sf QUAL}. \\
+  {\tt Q2} & Z & Phred quality of the mate/next segment sequence in the {\tt R2} tag. Same encoding as {\sf QUAL}.\\
   {\tt R2} & Z & Sequence of the mate/next segment in the template \\
   {\tt RG} & Z & Read group \\
   {\tt RT} & Z & Barcode sequence (deprecated; use {\tt BC} instead) \\
+  {\tt RX} & Z & Raw (uncorrected) molecular-barcode bases, with any quality scores stored in the {\tt QX} tag. \\
   {\tt SA} & Z & Other canonical alignments in a chimeric alignment \\
   {\tt SM} & i & Template-independent mapping quality \\
   {\tt SQ} & ? & Reserved for backwards compatibility reasons \\
@@ -208,6 +212,16 @@ Phred likelihood of the segment, conditional on the mapping being correct.
 \subsection{Metadata}
 
 \begin{description}
+
+\item[FT:Z:\tagvalue{text}] Filter field, free-text indicating the reason why this record has been modified or filtered
+There are two ways in which reads can be filtered: their 0x200 bit can be set (not passing filters) or their 0x4 bit can be set (segment unmapped). 
+In either case it may be important or interesting to inform the users that this action was done after the vendor created the record and/or the aligner had been run. 
+The {\tt FT} tag is a place to put such information. 
+For example, Picard's MergeBamAlignment will unmap (unset 0x4) a read (and its mate) if it finds that it had been clipped on both ends, and it has less than some number of bases that are \emph{not} clipped.
+The {\tt FT} tag will be set to say ``Cross-species contamination'' (as this is what it perceives the read to be sourced from in this case). 
+GATK's HaplotypeCaller (in bamOut mode)  will set the 0x200 bit for reads that do count towards the model.  
+The {\tt FT} tag is used to explain why this is the case (e.g., Trimmed, Downsampled, etc.). 
+
 \item[RG:Z:\tagvalue{readgroup}]
 The read group to which the read belongs.
 If {\tt @RG} headers are present, then \emph{readgroup} must match the
@@ -235,12 +249,30 @@ Free-text comments.
 \begin{description}
 \item[BC:Z:\tagvalue{sequence}]
 Barcode sequence, with any quality scores stored in the {\tt QT} tag.
+The {\tt BC} tag should match the {\tt QT} tag in length. 
+What one does with multiple sample barcodes (e.g. one on each end of the template) is left to the implementation. 
+One current implementation concatenates all the barcodes and qualities and places a dash (`{\tt -}') between the barcodes from the same template. 
 
-\item[QT:Z:\tagvalue{qualities}]
-Phred quality of the barcode sequence in the {\tt BC} (or {\tt RT}) tag. Same encoding as {\sf QUAL}.
+\item[QT:Z:\tagvalue{qualities}] 
+Phred quality of the sample-barcode sequence in the {\tt BC} (or {\tt RT}) tag. 
+Same encoding as {\sf QUAL}. 
+See {\tt BC} for more detail.
+
+\item[QX:Z:\tagvalue{qualities}] 
+Phred quality of the molecular-barcode sequence in the {\tt RX} tag. 
+Same encoding as {\sf QUAL}. 
+
+The {\tt RX} tag should match the {\tt QX} tag in length. 
+What one does with multiple molecular barcodes (e.g., one on each end of the template) is left to the implementation. 
+One current implementation concatenates all the barcodes and qualities with no separator between the different barcodes.
 
 \item[RT:Z:\tagvalue{sequence}]
 Deprecated alternative to {\tt BC} tag originally used at Sanger.
+
+\item[RX:Z:\tagvalue{sequence}] 
+Raw (uncorrected) molecular-barcode bases, with any quality scores stored in the {\tt QX} tag. 
+See {\tt QX} for more detail.
+
 \end{description}
 
 \subsection{Original data}
