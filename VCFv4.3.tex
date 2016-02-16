@@ -1288,7 +1288,7 @@ extensions/restrictions:
 No record may refer to a contig not present in the header itself.
 
 \item All INFO and GENOTYPE fields must be fully typed in the BCF2 header to
-enable type-specific encoding of the fields in records.  An error should be
+enable type-specific encoding of the fields in records.  An error must be
 thrown when converting a VCF to BCF2 when an unknown or not fully specified
 field is encountered in the records.
 \end{itemize}
@@ -1376,8 +1376,8 @@ In BCF2, the original VCF records are converted to binary and encoded as BGZF
 blocks.  Each record is conceptually two parts.  First is the site information
 (chr, pos, INFO field).  Immediately after the sites data is the genotype data
 for every sample in the BCF2 file.  The genotype data may be omitted entirely
-from the record if there is no genotype data in the VCF file.  Note that it's
-acceptable to not BGZF compress a BCF2 file.
+from the record if there is no genotype data in the VCF file. 
+Compression of a BCF file is recommended but not required.
 
 \subsubsection{Site encoding}
 
@@ -1388,7 +1388,7 @@ l\_shared &	uint32\_t &	Data length from CHROM to the end of INFO \\ \hline
 l\_indiv  &	uint32\_t &	Data length of FORMAT and individual genotype fields \\ \hline
 CHROM	  & int32\_t  &	Given as an offset into the mandatory contig dictionary \\ \hline
 POS	      & int32\_t  &	0-based leftmost coordinate \\ \hline
-rlen      &	int32\_t  &	Length of the record as projected onto the reference sequence.  May be the actual length of the REF allele but for symbolic alleles should be the declared length respecting the END attribute \\ \hline
+rlen      &	int32\_t  &	Length of the record as projected onto the reference sequence. Must be the length of the REF allele or the declared length of a symbolic allele respecting the END attribute \\ \hline
 n\_allele\_info	& int32\_t	& n\_info, where n\_allele is the number of REF+ALT alleles in this record, and n\_info is the number of VCF INFO fields present in this record \\ \hline
 n\_fmt\_sample	& uint32\_t	& n\_sample, where n\_fmt is the number of format fields for genotypes in this record, and n\_samples is the number of samples present in this sample.  Note that the number of samples must be equal to the number of samples in the header \\ \hline
 QUAL	  & float	  & Variant quality; 0x7F800001 for a missing value \\ \hline
@@ -1434,7 +1434,7 @@ fmt\_values	(by fmt type) & Array of values & The information of each individual
 
 The value is always implicitly a vector of N values, where N is the number of samples.  The type byte of the value field indicates the type of each value of the N length vector.  For atomic values this is straightforward (size = 1).  But if the type field indicates that the values are themselves vectors (as often occurs, such as with the PL field) then each of the N values in the outer vector is itself a vector of values.  This encoding is efficient when every value in the genotype field vector has the same length and type.
 
-Note that the specific order of fields isn't defined, but it's probably a good idea to respect the ordering as specified in the input VCF/BCF2 file.
+It is recommended to respect the ordering as specified in the input VCF/BCF2 file, but parsers should not rely on a specific ordering.
 
 If there are no sample records (genotype data) in this VCF/BCF2 file, the size of the genotypes block will be 0.
 
@@ -1524,7 +1524,7 @@ reserved & 0b0111 1111 1000 0000 0000 0000 0000 0111 & 0x7F800007 \\ \hline
 \end{tabular}
 
 \vspace{0.3cm}
-\textbf{Character} values are not explicitly typed in BCF2.  Instead, VCF Character values should be encoded by a single character string. See also \ref{character-encoding}.
+\textbf{Character} values are not explicitly typed in BCF2.  Instead, VCF Character values must be encoded by a single character string. See also \ref{character-encoding}.
 
 \vspace{0.3cm}
 \textbf{Flags} values -- which can only appear in INFO fields -- in BCF2 should be encoded by any non-MISSING value.  The recommended best practice is to encode the value as an 1-element INT8 (type 0x11) with value of 1 to indicate present.  Because FLAG values can only be encoded in INFO fields, BCF2 provides no mechanism to encode FLAG values in genotypes, but could be easily extended to do so if allowed in a future VCF version.
