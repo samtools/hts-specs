@@ -491,18 +491,28 @@ The following INFO keys are reserved for encoding structural variants. In genera
 \end{verbatim}
 \normalsize
 For precise variants, END is POS + length of REF allele - 1, and the for imprecise variants the corresponding best estimate.
+
 \footnotesize
 \begin{verbatim}
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
 \end{verbatim}
 \normalsize
-Value should be one of DEL, INS, DUP, INV, CNV, BND. This key can be derived from the REF/ALT fields but is useful for filtering.
+This key can be derived from the REF/ALT fields but is useful for filtering. The reserved values must be used for the types listed below:
+\begin{itemize}
+  \item DEL: Deletion relative to the reference
+  \item INS: Insertion of novel sequence relative to the reference
+  \item DUP: Region of elevated copy number relative to the reference
+  \item INV: Inversion of reference sequence
+  \item CNV: Copy number variable region (may be both deletion and duplication)
+\end{itemize}
+
 \footnotesize
 \begin{verbatim}
 ##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
 \end{verbatim}
 \normalsize
 One value for each ALT allele. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values.
+
 \footnotesize
 \begin{verbatim}
 ##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
@@ -513,6 +523,7 @@ One value for each ALT allele. Longer ALT alleles (e.g. insertions) have positiv
 \end{verbatim}
 \normalsize
 For precise variants, the consensus sequence the alternate allele assembly is derivable from the REF and ALT fields. However, the alternate allele assembly file may contain additional information about the characteristics of the alt allele contigs.
+
 \footnotesize
 \begin{verbatim}
 ##INFO=<ID=MEINFO,Number=4,Type=String,Description="Mobile element info of the form NAME,START,END,POLARITY">
