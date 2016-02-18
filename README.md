@@ -22,7 +22,7 @@ Alignment data files
 **SAMv1.tex** is the canonical specification for the SAM (Sequence Alignment/Map) format, BAM (its binary equivalent), and the BAI format for indexing BAM files.
 These formats are discussed on the [samtools-devel mailing list][samdev-ml].
 
-**CRAMv2.1.tex** and **CRAMv3.tex** are the canonical specifications for the CRAM format.
+**CRAMv3.tex** is the canonical specification for the CRAM format, while **CRAMv2.1.tex** describes its now-obsolete predecessor.
 Further details can be found at [ENA's CRAM toolkit page][ena-cram].
 CRAM discussions can also be found on the [samtools-devel mailing list][samdev-ml].
 
