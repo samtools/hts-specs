@@ -385,7 +385,7 @@ See table~\ref{table:reserved-genotypes} for a list of common, reserved keywords
       FT		& 1		& String	& Filter indicating if this genotype was ``called''. More details in Subsection~\ref{para:genotype-FT} \\
       GL		& G		& Float		& $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields. More details in Subsection~\ref{para:genotype-GL} \\
       GP		& G		& Float		& Genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field (could be used to store imputed genotype probabilities) \\
-      GQ		& 1		& Float		& Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant) \\
+      GQ		& 1		& Integer	& Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant) \\
       GT   		& 1		& Integer	& Genotype, encoded as allele values separated by either of $/$ or $\mid$. \\
       HQ		& 2		& Integer	& Haplotype (phred) qualities \\
       MQ		& 1		& Integer	& RMS mapping quality \\
