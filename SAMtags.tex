@@ -3,6 +3,8 @@
 \usepackage{longtable}
 \usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
 
+\newcommand{\mailtourl}[1]{\href{mailto:#1}{\tt #1}}
+
 \begin{document}
 
 \input{SAMtags.ver}
@@ -188,11 +190,14 @@ The CM, CQ, CS tags.
 
 \section{Locally-defined tags}
 
-You can freely add new tags, and if a new tag may be of general interest, you
-can email {\tt samtools-devel@lists.sourceforge.net} to add the new tag
-to the specification. Note that tags starting with `{\tt X}', `{\tt Y}'
-and `{\tt Z}' or tags containing lowercase letters in either position
-are reserved for local use and will not be formally defined in any future
-version of this specification.
+You can freely add new tags.
+Note that tags starting with `{\tt X}', `{\tt Y}', or `{\tt Z}' and tags
+containing lowercase letters in either position are reserved for local use
+and will not be formally defined in any future version of this specification.
+
+If a new tag may be of general interest, it may be useful to have it added
+to this specification.  Additions can be proposed by opening a new issue at
+\url{https://github.com/samtools/hts-specs/issues} and/or by sending email
+to \mailtourl{samtools-devel@lists.sourceforge.net}.
 
 \end{document}
