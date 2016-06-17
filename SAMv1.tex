@@ -427,8 +427,8 @@ defines the format of {\tt VALUE}:
 A & {\tt [!-\char126]} & Printable character \\
 i & {\tt [-+]?[0-9]+} & Signed integer\footnotemark\\
 f & {\tt [-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?} & Single-precision floating number \\
-Z & {\tt [\,\,\,!-\char126]+} & Printable string, including space\\
-H & {\tt [0-9A-F]+} & Byte array in the Hex format\footnotemark\\
+Z & {\tt [\,\,\,!-\char126]*} & Printable string, including space\\
+H & {\tt ([0-9A-F][0-9A-F])*} & Byte array in the Hex format\footnotemark\\
 B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)+} & Integer or numeric array\\
 \hline
 \end{tabular}
