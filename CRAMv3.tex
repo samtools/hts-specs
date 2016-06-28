@@ -195,7 +195,7 @@ The most significant bits of the first byte have special meaning and are called
 the number of bytes to follow. To accommodate 32 bits such representation requires 
 5 bytes with only 4 lower bits used in the last byte 5.
 
-\item[LTF-8 long or (ltf8)]\ \newline
+\item[LTF-8 long (ltf8)]\ \newline
 See ITF-8 for more details. The only difference between ITF-8 and LTF-8 is the 
 number of bytes used to encode a single value. To do so 64 bits are required and 
 this can be done with 9 byte at most with the first byte consisting of just 1s 
@@ -204,11 +204,8 @@ or 0xFF value.
 \item[{Array ([ ])}]\ \newline
 Array length is written first as integer (itf8), followed by the elements of the 
 array. 
-\end{description}
 
-
-\subsubsection*{Encoding}
-
+\item[{Encoding}]\ \newline
 Encoding is a data type that specifies how data series have been compressed. Encodings 
 are defined as encoding\texttt{<}type\texttt{>} where the type is a logical data 
 type as opposed to a storage data type.
@@ -244,8 +241,7 @@ offset = 0x0 = 0
 K = 0x1 = 1
 
 
-\subsubsection*{Map}
-
+\item[{Map}]\ \newline
 A map is a collection of keys and associated values. A map with N keys is written 
 as follows: 
 
@@ -258,10 +254,12 @@ size in bytes & N & key 1 & value 1 & key ... & value ... & key N & value N\tabu
 Both the size in bytes and the number of keys are written as integer (itf8). Keys 
 and values are written according to their data types and are specific to each map.
 
-\subsection{\textbf{Strings}}
-
-Strings are represented as byte arrays using UTF-8 format. Read names, reference 
+\item[String]\ \newline
+A string is represented as byte arrays using UTF-8 format. Read names, reference 
 sequence names and tag values with type `Z' are stored as UTF-8.
+
+\end{description}
+
 
 \section{\textbf{Encodings }}
 
