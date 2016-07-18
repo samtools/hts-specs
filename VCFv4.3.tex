@@ -159,10 +159,10 @@ pair of numbers, then this value must be $2$ and so on. There are also
 certain special characters used to define special cases:
 
 \begin{itemize}
-  \item If the field has one value per alternate allele then this value must be `A'.
-  \item If the field has one value for each possible allele (including the reference), then this value must be `R'.
-  \item If the field has one value for each possible genotype (more relevant to the FORMAT tags) then this value must be `G'.
-  \item If the number of possible values varies, is unknown, or is unbounded, then this value must be `.'.
+  \item A: The field has one value per alternate allele.
+  \item R: The field has one value for each possible allele, including the reference.
+  \item G: The field has one value for each possible genotype (more relevant to the FORMAT tags).
+  \item . (dot): The number of possible values varies, is unknown or unbounded.
 \end{itemize}
 
 The `Flag' type indicates that the INFO field does not contain a Value entry, and hence the Number must be $0$ in this case. The Description value must be surrounded by double-quotes. Double-quote character must be escaped with backslash $\backslash$ and backslash as $\backslash\backslash$. Source and Version values likewise must be surrounded by double-quotes and specify the annotation source (case-insensitive, e.g. ``dbsnp'') and exact version (e.g. ``138''), respectively for computational use.
