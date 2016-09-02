@@ -7,6 +7,7 @@ Quick links
 <!-- Whitespace at the ends of these lines are Markdown line breaks -->
 [HTS-spec GitHub page](http://samtools.github.io/hts-specs/)  
 [SAMv1.pdf](http://samtools.github.io/hts-specs/SAMv1.pdf)  
+[SAMtags.pdf](http://samtools.github.io/hts-specs/SAMtags.pdf)  
 [CRAMv2.1.pdf](http://samtools.github.io/hts-specs/CRAMv2.1.pdf)  
 [CRAMv3.pdf](http://samtools.github.io/hts-specs/CRAMv3.pdf)  
 [BCFv1.pdf](http://samtools.github.io/hts-specs/BCFv1_qref.pdf)  
@@ -20,6 +21,7 @@ Alignment data files
 --------------------
 
 **SAMv1.tex** is the canonical specification for the SAM (Sequence Alignment/Map) format, BAM (its binary equivalent), and the BAI format for indexing BAM files.
+**SAMtags.tex** is a companion specification describing the predefined standard optional fields and tags found in SAM, BAM, and CRAM files.
 These formats are discussed on the [samtools-devel mailing list][samdev-ml].
 
 **CRAMv3.tex** is the canonical specification for the CRAM format, while **CRAMv2.1.tex** describes its now-obsolete predecessor.
