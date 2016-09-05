@@ -392,11 +392,29 @@ byte[4] & format magic number & CRAM (0x43 0x52 0x41 0x4d)\tabularnewline
 \hline
 unsigned byte & major format number & 2 (0x2)\tabularnewline
 \hline
-unsigned byte & minor format number & 0 (0x0)\tabularnewline
+unsigned byte & minor format number & 1 (0x1)\tabularnewline
 \hline
 byte[20] & file id & CRAM file identifier (e.g. file name or SHA1 checksum)\tabularnewline
 \hline
 \end{tabular}
+
+Valid CRAM \textit{major}.\textit{minor} version numbers are as follows:
+
+\begin{itemize}
+\item[\textit{1.0}]
+The original public CRAM release.
+
+\item[\textit{2.0}]
+The first CRAM release implemented in both Java and C; tidied up
+implementation vs specification differences in \textit{1.0}.
+
+\item[\textit{2.1}]
+Gained end of file markers; compatible with \textit{2.0}.
+
+\item[\textit{3.0}]
+Additional compression methods; header and data checksums;
+improvements for unsorted data.
+\end {itemize}
 
 \section{\textbf{Container structure}}
 
