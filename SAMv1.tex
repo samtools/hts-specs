@@ -321,11 +321,18 @@ Each bit is explained in the following table:
     segment has been mapped.
     When 0x4 is set, this indicates whether the unmapped read is stored
     in its original orientation as it came off the sequencing machine.
-  \item If 0x40 and 0x80 are both set, the read is part of a linear
+  \item Bits 0x40 and 0x80 reflect the read ordering within each template
+    inherent in the sequencing technology used.\footnote{For example,
+    in Illumina paired-end sequencing, {\sf first}~(0x40) corresponds to
+    the R1~`forward' read and {\sf last}~(0x80) to the R2~`reverse' read.
+    (Despite the terminology, this is unrelated to the segments' orientations
+    when they are mapped: either, neither, or both may have their
+    {\sf reverse} flag bits~(0x10) set after mapping.)}
+    If 0x40 and 0x80 are both set, the read is part of a linear
     template, but it is neither the first nor the last read. If both
     0x40 and 0x80 are unset, the index of the read in the template
-    is unknown. This may happen for a non-linear template or the index
-    is lost in data processing.
+    is unknown. This may happen for a non-linear template or when this
+    information is lost during data processing.
   \item If 0x1 is unset, no assumptions can be made about 0x2, 0x8,
     0x20, 0x40 and 0x80.
   \item Bits that are not listed in the table are reserved for future use.
