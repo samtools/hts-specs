@@ -1,0 +1,52 @@
+\section{INFO keys used for structural variants}
+\label{sv-info-keys}
+The following INFO keys are reserved for encoding structural variants. In general, when these keys are used by imprecise variants, the values should be best estimates. When a key reflects a property of a single alt allele (e.g. SVLEN), then when there are multiple alt alleles there will be multiple values for the key corresponding to each alelle (e.g. SVLEN=-100,-110 for a deletion with two distinct alt alleles).
+\footnotesize
+\begin{verbatim}
+##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
+##INFO=<ID=NOVEL,Number=0,Type=Flag,Description="Indicates a novel structural variation">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+\end{verbatim}
+\normalsize
+For precise variants, END is POS + length of REF allele - 1, and the for imprecise variants the corresponding best estimate.
+\footnotesize
+\begin{verbatim}
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+\end{verbatim}
+\normalsize
+Value should be one of DEL, INS, DUP, INV, CNV, BND. This key can be derived from the REF/ALT fields but is useful for filtering.
+\footnotesize
+\begin{verbatim}
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+\end{verbatim}
+\normalsize
+One value for each ALT allele. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values.
+\footnotesize
+\begin{verbatim}
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
+##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=BKPTID,Number=.,Type=String,Description="ID of the assembled alternate allele in the assembly file">
+\end{verbatim}
+\normalsize
+For precise variants, the consensus sequence the alternate allele assembly is derivable from the REF and ALT fields. However, the alternate allele assembly file may contain additional information about the characteristics of the alt allele contigs.
+\footnotesize
+\begin{verbatim}
+##INFO=<ID=MEINFO,Number=4,Type=String,Description="Mobile element info of the form NAME,START,END,POLARITY">
+##INFO=<ID=METRANS,Number=4,Type=String,Description="Mobile element transduction info of the form CHR,START,END,POLARITY">
+##INFO=<ID=DGVID,Number=1,Type=String,Description="ID of this element in Database of Genomic Variation">
+##INFO=<ID=DBVARID,Number=1,Type=String,Description="ID of this element in DBVAR">
+##INFO=<ID=DBRIPID,Number=1,Type=String,Description="ID of this element in DBRIP">
+##INFO=<ID=MATEID,Number=.,Type=String,Description="ID of mate breakends">
+##INFO=<ID=PARID,Number=1,Type=String,Description="ID of partner breakend">
+##INFO=<ID=EVENT,Number=1,Type=String,Description="ID of event associated to breakend">
+##INFO=<ID=CILEN,Number=2,Type=Integer,Description="Confidence interval around the inserted material between breakends">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Read Depth of segment containing breakend">
+##INFO=<ID=DPADJ,Number=.,Type=Integer,Description="Read Depth of adjacency">
+##INFO=<ID=CN,Number=1,Type=Integer,Description="Copy number of segment containing breakend">
+##INFO=<ID=CNADJ,Number=.,Type=Integer,Description="Copy number of adjacency">
+##INFO=<ID=CICN,Number=2,Type=Integer,Description="Confidence interval around copy number for the segment">
+##INFO=<ID=CICNADJ,Number=.,Type=Integer,Description="Confidence interval around copy number for the adjacency">
+\end{verbatim}
+\normalsize
