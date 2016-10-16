@@ -1,0 +1,25 @@
+\section{Understanding the VCF format and the haplotype representation}
+VCF records use a single general system for representing genetic variation data composed of:
+\begin{itemize}
+  \item Allele: representing single genetic haplotypes (A, T, ATC).
+  \item Genotype: an assignment of alleles for each chromosome of a single named sample at a particular locus.
+  \item VCF record: a record holding all segregating alleles at a locus (as well as genotypes, if appropriate, for multiple individuals containing alleles at that locus).
+\end{itemize}
+VCF records use a simple haplotype representation for REF and ALT alleles to describe variant haplotypes at a locus. ALT haplotypes are constructed from the REF haplotype by taking the REF allele bases at the POS in the reference genotype and replacing them with the ALT bases. In essence, the VCF record specifies a-REF-t and the alternative haplotypes are a-ALT-t for each alternative allele.
+
+\subsection{VCF tag naming conventions}
+\begin{itemize}
+    \item The "L" suffix means "likelihood" as log-likelihood in the sampling
+    distribution, log10 Pr(Data$|$Model).  Likelihoods are represented as log10
+    scale, so has to be negative (e.g.~GL, CNL).  The likelihood can be also
+    represented in some cases as phred-scale in a separate tag (e.g.~PL).
+
+    \item The "P" suffix means "probability" as linear-scale probability in the
+    posterior distribution, which is Pr(Model$|$Data).  Examples are GP, CNP.
+
+    \item The "Q" suffix means "quality" as log-complementary-phred-scale posterior
+    probability, which is -10 * log10 Pr(Data$|$Model) where the model is the most
+    likely genotype that appears in the GT field.  Examples are GQ, CNQ.  The fixed
+    site-level QUAL field follows the same convention (represented as a
+    phred-scaled number).
+\end{itemize}

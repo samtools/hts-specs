@@ -1,0 +1,23 @@
+\section{FORMAT keys used for structural variants}
+\label{sv-format-keys}
+\footnotesize
+\begin{verbatim}
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
+##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
+##FORMAT=<ID=CNL,Number=G,Type=Float,Description="Copy number genotype likelihood for imprecise events">
+##FORMAT=<ID=CNP,Number=G,Type=Float,Description="Copy number posterior probabilities">
+##FORMAT=<ID=NQ,Number=1,Type=Integer,Description="Phred style probability score that the variant is novel">
+##FORMAT=<ID=HAP,Number=1,Type=Integer,Description="Unique haplotype identifier">
+##FORMAT=<ID=AHAP,Number=1,Type=Integer,Description="Unique identifier of ancestral haplotype">
+\end{verbatim}
+\normalsize
+These keys are analogous to GT/GQ/GL/GP and are provided for genotyping
+imprecise events by copy number (either because there is an unknown number of
+alternate alleles or because the haplotypes cannot be determined). CN specifies
+the integer copy number of the variant in this sample. CNQ is encoded as a
+phred quality $-10log_{10}$ p(copy number genotype call is wrong). CNL
+specifies a list of $log_{10}$ likelihoods for each potential copy number,
+starting from zero. CNP is 0 to 1-scaled copy number posterior
+probabilities (and otherwise defined precisely as the CNL field), intended to
+store imputed genotype probabilities. When possible, GT/GQ/GL/GP should be used
+instead of (or in addition to) these keys.

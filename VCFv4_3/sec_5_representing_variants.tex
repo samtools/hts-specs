@@ -1,0 +1,683 @@
+\section{Representing variation in VCF records}
+\subsection{Creating VCF entries for SNPs and small indels}
+\subsubsection{Example 1}
+For example, suppose we are looking at a locus in the genome:
+
+\vspace{0.3cm}
+\begin{tabular}{ | l | l | l | }
+\hline
+Example & Sequence & Alteration \\ \hline
+Ref & a t C g a & C is the reference base \\ \hline
+1   & a t G g a & C base is a G in some individuals \\ \hline
+2   & a t \ - \ g a & C base is deleted w.r.t. the reference sequence\\ \hline
+3   & a t CAg a & A base is inserted w.r.t. the reference sequence \\ \hline
+\end{tabular}
+\vspace{0.3cm}
+
+Representing these as VCF records would be done as follows:
+\begin{enumerate}
+  \item A SNP polymorphism of C/G at position 3 where C is the reference base and G is the alternate base becomes REF=C, ALT=G
+  \item A single base deletion of C at position 3 becomes REF=TC, ALT=T
+  \item A single base insertion of A after position 3 becomes REF=C, ALT=CA
+\end{enumerate}
+
+Note that the positions must be sorted in increasing order:
+
+\vspace{0.5em}
+\begin{tabular}{ l l l l l l l l}
+	\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+	$20$ & $2$ & . & TC & T & . & PASS & DP=100 \\
+	$20$ & $3$ & . & C & G & . & PASS & DP=100 \\
+	$20$ & $3$ & . & C & CA & . & PASS & DP=100 \\
+\end{tabular}
+
+\subsubsection{Example 2}
+Suppose I see a the following in a population of individuals and want to represent these three segregating alleles:
+
+\vspace{0.3cm}
+\begin{tabular}{ | l | l | l | }
+\hline
+Example & Sequence & Alteration \\ \hline
+Ref & a t C g a & C is the reference base \\ \hline
+$1$   & a t G g a & C base is a G in some individuals \\ \hline
+$2$   & a t \ - \ g a & C base is deleted w.r.t. the reference sequence \\ \hline
+\end{tabular}
+\vspace{0.3cm}
+
+In this case there are three segregating alleles: $\{tC,tG,t\}$ with a corresponding VCF record:
+
+\vspace{0.3cm}
+\begin{tabular}{ l l l l l l l l}
+	\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+	$20$ & $2$ & . & TC & TG,T & . & PASS & DP=100 \\
+\end{tabular}
+\subsubsection{Example 3}
+Now suppose I have this more complex example:
+
+\vspace{0.3cm}
+\begin{tabular}{ | l | l | l | }
+\hline
+Example & Sequence & Alteration \\ \hline
+Ref & a t C g a & C is the reference base \\ \hline
+$1$   & a t \ - \ g a & C base is is deleted w.r.t. the reference sequence \\ \hline
+$2$   & a t \ - - \ a & C and G bases are deleted w.r.t. the reference sequence\\ \hline
+$3$   & a t CAg a & A base is inserted w.r.t. the reference sequence \\ \hline
+\end{tabular}
+
+\vspace{0.3cm}
+There are actually four segregating alleles: $\{tCg,tg,t,tCAg\}$ over bases 2-4. This complex set of allele is represented in VCF as:
+
+\vspace{0.3cm}
+\begin{tabular}{ l l l l l l l l}
+	\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+	$20$ & $2$ & . & TCG & TG,T,TCAG & . & PASS & DP=100 \\
+\end{tabular}
+\vspace{0.3cm}
+
+Note that in VCF records, the molecular equivalence explicitly listed above in the per-base alignment is discarded, so the actual placement of equivalent g isn't retained. For completeness, VCF records are dynamically typed, so whether a VCF record is a SNP, Indel, Mixed, or Reference site depends on the properties of the alleles in the record.
+
+\subsection{Decoding VCF entries for SNPs and small indels}
+\subsubsection{SNP VCF record}
+Suppose I receive the following VCF record:
+
+\vspace{0.3cm}
+\begin{tabular}{ l l l l l l l l}
+	\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+	$20$ & $3$ & . & C & T & . & PASS & DP=100 \\
+\end{tabular}
+\vspace{0.3cm}
+
+This is a SNP since its only single base substitution and there are only two alleles so I have the two following segregating haplotypes:
+
+\vspace{0.3cm}
+\begin{tabular}{ | l | l | l | }
+\hline
+Example & Sequence & Alteration \\ \hline
+Ref & \verb|a t C g a| & C is the reference base \\ \hline
+$1$ & \verb|a t T g a| & C base is a T in some individuals \\ \hline
+\end{tabular}
+
+\subsubsection{Insertion VCF record}
+Suppose I receive the following VCF record:
+
+\vspace{0.3cm}
+\begin{tabular}{ l l l l l l l l}
+	\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+	$20$ & $3$ & . & C & CTAG & . & PASS & DP=100 \\
+\end{tabular}
+\vspace{0.3cm}
+
+This is a insertion since the reference base C is being replaced by C [the reference base] plus three insertion bases TAG. Again there are only two alleles so I have the two following segregating haplotypes:
+
+\vspace{0.3cm}
+\begin{tabular}{ | l | l | l | }
+\hline
+Example & Sequence & Alteration \\ \hline
+Ref & \verb|a t C - - - g a| & C is the reference base \\ \hline
+$1$ & \verb|a t C T A G g a| & following the C base is an insertion of 3 bases \\ \hline
+\end{tabular}
+
+\subsubsection{Deletion VCF record}
+Suppose I receive the following VCF record:
+
+\vspace{0.3cm}
+\begin{tabular}{ l l l l l l l l}
+	\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+	$20$ & $2$ & . & TCG & T & . & PASS & DP=100 \\
+\end{tabular}
+\vspace{0.3cm}
+
+This is a deletion of two reference bases since the reference allele TCG is being replaced by just the T [the reference base]. Again there are only two alleles so I have the two following segregating haplotypes:
+
+\vspace{0.3cm}
+\begin{tabular}{ | l | l | l | }
+\hline
+Example & Sequence & Alteration \\ \hline
+Ref & \verb|a T C G a| & T is the (first) reference base \\ \hline
+$1$ & \verb|a T - - a| & following the T base is a deletion of 2 bases \\ \hline
+\end{tabular}
+
+\subsubsection{Mixed VCF record for a microsatellite}
+Suppose I receive the following VCF record:
+
+\vspace{0.3cm}
+\begin{tabular}{ l l l l l l l l}
+	\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+	$20$ & $4$ & . & GCG & G,GCGCG & . & PASS & DP=100 \\
+\end{tabular}
+\vspace{0.3cm}
+
+This is a mixed type record containing a 2 base insertion and a 2 base deletion. There are are three segregating alleles so I have the three following haplotypes:
+
+\vspace{0.3cm}
+\begin{tabular}{ | l | l | l | }
+\hline
+Example & Sequence & Alteration \\ \hline
+Ref & \verb|a t c G C G - - a| & G is the (first) reference base \\ \hline
+$1$ & \verb|a t c G - - - - a| & following the G base is a deletion of 2 bases \\ \hline
+$2$ & \verb|a t c G C G C G a| & following the G base is a insertion of 2 bases \\ \hline
+\end{tabular}
+\vspace{0.3cm}
+
+Note that in all of these examples dashes have been added to make the haplotypes clearer but of course the equivalence among bases isn't provided by the VCF. Technically the following is an equivalent alignment:
+
+\vspace{0.3cm}
+\begin{tabular}{ | l | l | l | }
+\hline
+Example & Sequence & Alteration \\ \hline
+Ref & \verb|a t c G - - C G a| & G is the (first) reference base \\ \hline
+$1$ & \verb|a t c G - - - - a| & following the G base is a deletion of 2 bases \\ \hline
+$2$ & \verb|a t c G C G C G a| & following the G base is a insertion of 2 bases \\ \hline
+\end{tabular}
+
+\subsection{Encoding Structural Variants}
+The following page contains examples of structural variants encoded in VCF:
+\pagebreak
+\footnotesize
+\begin{landscape}
+\begin{verbatim}
+VCF STRUCTURAL VARIANT EXAMPLE
+
+##fileformat=VCFv4.1
+##fileDate=20100501
+##reference=1000GenomesPilot-NCBI36
+##assembly=ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/sv/breakpoint_assemblies.fasta
+##INFO=<ID=BKPTID,Number=.,Type=String,Description="ID of the assembled alternate allele in the assembly file">
+##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">
+##ALT=<ID=DEL:ME:L1,Description="Deletion of L1 element">
+##ALT=<ID=DUP,Description="Duplication">
+##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
+##ALT=<ID=INS,Description="Insertion of novel sequence">
+##ALT=<ID=INS:ME:ALU,Description="Insertion of ALU element">
+##ALT=<ID=INS:ME:L1,Description="Insertion of L1 element">
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=CNV,Description="Copy number variable region">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Float,Description="Genotype quality">
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
+##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
+#CHROM POS     ID        REF              ALT          QUAL FILTER INFO                                                               FORMAT       NA00001
+1      2827694 rs2376870 CGTGGATGCGGGGAC  C            .    PASS   SVTYPE=DEL;END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14                 GT:GQ        1/1:13.9
+2       321682 .         T                <DEL>        6    PASS   SVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62         GT:GQ        0/1:12
+2     14477084 .         C                <DEL:ME:ALU> 12   PASS   SVTYPE=DEL;END=14477381;SVLEN=-297;CIPOS=-22,18;CIEND=-12,32       GT:GQ        0/1:12
+3      9425916 .         C                <INS:ME:L1>  23   PASS   SVTYPE=INS;END=9425916;SVLEN=6027;CIPOS=-16,22                     GT:GQ        1/1:15
+3     12665100 .         A                <DUP>        14   PASS   SVTYPE=DUP;END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500  GT:GQ:CN:CNQ ./.:0:3:16.2
+4     18665128 .         T                <DUP:TANDEM> 11   PASS   SVTYPE=DUP;END=18665204;SVLEN=76;CIPOS=-10,10;CIEND=-10,10         GT:GQ:CN:CNQ ./.:0:5:8.3
+\end{verbatim}
+\end{landscape}
+\pagebreak
+\normalsize
+
+The example shows in order:
+\begin{enumerate}
+  \item A precise deletion with known breakpoint, a one base micro-homology, and a sample that is homozygous for the deletion.
+  \item An imprecise deletion of approximately 205 bp.
+  \item An imprecise deletion of an ALU element relative to the reference.
+  \item An imprecise insertion of an L1 element relative to the reference.
+  \item An imprecise duplication of approximately 21Kb. The sample genotype is copy number 3 (one extra copy of the duplicated sequence).
+  \item An imprecise tandem duplication of 76bp. The sample genotype is copy number 5 (but the two haplotypes are not known).
+\end{enumerate}
+
+\subsection{Specifying complex rearrangements with breakends}
+
+An arbitrary rearrangement event can be summarized as a set of novel \textbf{adjacencies}. Each adjacency ties together $2$ \textbf{breakends}. The two breakends at either end of a novel adjacency are called \textbf{mates}.
+
+There is one line of VCF (i.e. one record) for each of the two breakends in a novel adjacency. A breakend record is identified with the tag ``SVTYPE=BND'' in the INFO field. The REF field of a breakend record indicates a base or sequence s of bases beginning at position POS, as in all VCF records. The ALT field of a breakend record indicates a replacement for s. This ``breakend replacement'' has three parts:
+\begin{enumerate}
+  \item The string t that replaces places s. The string t may be an extended version of s if some novel bases are inserted during the formation of the novel adjacency.
+  \item The position p of the mate breakend, indicated by a string of the form ``chr:pos''. This is the location of the first mapped base in the piece being joined at this novel adjacency.
+  \item The direction that the joined sequence continues in, starting from p. This is indicated by the orientation of square brackets surrounding p.
+
+\end{enumerate}
+These 3 elements are combined in 4 possible ways to create the ALT. In each of the 4 cases, the assertion is that s is replaced with t, and then some piece starting at position p is joined to t. The cases are:
+
+\vspace{0.3cm}
+\begin{tabular}{ l l l }
+REF & ALT & Meaning \\
+s & t$[$p$[$ & piece extending to the right of p is joined after t \\
+s & t$]$p$]$ & reverse comp piece extending left of p is joined after t \\
+s & $]$p$]$t & piece extending to the left of p is joined before t \\
+s & $[$p$[$t & reverse comp piece extending right of p is joined before t \\
+\end{tabular}
+\vspace{0.3cm}
+
+The example in Figure 1 shows a 3-break operation involving 6 breakends. It exemplifies all possible orientations of breakends in adjacencies. Notice how the ALT field expresses the orientation of the breakends.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=4in,height=2.96in]{img/all_orientations-400x296.png}
+\caption{All possible orientations of breakends}
+\end{figure}
+
+\vspace{0.3cm}
+\begin{tabular}{ l l l l l l l l }
+\#CHROM &POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+$2$ & $321681$ & bnd\_W & G & G$]17$:$198982]$ & $6$ & PASS & SVTYPE=BND \\
+$2$ & $321682$ & bnd\_V & T & $]$13:123456$]$T & 6 & PASS & SVTYPE=BND \\
+$13$ & $123456$ & bnd\_U & C & C$[$2:321682$[$ & 6 & PASS & SVTYPE=BND \\
+$13$ & $123457$ & bnd\_X & A & $[$17:198983$[$A & 6 & PASS & SVTYPE=BND \\
+$17$ & $198982$ & bnd\_Y & A & A$]$2:321681$]$ & 6 & PASS & SVTYPE=BND \\
+$17$ & $198983$ & bnd\_Z & C & $[$13:123457$[$C & 6 & PASS & SVTYPE=BND \\
+\end{tabular}
+
+\subsubsection{Inserted Sequence}
+
+Sometimes, as shown in Figure 2, some bases are inserted between the two breakends, this information is also carried in the ALT column:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in,height=1.89in]{img/inserted_sequence-400x189.png}
+\caption{Inserted sequence between breakends}
+\end{figure}
+
+\vspace{0.3cm}
+\footnotesize
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+$2$ & $321682$ & bnd\_V & T & $]13:123456]$AGTNNNNNCAT & $6$ & PASS & SVTYPE=BND;MATEID=bnd\_U \\
+$13$ & $123456$ & bnd\_U & C & CAGTNNNNNCA$[2:321682[$ & $6$ & PASS & SVTYPE=BND;MATEID=bnd\_V \\
+\end{tabular}
+\normalsize
+\vspace{0.3cm}
+
+\subsubsection{Large Insertions}
+If the insertion is too long to be conveniently stored in the ALT column, as in the 329 base insertion shown in Figure 3, it can be represented by a contig from the assembly file:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in,height=2.47in]{img/inserted_contig-400x247.png}
+\caption{Inserted contig}
+\end{figure}
+
+\vspace{0.3cm}
+\small
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+$13$ & $123456$ & bnd\_U & C & C$[<$ctg1$>:1[$ & $6$ & PASS & SVTYPE=BND \\
+$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:329]$A & $6$ & PASS & SVTYPE=BND \\
+\end{tabular}
+\normalsize
+\vspace{0.3cm}
+
+\textbf{Note}: In the special case of the complete insertion of a sequence between two base pairs, it is recommended to use the shorthand notation described above:
+
+\vspace{0.3cm}
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+$13$ & $321682$ & INS0 & T & C$<$ctg$1>$ & $6$ & PASS & SVTYPE=INS \\
+\end{tabular}
+\vspace{0.3cm}
+
+If only a portion of $<$ctg$1>$, say from position $7$ to position $214$, is inserted, the VCF would be:
+
+\vspace{0.3cm}
+\small
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+$13$ & $123456$ & bnd\_U & C & C$[<$ctg1$>:7[$ & $6$ & PASS & SVTYPE=BND \\
+$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:214]$A & $6$ & PASS & SVTYPE=BND \\
+\end{tabular}
+\normalsize
+\vspace{0.3cm}
+
+If $<$ctg$1>$ is circular and a segment from position 229 to position 45 is inserted, i.e. continuing from position 329 on to position 1, this is represented by adding a circular adjacency:
+
+\vspace{0.3cm}
+\small
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+$13$ & $123456$ & bnd\_U & C & C$[<$ctg$1>:229[$ & 6 & PASS & SVTYPE=BND \\
+$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:45]$A & 6 & PASS & SVTYPE=BND \\
+$<$ctg$1>$ & 1 & bnd\_X & A & $]<$ctg$1>:329]$A & 6 & PASS & SVTYPE=BND \\
+$<$ctg$1>$ & 329 & bnd\_Y & T & T$[<$ctg$1>:1[$ & 6 & PASS & SVTYPE=BND \\
+\end{tabular}
+\normalsize
+
+\subsubsection{Multiple mates}
+If a breakend has multiple mates such as in Figure 4 (either because of breakend reuse or of uncertainty in the measurement), these alternate adjacencies are treated as alternate alleles:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in,height=2.80in]{img/multiple_mates-400x280.png}
+\caption{Breakend with multiple mates}
+\end{figure}
+
+\footnotesize
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+$2$ & $321682$ & bnd\_V & T & $]13:123456]$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U \\
+$13$ & $123456$ & bnd\_U & C & C$[2:321682[$,C$[17:198983[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V,bnd\_Z \\
+$17$ & $198983$ & bnd\_Z & A & $]13:123456]$A & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U \\
+\end{tabular}
+\normalsize
+
+\subsubsection{Explicit partners}
+Two breakends which are connected in the reference genome but disconnected in the variants are called partners. Each breakend only has one partner, typically one basepair left or right. However, it is not uncommon to observe loss of a few basepairs during the rearrangement. It is then possible to explicitly name a breakend's partner, such as in Figure 5.:
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=4in,height=2.11in]{img/erosion-400x211.png}
+\caption{Partner breakends}
+\end{figure}
+
+\small
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+2 & 321681 & bnd\_W & G & G$[13:123460[$ & 6 & PASS & PARID=bnd\_V;MATEID=bnd\_X \\
+2 & 321682 & bnd\_V & T & $]13:123456]$T & 6 & PASS & PARID=bnd\_W;MATEID=bnd\_U \\
+13 & 123456 & bnd\_U & C & C$[2:321682[$ & 6 & PASS &  PARID=bnd\_X;MATEID=bnd\_V \\
+13 & 123460 & bnd\_X & A & $]2:321681]$A & 6 & PASS &  PARID=bnd\_U;MATEID=bnd\_W \\
+\end{tabular}
+\normalsize
+
+\subsubsection{Telomeres}
+For a rearrangement involving the telomere end of a reference chromosome, we define a virtual telomeric breakend that serves as a breakend partner for the breakend at the telomere. That way every breakend has a partner. If the chromosome extends from position 1 to N, then the virtual telomeric breakends are at positions 0 and N+1. For example, to describe the reciprocal translocation of the entire chromosome 1 into chromosome 13, as illustrated in Figure 6:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in,height=2.51in]{img/telomere-400x251.png}
+\caption{Telomeres}
+\end{figure}
+
+the records would look like:
+
+\small
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+1 & 0 & bnd\_X & N & $.[13:123457[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V \\
+1 & 1 & bnd\_Y & T & $]13:123456]$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U \\
+13 & 123456 & bnd\_U & C & C$[1:1[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_Y \\
+13 & 123457 & bnd\_V & A & $]1:0]$A & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X \\
+\end{tabular}
+\normalsize
+
+\subsubsection{Event modifiers}
+As mentioned previously, a single rearrangement event can be described as a set of novel adjacencies. For example, a reciprocal rearrangement such as in Figure 7:
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in,height=1.92in]{img/reciprocal_rearrangement-400x192.png}
+\caption{Rearrangements}
+\end{figure}
+
+would be described as:
+
+\vspace{0.3cm}
+\footnotesize
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+2 & 321681 & bnd\_W & G & G$[13:123457[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X;EVENT=RR0 \\
+2 & 321682 & bnd\_V & T & $]13:123456]$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U;EVENT=RR0 \\
+13 & 123456 & bnd\_U & C & C$[2:321682[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V;EVENT=RR0 \\
+13 & 123457 & bnd\_X & A & $]2:321681]$A & 6 & PASS & SVTYPE=BND;MATEID=bnd\_W;EVENT=RR0 \\
+\end{tabular}
+\normalsize
+
+\subsubsection{Inversions}
+Similarly an inversion such as in Figure 8:
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=4in,height=0.95in]{img/inversion-400x95.png}
+\caption{Inversion}
+\end{figure}
+
+can be described equivalently in two ways. Either one uses the short hand notation described previously (recommended for simple cases):
+
+\vspace{0.3cm}
+\small
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+2 & 321682 & INV0 & T & $<$INV$>$ & 6 & PASS & SVTYPE=INV;END=421681 \\
+\end{tabular}
+\normalsize
+\vspace{0.3cm}
+
+or one describes the breakends:
+
+\vspace{0.3cm}
+\footnotesize
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U;EVENT=INV0 \\
+2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X;EVENT=INV0 \\
+2 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_W;EVENT=INV0 \\
+2 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V;EVENT=INV0 \\
+\end{tabular}
+\normalsize
+
+\subsubsection{Uncertainty around breakend location}
+It sometimes is difficult to determine the exact position of a break, generally because of homologies between the sequences being modified, such as in Figure 9. The breakend is then placed arbitrarily at the left most position, and the uncertainty is represented with the CIPOS tag. The ALT string is then constructed assuming this arbitrary breakend choice.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=4in,height=2.48in]{img/microhomology-400x248.png}
+\caption{Homology}
+\end{figure}
+
+The figure above represents a nonreciprocal translocation with microhomology. Even if we know that breakend U is rearranged with breakend V, actually placing these breaks can be extremely difficult. The red and green dashed lines represent the most extreme possible recombination events which are allowed by the sequence evidence available. We therefore place both U and V arbitrarily within the interval of possibility:
+
+\vspace{0.3cm}
+\footnotesize
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+2 & 321681 & bnd\_V & T & T$]13:123462]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U;CIPOS=0,6 \\
+13 & 123456 & bnd\_U & A & A$]2:321687]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V;CIPOS=0,6 \\
+\end{tabular}
+\normalsize
+\vspace{0.3cm}
+
+Note that the coordinate in breakend U's ALT string does not correspond to the designated position of breakend V, but to the position that V would take if U's position were fixed (and vice-versa). The CIPOS tags describe the uncertainty around the positions of U and V.
+
+The fact that breakends U and V are mates is preserved thanks to the MATEID tags. If this were a reciprocal translocation, then there would be additional breakends X and Y, say with X the partner of V on Chr 2 and Y the partner of U on Chr 13, and there would be two more lines of VCF for the XY novel adjacency. Depending on which positions are chosen for the breakends X and Y, it might not be obvious that X is the partner of V and Y is the partner of U from their locations alone. This partner relation ship can be specified explicitly with the tag PARID=bnd\_X in the VCF line for breakend V and PARID=bnd\_Y in the VCF line for breakend U, and vice versa.
+
+\subsubsection{Single breakends}
+We allow for the definition of a breakend that is not part of a novel adjacency, also identified by the tag SVTYPE=BND. We call these single breakends, because they lack a mate. Breakends that are unobserved partners of breakends in observed novel adjacencies are one kind of single breakend. For example, if the true situation is known to be either as depicted back in Figure 1, and we only observe the adjacency (U,V), and no adjacencies for W, X, Y, or Z, then we cannot be sure whether we have a simple reciprocal translocation or a more complex 3-break operation. Yet we know the partner X of U and the partner W of V exist and are breakends. In this case we can specify these as single breakends, with unknown mates. The 4 lines of VCF representing this situation would be:
+
+\vspace{0.3cm}
+\small
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+2 & 321681 & bnd\_W & G & G. & 6 & PASS & SVTYPE=BND \\
+2 & 321682 & bnd\_V & T & $]13:123456]$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U \\
+13 & 123456 & bnd\_U & C & C$[2:321682[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V \\
+13 & 123457 & bnd\_X & A & .A & 6 & PASS & SVTYPE=BND \\
+\end{tabular}
+\normalsize
+\vspace{0.3cm}
+
+On the other hand, if we know a simple reciprocal translocation has occurred as in Figure 7, then even if we have no evidence for the (W,X) adjacency, for accounting purposes an adjacency between W and X may also be recorded in the VCF file. These two breakends W and X can still be crossed-referenced as mates. The 4 VCF records describing this situation would look exactly as below, but perhaps with a special quality or filter value for the breakends W and X.
+
+Another possible reason for calling single breakends is an observed but unexplained change in copy number along a chromosome.
+
+\vspace{0.3cm}
+\scriptsize
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+3 & 12665 & bnd\_X & A & .A & 6 & PASS & SVTYPE=BND;CIPOS=-50,50 \\
+3 & 12665 & . & A & $<$DUP$>$ & 14 & PASS & SVTYPE=DUP;END=13686;CIPOS=-50,50;CIEND=-50,50 \\
+3 & 13686 & bnd\_Y & T & T. & 6 & PASS & SVTYPE=BND;CIPOS=-50,50 \\
+\end{tabular}
+\normalsize
+\vspace{0.3cm}
+
+Finally, if an insertion is detected but only the first few base-pairs provided by overhanging reads could be assembled, then this inserted sequence can be provided on that line, in analogy to paired breakends:
+
+\vspace{0.3cm}
+\scriptsize
+\begin{tabular}{ l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
+3 & 12665 & bnd\_X & A & .TGCA & 6 & PASS & SVTYPE=BND;CIPOS=-50,50 \\
+3 & 12665 & . & A & $<$DUP$>$ & 14 & PASS & SVTYPE=DUP;END=13686;CIPOS=-50,50;CIEND=-50,50 \\
+3 & 13686 & bnd\_Y & T & TCC. & 6 & PASS & SVTYPE=BND;CIPOS=-50,50 \\
+\end{tabular}
+\normalsize
+
+\subsubsection{Sample mixtures}
+It may be extremely difficult to obtain clinically perfect samples, with only one type of cell. Let's imagine that two samples are taken from a cancer patient: healthy blood, and some tumor tissue with an estimated 30\% stromal contamination. This would then be expressed in the header as:
+
+\footnotesize
+\begin{verbatim}
+##SAMPLE=<ID=Blood,Genomes=Germline,Mixture=1.,Description="Patient germline genome">
+##SAMPLE=<ID=TissueSample,Genomes=Germline;Tumor,Mixture=.3;.7,Description="Patient germline genome;Patient tumor genome">
+\end{verbatim}
+\normalsize
+
+Because of this distinction between sample and genome, it is possible to express the data along both distinctions. For example, in a first pass, a structural variant caller would simply report counts per sample. Using the example of the inversion just above, the VCF code could become:
+
+\vspace{0.3cm}
+\tiny
+\begin{flushleft}
+\begin{tabular}{ l l l l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Blood & TissueSample\\
+2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U & GT:DPADJ & 0:32 & $0\mid1:9\mid21$ \\
+2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X & GT:DPADJ & 0:29 & $0\mid1:11\mid25$ \\
+13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_W & GT:DPADJ & 0:34 & $0\mid1:10\mid23$ \\
+13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V & GT:DPADJ & 0:31 & $0\mid1:8\mid20$ \\
+\end{tabular}
+\end{flushleft}
+\normalsize
+\vspace{0.3cm}
+
+However, a more evolved algorithm could attempt actually deconvolving the two genomes and generating copy number estimates based on the raw data:
+
+\vspace{0.3cm}
+\tiny
+\begin{flushleft}
+\begin{tabular}{ l l l l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Blood & TumorSample \\
+2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U & GT:CNADJ & 0:1 & 1:1 \\
+2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X & GT:CNADJ & 0:1 & 1:1 \\
+13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_W & GT:CNADJ & 0:1 & 1:1 \\
+13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V & GT:CNADJ & 0:1 & 1:1 \\
+\end{tabular}
+\end{flushleft}
+\normalsize
+
+\subsubsection{Clonal derivation relationships}
+\label{PedigreeInDetail}
+In cancer, each VCF file represents several genomes from a patient, but one genome is special in that it represents the germline genome of the patient. This genome is contrasted to a second genome, the cancer tumor genome. In the simplest case the VCF file for a single patient contains only these two genomes. This is assumed in most of the discussion of the sections below.
+
+In general there may be several tumor genomes from the same patient in the VCF file. Some of these may be secondary tumors derived from an original primary tumor. We suggest the derivation relationships between genomes in a cancer VCF file be represented in the header with PEDIGREE tags.
+
+Analogously, there might also be several normal genomes from the same patient in the VCF (typically double normal studies with blood and solid tissue samples). These normal genomes are then considered to be derived from the original germline genome, which has to be inferred by parsimony.
+
+The general format of a PEDIGREE line describing asexual, clonal derivation is:
+
+\begin{verbatim}
+PEDIGREE=<ID=DerivedID,Original=OriginalID>
+\end{verbatim}
+
+This line asserts that the DNA in genome is asexually or clonally derived with mutations from the DNA in genome. This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e. there is one entry per of the form:
+
+\begin{verbatim}
+PEDIGREE=<ID=ChildID,Mother=MotherID,Father=FatherID>
+\end{verbatim}
+
+Let's consider a cancer patient VCF file with 4 genomes: germline, primary\_tumor, secondary\_tumor1, and secondary\_tumor2 as illustrated in Figure 10. The primary\_tumor is derived from the germline and the secondary tumors are each derived independently from the primary tumor, in all cases by clonal derivation with mutations. The PEDIGREE lines would look like:
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=4in,height=2.67in]{img/derivation-400x267.png}
+\caption{Pegigree example}
+\end{figure}
+
+\begin{verbatim}
+##PEDIGREE=<ID=PrimaryTumorID,Original=GermlineID>
+##PEDIGREE=<ID=Secondary1TumorID,Original=PrimaryTumorID>
+##PEDIGREE=<ID=Secondary2TumorID,Original=PrimaryTumorID>
+\end{verbatim}
+
+Alternately, if data on the genomes is compiled in a database, a simple pointer can be provided:
+
+\begin{verbatim}
+##pedigreeDB=<url>
+\end{verbatim}
+
+The most general form of a pedigree line is:
+
+\begin{verbatim}
+##PEDIGREE=<ID=SampleID,Name_1=Ancestor1,...,Name_N=AncestorN>
+\end{verbatim}
+
+This means that the genome SampleID is derived from the N $\ge$ 1 genomes Ancestor1, ..., AncestorN. Based on these derivation relationships two new pieces of information can be specified.
+
+Firstly, we wish to express the knowledge that a variant is novel to a genome, with respect to its parent genome. Ideally, this could be derived by simply comparing the features on either genomes. However, insufficient data or sample mixtures might prevent us from clearly determining at which stage a given variant appeared. This would be represented by a mutation quality score.
+
+Secondly, we define a \textbf{haplotype} as a set of variants which are known to be on the same chromosome in the germline genome. Haplotype identifiers must be unique across the germline genome, and are conserved along clonal lineages, regardless of mutations, rearrangements, or recombination. In the case of the duplication of a region within a haplotype, one copy retains the original haplotype identifier, and the others are considered to be novel haplotypes with their own unique identifiers. All these novel haplotypes have in common their \textbf{haplotype ancestor} in the parent genome.
+
+\subsubsection{Phasing adjacencies in an aneuploid context}
+In a cancer genome, due to duplication followed by mutation, there can in principle exist any number of haplotypes in the sampled genome for a given location in the reference genome. We assume each haplotype that the user chooses to name is named with a numerical haplotype identifier. Although it is difficult with current technologies to associate haplotypes with novel adjacencies, it might be partially possible to deconvolve these connections in the near future. We therefore propose the following notation to allow haplotype-ambiguous as well as haplotype-unambiguous connections to be described. The general term for these haplotype-specific adjacencies is \textbf{bundles}.
+
+The diagram in Figure 11 will be used to support examples below:
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=4in,height=2.59in]{img/phasing-400x259.png}
+\caption{Phasing}
+\end{figure}
+
+In this example, we know that in the sampled genome:
+
+\begin{enumerate}
+  \item A reference bundle connects breakend U, haplotype 5 on chr13 to its partner, breakend X, haplotype 5 on chr13,
+  \item A novel bundle connects breakend U, haplotype 1 on chr13 to its mate breakend V, haplotype 11 on chr2, and finally,
+  \item A novel bundle connects breakend U, haplotypes 2, 3 and 4 on chr13 to breakend V, haplotypes 12, 13 or 14 on chr2 without any explicit pairing.
+\end{enumerate}
+
+These three are the bundles for breakend U. Each such bundle is referred to as a haplotype of the breakend U. Each allele of a breakend corresponds to one or more haplotypes. In the above case there are two alleles: the 0 allele, corresponding to the adjacency to the partner X, which has haplotype (1), and the 1 allele, corresponding to the two haplotypes (2) and (3) with adjacency to the mate V.
+
+For each haplotype of a breakend, say the haplotype (2) of breakend U above, connecting the end of haplotype 1 on a segment of Chr 13 to a mate on Chr 2 with haplotype 11, in addition to the list of haplotype-specific adjacencies that define it, we can also specify in VCF several other quantities. These include:
+
+\begin{enumerate}
+  \item The depth of reads on the segment where the breakend occurs that support the haplotype, e.g. the depth of reads supporting haplotype 1 in the segment containing breakend U
+  \item The estimated copy number of the haplotype on the segment where the breakend occurs
+  \item The depth of paired-end or split reads that support the haplotype-specific adjacencies, e.g. that support the adjacency between haplotype 1 on Chr 13 to haplotype 11 on Chr 2
+  \item The estimated copy number of the haplotype-specific adjacencies
+  \item An overall quality score indicating how confident we are in this asserted haplotype
+\end{enumerate}
+These are specified using the using the DP, CN, BDP, BCN, and HQ subfields, respectively. The total information available about the three haplotypes of breakend U in the figure above may be visualized in a table as follows.
+
+\vspace{0.3cm}
+\begin{tabular}{ l l l l }
+Allele & 1 & 1 & 0 \\
+Haplotype & 1$>$11 & 2,3,4$>$12,13,14 &	5$>$5 \\
+Segment Depth & 5 & 17 & 4 \\
+Segment Copy Number	& 1 & 3	& 1 \\
+Bundle Depth & 4 & 0 & 3 \\
+Bundle Copy Number & 1 & 3 & 1 \\
+Haplotype quality & 30 & 40 & 40 \\
+\end{tabular}
+
+\subsection{Representing unspecified alleles and REF-only blocks (gVCF)}
+In order to report sequencing data evidence for both variant and non-variant
+positions in the genome, the VCF specification allows to represent blocks of reference-only calls in a single record
+using the END INFO tag, an idea originally introduced by the gVCF file format\footnote{\url{https://support.basespace.illumina.com/knowledgebase/articles/147078-gvcf-file}}.
+The convention adopted here is to represent reference evidence as likelihoods against an
+unknown alternate allele. Think of this as the likelihood for reference as compared to any other possible alternate
+allele (both SNP, indel, or otherwise). A symbolic alternate allele $<$*$>$
+is used to represent this unspecified alternate allele.
+
+Example records are given below:
+\scriptsize
+\begin{flushleft}
+\begin{tabular}{ l l l l l l l l l l }
+\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Sample \\
+1 & 4370 & . & G & $<$*$>$ & . & . & END=4383 & GT:DP:GQ:MIN\_DP:PL & 0/0:25:60:23:0,60,900 \\
+1 & 4384 & . & C & $<$*$>$ & . & . & END=4388 & GT:DP:GQ:MIN\_DP:PL & 0/0:25:45:25:0,42,630 \\
+1 & 4389 & . & T & TC,$<$*$>$ & 213.73 & . & . & GT:DP:GQ:PL & 0/1:23:99:51,0,36,93,92,86 \\
+1 & 4390 & . & C & $<$*$>$ & . & . & END=4390 & GT:DP:GQ:MIN\_DP:PL & 0/0:26:0:26:0,0,315 \\
+1 & 4391 & . & C & $<$*$>$ & . & . & END=4395 & GT:DP:GQ:MIN\_DP:PL & 0/0:27:63:27:0,63,945 \\
+1 & 4396 & . & G & C,$<$*$>$ & 0 & . & . & GT:DP:GQ:P & 0/0:24:52:0,52,95,66,95,97 \\
+1 & 4397 & . & T & $<$*$>$ & . & . & END=4416 & GT:DP:GQ:MIN\_DP:PL & 0/0:22:14:22:0,15,593 \\
+\end{tabular}
+\end{flushleft}
+\normalsize

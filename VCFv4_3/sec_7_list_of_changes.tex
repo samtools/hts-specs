@@ -1,0 +1,36 @@
+\section{List of changes}
+
+\subsection{Changes between VCFv4.2 and VCFv4.3}
+
+\begin{itemize}
+\item VCF compliant implementations must support both LF and CR+LF newline conventions
+\item INFO and FORMAT tag names must match the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}
+\item Spaces are allowed in INFO field values
+\item Characters with special meaning (such as ';' in INFO, ':' in FORMAT, and '\%' in both) can be encoded using the percent encoding (see Section~\ref{character-encoding})
+\item The character encoding of VCF files is UTF-8.
+\item The SAMPLE field can contain optional DOI URL for the source data file
+\item Introduced \#\#META header lines for defining phenotype metadata
+\item New reserved tag "CNP" analogous to "GP" was added. Both CNP and GP use 0 to 1 encoding, which is a change from previous phred-scaled GP.
+\item In order for VCF and BCF to have the same expressive power, we state explicitly that Integers and Floats are 32-bit numbers. Integers are signed.
+\item We state explicitly that zero length strings are not allowed, this includes the CHROM and ID column, INFO IDs, FILTER IDs and FORMAT IDs. Meta-information lines can be in any order, with the exception of \#\#fileformat which must come first. 
+\item All header  lines of the form \#\#key=$<$ID=xxx,...$>$ must have an ID value
+that is unique for a given value of "key". All header lines whose value starts
+with "$<$" must have an ID field. Therefore, also \#\#PEDIGREE newly requires a unique ID.
+\item We state explicitly that duplicate IDs, FILTER, INFO or FORMAT keys are not valid.
+\item A section about gVCF was added, introduced the $<$*$>$ symbolic allele.
+\item A section about tag naming conventions was added.
+\item New reserved AD, ADF, and ADR INFO and FORMAT fields added.
+\item Removed unused and ill-defined GLE FORMAT tag.
+\item Chromosome names cannot use reserved symbolic alleles and contain characters used by breakpoints (Section~\ref{sec-contig-field}).
+\item IUPAC ambiguity codes should be converted to a concrete base.
+\item Symbolic ALTs for IUPAC codes.
+\end{itemize}
+
+\subsection{Changes between BCFv2.1 and BCFv2.2}
+\begin{itemize}
+\item BCF header lines can include optional IDX field
+\item We introduce end-of-vector byte and reserve 8 values for future use
+\item Clarified that except the end-of-vector byte, no other negative values are allowed in the GT array 
+\item String vectors in BCF do not need to start with comma, as the number of values is indicated already in the definition of the tag in the header.
+\item The implicit filter PASS was described inconsistently throughout BCFv2.1: It is encoded as the first entry in the dictionary, not the last.
+\end{itemize}
