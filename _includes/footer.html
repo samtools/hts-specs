@@ -1,0 +1,18 @@
+<footer class="site-footer">
+  <div class="wrapper">
+    <div class="sidebar">
+      <ul>
+        {% if site.github_username %}
+        <li>
+          {% include icon-github.html username=site.github_username %}
+        </li>
+        {% endif %}
+      </ul>
+    </div>
+
+    <div class="mainbar">
+      <p>{{ site.description }}</p>
+    </div>
+    <div class="clear"></div>
+  </div>
+</footer>

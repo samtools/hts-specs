@@ -1,0 +1,15 @@
+# Site settings
+title: HTS file format specifications
+description: >
+  <a href="/">Samtools organisation</a> for next-generation sequencing
+  developers: htslib C&nbsp;API, htsjdk Java API, file format specifications,
+  and samtools/bcftools source code.
+baseurl: "/hts-specs"
+url: "http://samtools.github.io"
+github_username: samtools
+exclude: ["*.tex", img, new, Makefile, README.md]
+
+# Build settings
+markdown: kramdown
+kramdown:
+  parse_block_html: true

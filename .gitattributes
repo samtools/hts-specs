@@ -1,0 +1,11 @@
+# Ensure PDF files are left as binary.  To roughly display changes in them
+# by converting to text, add to your configuration (perhaps with --global):
+#
+#	git config diff.pdf.textconv pdftotext-filter
+#
+# where pdftotext-filter is a wrapper around pdftotext, similar to
+#
+#	#!/bin/sh
+#	pdftotext -nopgbrk -q "$@" -
+#
+*.pdf	-text diff=pdf

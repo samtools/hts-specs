@@ -39,6 +39,7 @@ mostlyclean:
 
 clean: mostlyclean
 	-cd new && rm -f $(PDFS)
+	-rm -rf _site
 
 
 .PHONY: all pdf mostlyclean clean
