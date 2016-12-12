@@ -1,36 +1,10 @@
 ---
 layout: default
 title: Retrieval API spec v0.1
+suppress_footer: true
 ---
 
 # Retrieval API spec v0.1
-
-Design principles
-Protocol essentials
-  Authentication
-  Errors
-  CORS
-Method: get reads by ID
-  URL parameters
-  Query parameters
-    Field filtering
-  Response JSON fields
-  Response data blocks
-    Diagram of core mechanic
-    HTTPS data block URLs
-    Inline data block URIs
-    Reliability & performance considerations
-    Security considerations
-  Method-specific error interpretations
-Possible future enhancements
-
-
-## Document history:
-
-18-mar-2016: copied from https://github.com/dnanexus-rnd/htsnexus/wiki
-15-apr-2016: copied from working doc
-15-aug-2016: final version for interop testing
-
 
 # Design principles
 
@@ -45,7 +19,8 @@ This data retrieval API bridges from existing genomics bulk data transfers to a 
    * The structuring of POST inputs, redirects and other non-reads data will be protobuf3 compatible JSON
 
 Explicitly this API does NOT:
-* Provide a way to discover the identifiers for valid ReadGroupSets -- clients obtain these via some out of band mechanism
+
+* Provide a way to discover the identifiers for valid ReadGroupSets --- clients obtain these via some out of band mechanism
 
 
 # Protocol essentials
@@ -76,7 +51,7 @@ Non-successful invocations of the API return an HTTP error code, and the respons
 The following error types are defined:
 
 |-
-type			| HTTP status code | Description
+Type			| HTTP status code | Description
 |-
 InvalidAuthentication	| 401	| Authorization provided is invalid
 PermissionDenied	| 403	| Authorization is required to access the resource
@@ -114,7 +89,7 @@ _required_
 </td><td>
 A string specifying which reads to return.
 
-The format of the string is left to the discretion of the API provider, including allowing embedded “/” characters. Strings could be ReadGroupSetIds as defined by the GA4GH API, or any other format the API provider chooses (e.g. “/data/platinum/NA12878”, “/byRun/ERR148333”).
+The format of the string is left to the discretion of the API provider, including allowing embedded "/" characters. Strings could be ReadGroupSetIds as defined by the GA4GH API, or any other format the API provider chooses (e.g. "/data/platinum/NA12878", "/byRun/ERR148333").
 </td></tr>
 </table>
 
@@ -134,7 +109,7 @@ Server replies with HTTP status 409 if the requested format is not supported.
 `referenceName` 
 _optional_
 </td><td>
-The reference sequence name, for example “chr1”, “1”, or “chrX”. If unspecified, all reads (mapped and unmapped) are returned. [^b]
+The reference sequence name, for example "chr1", "1", or "chrX". If unspecified, all reads (mapped and unmapped) are returned. [^b]
 </td></tr>
 <tr markdown="block"><td>
 `referenceMD5`  
@@ -212,7 +187,7 @@ Read data format. Default: BAM. Allowed values: BAM,CRAM.
 `urls`  
 _array of objects_
 </td><td>
-an array providing URLs from which raw data can be retrieved. The client must retrieve binary data blocks from each of these URLs and concatenate them to obtain the complete response in the requested format.
+An array providing URLs from which raw data can be retrieved. The client must retrieve binary data blocks from each of these URLs and concatenate them to obtain the complete response in the requested format.
 
 Each element of the array is a JSON object with the following fields:
 
@@ -221,7 +196,7 @@ Each element of the array is a JSON object with the following fields:
 `url`  
 _string_
 </td><td>
-one URL.
+One URL.
 
 May be either a `https:` URL or an inline `data:` URI. HTTPS URLs require the client to make a follow-up request (possibly to a different endpoint) to retrieve a data block. Data URIs provide a data block inline, without necessitating a separate request.
 
@@ -231,7 +206,7 @@ Further details below.
 `headers`  
 _optional object_
 </td><td>
-for HTTPS URLs, the server may supply a JSON object containing one or more string key-value pairs which the client MUST supply as headers with any request to the URL. For example, if headers is `{"Range": "bytes=0-1023", "Authorization": "Bearer xxxx"}`, then the client must supply the headers `Range: bytes=0-1023` and `Authorization: Bearer xxxx` with the HTTPS request to the URL.
+For HTTPS URLs, the server may supply a JSON object containing one or more string key-value pairs which the client MUST supply as headers with any request to the URL. For example, if headers is `{"Range": "bytes=0-1023", "Authorization": "Bearer xxxx"}`, then the client must supply the headers `Range: bytes=0-1023` and `Authorization: Bearer xxxx` with the HTTPS request to the URL.
 </td></tr>
 </table>
 
@@ -240,7 +215,7 @@ for HTTPS URLs, the server may supply a JSON object containing one or more strin
 `md5`  
 _optional hex string_
 </td><td>
-MD5 digest of the blob resulting from concatenating all of the ’payload’ data’ -- the url data blocks.
+MD5 digest of the blob resulting from concatenating all of the "payload" data --- the url data blocks.
 </td></tr>
 </table>
 
