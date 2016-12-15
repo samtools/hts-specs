@@ -28,7 +28,7 @@ new/VCFv4.3.pdf: VCFv4.3.tex new/VCFv4.3.ver
 
 new/%.pdf: %.tex
 	pdflatex --output-directory new $<
-	while grep -q 'Rerun to get [a-z-]* right' $*.log; do pdflatex --output-directory new $< || exit; done
+	while grep -q 'Rerun to get [a-z-]* right' new/$*.log; do pdflatex --output-directory new $< || exit; done
 
 new/%.ver: %.tex
 	echo "@newcommand*@commitdesc{`git describe --always --dirty`}@newcommand*@headdate{`git rev-list -n1 --format=%aD HEAD $< | sed '1d;s/.*, *//;s/ *[0-9]*:.*//'`}" | tr @ \\ > $@
