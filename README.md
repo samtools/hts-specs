@@ -29,7 +29,7 @@ These formats are discussed on the [vcftools-spec mailing list][vcfspec-ml].
 Transfer protocols
 ------------------
 
-The **[ga4gh-retrieval.md]** protocol enables parallel streaming access to data sharded across multiple URLs or files.
+**[Htsget.md]** describes the _hts-get_ retrieval protocol, which enables parallel streaming access to data sharded across multiple URLs or files.
 
 [SAMv1.tex]:    http://samtools.github.io/hts-specs/SAMv1.pdf
 [SAMtags.tex]:  http://samtools.github.io/hts-specs/SAMtags.pdf
@@ -42,7 +42,7 @@ The **[ga4gh-retrieval.md]** protocol enables parallel streaming access to data 
 [VCFv4.3.tex]:  http://samtools.github.io/hts-specs/VCFv4.3.pdf
 [BCFv1_qref.tex]: http://samtools.github.io/hts-specs/BCFv1_qref.pdf
 [BCFv2_qref.tex]: http://samtools.github.io/hts-specs/BCFv2_qref.pdf
-[ga4gh-retrieval.md]: http://samtools.github.io/hts-specs/ga4gh-retrieval.html
+[Htsget.md]:    http://samtools.github.io/hts-specs/htsget.html
 
 [ena-cram]:   http://www.ebi.ac.uk/ena/about/cram_toolkit
 [htslib]:     https://github.com/samtools/htslib

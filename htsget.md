@@ -1,10 +1,10 @@
 ---
 layout: default
-title: Retrieval API spec v0.1
+title: htsget protocol
 suppress_footer: true
 ---
 
-# Retrieval API spec v0.1
+# Htsget retrieval API spec v0.1
 
 # Design principles
 
@@ -223,7 +223,7 @@ MD5 digest of the blob resulting from concatenating all of the "payload" data --
 
 ### Diagram of core mechanic
 
-![Diagram showing ticket flow](pub/ga4gh-ticket.png)
+![Diagram showing ticket flow](pub/htsget-ticket.png)
 
 1. Client sends a request with id, genomic range, and filter.
 2. Server replies with a ticket describing data block locations (URLs and headers).
