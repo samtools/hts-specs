@@ -11,7 +11,7 @@ title: HTS format specifications
 {{line}}{% endfor %}
 
 <div class="sidebar lowered">
-View as PDF:
+Specifications:
 
 - [SAM v1](SAMv1.pdf)
 - [SAM tags](SAMtags.pdf)
@@ -25,6 +25,7 @@ View as PDF:
 - [VCF v4.1](VCFv4.1.pdf)
 - [VCF v4.2](VCFv4.2.pdf)
 - [VCF v4.3](VCFv4.3.pdf)
+- [Htsget](htsget.html)
 </div>
 <div class="mainbar">
 {% for line in readme_lines offset: 5 %}

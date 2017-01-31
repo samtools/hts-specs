@@ -10,7 +10,7 @@
       </div>
     </div>
 
-    {% include footer.html %}
+    {%unless page.suppress_footer %}{% include footer.html %}{% endunless %}
 
   </body>
 
