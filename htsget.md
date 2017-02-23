@@ -4,7 +4,7 @@ title: htsget protocol
 suppress_footer: true
 ---
 
-# Htsget retrieval API spec v0.1
+# Htsget retrieval API spec v0.2rc
 
 # Design principles
 
@@ -37,29 +37,45 @@ Requests to the retrieval API endpoint may be authenticated by means of an OAuth
 
 ## Errors
 
-Non-successful invocations of the API return an HTTP error code, and the response body contains a JSON object (content-type application/json) with the following structure:
+The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when an error condition is detected.  In the case of transient server errors, (e.g., 503 and other 5xx status codes), the client SHOULD implement appropriate retry logic as discussed in [Reliability & performance considerations](#reliability--performance-considerations) below.
 
-```json
-{
-   "error": {
-       "type": "NotFound",
-       "message": "No such accession"
-   }
-}
-```
+For errors that are specific to the `htsget` protocol, the response body SHOULD be a JSON object (content-type `application/json`) providing machine-readable information about the nature of the error, along with a human-readable description. The structure of this JSON object is described as follows.
 
-The following error types are defined:
+### Error Response JSON fields
 
-Type			| HTTP status code | Description
+<table>
+<tr markdown="block"><td>
+`error`  
+_string_
+</td><td>
+The type of error. This SHOULD be chosen from the list below.
+</td></tr>
+<tr markdown="block"><td>
+`message`  
+_string_
+</td><td>
+A message specific to the error providing information on how to debug the problem. Clients MAY display this message to the user.
+</td></tr>
+</table>
+
+The following errors types are defined:
+
+Error type	| HTTP status code | Description
 |-----|:---:|-----|
 InvalidAuthentication	| 401	| Authorization provided is invalid
 PermissionDenied	| 403	| Authorization is required to access the resource
 NotFound		| 404	| The resource requested was not found
-Unable			| 406	| The server is unable to fulfill the request
-UnsupportedFormat	| 409	| The requested file format is not supported by the server
-InvalidInput		| 422	| The request parameters do not adhere to the specification
-InternalError		| 500	| Server error, clients should try later
-ServiceUnavailable	| 503	| Service is temporarily unavailable
+UnsupportedFormat	| 400	| The requested file format is not supported by the server
+InvalidInput		| 400	| The request parameters do not adhere to the specification
+InvalidRange		| 400	| The requested range cannot be satisfied
+
+The error type SHOULD be chosen from this table and be accompanied by the specified HTTP status code.  An example of a valid JSON error response is:
+```json
+{
+   "error": "NotFound",
+   "message": "No such accession 'ENS16232164'"
+}
+```
 
 ## CORS
 
@@ -100,7 +116,7 @@ _optional string_
 </td><td>
 Request read data in this format. Default: BAM. Allowed values: BAM,CRAM.
 
-Server replies with HTTP status 409 if the requested format is not supported.
+The server SHOULD reply with an `UnsupportedFormat` error if the requested format is not supported.
 [^a]
 </td></tr>
 <tr markdown="block"><td>
@@ -108,6 +124,8 @@ Server replies with HTTP status 409 if the requested format is not supported.
 _optional_
 </td><td>
 The reference sequence name, for example "chr1", "1", or "chrX". If unspecified, all reads (mapped and unmapped) are returned. [^b]
+
+The server SHOULD reply with a `NotFound` error if the requested reference does not exist.
 </td></tr>
 <tr markdown="block"><td>
 `referenceMD5`  
@@ -115,19 +133,33 @@ _optional_
 </td><td>
 The MD5 checksum uniquely representing the reference sequence as a lower-case hexadecimal string, calculated as the MD5 of the upper-case sequence excluding all whitespace characters (this is equivalent to SQ:M5 in SAM).
 
-Server replies with HTTP status 422 if `referenceName` and `referenceMD5` are both specified and are incompatible.
+The server SHOULD reply with a `NotFound` error if the requested reference does not exist.
+
+The server SHOULD reply with an `InvalidInput` if `referenceName` and `referenceMD5` are both specified and are incompatible.
 </td></tr>
 <tr markdown="block"><td>
 `start`  
 _optional 32-bit unsigned integer_
 </td><td>
-The start position of the range on the reference, 0-based, inclusive. If specified, `referenceName` or `referenceMD5` must also be specified. [^c]
+The start position of the range on the reference, 0-based, inclusive. 
+
+The server SHOULD respond with an `InvalidInput` error if `start` is specified and a reference is not specified
+(see `referenceName` and `referenceMD5`).
+
+The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater
+than `end`.
 </td></tr>
 <tr markdown="block"><td>
 `end`  
 _optional 32-bit unsigned integer_
 </td><td>
-The end position of the range on the reference, 0-based exclusive. If specified, `referenceName` or `referenceMD5` must also be specified.
+The end position of the range on the reference, 0-based exclusive.
+
+The server SHOULD respond with an `InvalidInput` error if `end` is specified and a reference is not specified
+(see `referenceName` and `referenceMD5`).
+
+The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater
+than `end`.
 </td></tr>
 <tr markdown="block"><td>
 `fields`  
@@ -140,13 +172,17 @@ Default: all
 `tags`  
 _optional_
 </td><td>
-A comma separated list of tags to include, default: all. If the empty string is specified (tags=) no tags are included. It is illegal for the values of `tags` and `notags` to intersect; the server may return HTTP status 400 in this case.
+A comma separated list of tags to include, default: all. If the empty string is specified (tags=) no tags are included. 
+
+The server SHOULD respond with an `InvalidInput` error if `tags` and `notags` intersect.
 </td></tr>
 <tr markdown="block"><td>
 `notags`  
 _optional_
 </td><td>
-A comma separated list of tags to exclude, default: none. It is illegal for the values of `tags` and `notags` to intersect; the server may return HTTP status 400 in this case.
+A comma separated list of tags to exclude, default: none. 
+
+The server SHOULD respond with an `InvalidInput` error if `tags` and `notags` intersect.
 </td></tr>
 </table>
 
@@ -262,10 +298,6 @@ Initial guidelines, which we expect to revise in light of future experience:
 
 The URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
 
-## Method-specific error interpretations
-
-* 406 Unable: may be returned if a genomic range is requested, but the server is unable to provide genomic range slicing for the particular dataset (e.g. if no index is available).
-
 
 # Possible future enhancements
 
@@ -279,8 +311,6 @@ The URL and headers might contain embedded authentication tokens; therefore, pro
 ## Existing clarification suggestions
 
 [^a]: This should probably be specified as a (comma separated?) list in preference order.  If the client can accept both BAM and CRAM it is useful for it to indicate this and let the server pick whichever format it is most comfortable with.
-[^b]: Define error code (404?, 416?) for queries to a reference that is not present in the header.  (Note this is not the same as present but having no data aligned to it - that should just be an empty reply.)
-[^c]: Define error response codes - suggest 416 (range not satisfiable).  Perhaps this is appropriate for all chr, start and end failures.
 [^d]: How will compression work in this case - can we benefit from columnar compression as does Parquet?
 
 
