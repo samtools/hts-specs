@@ -367,14 +367,35 @@ There are 8 fixed fields per record.  Fixed fields are:
 \end{enumerate}
 
 \subsubsection{Genotype fields}
-If genotype information is present, then the same types of data must be present
-for all samples. First a FORMAT field is given specifying the data types and
-order (colon-separated FORMAT ids matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed). This is followed by one data block per
-sample, with the colon-separated data corresponding to the types
-specified in the format. The first sub-field must always be the genotype (GT)
-if it is present.  There are no required sub-fields.
+If genotype information is present, then the same types of data must be present for all samples. First a FORMAT field is given specifying the data types and order (colon-separated FORMAT ids matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed). This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format. The first sub-field must always be the genotype (GT) if it is present. There are no required sub-fields. Additional Genotype fields can be defined in the meta-information, however, software support for such fields is not guaranteed.
 
-As with the INFO field, there are several common, reserved keywords that are standards across the community:
+If any of the fields is missing, it is replaced with the missing value. For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing. Trailing fields can be dropped, with the exception of the GT field, which should always be present if specified in the FORMAT field.
+
+As with the INFO field, there are several common, reserved keywords that are standards across the community. See their detailed definitions below, as well as table~\ref{table:reserved-genotypes} for their reference Number, Type and Description. See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for structural variants.
+
+\begin{table}[htbp]
+  \centering
+  \begin{tabularx}{\textwidth}{ | l | l | l | X | }
+      Field		& Number	& Type		& Description \\ \hline
+      AD		& R		& Integer	& Read depth for each allele \\
+      ADF		& R		& Integer	& Read depth for each allele on the forward strand \\
+      ADR		& R		& Integer	& Read depth for each allele on the reverse strand \\
+      DP		& 1		& Integer	& Read depth \\
+      EC		& A		& Integer	& Expected alternate allele counts \\
+      FT		& 1		& String	& Filter indicating if this genotype was ``called'' \\
+      GL		& G		& Float		& Genotype likelihoods \\
+      GP		& G		& Float		& Genotype posterior probabilities \\
+      GQ		& 1		& Integer	& Conditional genotype quality \\
+      GT		& 1		& Integer	& Genotype \\
+      HQ		& 2		& Integer	& Haplotype quality \\
+      MQ		& 1		& Integer	& RMS mapping quality \\
+      PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
+      PQ		& 1		& Integer	& Phasing quality \\
+      PS		& 1		& Integer	& Phase set \\
+  \end{tabularx}
+  \caption{Reserved genotype fields}
+  \label{table:reserved-genotypes}
+\end{table}
 
 \begin{itemize}
 \renewcommand{\labelitemii}{$\circ$}
@@ -453,13 +474,8 @@ As with the INFO field, there are several common, reserved keywords that are sta
   \item PL : the phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) (Integers)
   \item PQ : phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set).  We note that we have not yet included the specific measure for precisely defining ``phasing quality''; our intention for now is simply to reserve the PQ tag for future use as a measure of phasing quality. (Integer)
   \item PS : phase set.  A phase set is defined as a set of phased genotypes to which this genotype belongs.  Phased genotypes for an individual that are on the same chromosome and have the same PS value are in the same phased set.  A phase set specifies multi-marker haplotypes for the phased genotypes in the set.  All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.  If the genotype in the GT field is unphased, the corresponding PS field is ignored.  The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required). (Non-negative 32-bit Integer)
-  \item $\ldots$ see Section~\ref{sv-format-keys} for a list of genotype keys reserved for structural variants.
 \end{itemize}
 
-
-If any of the fields is missing, it is replaced with the missing value. For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing. Trailing fields can be dropped (with the exception of the GT field, which should always be present if specified in the FORMAT field).
-
-See below for additional genotype fields used to encode structural variants. Additional Genotype fields can be defined in the meta-information. However, software support for such fields is not guaranteed.
 
 \section{Understanding the VCF format and the haplotype representation}
 VCF records use a single general system for representing genetic variation data composed of:
