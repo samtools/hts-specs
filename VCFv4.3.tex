@@ -334,7 +334,7 @@ There are 8 fixed fields per record.  Fixed fields are:
 
   \begin{table}[htbp]
     \centering
-    \begin{tabularx}{\textwidth}{ | l | l | l | X | }
+    \begin{tabularx}{\textwidth}{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | X | }
 	Field		& Number	& Type		& Description \\ \hline
 	AA		& 1		& String	& Ancestral allele \\
 	AC		& A		& Integer	& Allele count in genotypes, for each ALT allele, in the same order as listed  \\
@@ -375,7 +375,7 @@ As with the INFO field, there are several common, reserved keywords that are sta
 
 \begin{table}[htbp]
   \centering
-  \begin{tabularx}{\textwidth}{ | l | l | l | X | }
+    \begin{tabularx}{\textwidth}{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | X | }
       Field		& Number	& Type		& Description \\ \hline
       AD		& R		& Integer	& Read depth for each allele \\
       ADF		& R		& Integer	& Read depth for each allele on the forward strand \\
