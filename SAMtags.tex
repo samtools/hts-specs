@@ -59,12 +59,12 @@ or
   {\tt BQ} & Z & Offset to base alignment quality (BAQ) \\
   {\tt BX} & Z & Corrected sequence bases for the unique molecular identifier \\
   {\tt CC} & Z & Reference name of the next hit \\
-  {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM})\\
+  {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM}) \\
   {\tt CO} & Z & Free-text comments \\
   {\tt CP} & i & Leftmost coordinate of the next hit \\
   {\tt CQ} & Z & Color read base qualities \\
   {\tt CS} & Z & Color read sequence \\
-  {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features.\\
+  {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features\\
   {\tt E2} & Z & The 2nd most likely base calls \\
   {\tt FI} & i & The index of segment in the template \\
   {\tt FS} & Z & Segment suffix \\
@@ -76,29 +76,29 @@ or
   {\tt H1} & i & Number of 1-difference hits (see also {\tt NM}) \\
   {\tt H2} & i & Number of 2-difference hits \\
   {\tt HI} & i & Query hit index \\
-  {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record\\
+  {\tt IH} & i & Number of stored alignments in SAM that contains the query in the current record \\
   {\tt LB} & Z & Library \\
-  {\tt MC} & Z & CIGAR string for mate/next segment\\
+  {\tt MC} & Z & CIGAR string for mate/next segment \\
   {\tt MD} & Z & String for mismatching positions \\
   {\tt MF} & ? & Reserved for backwards compatibility reasons \\
-  {\tt MI} & Z & Molecular-barcode (corrected) sequence or identifier. \\
+  {\tt MI} & Z & Molecular-barcode (corrected) sequence or identifier \\
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
-  {\tt NH} & i & Number of reported alignments that contains the query in the current record\\
+  {\tt NH} & i & Number of reported alignments that contains the query in the current record \\
   {\tt NM} & i & Edit distance to the reference \\
   {\tt OC} & Z & Original CIGAR \\
   {\tt OP} & i & Original mapping position \\
-  {\tt OQ} & Z & Original base quality.\\
+  {\tt OQ} & Z & Original base quality\\
   {\tt PG} & Z & Program \\
   {\tt PQ} & i & Phred likelihood of the template \\
   {\tt PT} & Z & Read annotations for parts of the padded read sequence \\
   {\tt PU} & Z & Platform unit \\
-  {\tt QT} & Z & Phred quality of the sample-barcode sequence in the {\tt BC} (or {\tt RT}) tag.  \\
-  {\tt QX} & Z & Phred quality of the unique molecular barcode bases in the {\tt RX} tag. \\
-  {\tt Q2} & Z & Phred quality of the mate/next segment sequence in the {\tt R2} tag. \\
+  {\tt QT} & Z & Phred quality of the sample-barcode sequence in the {\tt BC} (or {\tt RT}) tag \\
+  {\tt QX} & Z & Phred quality of the unique molecular barcode bases in the {\tt RX} tag \\
+  {\tt Q2} & Z & Phred quality of the mate/next segment sequence in the {\tt R2} tag \\
   {\tt R2} & Z & Sequence of the mate/next segment in the template \\
   {\tt RG} & Z & Read group \\
   {\tt RT} & Z & Barcode sequence (deprecated; use {\tt BC} instead) \\
-  {\tt RX} & Z & Raw (uncorrected) unique molecular barcode bases. see {\tt QX} tag for qualities \\
+  {\tt RX} & Z & Raw (uncorrected) unique molecular barcode bases. See {\tt QX} tag for qualities \\
   {\tt SA} & Z & Other canonical alignments in a chimeric alignment \\
   {\tt SM} & i & Template-independent mapping quality \\
   {\tt SQ} & ? & Reserved for backwards compatibility reasons \\
@@ -239,16 +239,20 @@ Free-text comments.
 
 \begin{description}
 \item[BC:Z:\tagvalue{sequence}]
-Barcode sequence (Identifying the sample/library), with any quality scores stored in the {\tt QT} tag.
+Barcode sequence (Identifying the sample/library), with any quality scores (optionally) stored in the {\tt QT} tag.
 The {\tt BC} tag should match the {\tt QT} tag in length. 
-What one does with multiple sample barcodes (e.g. one on each end of the template) is left to the implementation. 
-One current implementation concatenates all the barcodes and qualities and places a dash (`{\tt -}') between the barcodes from the same template. 
+In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the barcodes and qualities and places a dash (`{\tt -}') between the barcodes from the same template. 
 
 \item[BX:Z:\tagvalue{sequence}]
-Corrected bases from the unique molecular identifier. unlike MI, this may be non-unique in the file. Should comprise of sequence base possibly separated by hyphens as {\tt RX}.
+Sequence bases from the unique molecular identifier. 
+These could be either corrected or uncorrected. Unlike MI, this may be non-unique in the file. 
+Should comprise of sequence base possibly separated by hyphens as {\tt RX}.
+In case that the bases represent the corrected bases, the original sequence can be stored in {\tt RX} (similar to OQ storing the original qualities of bases.)
 
 \item[MI:Z:\tagvalue{str}]
-Molecular Identifier. A unique ID within the SAM file for the source molecule/cell from which this read is derived. All reads with the same MI tag represent the group of reads derived from the same source molecule/cell. 
+Molecular Identifier. 
+A unique ID within the SAM file for the source molecule from which this read is derived. 
+All reads with the same MI tag represent the group of reads derived from the same source molecule. 
 
 \item[QT:Z:\tagvalue{qualities}] 
 Phred quality of the sample-barcode sequence in the {\tt BC} (or {\tt RT}) tag. 
@@ -256,17 +260,16 @@ Same encoding as {\sf QUAL}, i.e., Phred score + 33.
 See {\tt BC} for more detail.
 
 \item[QX:Z:\tagvalue{qualities}] 
-Phred quality of the unique molecular identifier sequence in the {\tt RX} tag. 
+Phred quality of the unique molecular identifier sequence in the {\tt RX} or {\tt BX} tag. 
 Same encoding as {\sf QUAL}, i.e., Phred score + 33.
-The {\tt RX} tag should match the {\tt QX} tag in length. 
-What one does with multiple unique molecular identifiers (e.g., one on each end of the template) is left to the implementation. 
-One current implementation concatenates all the barcodes and qualities with no separator between the different barcodes.
+The {\tt RX} and {\tt BX} tags should match the {\tt QX} tag in length. 
+In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the barcodes and qualities with no separator between the different barcodes.
 
 \item[RT:Z:\tagvalue{sequence}]
 Deprecated alternative to {\tt BC} tag originally used at Sanger.
 
 \item[RX:Z:\tagvalue{sequence}] 
-Raw (uncorrected) unique molecular identifier bases, with any quality scores stored in the {\tt QX} tag. 
+Raw (uncorrected) unique molecular identifier bases, with any quality scores (optionally) stored in the {\tt QX} tag. 
 See {\tt QX} for more detail.
 
 \end{description}
