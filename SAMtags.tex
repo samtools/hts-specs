@@ -92,8 +92,9 @@ or
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
   {\tt NH} & i & Number of reported alignments that contain the query in the current record \\
   {\tt NM} & i & Edit distance to the reference \\
-  {\tt OC} & Z & Original CIGAR \\
-  {\tt OP} & i & Original mapping position \\
+  {\tt OA} & Z & Original Alignment \\
+  {\tt OC} & Z & Original CIGAR (deprecated; use {\tt OA} instead) \\
+  {\tt OP} & i & Original mapping position (deprecated; use {\tt OA} instead) \\
   {\tt OQ} & Z & Original base quality \\
   {\tt OX} & Z & Original unique molecular barcode bases \\
   {\tt PG} & Z & Program \\
@@ -214,11 +215,13 @@ Same encoding as {\sf QUAL}.
 Sequence of the mate/next segment in the template.  See also {\tt Q2}
 for any associated quality values.
 
-\item[SA:Z:\tagregex{{\tt (}\emph{rname}{\tt ,}\emph{pos}{\tt ,}\emph{strand}{\tt ,}\emph{CIGAR}{\tt ,}\emph{mapQ}{\tt ,}\emph{NM}{\tt ;)}+}]
-Other canonical alignments in a chimeric alignment, formatted as a semicolon-delimited list.
-Each element in the list represents a part of the chimeric alignment. Conventionally, at a supplementary line, the first element points to the primary line.
-\emph{Strand} is either `{\tt +}' or `{\tt -}', indicating positive/negative strand, corresponding to FLAG bit 0x10.
-\emph{Pos} is a 1-based coordinate.
+\item[SA:Z:\tagregex{{\tt (}\sf{RNAME}{\tt ,}\sf{POS}{\tt ,}\emph{strand}{\tt ,}\sf{CIGAR}{\tt ,}\sf{MAPQ}{\tt ,}\sf{NM}{\tt ;)}+}]
+The tag encodes the values of other canonical alignments in a chimeric alignment, formatted as a semicolon-delimited list. 
+Where \emph{strand} encodes the 0x10 bit of {\sf FLAG}---indicating positive/negative strand---such that it is '+' if the bit is unset and '--' if the bit is set.
+The other values are taken directly from the canonical read.
+Each element in the list represents a part of the chimeric alignment. 
+Conventionally, when present at a supplementary line, the first element points to the primary line.
+\emph{\sf POS} is a 1-based coordinate.
 
 \item[SM:i:\tagvalue{score}]
 Template-independent mapping quality, i.e., the mapping quality if the read were mapped as a single read rather than as part of a read pair or template.
@@ -346,11 +349,30 @@ In the case of multiple unique molecular identifiers (e.g., one on each end of t
 \subsection{Original data}
 
 \begin{description}
+\item[OA:Z:\tagregex{{\tt (}\sf{RNAME}{\tt,\,}\sf{POS}{\tt,\,}\emph{strand}{\tt,\,}\sf{CIGAR}{\tt,\,}\sf{MAPQ}{\tt,\,}\sf{NM}{\tt; )}+}]
+The tag encodes the original alignment information of the record prior to realignment or unalignment by subsequent tool. 
+Here \emph{Strand} is either `{\tt +}' or `{\tt -}', indicating whether the read has been reverse-complemented, which corresponds to FLAG bit 0x10.
+That is, \emph{Strand} is `+' if the bit is unset and `-' if the bit is set.
+The resulting string is the result of joining the 6 values with commas `,' (no additional spaces).
+If  {\tt NM} is unknown it may be omitted, but the comma delimiter must be retained so that the string can be easily parsed into the 6 subfields.
+In the presence of an existing {\tt OA} tag, a subsequent tool may append another set of original alignment information after the semicolon,
+adding to---rather than replacing---the existing {\tt OA} information.
+
+Note 1: While commas are legal characters in sequence names, it is forbidden to have an {\tt OA} tag with such sequences.
+
+Note 2: {\sf RNAME} must be stated explicitly: the use of \,`=', which is allowed in {\sf RNEXT}, is not allowed here.
+
+Note 3: The {\tt OA} field is designed to provide record-level information that can be useful for understanding the provenance of the information in a record. 
+It is not designed to provide a complete history of the template alignment information. 
+In particular, realignments resulting in the the removal of Secondary or Supplementary records will cause the loss of all tags associated with those records, and may alternatively leave the {\tt SA} tag in an invalid state.
+
 \item[OC:Z:\tagvalue{cigar}]
 Original CIGAR, usually before realignment.
+Deprecated by the more general {\tt OA}.
 
 \item[OP:i:\tagvalue{pos}]
-Original 1-based mapping position, usually before realignment.
+Original {\sf POS}, usually before realignment.
+Deprecated by the more general {\tt OA}.
 
 \item[OQ:Z:\tagvalue{qualities}]
 Original base quality, usually before recalibration.
@@ -452,6 +474,10 @@ This appendix lists when standard tags were initially defined or significantly c
 
 \setlength{\parindent}{0pt}
 \newcommand*{\gap}{\vspace*{2ex}}
+
+
+\subsection*{September 2018}
+Add OA tag for recording original/previous alignment information. 
 
 \subsubsection*{July 2018}
 
