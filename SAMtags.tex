@@ -92,8 +92,9 @@ or
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
   {\tt NH} & i & Number of reported alignments that contain the query in the current record \\
   {\tt NM} & i & Edit distance to the reference \\
-  {\tt OC} & Z & Original CIGAR \\
-  {\tt OP} & i & Original mapping position \\
+  {\tt OA} & Z & Original alignment \\
+  {\tt OC} & Z & Original CIGAR (deprecated; use {\tt OA} instead) \\
+  {\tt OP} & i & Original mapping position (deprecated; use {\tt OA} instead) \\
   {\tt OQ} & Z & Original base quality \\
   {\tt OX} & Z & Original unique molecular barcode bases \\
   {\tt PG} & Z & Program \\
@@ -346,11 +347,30 @@ In the case of multiple unique molecular identifiers (e.g., one on each end of t
 \subsection{Original data}
 
 \begin{description}
+\item[OA:Z:\tagregex{(\metavar{RNAME},\metavar{POS},\metavar{strand},\metavar{CIGAR},\metavar{MAPQ},\metavar{NM};)+}]
+The original alignment information of the record prior to realignment or unalignment by a subsequent tool.
+Each original alignment entry contains the following six field values from the original record, generally in their textual SAM representations, separated by commas (`{\tt ,}') and terminated by a semicolon (`{\tt ;}'):
+{\sf RNAME}, which must be explicit (unlike {\sf RNEXT}, `{\tt =}' may not be used here);
+1-based {\sf POS};
+`{\tt +}' or `{\tt -}', indicating forward/reverse strand respectively (as per bit~0x10 of {\sf FLAG});
+{\sf CIGAR};
+{\sf MAPQ};
+{\tt NM} tag value, which may be omitted (though the preceding comma must be retained).
+
+In the presence of an existing {\tt OA} tag, a subsequent tool may append another original alignment entry after the semicolon,
+adding to---rather than replacing---the existing {\tt OA} information.
+
+The {\tt OA} field is designed to provide record-level information that can be useful for understanding the provenance of the information in a record.
+It is not designed to provide a complete history of the template alignment information.
+In particular, realignments resulting in the the removal of Secondary or Supplementary records will cause the loss of all tags associated with those records, and may also leave the {\tt SA} tag in an invalid state.
+
 \item[OC:Z:\tagvalue{cigar}]
 Original CIGAR, usually before realignment.
+Deprecated in favour of the more general {\tt OA}.
 
 \item[OP:i:\tagvalue{pos}]
-Original 1-based mapping position, usually before realignment.
+Original 1-based {\sf POS}, usually before realignment.
+Deprecated in favour of the more general {\tt OA}.
 
 \item[OQ:Z:\tagvalue{qualities}]
 Original base quality, usually before recalibration.
@@ -452,6 +472,11 @@ This appendix lists when standard tags were initially defined or significantly c
 
 \setlength{\parindent}{0pt}
 \newcommand*{\gap}{\vspace*{2ex}}
+
+\subsubsection*{January 2019}
+Added the OA tag for recording original/previous alignment information.
+
+Deprecated the OC and OP tags.
 
 \subsubsection*{July 2018}
 
