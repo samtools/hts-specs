@@ -197,6 +197,11 @@ meanings can be avoided.}
   field is used in the
   alignment records in {\sf RNAME} and {\sf RNEXT} fields. Regular expression: {\tt [!-)+-\char60\char62-\char126][!-\char126]*}\\\cline{2-3}
   & {\tt LN}* & Reference sequence length. \emph{Range}: {\tt [1,2$^{31}$-1]}\\\cline{2-3}
+  & {\tt AH} & Indicates that this sequence is an alternate
+  locus.\footnote{See \url{https://www.ncbi.nlm.nih.gov/grc/help/definitions} for descriptions of \emph{alternate locus} and \emph{primary assembly}.}
+  The value is the locus in the primary assembly for which this
+  sequence is an alternative, in the format `\emph{chr}{\tt :}\emph{start}{\tt -}\emph{end}', `\emph{chr}' (if known), or `{\tt *}' (if unknown), where `\emph{chr}' is a sequence in the primary assembly.
+  Must not be present on sequences in the primary assembly.\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
   & {\tt M5} & MD5 checksum of the sequence in the uppercase, excluding spaces but including pads (as `*'s).\\\cline{2-3}
   & {\tt SP} & Species.\\\cline{2-3}
