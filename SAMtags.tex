@@ -128,8 +128,9 @@ Reference name of the next hit; `{\tt =}' for the same chromosome.
 \item[CP:i:\tagvalue{pos}]
 Leftmost coordinate of the next hit.
 
-\item[E2:Z:\tagvalue{qualities}]
-The 2nd most likely base calls. Same encoding and same length as {\sf QUAL}.
+\item[E2:Z:\tagvalue{bases}]
+The 2nd most likely base calls. Same encoding and same length as {\sf SEQ}.
+See also {\tt U2} for associated quality values.
 
 \item[FI:i:\tagvalue{int}]
 The index of segment in the template.
@@ -180,12 +181,13 @@ Edit distance to the reference, including ambiguous bases but excluding clipping
 \item[PQ:i:\tagvalue{}]
 Phred likelihood of the template, conditional on both the mapping being correct.
 
-\item[Q2:Z:\tagvalue{}]
+\item[Q2:Z:\tagvalue{qualities}]
 Phred quality of the mate/next segment sequence in the {\tt R2} tag.
 Same encoding as {\sf QUAL}.
 
-\item[R2:Z:\tagvalue{}]
-Sequence of the mate/next segment in the template.
+\item[R2:Z:\tagvalue{bases}]
+Sequence of the mate/next segment in the template.  See also {\tt Q2}
+for any associated quality values.
 
 \item[SA:Z:\tagregex{{\tt (}\emph{rname}{\tt ,}\emph{pos}{\tt ,}\emph{strand}{\tt ,}\emph{CIGAR}{\tt ,}\emph{mapQ}{\tt ,}\emph{NM}{\tt ;)}+}]
 Other canonical alignments in a chimeric alignment, formatted as a semicolon-delimited list.
@@ -199,7 +201,7 @@ The number of segments in the template.
 
 \item[U2:Z:\tagvalue{}]
 Phred probility of the 2nd call being wrong conditional on the best being wrong.
-The same encoding as {\sf QUAL}.
+The same encoding and length as {\sf QUAL}.  See also {\tt E2} for associated base calls.
 
 \item[UQ:i:\tagvalue{}]
 Phred likelihood of the segment, conditional on the mapping being correct.
