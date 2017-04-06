@@ -334,7 +334,7 @@ There are 8 fixed fields per record.  Fixed fields are:
 
   \begin{table}[htbp]
     \centering
-    \begin{tabularx}{\textwidth}{ | l | l | l | X | }
+    \begin{tabularx}{\textwidth}{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | X | }
 	Field		& Number	& Type		& Description \\ \hline
 	AA		& 1		& String	& Ancestral allele \\
 	AC		& A		& Integer	& Allele count in genotypes, for each ALT allele, in the same order as listed  \\
@@ -367,35 +367,53 @@ There are 8 fixed fields per record.  Fixed fields are:
 \end{enumerate}
 
 \subsubsection{Genotype fields}
-If genotype information is present, then the same types of data must be present
-for all samples. First a FORMAT field is given specifying the data types and
-order (colon-separated FORMAT ids matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed). This is followed by one data block per
-sample, with the colon-separated data corresponding to the types
-specified in the format. The first sub-field must always be the genotype (GT)
-if it is present.  There are no required sub-fields.
+If genotype information is present, then the same types of data must be present for all samples. First a FORMAT field is given specifying the data types and order (colon-separated FORMAT ids matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed). This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format. The first sub-field must always be the genotype (GT) if it is present. There are no required sub-fields. Additional Genotype fields can be defined in the meta-information, however, software support for such fields is not guaranteed.
 
-As with the INFO field, there are several common, reserved keywords that are standards across the community:
+If any of the fields is missing, it is replaced with the missing value. For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing. Trailing fields can be dropped, with the exception of the GT field, which should always be present if specified in the FORMAT field.
+
+As with the INFO field, there are several common, reserved keywords that are standards across the community. See their detailed definitions below, as well as table~\ref{table:reserved-genotypes} for their reference Number, Type and Description. See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for structural variants.
+
+\begin{table}[htbp]
+  \centering
+    \begin{tabularx}{\textwidth}{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | X | }
+      Field		& Number	& Type		& Description \\ \hline
+      AD		& R		& Integer	& Read depth for each allele \\
+      ADF		& R		& Integer	& Read depth for each allele on the forward strand \\
+      ADR		& R		& Integer	& Read depth for each allele on the reverse strand \\
+      DP		& 1		& Integer	& Read depth \\
+      EC		& A		& Integer	& Expected alternate allele counts \\
+      FT		& 1		& String	& Filter indicating if this genotype was ``called'' \\
+      GL		& G		& Float		& Genotype likelihoods \\
+      GP		& G		& Float		& Genotype posterior probabilities \\
+      GQ		& 1		& Integer	& Conditional genotype quality \\
+      GT		& 1		& String	& Genotype \\
+      HQ		& 2		& Integer	& Haplotype quality \\
+      MQ		& 1		& Integer	& RMS mapping quality \\
+      PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
+      PQ		& 1		& Integer	& Phasing quality \\
+      PS		& 1		& Integer	& Phase set \\
+  \end{tabularx}
+  \caption{Reserved genotype fields}
+  \label{table:reserved-genotypes}
+\end{table}
 
 \begin{itemize}
 \renewcommand{\labelitemii}{$\circ$}
-  \item AD, ADF, ADR: per-sample read depths for each allele; total (AD), on the forward (ADF) and the reverse (ADR) strand (Integer, Number=R)
-  \item DP : read depth at this position for this sample (Integer)
-  \item EC : comma separated list of expected alternate allele counts for each alternate allele in the same order as listed in the ALT field (typically used in association analyses) (Integers)
-  \item FT : sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field). Again, use PASS to indicate that all filters have been passed, a semi-colon separated list of codes for filters that fail, or `.' to indicate that filters have not been applied. These values should be described in the meta-information in the same way as FILTERs (String, no white-space or semi-colons permitted)
-  \item GQ : conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant) (Integer)
-  \item GP : genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities (Float)
-  \item GT : genotype, encoded as allele values separated by either of $/$ or $\mid$. The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on. For diploid calls examples could be $0/1$, $1\mid0$, or $1/2$, etc. Haploid calls, e.g. on Y, male non-pseudoautosomal X, or mitochondrion, are indicated by having only one allele value. A triploid call might look like $0/0/1$. If a call cannot be made for a sample at a given locus, `.' must be specified for each missing allele in the GT field (for example `$./.$' for a diploid genotype and `.' for haploid genotype). The meanings of the separators are as follows (see the PS field below for more details on incorporating phasing information into the genotypes):
+  \item AD, ADF, ADR (Integer): Per-sample read depths for each allele; total (AD), on the forward (ADF) and the reverse (ADR) strand.
+  \item DP (Integer): Read depth at this position for this sample.
+  \item EC (Integer): Comma separated list of expected alternate allele counts for each alternate allele in the same order as listed in the ALT field. Typically used in association analyses.
+  \item FT (String): Sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field). Again, use PASS to indicate that all filters have been passed, a semi-colon separated list of codes for filters that fail, or `.' to indicate that filters have not been applied. These values should be described in the meta-information in the same way as FILTERs. No white-space or semi-colons permitted.
+  \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
+  \item GP (Float): Genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities.
+  \item GT (String): Genotype, encoded as allele values separated by either of $/$ or $\mid$. The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on. For diploid calls examples could be $0/1$, $1\mid0$, or $1/2$, etc. Haploid calls, e.g. on Y, male non-pseudoautosomal X, or mitochondrion, are indicated by having only one allele value. A triploid call might look like $0/0/1$. If a call cannot be made for a sample at a given locus, `.' must be specified for each missing allele in the GT field (for example `$./.$' for a diploid genotype and `.' for haploid genotype). The meanings of the separators are as follows (see the PS field below for more details on incorporating phasing information into the genotypes):
 	\begin{itemize}
 	  \item $/$ : genotype unphased
 	  \item $\mid$ : genotype phased
 	\end{itemize}
 
-  \item GL : genotype likelihoods comprised of comma separated floating point
-  $log_{10}$-scaled likelihoods for all possible genotypes given the set of
-  alleles defined in the REF and ALT fields. In presence of the GT field the
-  same ploidy is expected; without GT field, diploidy is assumed. 
+  \item GL (Float): Genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields. In presence of the GT field the same ploidy is expected; without GT field, diploidy is assumed.
 
-  \textsc{Genotype Ordering.} In general case of ploidy P and N alternate alleles (0 is the REF and 1..N
+  \textsc{Genotype Ordering.} In general case of ploidy P and N alternate alleles (0 is the REF and $1\ldots N$
   the alternate alleles), the ordering of genotypes for the likelihoods can
   be expressed by the following pseudocode with as many nested loops as ploidy:\footnote{Note that we use inclusive \texttt{for} loop boundaries.}
   \begingroup
@@ -448,18 +466,13 @@ As with the INFO field, there are several common, reserved keywords that are sta
             }
     \end{itemize}
 
-  \item HQ : haplotype qualities, two comma separated phred qualities (Integers)
-  \item MQ : RMS mapping quality, similar to the version in the INFO field. (Integer)
-  \item PL : the phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) (Integers)
-  \item PQ : phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set).  We note that we have not yet included the specific measure for precisely defining ``phasing quality''; our intention for now is simply to reserve the PQ tag for future use as a measure of phasing quality. (Integer)
-  \item PS : phase set.  A phase set is defined as a set of phased genotypes to which this genotype belongs.  Phased genotypes for an individual that are on the same chromosome and have the same PS value are in the same phased set.  A phase set specifies multi-marker haplotypes for the phased genotypes in the set.  All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.  If the genotype in the GT field is unphased, the corresponding PS field is ignored.  The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required). (Non-negative 32-bit Integer)
-  \item $\ldots$ see Section~\ref{sv-format-keys} for a list of genotype keys reserved for structural variants.
+  \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
+  \item MQ (Integer): RMS mapping quality, similar to the version in the INFO field.
+  \item PL (Integer): The phred-scaled genotype likelihoods rounded to the closest integer, and otherwise defined precisely as the GL field.
+  \item PQ (Integer): Phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set).  We note that we have not yet included the specific measure for precisely defining ``phasing quality''; our intention for now is simply to reserve the PQ tag for future use as a measure of phasing quality.
+  \item PS (non-negative 32-bit Integer): Phase set.  A phase set is defined as a set of phased genotypes to which this genotype belongs.  Phased genotypes for an individual that are on the same chromosome and have the same PS value are in the same phased set.  A phase set specifies multi-marker haplotypes for the phased genotypes in the set.  All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.  If the genotype in the GT field is unphased, the corresponding PS field is ignored.  The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required).
 \end{itemize}
 
-
-If any of the fields is missing, it is replaced with the missing value. For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing. Trailing fields can be dropped (with the exception of the GT field, which should always be present if specified in the FORMAT field).
-
-See below for additional genotype fields used to encode structural variants. Additional Genotype fields can be defined in the meta-information. However, software support for such fields is not guaranteed.
 
 \section{Understanding the VCF format and the haplotype representation}
 VCF records use a single general system for representing genetic variation data composed of:
