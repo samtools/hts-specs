@@ -5,6 +5,7 @@
 \usepackage{framed}
 \usepackage{enumitem}
 \usepackage{longtable}
+\usepackage{makecell}
 \usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
 
 \makeindex
@@ -350,8 +351,9 @@ Each bit is explained in the following table:
   also have an ordinary coordinate such that it can be placed at a
   desired position after sorting. If {\sf RNAME} is `*', no assumptions
   can be made about {\sf POS} and {\sf CIGAR}.
-\item {\sf POS}: 1-based leftmost mapping POSition of the first matching
-  base. The first base in a reference sequence has coordinate 1. {\sf
+\item {\sf POS}: 1-based leftmost mapping POSition of the first {\sf
+    CIGAR} operation that ``consumes'' a reference base (see table below).
+    The first base in a reference sequence has coordinate 1. {\sf
     POS} is set as 0 for an unmapped read without coordinate. If {\sf
     POS} is 0, no assumptions can be made about {\sf RNAME} and {\sf
     CIGAR}.
@@ -362,23 +364,26 @@ Each bit is explained in the following table:
 \item {\sf CIGAR}: CIGAR string. The CIGAR operations are given in the
   following table (set `*' if unavailable):
   \begin{center}\small
-  \begin{tabular}{ccl}
+  \begin{tabular}{cclcc}
   \hline
-  Op & BAM & Description\\
+  Op & BAM & Description & \makecell{Consumes \\ query} & \makecell{Consumes \\ reference}\\
   \hline
-  {\tt M} & 0 & alignment match (can be a sequence match or mismatch)\\
-  {\tt I} & 1 & insertion to the reference \\
-  {\tt D} & 2 & deletion from the reference \\
-  {\tt N} & 3 & skipped region from the reference \\
-  {\tt S} & 4 & soft clipping (clipped sequences present in {\sf SEQ})\\
-  {\tt H} & 5 & hard clipping (clipped sequences NOT present in {\sf SEQ})\\
-  {\tt P} & 6 & padding (silent deletion from padded reference)\\
-  {\tt =} & 7 & sequence match \\
-  {\tt X} & 8 & sequence mismatch \\
+  {\tt M} & 0 & alignment match (can be a sequence match or mismatch)       & yes & yes \\
+  {\tt I} & 1 & insertion to the reference                                  & yes & no  \\
+  {\tt D} & 2 & deletion from the reference                                 & no  & yes \\
+  {\tt N} & 3 & skipped region from the reference                           & no  & yes \\
+  {\tt S} & 4 & soft clipping (clipped sequences present in {\sf SEQ})      & yes & no  \\
+  {\tt H} & 5 & hard clipping (clipped sequences NOT present in {\sf SEQ})  & no  & no  \\
+  {\tt P} & 6 & padding (silent deletion from padded reference)             & no  & no  \\
+  {\tt =} & 7 & sequence match                                              & yes & yes \\
+  {\tt X} & 8 & sequence mismatch                                           & yes & yes \\
   \hline
   \end{tabular}
   \end{center}
   \begin{itemize}
+  \item ``Consumes query'' and ``consumes reference'' indicate
+    whether the CIGAR operation causes the alignment to step along the
+    query sequence and the reference sequence respectively.
   \item {\tt H} can only be present as the first and/or last operation.
   \item {\tt S} may only have {\tt H} operations between them and the
     ends of the {\sf CIGAR} string.
