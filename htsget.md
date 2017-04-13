@@ -50,9 +50,8 @@ Non-successful invocations of the API return an HTTP error code, and the respons
 
 The following error types are defined:
 
-|-
 Type			| HTTP status code | Description
-|-
+|-----|:---:|-----|
 InvalidAuthentication	| 401	| Authorization provided is invalid
 PermissionDenied	| 403	| Authorization is required to access the resource
 NotFound		| 404	| The resource requested was not found
@@ -61,7 +60,6 @@ UnsupportedFormat	| 409	| The requested file format is not supported by the serv
 InvalidInput		| 422	| The request parameters do not adhere to the specification
 InternalError		| 500	| Server error, clients should try later
 ServiceUnavailable	| 503	| Service is temporarily unavailable
-|-
 
 ## CORS
 
@@ -156,9 +154,8 @@ A comma separated list of tags to exclude, default: none. It is illegal for the 
 
 The list of fields is based on BAM fields:
 
-|-
 Field	| Description
-|-
+|-------|-------|
 QNAME	| Read names
 FLAG	| Read bit flags
 RNAME	| Reference sequence name
@@ -170,7 +167,6 @@ PNEXT	| Alignment position of the next fragment in the template
 TLEN	| Inferred template size
 SEQ	| Read bases
 QUAL	| Base quality scores
-|-
 
 Example: `fields=QNAME,FLAG,POS`.
 
