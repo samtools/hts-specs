@@ -1,3 +1,38 @@
+## Specification maintainers
+
+The SAM, BAM, and VCF formats originated in the 1000 Genomes Project.
+In February 2014, ongoing format maintenance was brought under the aegis of the [Global Alliance for Genomics & Health][ga4gh-ff].
+At this time, lead maintainers for each of the formats were nominated.
+The current maintainers are listed below.
+
+### SAM/BAM
+
+* James Bonfield (@jkbonfield)
+* John Marshall (@jmarshall)
+* Yossi Farjoun (@yfarjoun)
+
+Past SAM/BAM maintainers include Jay Carey, Tim Fennell, and Nils Homer.
+
+### CRAM
+
+* James Bonfield (@jkbonfield)
+* Vadim Zalunin (@vadimzalunin)
+
+### VCF/BCF
+
+* Cristina Yenyxe Gonzalez Garcia (@cyenyxe)
+* David Roazen (@droazen)
+* Petr Danecek (@pd3)
+
+Past VCF/BCF maintainers include Ryan Poplin.
+
+### Htsget
+
+* Mike Lin (@mlin)
+
+[ga4gh-ff]:  https://genomicsandhealth.org/working-groups/our-work/file-formats
+
+
 ## Generating PDF specification documents
 
 Use the _Makefile_ to generate PDFs from the TeX source documents.
