@@ -6,6 +6,7 @@
 \usepackage{enumitem}
 \usepackage{longtable}
 \usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
+\usepackage[title]{appendix}
 
 \makeindex
 
@@ -33,6 +34,10 @@ alignments. Header lines start with `{\tt @}', while alignment lines do
 not. Each alignment line has 11 mandatory fields for essential alignment
 information such as mapping position, and variable number of optional
 fields for flexible or aligner specific information.
+
+This specification is for version 1.5 of the SAM and BAM formats.  Each SAM and
+BAM file may optionally specify the version being used via the
+{\tt @HD VN} tag. For full version history see Appendix~\ref{sec:history}. 
 
 \subsection{An example}\label{sec:example}
 Suppose we have the following alignment with bases in lower cases
@@ -1040,4 +1045,75 @@ int reg2bins(int beg, int end, uint16_t list[MAX_BIN])
 \end{verbatim}
 }
 
+\pagebreak
+
+\begin{appendices}
+\appendix
+\section{SAM Version History}\label{sec:history}
+
+This lists the date of each tagged SAM version along with changes that
+have been made while that version was current.  The key changes
+that caused the version number to change are shown in bold.
+
+Note the auxiliary tags have now moved to their own
+specification with its own version numbering.\footnote{
+\href{http://samtools.github.io/hts-specs/SAMtags.pdf}{http://samtools.github.io/hts-specs/SAMtags.pdf}}
+
+\subsection*{1.5: 23 May 2013 to current}
+
+\begin{itemize}
+\item Add {\tt @SQ AH} header tag. (Mar 2017)
+\item Auxiliary tags migrated to SAMtags document. (Sep 2016)
+\item Z and H auxiliary tags are permitted to be zero length. (Jun 2016)
+\item QNAME limited to 254 bytes (was 255). (Aug 2015)
+\item Generalise 0x200 flag bit as filtered-out bit. (Aug 2015)
+\item Add {\tt @HD GO} for group order. (Mar 2015)
+\item Add {\tt ONT} to the {\tt @RG PL} and {\tt @RG PM} header tags. (Mar 2015)
+\item Add meaning to reverse FLAG on unmapped reads. (Mar 2015)
+\item Document the {\tt idxstats} .bai elements. (Nov 2014)
+\item Addition of CSI index. (Sep 2014)
+\item Add {\tt MC} auxiliary tag. (Dec 2013)
+\item Add {\tt @PG DS} header field. (Dec 2013)
+\item Document the BAM EOF byte values. (Dec 2013)
+\item Glossary of alignment types. (May 2013)
+\item Add {\tt SA:Z} tag; PNEXT/RNEXT points to next read, not
+  segment.  (May 2013)
+\item \textbf{Add SUPPLEMENTARY flag bit}. (May 2013)
+\end{itemize}
+
+\subsection*{1.4: 21 April 2011 to May 2013}
+
+\begin{itemize}
+\item Add guide to using sequence annotations ({\tt CT/PT tags}). (Mar 2012)
+\item Increase max reference length from $2^{29}$ to $2^{31}$. (Sep
+  2011)
+\item Add {\tt CO} and {\tt RT} auxiliary tags. (Sep 2011)
+\item Clarify {\tt @SQ M5} header tag generation. (Sep 2011)
+\item Describe padded alignments and add {\tt CT/PT tags}. (Sep 2011)
+\item Add {\tt BC} barcode auxiliary tag. (Sep 2011)
+\item Change {\tt FZ} tag from type {\tt H} to type {\tt B,S}. (Aug 2011)
+\item Add {\tt @RG FO}, {\tt KS} header fields. (Apr 2011)
+\item Add {\tt FZ} auxiliary tag. (Apr 2011)
+\item Clarify chaining of PG records. (Apr 2011)
+\item \textbf{Add {\tt B} array auxiliary tag type.} (Apr 2011)\
+\item \textbf{Permit IUPAC in SEQ and {\tt MD} auxiliary tag.} (Apr 2011)
+\item \textbf{Permit QNAME ``{\tt *}''.} (Apr 2011)
+\end{itemize}
+
+\subsection*{1.3: July 2010 to April 2011}
+
+\begin{itemize}
+\item Re-add {\tt CC} and {\tt CP} auxiliary tags. (Mar 2011)
+\item Add CIGAR N intron/skip operator. (Dec 2010)
+\item Add {\tt BQ} BAQ tag. (Nov 2010)
+\item Add {\tt RG PG} header field. (Nov 2010)
+\item Add BAM description and index sections. (Nov 2010)
+\item \textbf{Removal of FLAG letters.} (July 2010)
+\end{itemize}
+
+\subsection*{1.0: 2009 to July 2010}
+
+Initial edition.
+
+\end{appendices}
 \end{document}
