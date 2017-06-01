@@ -1,4 +1,5 @@
 \documentclass[8pt]{article}
+\usepackage{amsmath}
 \usepackage{enumerate}
 \usepackage{graphicx}
 \usepackage{lscape}
@@ -219,7 +220,28 @@ As with the INFO field, there are several common, reserved keywords that are sta
 	\end{itemize}
   \item DP : read depth at this position for this sample (Integer)
   \item FT : sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field). Again, use PASS to indicate that all filters have been passed, a semi-colon separated list of codes for filters that fail, or `.' to indicate that filters have not been applied. These values should be described in the meta-information in the same way as FILTERs (String, no white-space or semi-colons permitted)
-  \item GL : genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields. In presence of the GT field the same ploidy is expected and the canonical order is used; without GT field, diploidy is assumed. If A is the allele in REF and B,C,... are the alleles as ordered in ALT, the ordering of genotypes for the likelihoods is given by: F(j/k) = (k*(k+1)/2)+j.  In other words, for biallelic sites the ordering is: AA,AB,BB; for triallelic sites the ordering is: AA,AB,BB,AC,BC,CC, etc.  For example: GT:GL 0/1:-323.03,-99.29,-802.53 (Floats)
+  \item GL : genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields. In presence of the GT field the same ploidy is expected and the canonical order is used; without GT field, diploidy is assumed. If A is the allele in REF and B,C,... are the alleles as ordered in ALT, the ordering used to output unphased genotype likelihoods for genotypes composed of allele combinations $k_1/k_2/.../k_n$, where $k_1$ is the index of an allele and $n$ is the ploidy (i.e. number of allele per genotype) is given by:
+%
+\begin{align}
+\text{Ordering}\Big(k_1/k_2/.../k_n\Big) & = \sum_{m=1}^{n} \binom{k_m - 1}{m} 
+ = \sum_{m=1}^{n} \frac{k_m^{(m)} }{m!} 
+\\ & = k_1 + \frac{k_2 \cdot (k_2 + 1)}{2}   +    \frac{k_3 \cdot (k_3 + 1) \cdot (k_3 + 2)}{6} + \ldots
+\end{align}
+
+where $x^{(m)}$ is Pochhammer symbol (Stirling function of 1st type, `upper factorial').
+
+In other words, for biallelic sites the ordering is: AA,AB,BB; for polyallelic sites the ordering is: 
+\begin{verbatim}
+(0)    0/0 -- AA                (6)    0/3 -- AD                (15)    0/5-- AF
+(1)    0/1 -- AB                (7)    1/3 -- BD                ...
+(2)    1/1 -- BB                (8)    2/3 -- CD                (21)    0/6-- AG
+(3)    0/2 -- AC                (9)    3/3 -- DD                ...
+(4)    1/2 -- BC                (10)   0/4 -- AE                (28)    0/7-- AH
+(5)    2/2 -- CC                ...                             ...
+\end{verbatim}
+
+For example: GT:GL 0/1:-323.03,-99.29,-802.53 (Floats)
+
   \item GLE : genotype likelihoods of heterogeneous ploidy, used in presence of uncertain copy number. For example: GLE=0:-75.22,1:-223.42,0/0:-323.03,1/0:-99.29,1/1:-802.53 (String)
   \item PL : the phred-scaled genotype likelihoods rounded to the closest integer (and otherwise defined precisely as the GL field) (Integers)
   \item GP : the phred-scaled genotype posterior probabilities (and otherwise defined precisely as the GL field); intended to store imputed genotype probabilities (Floats)
