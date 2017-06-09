@@ -28,7 +28,7 @@ Specifications:
 - [Htsget](htsget.html)
 </div>
 <div class="mainbar">
-{% for line in readme_lines offset: 5 %}
+{% for line in readme_lines offset: 8 %}
 {{line}}{% endfor %}
 </div>
 <div class="clear"></div>
