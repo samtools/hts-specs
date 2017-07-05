@@ -25,11 +25,19 @@ Explicitly this API does NOT:
 
 # Protocol essentials
 
-All API invocations are made to a configurable HTTP(S) endpoint, receive URL-encoded query string parameters, and return JSON output. Successful requests result with HTTP status code 200 and have UTF8-encoded JSON in the response body, with the content-type `application/json`. The server may provide responses with chunked transfer encoding. The client and server may mutually negotiate HTTP/2 upgrade using the standard mechanism.
+All API invocations are made to a configurable HTTP(S) endpoint, receive URL-encoded query string parameters, and return JSON output. Successful requests result with HTTP status code 200 and have UTF8-encoded JSON in the response body. The server may provide responses with chunked transfer encoding. The client and server may mutually negotiate HTTP/2 upgrade using the standard mechanism.
 
 Any timestamps that appear in the response from an API method are given as [ISO 8601] date/time format.
 
 HTTP responses may be compressed using [RFC 2616] `transfer-coding`, not `content-coding`.
+
+Requests adhering to this specification MAY include an `Accept` header specifying the htsget protocol version they are using:
+
+    Accept: application/vnd.ga4gh.htsget.v0.2rc+json
+
+JSON responses SHOULD include a `Content-Type` header describing the htsget protocol version defining the JSON schema used in the response, e.g.,
+
+    Content-Type: application/vnd.ga4gh.htsget.v0.2rc+json; charset=utf-8
 
 ## Authentication
 
