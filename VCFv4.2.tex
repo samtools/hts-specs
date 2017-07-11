@@ -1349,17 +1349,17 @@ which would then be followed by the five bytes for the string of
 \subsubsection{Encoding REF/ALT fields}
 
 We encode each of REF and ALT as typed strings, first REF followed immediately
-by ALT.  Each is a 1 element string (0x19), which would then be followed by the
+by ALT.  Each is a 1 element string (0x17), which would then be followed by the
 single bytes for the bases of 0x43 and 0x41:
 
 \vspace{0.3cm}
 \begin{tabular}{|l| l|} \hline
-0x19 0x41 & REF A \\ \hline
-0x19 0x43 & ALT C \\ \hline
+0x17 0x41 & REF A \\ \hline
+0x17 0x43 & ALT C \\ \hline
 \end{tabular}
 
 \vspace{0.3cm}
-Just for discussion, suppose instead that ALT was ALT=C,T.  The only thing that could change is that there would be another typed string following immediately after C encoding 0x19 (1 element string) with the value of 0x54.
+Just for discussion, suppose instead that ALT was ALT=C,T.  The only thing that could change is that there would be another typed string following immediately after C encoding 0x17 (1 element string) with the value of 0x54.
 
 \subsubsection{Encoding FILTER}
 
@@ -1394,12 +1394,12 @@ Now let's encode the two atomic 8-bit integer fields AC and AN:
 \end{tabular}
 \vspace{0.3cm}
 
-The ancestral allele (AA) tell us that among other primates the original allele is C, a Character here.  Because we represent Characters as single element strings in BCF2 (0x19) with value 0x43 (C).  So the entire key/value pair is:
+The ancestral allele (AA) tell us that among other primates the original allele is C, a Character here.  Because we represent Characters as single element strings in BCF2 (0x17) with value 0x43 (C).  So the entire key/value pair is:
 
 \vspace{0.3cm}
 \begin{tabular}{|l |l|} \hline
 0x11 0x51 & AA key \\ \hline
-0x19 0x43 & with value of C \\ \hline
+0x17 0x43 & with value of C \\ \hline
 \end{tabular}
 
 \subsubsection{Encoding Genotypes}
@@ -1462,8 +1462,8 @@ n\_fmt\_samples = n\_fmt$<<24\mid$n\_sample = $5 << 24 \mid 3$ = 0x05000003
 0x00020004 & n\_allele\_info \\ \hline
 0x05000003 & n\_fmt\_samples \\ \hline
 0x59 0x72 0x73 0x31 0x32 0x33 & ID \\ \hline
-0x19 0x41 & REF A \\ \hline
-0x19 0x43 & ALT C \\ \hline
+0x17 0x41 & REF A \\ \hline
+0x17 0x43 & ALT C \\ \hline
 0x11 0x00 & FILTER field PASS \\ \hline
 0x11 0x50 0x11 0x01 & HM3 flag is present \\ \hline
 0x11 0x51 & AC key \\ \hline
@@ -1471,7 +1471,7 @@ n\_fmt\_samples = n\_fmt$<<24\mid$n\_sample = $5 << 24 \mid 3$ = 0x05000003
 0x11 0x52 & AN key \\ \hline
 0x11 0x06 & with value of 6 \\ \hline
 0x11 0x51 & AA key \\ \hline
-0x19 0x43 & with value of C \\ \hline
+0x17 0x43 & with value of C \\ \hline
 0x1101 0x21 0x020202040404 & GT \\ \hline
 0x1102 0x11 0x0A0A0A & GQ \\ \hline
 0x1103 0x11 0x203040 & DP \\ \hline
