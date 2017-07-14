@@ -60,6 +60,7 @@ or
   {\tt BQ} & Z & Offset to base alignment quality (BAQ) \\
   {\tt BZ} & Z & Phred quality of the unique molecular barcode bases in the {\tt OX} tag \\
   {\tt CC} & Z & Reference name of the next hit \\
+  {\tt CG} & B,I & BAM only: {\sf CIGAR} in BAM's binary encoding if (and only if) it consists of $>$65535 operators \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM}) \\
   {\tt CO} & Z & Free-text comments \\
   {\tt CP} & i & Leftmost coordinate of the next hit \\
@@ -130,6 +131,13 @@ At the $i$-th read base, ${\rm BAQ}_i=Q_i-({\rm BQ}_i-64)$ where $Q_i$ is the $i
 
 \item[CC:Z:\tagvalue{rname}]
 Reference name of the next hit; `{\tt =}' for the same chromosome.
+
+\item[CG:B:I,\tagvalue{encodedCigar}]
+Real CIGAR in its binary form if (and only if) it contains $>$65535 operations. This is
+a BAM file only tag as a workaround of BAM's incapability to store long CIGARs
+in the standard way. SAM and CRAM files created with updated tools aware of the
+workaround are not expected to contain this tag. See also the footnote in
+Section 4.2 of the SAM spec for details.
 
 \item[CP:i:\tagvalue{pos}]
 Leftmost coordinate of the next hit.
