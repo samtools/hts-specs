@@ -827,7 +827,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
   & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed from the mapping position;\footnotemark\ {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}};\footnotemark\ {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}. & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}};\footnotemark\ {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}\footnotemark. & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
@@ -843,7 +843,7 @@ underlined word in uppercase denotes a field in the SAM format.
   \cline{1-6}
 \end{tabular}}
 \end{table}
-\addtocounter{footnote}{-4}
+\addtocounter{footnote}{-5}
 \footnotetext{{\sf BIN} is calculated using the {\sf reg2bin()} function
 in Section~\ref{sec:code}. For mapped reads this uses {\sf POS-1}
 (i.e.,~0-based left position) and the alignment end point using the
@@ -856,6 +856,19 @@ is $4680$.}
 \stepcounter{footnote}
 \footnotetext{As noted in Section~\ref{sec:alnrecord}, reserved {\sf FLAG} bits
 should be written as zero and ignored on reading by current software.}
+\stepcounter{footnote}
+\footnotetext{With 16 bits, {\sf n\_cigar\_op} can keep at most 65535 CIGAR
+operations in BAM files. For an alignment with more CIGAR operations, BAM
+stores the real {\sf CIGAR}, encoded the same way as the {\sf cigar} field in
+BAM, in the {\tt CG} optional tag of type `{\tt B,I}', and sets {\sf CIGAR} to
+`{\tt kSmN}' as a placeholder, where `{\tt k}' equals {\sf l\_seq}, `{\tt m}'
+is the reference sequence length in the alignment, and `{\tt S}' and `{\tt N}'
+are the soft-clipping and reference-clip CIGAR operators, respectively -- i.e.
+in the binary form, {\sf n\_cigar\_op}=2 and {\sf cigar}={\tt [k\char60\char60
+4\char124{4},m\char60\char60 4\char124{3}]}. If tag {\tt CG} is present and
+the first CIGAR operation clips the entire read, a BAM parsing library is
+expected to update {\sf n\_cigar\_op} and {\sf cigar} with the real CIGAR
+stored in the {\tt CG} tag and remove the now-redundant {\tt CG} tag.}
 \stepcounter{footnote}
 \footnotetext{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
 \stepcounter{footnote}
