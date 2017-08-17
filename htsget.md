@@ -27,6 +27,8 @@ Explicitly this API does NOT:
 
 All API invocations are made to a configurable HTTP(S) endpoint, receive URL-encoded query string parameters, and return JSON output. Successful requests result with HTTP status code 200 and have UTF8-encoded JSON in the response body. The server may provide responses with chunked transfer encoding. The client and server may mutually negotiate HTTP/2 upgrade using the standard mechanism.
 
+The JSON response is an object with the single key `htsget` as described in the [Response JSON fields](#response-json-fields) and [Error Response JSON fields](#error-response-json-fields) sections.  This ensures that, apart from whitespace differences, the message always starts with the same prefix.  The presence of this prefix can be used as part of a client's response validation.
+
 Any timestamps that appear in the response from an API method are given as [ISO 8601] date/time format.
 
 HTTP responses may be compressed using [RFC 2616] `transfer-coding`, not `content-coding`.
@@ -53,6 +55,12 @@ For errors that are specific to the `htsget` protocol, the response body SHOULD 
 
 <table>
 <tr markdown="block"><td>
+`htsget`
+_object_
+<td>
+Container for response object.
+<table>
+<tr markdown="block"><td>
 `error`  
 _string_
 </td><td>
@@ -63,6 +71,8 @@ The type of error. This SHOULD be chosen from the list below.
 _string_
 </td><td>
 A message specific to the error providing information on how to debug the problem. Clients MAY display this message to the user.
+</td></tr>
+</table>
 </td></tr>
 </table>
 
@@ -80,8 +90,10 @@ InvalidRange		| 400	| The requested range cannot be satisfied
 The error type SHOULD be chosen from this table and be accompanied by the specified HTTP status code.  An example of a valid JSON error response is:
 ```json
 {
-   "error": "NotFound",
-   "message": "No such accession 'ENS16232164'"
+   "htsget" : {
+      "error": "NotFound",
+      "message": "No such accession 'ENS16232164'"
+   }
 }
 ```
 
@@ -208,6 +220,12 @@ Example: `fields=QNAME,FLAG,POS`.
 
 <table>
 <tr markdown="block"><td>
+`htsget`
+_object_
+<td>
+Container for response object.
+<table>
+<tr markdown="block"><td>
 `format`  
 _string_
 </td><td>
@@ -248,6 +266,39 @@ _optional hex string_
 MD5 digest of the blob resulting from concatenating all of the "payload" data --- the url data blocks.
 </td></tr>
 </table>
+</td></tr>
+</table>
+
+An example of a JSON response is:
+```json
+{
+   "htsget" : {
+      "format" : "BAM",
+      "urls" : [
+         {
+            "url" : "data:application/vnd.ga4gh.bam;base64,QkFNAQ=="
+         },
+         {
+            "url" : "https://htsget.blocksrv.example/sample1234/header"
+         },
+         {
+            "url" : "https://htsget.blocksrv.example/sample1234/run1.bam",
+            "headers" : {
+               "Authorization" : "Bearer xxxx",
+               "Range" : "bytes=65536-1003750"
+             }
+         },
+         {
+            "url" : "https://htsget.blocksrv.example/sample1234/run1.bam",
+            "headers" : {
+               "Authorization" : "Bearer xxxx",
+               "Range" : "bytes=2744831-9375732"
+            }
+         }
+      ]
+   }
+}
+```
 
 ## Response data blocks
 
