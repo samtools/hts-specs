@@ -222,7 +222,11 @@ or~{\sf RNEXT} fields.
 \emph{Regular expression}: \emph{name}{\tt (,}\emph{name}{\tt )*}
 where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
-  & {\tt M5} & MD5 checksum of the sequence in the uppercase, excluding spaces but including pads (as `*'s).\\\cline{2-3}
+  & {\tt M5} & MD5 checksum of the sequence.
+The sequence must be in the 7-bit US-ASCII character set, with pads represented as `*'s if present.
+Before calculating the digest, all characters outside the inclusive range 33 (`!') to 126 (`\~{}')  are removed, and all lower-case characters are converted to upper-case\footnote{Equivalent to calling \href{http://pubs.opengroup.org/onlinepubs/9699919799/functions/toupper.html}{\sl toupper()} on the characters in the \href{http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1\_chap07.html\#tag\_07\_02}{\sl POSIX locale}}.
+The MD5 digest\footnote{See \href{https://tools.ietf.org/html/rfc1321}{\sl RFC 1321}} is calculated and presented as a 32 character lower-case hexadecimal number.
+\\\cline{2-3}
   & {\tt SP} & Species.\\\cline{2-3}
   & {\tt UR} & URI of the sequence.  This value may start with one of the standard
   protocols, e.g http: or ftp:.  If it does not start with one of these protocols, it is assumed to be a file-system path.\\\cline{1-3}
