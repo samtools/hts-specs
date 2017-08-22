@@ -41,9 +41,13 @@ JSON responses SHOULD include a `Content-Type` header describing the htsget prot
 
     Content-Type: application/vnd.ga4gh.htsget.v0.2rc+json; charset=utf-8
 
-## Authentication
+## Security
 
-Requests to the retrieval API endpoint may be authenticated by means of an OAuth2 bearer token included in the request headers, as detailed in [RFC 6750]. Briefly, the client supplies the header `Authorization: Bearer xxxx` with each HTTPS request, where `xxxx` is a private token. The mechanisms by which clients originally obtain their authentication tokens, and by which servers verify them, are currently beyond the scope of this specification. Servers may honor non-authenticated requests at their discretion.
+This data retrieval API enables the retrieval of highly sensitive genomic data by means of a client/server model.  Effective security measures are essential to protect the integrity and confidentiality of these data.  
+
+All communication channels used to transmit sensitive information, including security-critical information and genomic data, MUST BE protected using Transport Level Security (TLS) version 1.2 or later, as specified in [RFC 5246]. 
+
+A precondition of this specification is that the identity of all end users and client software have been authenticated and access authorized in accordance with the policies enforced by the applicable data holder (including open-access policies).  GA4GH recommends the use of OAuth 2.0 ([RFC 6749]) and its [OpenID Connect] profile for these purposes.  Details regarding specific implementations of these standards are beyond the scope of this specification.  
 
 ## Errors
 
@@ -366,8 +370,10 @@ The URL and headers might contain embedded authentication tokens; therefore, pro
 [CORS]:     http://www.w3.org/TR/cors/
 [Data URI]: https://en.wikipedia.org/wiki/Data_URI_scheme
 [ISO 8601]: http://www.iso.org/iso/iso8601
+[OpenID Connect]: http://openid.net/specs/openid-connect-core-1_0.html
 [RFC 2397]: https://www.ietf.org/rfc/rfc2397.txt
 [RFC 2616]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
-[RFC 6750]: https://tools.ietf.org/html/rfc6750
+[RFC 5246]: https://tools.ietf.org/html/rfc5246
+[RFC 6749]: https://tools.ietf.org/html/rfc6749
 
 <!-- vim:set linebreak: -->
