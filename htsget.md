@@ -252,7 +252,7 @@ Study ids from which variants are to be returned.
 `format`  
 _optional string_
 </td><td>
-Request read data in this format. Allowed values: VCF.
+Request variant data in this format. Allowed values: VCF.
 
 The server SHOULD reply with an `UnsupportedFormat` error if the requested format is not supported.
 [^a]
