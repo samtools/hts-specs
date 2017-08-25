@@ -319,6 +319,8 @@ sections of this document for more detailed information.
 A CRAM file starts with a fixed length file definition followed by one or more 
 containers. The BAM header is stored in the first container.
 
+The supported file name has the extension {\tt .cram}
+
 %%\begin{figure}[htbp]
 \includegraphics[width=356pt, height=31pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig001.png}
 %%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig001.png}.}
@@ -1213,6 +1215,26 @@ Indexing a CRAM file is deemed to be a lightweight operation because it does not
 require any CRAM records to be read. All indexing information can be obtained from 
 container headers, namely sequence id, alignment start and span, container start 
 byte offset and slice byte offset inside the container. 
+
+The currently supported index formats are listed in table \ref{tab:index}.
+The order in the table indicates the recomended order in which implementations should 
+look for the index files.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Index Type} & \textbf{File extension} \tabularnewline
+\hline
+CRAM index & {\tt .cram.crai}  \tabularnewline
+\hline
+BAM index & {\tt .cram.bai} \tabularnewline
+\hline
+\end{tabular}
+
+\caption{Supported index file names in the recommended order they be searched \label{tab:index}}
+\end{center}
+\end{table} 
 
 \subsubsection*{CRAM index}
 

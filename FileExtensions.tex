@@ -1,0 +1,113 @@
+
+%&pdfLaTeX
+% !TEX encoding = UTF-8 Unicode
+\documentclass[a4paper]{article}
+\usepackage{ifxetex}
+\ifxetex
+\usepackage{fontspec}
+\setmainfont[Mapping=tex-text]{STIXGeneral}
+\else
+\usepackage[T1]{fontenc}
+\usepackage[latin1]{inputenc}
+\fi
+\usepackage{textcomp}
+
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{ulem}
+\usepackage{fixltx2e}
+\usepackage{amssymb}
+\usepackage{fancyhdr}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{0.18cm}
+\usepackage[hmargin=2cm,vmargin=2.5cm,bindingoffset=0.0cm]{geometry}
+\usepackage[pdfborder={0 0 0}]{hyperref}
+\begin{document}
+
+
+
+
+\input{FileExtensions.ver}
+\title{File Extensions (version 0.1)}
+\author{farjoun@broadinstitute.org}
+\date{\headdate}
+\maketitle
+
+\begin{quote}\small
+The master version of this document can be found at
+\url{https://github.com/samtools/hts-specs}.\\
+This printing is version~\commitdesc\ from that repository,
+last modified on the date shown above.
+\end{quote}
+
+\begin{center}
+\textit{license: Apache 2.0}
+\end{center}
+
+\section{\textbf{Overview}}
+This document's purpose is to collect all the file extensions that are supported/recomended for SAM-related files.
+
+
+The currently supported index formats are listed in table \ref{tab:index}.
+The table is organized in blocks, where the first line in each block describes the file that might be indexed, and the 
+remaining lines describe the possible index formats \& file extensions for said file. 
+The order of the index suffixes is the recommended order by which an implementation will search for an index file.
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{File Type} & \textbf{Algorithm} &\textbf{File extension}& \textbf{Specified in} \tabularnewline
+\hline
+SAM file &plain& {\tt .sam} & SAM \tabularnewline
+\hline
+CRAM file &cram& {\tt.cram} &CRAM\tabularnewline
+CRAM index &cram index&  {\tt .cram.crai} & CRAM+SAM  \\
+BAM index &bam index &{\tt .cram.bai} &CRAM+BAM\tabularnewline
+CRAM index & cram index&{\tt .crai}&CRAM\tabularnewline
+\hline
+BAM file & bgzip &{\tt .bam}&SAM  \\
+BAM index & bam index & {\tt .bai} &SAM  \\
+BAM index & csi & {\tt .csi} &CSI \\
+\hline
+VCF file & plain& {\tt .vcf}  & VCF \\
+VCF index & tribble & {\tt .vcf.idx} & CODE ONLY\\
+\hline
+gzipped VCF file & bgzip & {\tt .vcf.gz} &CODE ONLY \\
+gzipped VCF tabix index & tabix & {\tt .vcf.gz.tbi}  &tabix\\
+\hline
+BCF file (compressed or not) & bcf or bcf+bgzip& {\tt .bcf} &BCF  \\
+BCF tabix index & bam index& {\tt .bcf.idx}  &SAM\\
+\hline
+FASTA file &  plain &{\tt .fasta} & https://blast.ncbi.nlm.nih.gov/Blast.cgi \\
+FASTA file & plain & {\tt .fa} & https://blast.ncbi.nlm.nih.gov/Blast.cgi \\
+FASTA index & fai & {\tt .fai} & CODE ONLY  \\
+\hline
+gzipped FASTA file & bgzip & {\tt .fasta.gz}  & CODE ONLY\\
+gzipped FASTA index & ??? & {\tt .fasta.gz.gzi} &???  \\
+\hline
+gzipped FASTA file & bgzip & {\tt .fa.gz} & CODE ONLY \\
+gzipped FASTA index & ??? & {\tt .fa.gz.gzi}  & ???\\
+\hline
+FASTQ & ??? & {\tt .fastq} & "crappy paper" \\
+\hline
+FASTQ & ??? & {\tt .fq} & "crappy paper" \\
+\hline
+\end{tabular}
+
+\caption{Supported index file names in the recommended order they be searched \label{tab:index}}
+\end{center}
+\end{table} 
+
+\section{Notes}
+This list exposes a few weaknesses:
+\begin{enumerate}
+\item We do not have a definitive format specified for tribble (e.g. VCF), BGZIP, FASTA, FAI, bgziped fasta index (does that even exist?), or FASTQ
+\item We have several index formats for the same kind of data: tribble and fai seem to be very similar. bcf.idx and bai are the same (really?) but do not use the same extension
+\item Index formats and file formats are rarely written in the same document.
+\end{enumerate}
+\end{document}
+
