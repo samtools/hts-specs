@@ -57,7 +57,7 @@ For errors that are specific to the `htsget` protocol, the response body SHOULD 
 <tr markdown="block"><td>
 `htsget`
 _object_
-<td>
+</td><td>
 Container for response object.
 <table>
 <tr markdown="block"><td>
@@ -222,7 +222,7 @@ Example: `fields=QNAME,FLAG,POS`.
 <tr markdown="block"><td>
 `htsget`
 _object_
-<td>
+</td><td>
 Container for response object.
 <table>
 <tr markdown="block"><td>
