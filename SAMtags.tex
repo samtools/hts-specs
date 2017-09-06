@@ -59,6 +59,7 @@ or
   {\tt BC} & Z & Barcode sequence identifying the sample \\
   {\tt BQ} & Z & Offset to base alignment quality (BAQ) \\
   {\tt BZ} & Z & Phred quality of the unique molecular barcode bases in the {\tt OX} tag \\
+  {\tt CB} & Z & Identifier for a putative biological cell \\
   {\tt CC} & Z & Reference name of the next hit \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM}) \\
   {\tt CO} & Z & Free-text comments \\
@@ -106,6 +107,7 @@ or
   {\tt SQ} & ? & Reserved for backwards compatibility reasons \\
   {\tt S2} & ? & Reserved for backwards compatibility reasons \\
   {\tt TC} & i & The number of segments in the template \\
+  {\tt UB} & Z & Identifier that labels a single reverse transcription event \\
   {\tt U2} & Z & Phred probability of the 2nd call being wrong conditional on the best being wrong \\
   {\tt UQ} & i & Phred likelihood of the segment, conditional on the mapping being correct \\
   {\tt X?} & ? & Reserved for end users \\
@@ -280,6 +282,14 @@ Phred quality of the (uncorrected) unique molecular identifier sequence in the {
 Same encoding as {\sf QUAL}, i.e., Phred score + 33.
 The {\tt OX} tags should match the {\tt BZ} tag in length. 
 In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the quality strings with a space (`{\tt \textvisiblespace}') between the different strings.
+
+\item[CB:Z:\tagvalue{str}]
+Cell identifier.
+A unique ID within the SAM file for the putative cell or cell partition from which this read is derived.
+
+\item[UB:Z:\tagvalue{str}]
+Unique reverse transcription event identifier.
+In combination with {\tt CB}, a unique ID within the SAM file for the source RNA from which this read is derived.
 
 \item[RT:Z:\tagvalue{sequence}]
 Deprecated alternative to {\tt BC} tag originally used at Sanger.
