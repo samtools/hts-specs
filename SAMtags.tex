@@ -59,7 +59,7 @@ or
   {\tt BC} & Z & Barcode sequence identifying the sample \\
   {\tt BQ} & Z & Offset to base alignment quality (BAQ) \\
   {\tt BZ} & Z & Phred quality of the unique molecular barcode bases in the {\tt OX} tag \\
-  {\tt BX} & Z & Linked-read identifier for a group of short reads drawn from a haplotype-limiting dilution pool of long molecules\footnote{Examples of this datatype are Moleculo, 10x Genomics Linked-Reads, and CPT-seq} \\
+  {\tt BX} & Z & Linked-read identifier for a group of short reads drawn from a haplotype-limiting dilution pool of long molecules \\
   {\tt CC} & Z & Reference name of the next hit \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM}) \\
   {\tt CO} & Z & Free-text comments \\
@@ -246,6 +246,12 @@ Free-text comments.
 Barcode sequence (Identifying the sample/library), with any quality scores (optionally) stored in the {\tt QT} tag.
 The {\tt BC} tag should match the {\tt QT} tag in length. 
 In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the barcodes and places a hyphen (`{\tt -}') between the barcodes from the same template. 
+
+\item[BX:Z:\tagvalue{str}]
+Identifier for haplotype limiting dilution group of reads.
+All reads with a common {\tt BX} tag are drawn from a small number of long molecules covering a small fraction of the reference genome.
+These could be either corrected or uncorrected sequences, and may include other character to disambiguate barcodes drawn from different samples. 
+Examples of this datatype are Moleculo, 10x Genomics Linked-Reads, and CPT-seq.
 
 \item[QT:Z:\tagvalue{qualities}] 
 Phred quality of the sample-barcode sequence in the {\tt BC} (or {\tt RT}) tag. 
