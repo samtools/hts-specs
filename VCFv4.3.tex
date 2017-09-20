@@ -160,9 +160,9 @@ pair of numbers, then this value must be $2$ and so on. There are also
 certain special characters used to define special cases:
 
 \begin{itemize}
-  \item A: The field has one value per alternate allele.
-  \item R: The field has one value for each possible allele, including the reference.
-  \item G: The field has one value for each possible genotype (more relevant to the FORMAT tags).
+  \item A: The field has one value per alternate allele. The values must be in the same order as listed in the ALT column (described in section \ref{data-lines}).
+  \item R: The field has one value for each possible allele, including the reference. The order of the values must be the reference allele first, then the alternate alleles as listed in the ALT column.
+  \item G: The field has one value for each possible genotype. The values must be in the same order as prescribed in section \ref{genotype-fields:genotype-ordering} (see \textsc{Genotype Ordering}).
   \item . (dot): The number of possible values varies, is unknown or unbounded.
 \end{itemize}
 
@@ -292,6 +292,7 @@ If genotype data is present in the file, these are followed by a FORMAT column h
 and there must be no tab characters at the end of the line.
 
 \subsection{Data lines}
+\label{data-lines}
 All data lines are tab-delimited
 with no tab character at the end of the line. The last data line must end with a line separator. In all cases,
 missing values are specified with a dot (`.').
@@ -413,7 +414,8 @@ As with the INFO field, there are several common, reserved keywords that are sta
 
   \item GL (Float): Genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields. In presence of the GT field the same ploidy is expected; without GT field, diploidy is assumed.
 
-  \textsc{Genotype Ordering.} In general case of ploidy P and N alternate alleles (0 is the REF and $1\ldots N$
+  \textsc{Genotype Ordering.} \label{genotype-fields:genotype-ordering}
+  In general case of ploidy P and N alternate alleles (0 is the REF and $1\ldots N$
   the alternate alleles), the ordering of genotypes for the likelihoods can
   be expressed by the following pseudocode with as many nested loops as ploidy:\footnote{Note that we use inclusive \texttt{for} loop boundaries.}
   \begingroup
