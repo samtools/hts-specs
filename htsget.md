@@ -41,14 +41,6 @@ JSON responses SHOULD include a `Content-Type` header describing the htsget prot
 
     Content-Type: application/vnd.ga4gh.htsget.v0.2rc+json; charset=utf-8
 
-## Security
-
-This data retrieval API enables the retrieval of highly sensitive genomic data by means of a client/server model.  Effective security measures are essential to protect the integrity and confidentiality of these data.  
-
-All communication channels used to transmit sensitive information, including security-critical information and genomic data, MUST BE protected using Transport Level Security (TLS) version 1.2 or later, as specified in [RFC 5246]. 
-
-A precondition of this specification is that the identity of all end users and client software have been authenticated and access authorized in accordance with the policies enforced by the applicable data holder (including open-access policies).  GA4GH recommends the use of OAuth 2.0 ([RFC 6749]) and its [OpenID Connect] profile for these purposes.  Details regarding specific implementations of these standards are beyond the scope of this specification.  
-
 ## Errors
 
 The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when an error condition is detected.  In the case of transient server errors, (e.g., 503 and other 5xx status codes), the client SHOULD implement appropriate retry logic as discussed in [Reliability & performance considerations](#reliability--performance-considerations) below.
@@ -100,6 +92,17 @@ The error type SHOULD be chosen from this table and be accompanied by the specif
    }
 }
 ```
+## Security
+
+The htsget API enables the retrieval of potentially sensitive genomic data by means of a client/server model. Effective security measures are essential to protect the integrity and confidentiality of these data.
+
+Sensitive information transmitted on public networks, such as access tokens and human genomic data, MUST be protected using Transport Level Security (TLS) version 1.2 or later, as specified in [RFC 5246](https://tools.ietf.org/html/rfc5246).
+
+A precondition of this specification is that users' identities have been authenticated and their access authorized if required by the policies enforced by the applicable data holder. The use of OAuth 2.0 ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for authorizing access to protected resources is RECOMMENDED by GA4GH.
+
+Individual API requests are authenticated, when necessary, by means of an *OAuth 2.0 bearer access token* included in the request headers ([RFC 6750](https://tools.ietf.org/html/rfc6750)). Briefly, the client software supplies the header `Authorization: Bearer xxxx` with each HTTPS request, where `xxxx` is a private token.
+
+For avoidance of doubt, this specification *requires* OAuth 2.0 bearer access tokens ([RFC 6750](https://tools.ietf.org/html/rfc6750)) as the mechanism for API request authentication, and *recommends* the broader OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for user authentication, access authorization, and bearer token distribution.
 
 ## CORS
 
@@ -323,7 +326,7 @@ While the blocks must be finally concatenated in the given order, the client may
 2. must accept GET requests
 3. should provide CORS
 4. should allow multiple request retries, within reason
-5. should use HTTPS rather than plain HTTP except for testing or internal-only purposes (for security + in-flight corruption detection)
+5. should use HTTPS rather than plain HTTP except for testing or internal-only purposes (providing both security and robustness to data corruption in flight)
 6. Server must send the response with either the Content-Length header, or chunked transfer encoding, or both. Clients must detect premature response truncation.
 7. Client and URL endpoint may mutually negotiate HTTP/2 upgrade using the standard mechanism.
 8. Client must follow 3xx redirects from the URL, subject to typical fail-safe mechanisms (e.g. maximum number of redirects), always supplying the headers, if any.
@@ -370,10 +373,10 @@ The URL and headers might contain embedded authentication tokens; therefore, pro
 [CORS]:     http://www.w3.org/TR/cors/
 [Data URI]: https://en.wikipedia.org/wiki/Data_URI_scheme
 [ISO 8601]: http://www.iso.org/iso/iso8601
-[OpenID Connect]: http://openid.net/specs/openid-connect-core-1_0.html
 [RFC 2397]: https://www.ietf.org/rfc/rfc2397.txt
 [RFC 2616]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
 [RFC 5246]: https://tools.ietf.org/html/rfc5246
 [RFC 6749]: https://tools.ietf.org/html/rfc6749
+[RFC 6750]: https://tools.ietf.org/html/rfc6750
 
 <!-- vim:set linebreak: -->
