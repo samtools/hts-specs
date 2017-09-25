@@ -98,11 +98,11 @@ The htsget API enables the retrieval of potentially sensitive genomic data by me
 
 Sensitive information transmitted on public networks, such as access tokens and human genomic data, MUST be protected using Transport Level Security (TLS) version 1.2 or later, as specified in [RFC 5246](https://tools.ietf.org/html/rfc5246).
 
-A precondition of this specification is that users' identities have been authenticated and their access authorized if required by the policies enforced by the applicable data holder. The use of OAuth 2.0 ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for authorizing access to protected resources is RECOMMENDED by GA4GH.
+If the data holder requires client authentication and/or authorization, then the client's HTTPS API request MUST present an OAuth 2.0 bearer access token as specified in [RFC 6750](https://tools.ietf.org/html/rfc6750), in the `Authorization` request header field with the `Bearer` authentication scheme:
 
-Individual API requests are authenticated, when necessary, by means of an *OAuth 2.0 bearer access token* included in the request headers ([RFC 6750](https://tools.ietf.org/html/rfc6750)). Briefly, the client software supplies the header `Authorization: Bearer xxxx` with each HTTPS request, where `xxxx` is a private token.
+```Authorization: Bearer [access_token]```
 
-For avoidance of doubt, this specification *requires* OAuth 2.0 bearer access tokens ([RFC 6750](https://tools.ietf.org/html/rfc6750)) as the mechanism for API request authentication, and *recommends* the broader OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for user authentication, access authorization, and bearer token distribution.
+The policies and processes used to perform user authentication and authorization, and the means through which access tokens are issued, are beyond the scope of this API specification; GA4GH recommends the broader OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)).
 
 ## CORS
 
