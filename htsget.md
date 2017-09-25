@@ -100,9 +100,11 @@ Sensitive information transmitted on public networks, such as access tokens and 
 
 If the data holder requires client authentication and/or authorization, then the client's HTTPS API request MUST present an OAuth 2.0 bearer access token as specified in [RFC 6750](https://tools.ietf.org/html/rfc6750), in the `Authorization` request header field with the `Bearer` authentication scheme:
 
-```Authorization: Bearer [access_token]```
+```
+Authorization: Bearer [access_token]
+```
 
-The policies and processes used to perform user authentication and authorization, and the means through which access tokens are issued, are beyond the scope of this API specification; GA4GH recommends the broader OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)).
+The policies and processes used to perform user authentication and authorization, and the means through which access tokens are issued, are beyond the scope of this API specification. GA4GH recommends the use of the OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for authentication and authorization.
 
 ## CORS
 
