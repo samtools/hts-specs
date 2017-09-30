@@ -329,10 +329,11 @@ While the blocks must be finally concatenated in the given order, the client may
 3. should provide CORS
 4. should allow multiple request retries, within reason
 5. should use HTTPS rather than plain HTTP except for testing or internal-only purposes (providing both security and robustness to data corruption in flight)
-6. Server must send the response with either the Content-Length header, or chunked transfer encoding, or both. Clients must detect premature response truncation.
-7. Client and URL endpoint may mutually negotiate HTTP/2 upgrade using the standard mechanism.
-8. Client must follow 3xx redirects from the URL, subject to typical fail-safe mechanisms (e.g. maximum number of redirects), always supplying the headers, if any.
-If a byte range HTTP header accompanies the URL, then the client MAY decompose this byte range into several sub-ranges and open multiple parallel, retryable requests to fetch them. (The URL and headers must be sufficient to authorize such behavior by the client, within reason.)
+6. need not use the same authentication scheme as the API server. URL and `headers` must include any temporary credentials necessary to access the data block. Client must not send the bearer token used for the API, if any, to the data block endpoint, unless copied in the required `headers`.
+7. Server must send the response with either the Content-Length header, or chunked transfer encoding, or both. Clients must detect premature response truncation.
+8. Client and URL endpoint may mutually negotiate HTTP/2 upgrade using the standard mechanism.
+9. Client must follow 3xx redirects from the URL, subject to typical fail-safe mechanisms (e.g. maximum number of redirects), always supplying the `headers`, if any.
+10. If a byte range HTTP header accompanies the URL, then the client MAY decompose this byte range into several sub-ranges and open multiple parallel, retryable requests to fetch them. (The URL and `headers` must be sufficient to authorize such behavior by the client, within reason.)
 
 ### Inline data block URIs
 
@@ -354,7 +355,7 @@ Initial guidelines, which we expect to revise in light of future experience:
 
 ### Security considerations
 
-The URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
+The data block URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
 
 
 # Possible future enhancements
