@@ -41,10 +41,6 @@ JSON responses SHOULD include a `Content-Type` header describing the htsget prot
 
     Content-Type: application/vnd.ga4gh.htsget.v0.2rc+json; charset=utf-8
 
-## Authentication
-
-Requests to the retrieval API endpoint may be authenticated by means of an OAuth2 bearer token included in the request headers, as detailed in [RFC 6750]. Briefly, the client supplies the header `Authorization: Bearer xxxx` with each HTTPS request, where `xxxx` is a private token. The mechanisms by which clients originally obtain their authentication tokens, and by which servers verify them, are currently beyond the scope of this specification. Servers may honor non-authenticated requests at their discretion.
-
 ## Errors
 
 The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when an error condition is detected.  In the case of transient server errors, (e.g., 503 and other 5xx status codes), the client SHOULD implement appropriate retry logic as discussed in [Reliability & performance considerations](#reliability--performance-considerations) below.
@@ -96,6 +92,19 @@ The error type SHOULD be chosen from this table and be accompanied by the specif
    }
 }
 ```
+## Security
+
+The htsget API enables the retrieval of potentially sensitive genomic data by means of a client/server model. Effective security measures are essential to protect the integrity and confidentiality of these data.
+
+Sensitive information transmitted on public networks, such as access tokens and human genomic data, MUST be protected using Transport Level Security (TLS) version 1.2 or later, as specified in [RFC 5246](https://tools.ietf.org/html/rfc5246).
+
+If the data holder requires client authentication and/or authorization, then the client's HTTPS API request MUST present an OAuth 2.0 bearer access token as specified in [RFC 6750](https://tools.ietf.org/html/rfc6750), in the `Authorization` request header field with the `Bearer` authentication scheme:
+
+```
+Authorization: Bearer [access_token]
+```
+
+The policies and processes used to perform user authentication and authorization, and the means through which access tokens are issued, are beyond the scope of this API specification. GA4GH recommends the use of the OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for authentication and authorization.
 
 ## CORS
 
@@ -319,11 +328,12 @@ While the blocks must be finally concatenated in the given order, the client may
 2. must accept GET requests
 3. should provide CORS
 4. should allow multiple request retries, within reason
-5. should use HTTPS rather than plain HTTP except for testing or internal-only purposes (for security + in-flight corruption detection)
-6. Server must send the response with either the Content-Length header, or chunked transfer encoding, or both. Clients must detect premature response truncation.
-7. Client and URL endpoint may mutually negotiate HTTP/2 upgrade using the standard mechanism.
-8. Client must follow 3xx redirects from the URL, subject to typical fail-safe mechanisms (e.g. maximum number of redirects), always supplying the headers, if any.
-If a byte range HTTP header accompanies the URL, then the client MAY decompose this byte range into several sub-ranges and open multiple parallel, retryable requests to fetch them. (The URL and headers must be sufficient to authorize such behavior by the client, within reason.)
+5. should use HTTPS rather than plain HTTP except for testing or internal-only purposes (providing both security and robustness to data corruption in flight)
+6. need not use the same authentication scheme as the API server. URL and `headers` must include any temporary credentials necessary to access the data block. Client must not send the bearer token used for the API, if any, to the data block endpoint, unless copied in the required `headers`.
+7. Server must send the response with either the Content-Length header, or chunked transfer encoding, or both. Clients must detect premature response truncation.
+8. Client and URL endpoint may mutually negotiate HTTP/2 upgrade using the standard mechanism.
+9. Client must follow 3xx redirects from the URL, subject to typical fail-safe mechanisms (e.g. maximum number of redirects), always supplying the `headers`, if any.
+10. If a byte range HTTP header accompanies the URL, then the client MAY decompose this byte range into several sub-ranges and open multiple parallel, retryable requests to fetch them. (The URL and `headers` must be sufficient to authorize such behavior by the client, within reason.)
 
 ### Inline data block URIs
 
@@ -345,7 +355,7 @@ Initial guidelines, which we expect to revise in light of future experience:
 
 ### Security considerations
 
-The URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
+The data block URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
 
 
 # Possible future enhancements
@@ -368,6 +378,8 @@ The URL and headers might contain embedded authentication tokens; therefore, pro
 [ISO 8601]: http://www.iso.org/iso/iso8601
 [RFC 2397]: https://www.ietf.org/rfc/rfc2397.txt
 [RFC 2616]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
+[RFC 5246]: https://tools.ietf.org/html/rfc5246
+[RFC 6749]: https://tools.ietf.org/html/rfc6749
 [RFC 6750]: https://tools.ietf.org/html/rfc6750
 
 <!-- vim:set linebreak: -->
