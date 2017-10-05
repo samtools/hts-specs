@@ -4,7 +4,7 @@ title: htsget protocol
 suppress_footer: true
 ---
 
-# Htsget retrieval API spec v1.0
+# Htsget retrieval API spec v1.0.0
 
 # Design principles
 
@@ -35,11 +35,11 @@ HTTP responses may be compressed using [RFC 2616] `transfer-coding`, not `conten
 
 Requests adhering to this specification MAY include an `Accept` header specifying the htsget protocol version they are using:
 
-    Accept: application/vnd.ga4gh.htsget.v1.0+json
+    Accept: application/vnd.ga4gh.htsget.v1.0.0+json
 
 JSON responses SHOULD include a `Content-Type` header describing the htsget protocol version defining the JSON schema used in the response, e.g.,
 
-    Content-Type: application/vnd.ga4gh.htsget.v1.0+json; charset=utf-8
+    Content-Type: application/vnd.ga4gh.htsget.v1.0.0+json; charset=utf-8
 
 ## Errors
 
