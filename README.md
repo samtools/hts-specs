@@ -19,6 +19,18 @@ CRAM discussions can also be found on the [samtools-devel mailing list][samdev-m
 
 The **[tabix.tex]** and **[CSIv1.tex]** quick references summarize more recent index formats: the tabix tool indexes generic textual genome position-sorted files, while CSI is [htslib]'s successor to the BAI index format.
 
+Unaligned sequence data files
+-----------------------------
+
+We do not define or endorse any dedicated unaligned sequence data format.
+Instead we recommend storing such data in one of the alignment formats (SAM, BAM or CRAM) with the unmapped flag set.
+However for completeness, we list the commonest formats below with external links.
+
+[FASTA] is an early sequence-only format originally defined by William Pearson's tool of the same name.
+
+[FASTQ] was designed as a replacement for FASTA, combining the sequence and quality information in the same file.
+It has no formal definition and several incompatible variants, but is described in a paper by Cock et al.
+
 Variant calling data files
 --------------------------
 
@@ -54,5 +66,8 @@ Transfer protocols
 
 [samdev-ml]:  https://lists.sourceforge.net/lists/listinfo/samtools-devel
 [vcfspec-ml]: https://lists.sourceforge.net/lists/listinfo/vcftools-spec
+
+[FASTA]:      https://en.wikipedia.org/wiki/FASTA
+[FASTQ]:      https://academic.oup.com/nar/article/38/6/1767/3112533
 
 <!-- vim:set linebreak: -->
