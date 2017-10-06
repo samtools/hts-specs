@@ -567,10 +567,6 @@ The following constraints apply to the BAM header:
 \begin{itemize}
 \item The SQ:MD5 checksum is required unless the reference sequence has been embedded 
 into the file.
-
-\item At least one RG record is required.
-
-\item The HD:SO sort order is always POS.
 \end{itemize}
 
 \subsection{\textbf{Compression header block}}
@@ -740,6 +736,12 @@ blocks associated with the slice. Mapped and unmapped reads can be stored within
 the same slice similarly to BAM file. Slices with unsorted reads must not contain 
 any other types of reads.
 
+A slice containing data that does not use the external reference in
+any sequence may set the reference MD5 sum to zero.  This can happen
+because the data is unmapped or the sequence has been stored verbatim
+instead of via reference-differencing.  This latter scenario is
+recommended for unsorted or non-coordinate sorted data.
+
 The slice header block contains the following fields.
 
 \begin{tabular}{|l|l|>{\raggedright}p{200pt}|}
@@ -767,7 +769,7 @@ itf8 & embedded reference bases block content id & block content id for the embe
 reference sequence bases or -1 for none\tabularnewline
 \hline
 byte[16] & reference md5 & MD5 checksum of the reference bases within the slice 
-boundaries or 16 \textbackslash{}0 bytes for unmapped or unsorted reads\tabularnewline
+boundaries or 16 \textbackslash{}0 bytes when unused\tabularnewline
 \hline
 byte[] & optional tags & a series of tag,type,value tuples encoded as
 per BAM auxiliary fields.\tabularnewline
