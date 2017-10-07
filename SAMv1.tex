@@ -826,8 +826,11 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf bin\_mq\_nl} & {\tt{\sf bin}\char60\char60 16\char124\underline{\sf MAPQ}\char60\char60 8\char124{\sf l\_read\_name}}; {\sf bin} is computed from the mapping position;\footnotemark\ {\sf l\_read\_name} is the length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf flag\_nc} & {\tt \underline{\sf FLAG}\char60\char60 16\char124{\sf n\_cigar\_op}};\footnotemark\ {\sf n\_cigar\_op} is the number of operations in \underline{\sf CIGAR}. & {\tt uint32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_read\_name} & Length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint8\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf mq} & Mapping quality (=\underline{\sf MAPQ}). & {\tt uint8\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf bin} & BAI index bin, see Section~\ref{sec:bin-field}  & {\tt uint16\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf n\_cigar\_op} & Number of operations in \underline{\sf CIGAR}. & {\tt uint16\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf flag} & Bitwise flags (= \underline{\sf FLAG})\footnotemark\ & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
@@ -838,36 +841,71 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
   & \multicolumn{5}{c|}{\textcolor{gray}{\it List of auxiliary data (until the end of the alignment block)}} \\\cline{3-6}
   & & {\sf tag} & Two-character tag & {\tt char[2]} & \\\cline{3-6}
-  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZHB}\footnotemark$^,$\footnotemark & {\tt char} & \\\cline{3-6}
+  & & {\sf val\_type} & Value type: {\tt AcCsSiIfZHB}, see Section~\ref{sec:aux-type-codes} & {\tt char} & \\\cline{3-6}
   & & {\sf value} & Tag value & (by {\sf val\_type}) &\\
   \cline{1-6}
 \end{tabular}}
 \end{table}
-\addtocounter{footnote}{-4}
-\footnotetext{{\sf BIN} is calculated using the {\sf reg2bin()} function
-in Section~\ref{sec:code}. For mapped reads this uses {\sf POS-1}
-(i.e.,~0-based left position) and the alignment end point using the
-alignment length from the {\sf CIGAR} string. For unmapped reads
-(e.g.,~paired end reads where only one part is mapped, see
-Section~\ref{sec:recommended-practice}) treat the alignment as
-being length one. Note unmapped reads with {\sf POS} $0$ (which
-becomes $-1$ in BAM) therefore use {\sf reg2bin(-1, 0)} which
-is $4680$.}
-\stepcounter{footnote}
+\addtocounter{footnote}{-1}
 \footnotetext{As noted in Section~\ref{sec:alnrecord}, reserved {\sf FLAG} bits
 should be written as zero and ignored on reading by current software.}
 \stepcounter{footnote}
 \footnotetext{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
-\stepcounter{footnote}
-\footnotetext{An integer may be stored as one of `{\tt cCsSiI}' in BAM, representing {\tt int8\_t}, {\tt uint8\_t},
-{\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t} and {\tt uint32\_t}, respectively.
-In SAM, all single (i.e., non-array) integer types are stored as `{\tt i}', regardless of magnitude.}
-\stepcounter{footnote}
-\footnotetext{A `{\tt B}'-typed (array) tag--value pair is stored as follows. The first two bytes keep the two-character tag. The 3rd byte is always `{\tt B}'.
-	The 4th byte, matching {\tt /\char94[cCsSiIf]\$/}, indicates the type of an element in the array.
-	Bytes from 5 to 8 encode a little-endian 32-bit integer which gives the number of elements in the array.
-	Bytes starting from the 9th store the array in the little-endian byte order; the number of these
-	bytes is determined by the type and the length of the array.}
+
+\subsubsection{BIN field calculation}\label{sec:bin-field}
+{\sf BIN} is calculated using the {\sf reg2bin()} function in
+Section~\ref{sec:code}.
+For mapped reads this uses {\sf POS-1} (i.e.,~0-based left position) and the
+alignment end point using the alignment length from the {\sf CIGAR} string.
+For unmapped reads (e.g.,~paired end reads where only one part is mapped, see
+Section~\ref{sec:recommended-practice}) the alignment is treated as
+being length one.
+Note unmapped reads with {\sf POS} $0$ (which becomes $-1$ in BAM) therefore
+use {\sf reg2bin(-1, 0)} which is $4680$.
+
+\subsubsection{Auxiliary data encoding}\label{sec:aux-type-codes}
+Optional alignment fields are stored in BAM as a two character tag followed by a single type character and then a variable-length value.
+The type encoding is similar to SAM, apart from integer values where BAM uses the type to indicate the size in bytes of the stored value (SAM always uses {\tt i}, regardless of magnitude).
+
+The type codes used in BAM, and permissible values are:
+
+\begin{center}
+\begin{tabular}{|c|l|l|}
+\hline
+{\bf Type} & {\bf Allowed values} & {\bf Description} \\
+\hline
+A & {\tt [!-\char126]} & Printable character \\
+c & -128 ... 127 & Signed 8-bit integer \\
+C & 0 ... 255 & Unsigned 8-bit integer \\
+s & -32768 ... 32767 & Signed 16-bit integer \\
+S & 0 ... 65535 & Unsigned 16-bit integer \\
+i & -2147483648 ... 2147483647 & Signed 32-bit integer \\
+I & 0 ... 4294967295 & Unsigned 32-bit integer \\
+f & Any valid IEEE 754-2008 binary32 value & Single-precision floating point \\
+Z & {\tt [\,\,\,!-\char126]*} & Printable string, terminated by NUL \\
+H & {\tt ([0-9A-F][0-9A-F])*} & Hexadecimal string, terminated by NUL \\
+B & Depends on subtype & Numeric array, see below \\
+\hline
+\end{tabular}
+\end{center}
+
+{\tt B} array type tags take the following form:
+
+\begin{center}
+\begin{tabular}{|ll|l|}
+\hline
+{\bf Field} & & {\bf Description} \\
+\hline
+tag & & Two-character tag \\
+\hline
+{val\_type} & & Value type: {\tt B} for array tags \\
+\hline
+value & \multicolumn{1}{|l|}{sub\_type} & Array data type, matches {\tt /\char94[cCsSiIf]/}; meaning as in the table above \\\cline{2-3}
+ & \multicolumn{1}{|l|}{array\_length} & 32-bit integer \\\cline{2-3}
+ & \multicolumn{1}{|l|}{array\_data} & {\tt array\_length * (size of sub\_type)} bytes \\
+\hline
+\end{tabular}
+\end{center}
 
 \pagebreak
 
