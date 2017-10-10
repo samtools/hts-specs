@@ -38,7 +38,10 @@ It contains meta-information lines (prefixed with "\#\#"), a header
 line (prefixed with "\#"), and data lines
 each containing information about a position in the genome and genotype
 information on samples for each position
-(text fields separated by tabs). Zero length fields are not allowed, a dot (".") must
+(text fields separated by tabs). The VCF format can also
+store information on DNA methylation from bisulfite sequencing
+experiments and other sources alongside information about genome
+sequence variation. Zero length fields are not allowed, a dot (".") must
 be used instead.
 In order to ensure interoperability across platforms, VCF compliant implementations must support
 both LF (\texttt{\textbackslash n}) and CR+LF (\texttt{\textbackslash r\textbackslash n}) newline conventions.  
@@ -475,6 +478,55 @@ As with the INFO field, there are several common, reserved keywords that are sta
   \item PS (non-negative 32-bit Integer): Phase set.  A phase set is defined as a set of phased genotypes to which this genotype belongs.  Phased genotypes for an individual that are on the same chromosome and have the same PS value are in the same phased set.  A phase set specifies multi-marker haplotypes for the phased genotypes in the set.  All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.  If the genotype in the GT field is unphased, the corresponding PS field is ignored.  The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required).
 \end{itemize}
 
+If any of the fields is missing, it is replaced with the missing value. For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing. Trailing fields can be dropped (with the exception of the GT field, which must always be present if specified in the FORMAT field).
+
+See below for additional genotype fields used to encode structural variants. Additional Genotype fields can be defined in the meta-information. However, software support for such fields is not guaranteed.
+
+\subsubsection{Bisulfite sequencing specific fields}
+
+As with genotype data, if DNA methylation information from bisulfite
+sequencing experiments is present then the same type of information
+must be present for all samples, and the FORMAT field must
+specifiy the data types and order.  If both methylation and genotype
+data are present then they must be reported together.  The relative
+order of genotype and methylation fields is not determined by the
+specifications,except that the first sub-field must be the genotype
+(GT) if present as described above.  There are no required sub-fields.
+It is, however, strongly recommended that the bisulfite strand specific
+counts (MC8) are present. If methylation data only are present, then
+the GT and other genotype associated fields must be omitted.
+
+In contrast to normal practice with genotype only data where only
+positions where sequence variants are called are generally present in
+the mVCF file, when methylation data is present then all observed
+positions where a C or a G allele is present either in the observed
+data or in the reference and every position where a non-reference
+allele is reported must be present in the VCF file.  In practice,
+this means every position where the called genotype for all samples is
+\emph{not} homozygous reference with the reference being A or T. Hard
+filtering of sites on read depth criteria is allowed, but it is
+recommended \emph{not} to perform hard filtering on genotype call
+quality as this can introduce biases, since different combinations of
+genotype/methylation required different coverage to achieve the same
+confidence of genotype call. If any of the fields are missing, they
+must be replaced by the missing value.  If the allele count field
+(MC8) is present then the methylation point estimates (MEF, MER) and
+number of methylation informative bases (MN) are not required. 
+However, if MC8 is \emph{not} present then MEF, MER and MN must all
+be present. 
+
+\begin{itemize}
+
+\renewcommand{\labelitemii}{$\circ$}
+  \item MC8: Base counts for A,C,G,T \emph{not} informative for methylation followed by base counts for A,C,G,T \emph{informative} for methylation.(8 Integers).  These counts do not consider the genotype call, and simply report the number of bases of each type seen at the position (after an optional quality filtering step).  If not all counts are available (due to conversion from another format) then the missing character '.' must be used to represent the missing values.
+  \item CS: Strand of Cytosine with respect to reference genome (+/-/+-/NA).  Heterozygous C/G SNPs must be represented as '+-' as there is a cytosine on both strands. Sites where no Cytosine is present on either strand must be represented by 'NA'. (String)
+  \item CG : CpG status for position as determined by the called genotypes.  This field can take values 'CG',' N', 'H' or '?' to represent 'Yes', 'No', 'Heterozygous' and 'Unknown'. A position called as homozygous C that is followed by a homozygous G call would have a CpG status of 'Y', whereas if the following position was called as a heterozygote containing a G (i.e., AG or TG) then the CpG status would be 'H'.  A status of 'N' is only given when the following base is confidently called as \emph{not} containing a G.  Similar rules apply to a position called as a homozygous G with respect to the whether the genotype call for the preceding base contains a C. (String)
+  \item CX: 5 base sequence context based on called genotypes.  This field provides additional information to the CG field above by giving the genotype calls for the 2 bases before the current position, the base at the current position, and the 2 bases following.  The sequence context is always given with respect to the forward strand.  Heterozygous genotype calls must be represented using the IUPAC codes. (String)
+\item MN: Number of bases informative for methylation. (Integer)
+  \item MEF: Methylation point estimate from the forward strand i.e., applying to a C.  The estimate must be from 0-1. (Float)
+  \item MER: Methylation point estimate from the reverse strand. i.e., applying to a G. The estimate must be from 0-1. (Float)
+
+\end{itemize}
 
 \section{Understanding the VCF format and the haplotype representation}
 VCF records use a single general system for representing genetic variation data composed of:
@@ -1274,6 +1326,49 @@ Example records are given below:
 \end{tabular}
 \end{flushleft}
 \normalsize
+
+\section{Representing DNA methylation variation in VCF records}
+
+DNA methylation is an important and widespread epigenetic marker that
+can be assayed at the level of individual bases in the same way as
+sequence variation.  Common experiments to assay DNA methylation also
+provide information on sequence variation, and joint consideration of
+sequence and methylation variation is important when comparing
+multiple samples.  The VCF format allows storing both sequence and
+methylation information in the same records.
+
+\subsection{An example}
+\scriptsize
+\begin{verbatim}
+##fileformat=mVCFv4.3
+##fileDate=20150505
+##source=myBScallerV4.3
+##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
+##contig=<ID=22,length=51304566,assembly=B36,species="Homo sapiens",taxonomy=x>l
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
+##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele">
+##INFO=<ID=CX,Number=1,Type=String,Description="5 base sequence context (from position -2 to +2 on the positive strand) determined from the reference">
+##FILTER=<ID=q10,Description="Quality below 10">
+##FILTER=<ID=s50,Description="Less than 50% of samples have data">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GL,Number=G,Type=Float,Description="Genotype Likelihood">
+##FORMAT=<ID=MC8,Number=8,Type=Integer,Description="Base counts non-informative for methylation (ACGT) followed by informative for methylation (ACGT)">
+##FORMAT=<ID=DP,Number=1,Type=Integer,Description="Read Depth">
+##FORMAT=<ID=CG,Number=1,Type=String,Description="CpG Status (from genotype calls)'>
+##FORMAT=<ID=CS,Number=1,Type=String,Description="Strand of Cytosine relative to reference sequence (+/-/+-/NA)'>
+##FORMAT=<ID=CX,Number=1,Type=String,Description='5 base sequence context (from position -2 to +2 on the positive strand) determined from genotype calls'>
+#CHROM POS     ID        REF    ALT     QUAL FILTER INFO                              FORMAT      NA00001
+22	18549904	.	G	.	38	PASS	CX=AAGAA	GT:DP:GL:MC8:CG:CS:CX	0/0:20:-5.541e-05:0,0,15,0,5,0,0,0:N:-:AAGAA
+22	18549908	.	C	.	44	PASS	CX=ATCGC 	GT:DP:GL:MC8:CG:CS:CX	0/0:20:-1.464e-05:0,4,0,0,0,15,0,1:Y:+:ATCGN
+22	18549909	.	G	.	49	PASS	CX=TCGTT 	GT:DP:GL:MC8:CG:CS:CX	0/0:45:-4.984e-06:0,0,25,0,0,1,19,0:Y:-:TCGNT
+22	18549981	.	G	.	9 	q10 	CX=GTGAG	GT:DP:GL:MC8:CG:CS:CX	0/0:17:-0.007085:0,0,8,0,9,0,0,0:N:-:GTGRG
+22	18549982	.	A	G	25	PASS	CX=TGAGA 	GT:DP:GL:MC8:CG:CS:CX	1/0:19:-1.684,-0.009095,-29.17:7,0,1,0,11,0,0,0:N:-:TGRGA
+\end{verbatim}
+\normalsize
+This example shows (in order): a G in non-CpG context with 5 converted bases and 0 non-converted bases giving an estimated methylation value (from the proportion of non-converted converted counts) of 0, a C followed by a G (so in CpG context) with converted and non-converted counts of $1,15$\ and $0,19$\ for the top and bottom strands respectively, giving methylation estimates of $15/16$ and 1, a G in non-CpG context with estimated methylation 0 and filltered for low quality, and a good A/G SNP where the G is not in CpG context and has an estimated methylation of 0.
+Note that the counts in the MC8 field are raw counts and take no account of the called genotype.  In the example above at position $18549909$, a count of 1 informative C has been reported despite the position being called as homozygous G based on the other counts.  In this case the C is most likely to be a sequencing error.
 
 \pagebreak
 \section{BCF specification}
