@@ -325,7 +325,7 @@ There are 8 fixed fields per record.  Fixed fields are:
   (thus R as a reference base is converted to A in VCF.)
 
 
-  \item ALT - alternate base(s): Comma separated list of alternate non-reference alleles.  These alleles do not have to be called in any of the samples. Options are base Strings made up of the bases A,C,G,T,N,*, (case insensitive) or a missing value `.' (no variant) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends. The `*' allele is reserved to indicate that the allele is missing due to a an overlapping deletion. If there are no alternative alleles, then the missing value must be used.  Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.  (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
+  \item ALT - alternate base(s): Comma separated list of alternate non-reference alleles.  These alleles do not have to be called in any of the samples. Options are base Strings made up of the bases A,C,G,T,N,*, (case insensitive) or a missing value `.' (no variant) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends. The `*' allele is reserved to indicate that the allele is missing due to an overlapping deletion. If there are no alternative alleles, then the missing value must be used.  Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.  (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
   \item QUAL - quality: Phred-scaled quality score for the assertion made in ALT. i.e. $-10log_{10}$ prob(call in ALT is wrong). If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant). If unknown, the missing value must be specified. (Float)
   \item FILTER - filter status: PASS if this position has passed all filters, i.e. a call is made at this position. Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g. ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples. `0' is reserved and must not be used as a filter String. If filters have not been applied, then this field must be set to the missing value. (String, no white-space or semi-colons permitted, duplicate values not allowed.)
   \item INFO - additional information: (String, no semi-colons or equals-signs permitted; commas are permitted only as delimiters for lists of
@@ -652,7 +652,7 @@ Now suppose I have this more complex example:
 \hline
 Example & Sequence & Alteration \\ \hline
 Ref & a t C g a & C is the reference base \\ \hline
-$1$   & a t \ - \ g a & C base is is deleted w.r.t. the reference sequence \\ \hline
+$1$   & a t \ - \ g a & C base is deleted w.r.t. the reference sequence \\ \hline
 $2$   & a t \ - - \ a & C and G bases are deleted w.r.t. the reference sequence\\ \hline
 $3$   & a t CAg a & A base is inserted w.r.t. the reference sequence \\ \hline
 \end{tabular}
@@ -748,7 +748,7 @@ This is a mixed type record containing a 2 base insertion and a 2 base deletion.
 Example & Sequence & Alteration \\ \hline
 Ref & \verb|a t c G C G - - a| & G is the (first) reference base \\ \hline
 $1$ & \verb|a t c G - - - - a| & following the G base is a deletion of 2 bases \\ \hline
-$2$ & \verb|a t c G C G C G a| & following the G base is a insertion of 2 bases \\ \hline
+$2$ & \verb|a t c G C G C G a| & following the G base is an insertion of 2 bases \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
@@ -760,7 +760,7 @@ Note that in all of these examples dashes have been added to make the haplotypes
 Example & Sequence & Alteration \\ \hline
 Ref & \verb|a t c G - - C G a| & G is the (first) reference base \\ \hline
 $1$ & \verb|a t c G - - - - a| & following the G base is a deletion of 2 bases \\ \hline
-$2$ & \verb|a t c G C G C G a| & following the G base is a insertion of 2 bases \\ \hline
+$2$ & \verb|a t c G C G C G a| & following the G base is an insertion of 2 bases \\ \hline
 \end{tabular}
 
 \subsection{Encoding Structural Variants}
