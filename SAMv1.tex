@@ -6,6 +6,7 @@
 \usepackage{enumitem}
 \usepackage{longtable}
 \usepackage{makecell}
+\usepackage{multirow}
 \usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
 \usepackage[title]{appendix}
 
@@ -197,7 +198,8 @@ meanings can be avoided.}
     are grouped together but the file is not necessarily sorted overall.
     \emph{Valid values}: {\tt none} (default), {\tt query} (alignments are
     grouped by {\sf QNAME}), and {\tt reference} (alignments are grouped by
-    {\sf RNAME}/{\sf POS}).\\\cline{1-3}
+    {\sf RNAME}/{\sf POS}).\\\cline{2-3}
+  & {\tt BV} & BAM version hint.  Used to indicate to BAM encoders that version 2 features may be needed.  See Section~\ref{sec:v2-hints}.  \emph{Valid values}: 1, 2.\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. The order of {\tt @SQ} lines defines the alignment sorting order.\\\cline{2-3}
   & {\tt SN}* & Reference sequence name.
 The {\tt SN} tags and all individual {\tt AN} names in all {\tt @SQ} lines
@@ -802,19 +804,27 @@ stream in question supports random access.}
 \pagebreak
 
 \subsection{The BAM format}
-BAM is compressed in the BGZF format. All multi-byte numbers in BAM are
-little-endian, regardless of the machine endianness. The format is
-formally described in the following table where values in brackets are
-the default when the corresponding information is not available; an
-underlined word in uppercase denotes a field in the SAM format.
+BAM is a binary serialisation of the information in a SAM file.
+It is compressed in the BGZF format.
+All multi-byte numbers in BAM are little-endian, regardless of the machine
+endianness.
+BAM version 2 is a modification of the original format which increases the
+maximum allowed length of the sequence alignment.
+It also adds header and per-record flags to allow for future enhancements.
 
-\begin{table}[ht]
+The format is formally described in the following table where values in
+brackets are the default when the corresponding information is not available;
+an underlined word in uppercase denotes a field in the SAM format.
+
+\begin{table}[!ht]
 \centering
 {\small
 \begin{tabular}{|l|l|l|p{8.15cm}|l|r|}
   \cline{1-6}
   \multicolumn{3}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf magic} & BAM magic string & {\tt char[4]} & {\tt BAM\char92 1}\\\cline{1-6}
+  \multicolumn{3}{|l|}{\multirow{2}{*}{\sf magic}} & BAM magic string (version 1) & \multirow{2}{*}{\tt char[4]} & {\tt BAM\char92 1}\\
+  \multicolumn{3}{|l|}{} & BAM magic string (version 2) & & {\tt BAM\char92 2}\\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf bam2\_hdr\_flags} & BAM header flags, see Section~\ref{sec:v2-flags} (version 2 only) & {\tt uint32\_t} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf l\_text} & Length of the header text, including any {\tt NUL} padding & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf text} & Plain header text in SAM; not necessarily {\tt NUL}-terminated & {\tt char[{\sf l\_text}]} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf n\_ref} & \# reference sequences & {\tt int32\_t} & \\\cline{1-6}
@@ -823,13 +833,15 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf name} & Reference sequence name; {\tt NUL}-terminated & {\tt char[{\sf l\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of alignments (until the end of the file)}} \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf bam2\_flags} & BAM record flags, see Section~\ref{sec:v2-flags} (version 2 only) & {\tt uint32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf block\_size} & Length of the remainder of the alignment record & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_read\_name} & Length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint8\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf mq} & Mapping quality (=\underline{\sf MAPQ}). & {\tt uint8\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf bin} & BAI index bin, see Section~\ref{sec:bin-field}  & {\tt uint16\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf n\_cigar\_op} & Number of operations in \underline{\sf CIGAR}. & {\tt uint16\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf bin} & BAI index bin, see Section~\ref{sec:bin-field} (version 1 only) & {\tt uint16\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\multirow{2}{*}{\sf n\_cigar\_op}} & \multirow{2}{*}{Number of operations in \underline{\sf CIGAR}.} & {\tt uint16\_t} (version 1 only) & \\
+  & \multicolumn{2}{l|}{} & & {\tt uint32\_t} (version 2 only) & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf flag} & Bitwise flags (= \underline{\sf FLAG})\footnotemark\ & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
@@ -862,6 +874,45 @@ Section~\ref{sec:recommended-practice}) the alignment is treated as
 being length one.
 Note unmapped reads with {\sf POS} $0$ (which becomes $-1$ in BAM) therefore
 use {\sf reg2bin(-1, 0)} which is $4680$.
+
+{\sf bin} is only present in version 1 files.
+
+\subsubsection{Version 2 flag fields}\label{sec:v2-flags}
+{\sf bam2\_hdr\_flags} and {\sf bam2\_flags} are both reserved for future
+enhancements.  They must be written as zero.  If a reader finds that any bits
+in these fields are set, it must stop and report an error.
+
+In version 1 files, {\sf bam2\_hdr\_flags} and {\sf bam2\_flags} are not present.
+
+\subsubsection{BAM version hinting}\label{sec:v2-hints}
+Writers should prefer to output the version 1 format where no extended features
+(like long alignments) are needed, to allow the use of software that has
+not been updated to understand the newer format.
+For example, if the query sequences are less than 30 kilobases long it is
+very unlikely that an alignment will exceed the 65535 {\sf n\_cigar\_op} limit,
+so it is best to use version 1.
+
+As it is often difficult to determine if version 2 features are needed
+until all alignments have been processed, the {\tt BV} tag on the SAM {\tt @HD}
+header line can be used to supply a hint as to which version should be written.
+For example, aligners that target long reads can set this tag to indicate that
+long alignments may be present.
+As the tag is in the SAM header, it will be carried through intermediate
+representations (e.g. SAM and CRAM files) as long as the {\tt @HD} line is
+kept intact.
+If the file is then converted to BAM, the output version can be selected
+automatically based on the value in the {\tt BV} tag.
+
+The {\tt BV} tag is not to be used by readers when determining the version
+used to write a file.
+They must only use the {\tt magic} field of the BAM header for this purpose.
+
+Writers may choose to ignore the hint if they can work out which format
+should be written in advance.
+For example, programs that sort alignment data have to read all of their
+input data before writing anything.
+Such programs can examine the input data, choose the most appropriate version
+and update the hint in the {\tt BV} tag if necessary.
 
 \subsubsection{Auxiliary data encoding}\label{sec:aux-type-codes}
 Optional alignment fields are stored in BAM as a two character tag followed by a single type character and then a variable-length value.
