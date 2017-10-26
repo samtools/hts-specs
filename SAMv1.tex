@@ -878,9 +878,26 @@ use {\sf reg2bin(-1, 0)} which is $4680$.
 {\sf bin} is only present in version 1 files.
 
 \subsubsection{Version 2 flag fields}\label{sec:v2-flags}
-{\sf bam2\_hdr\_flags} and {\sf bam2\_flags} are both reserved for future
-enhancements.  They must be written as zero.  If a reader finds that any bits
-in these fields are set, it must stop and report an error.
+The BAM version 2 field {\sf bam2\_hdr\_flags} describes modifications
+to how the header has been written.
+It restricted to use on the header only.
+No bits in this field affect alignment records.
+
+The alignment record field {\sf bam2\_flags} describes modifications
+to how the alignment records are encoded.
+Each {\sf bam2\_flags} field affects \emph{only} the single alignment record
+that follows it.
+
+The values of these flags are only of use for decoding BAM records.
+BAM readers should not expose them outside of the functions used to
+read the header and alignment records, and no attempt should be made
+to put the values in to other alignment formats.
+
+All bits in {\sf bam2\_hdr\_flags} and {\sf bam2\_flags} are currently reserved
+for future enhancements.
+They must be written as zero.
+If a reader finds that any bits in these fields are set, it must stop and
+report an error.
 
 In version 1 files, {\sf bam2\_hdr\_flags} and {\sf bam2\_flags} are not present.
 
