@@ -222,11 +222,7 @@ or~{\sf RNEXT} fields.
 \emph{Regular expression}: \emph{name}{\tt (,}\emph{name}{\tt )*}
 where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
-  & {\tt M5} & MD5 checksum of the sequence.
-The sequence must be in the 7-bit US-ASCII character set, with pads represented as `*'s if present.
-Before calculating the digest, all characters outside the inclusive range 33 (`!') to 126 (`\~{}')  are removed, and all lower-case characters are converted to upper-case\footnote{Equivalent to calling \href{http://pubs.opengroup.org/onlinepubs/9699919799/functions/toupper.html}{\sl toupper()} on the characters in the \href{http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1\_chap07.html\#tag\_07\_02}{\sl POSIX locale}}.
-The MD5 digest\footnote{See \href{https://tools.ietf.org/html/rfc1321}{\sl RFC 1321}} is calculated and presented as a 32 character lower-case hexadecimal number.
-\\\cline{2-3}
+  & {\tt M5} & MD5 checksum of the sequence.  See Section~\ref{sec:ref-md5}\\\cline{2-3}
   & {\tt SP} & Species.\\\cline{2-3}
   & {\tt UR} & URI of the sequence.  This value may start with one of the standard
   protocols, e.g http: or ftp:.  If it does not start with one of these protocols, it is assumed to be a file-system path.\\\cline{1-3}
@@ -271,6 +267,39 @@ The MD5 digest\footnote{See \href{https://tools.ietf.org/html/rfc1321}{\sl RFC 1
   \cline{1-3}
 \end{longtable}
 \end{center}
+
+\subsubsection{Reference MD5 calculation}\label{sec:ref-md5}
+The {\tt M5} tag on {\tt @SQ} lines allows reference sequences to be uniquely identified through the MD5 digest of the sequence itself.
+As the digest is based on the sequence and nothing else, it can help resolve ambiguities with reference naming - for example, it allows a quick way of checking that references named `1', `Chr1' and `chr1' in different files are in fact the same.
+
+The reference sequence must be in the 7-bit US-ASCII character set.
+All valid reference bases can be represented in this set, and it avoids the problem of determining exactly what 8-bit representation may have been intended.
+Padding characters (See Section~\ref{sec:padded-sam}) must be represented only using the `*' character. 
+
+The digest is calculated as follows:
+\begin{itemize}
+\item All characters outside of the inclusive range 33 (`\char33') to 126 (`\char126') are stripped out.
+This removes all unprintable and white-space characters including spaces and new lines.  Everything else is retained, even if not a legal nucleotide code.
+\item All lower-case characters and converted to upper-case.
+This operation is equivalent to calling the \href{http://pubs.opengroup.org/onlinepubs/9699919799/functions/toupper.html}{\sl toupper()} on the characters in the \href{http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1\_chap07.html\#tag\_07\_02}{\sl POSIX locale}.
+\item The MD5 digest is calculated as described in \href{https://tools.ietf.org/html/rfc1321}{\sl RFC 1321} and presented as a 32 character lower-case hexadecimal number.
+\end{itemize}
+
+As an example, if the reference contains the following characters (including spaces):
+\begin{verbatim}
+ACGT ACGT ACGT
+acgt acgt acgt
+... 12345 !!!
+\end{verbatim}
+then the digest is that of the string {\tt ACGTACGTACGTACGTACGTACGT...12345!!!}
+and the resulting tag would be {\tt M5:dfabdbb36e239a6da88957841f32b8e4}.
+
+In padded SAM files, the padding bases should be inserted into the reference as `*' characters.
+Taking the example in Section~\ref{sec:padded-sam}, the padded version of the reference is
+\begin{verbatim}
+AGCATGTTAGATAA**GATAGCTGTGCTAGTAGGCAGTCAGCGCCAT
+\end{verbatim}
+and the corresponding tag is {\tt M5:caad65b937c4bc0b33c08f62a9fb5411}.
 
 \subsection{The alignment section: mandatory fields}\label{sec:alnrecord}
 In the SAM format, each alignment line typically represents the linear
@@ -620,7 +649,7 @@ described by the start and end coordinates without using complex CIGAR strings.
 SAM traditionally uses the padded representation for {\it de novo} assembly.
 The ACE assembly format uses the padded representation exclusively.
 
-\subsection{Padded SAM}
+\subsection{Padded SAM}\label{sec:padded-sam}
 
 The SAM format is typically used to describe alignments against an unpadded
 reference sequence, but it is also able to describe alignments against a padded
