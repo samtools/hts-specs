@@ -50,6 +50,7 @@ or
 {\tt Z} (string).
 
 \begin{center}\small
+% This table is sorted alphabetically
 \begin{longtable}{ccp{12.5cm}}
   \hline
   {\bf Tag} & {\bf Type} & {\bf Description} \\
@@ -102,10 +103,10 @@ or
   {\tt RG} & Z & Read group \\
   {\tt RT} & Z & Barcode sequence (deprecated; use {\tt BC} instead) \\
   {\tt RX} & Z & Sequence bases of the (possibly corrected) unique molecular identifier \\
+  {\tt S2} & ? & Reserved for backwards compatibility reasons \\
   {\tt SA} & Z & Other canonical alignments in a chimeric alignment \\
   {\tt SM} & i & Template-independent mapping quality \\
   {\tt SQ} & ? & Reserved for backwards compatibility reasons \\
-  {\tt S2} & ? & Reserved for backwards compatibility reasons \\
   {\tt TC} & i & The number of segments in the template \\
   {\tt U2} & Z & Phred probability of the 2nd call being wrong conditional on the best being wrong \\
   {\tt UQ} & i & Phred likelihood of the segment, conditional on the mapping being correct \\
@@ -259,21 +260,6 @@ Phred quality of the sample-barcode sequence in the {\tt BC} (or {\tt RT}) tag.
 Same encoding as {\sf QUAL}, i.e., Phred score + 33.
 In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the quality strings with spaces (`{\tt \textvisiblespace}') between the different strings from the same template. 
 
-\item[RX:Z:\tagvalue{sequence+}]
-Sequence bases from the unique molecular identifier. 
-These could be either corrected or uncorrected. Unlike {\tt MI}, the value may be non-unique in the file. 
-Should be comprised of a sequence of bases. 
-In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the barcodes with a hyphen (`{\tt -}') between the different barcodes.
-
-If the bases represent corrected bases, the original sequence can be stored in {\tt OX} (similar to {\tt OQ} storing the original qualities of bases.)
-
-\item[QX:Z:\tagvalue{qualities+}] 
-Phred quality of the unique molecular identifier sequence in the {\tt RX} tag. 
-Same encoding as {\sf QUAL}, i.e., Phred score + 33.
-The qualities here may have been corrected (Raw bases and qualities can be stored in {\tt OX} and {\tt BZ} respectively.)
-The lengths of the {\tt QX} and the {\tt RX} tags must match. 
-In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the quality strings with a space (`{\tt \textvisiblespace}') between the different strings.
-
 \item[MI:Z:\tagvalue{str}]
 Molecular Identifier. 
 A unique ID within the SAM file for the source molecule from which this read is derived. 
@@ -287,6 +273,21 @@ In the case of multiple unique molecular identifiers (e.g., one on each end of t
 Phred quality of the (uncorrected) unique molecular identifier sequence in the {\tt OX} tag.
 Same encoding as {\sf QUAL}, i.e., Phred score + 33.
 The {\tt OX} tags should match the {\tt BZ} tag in length. 
+In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the quality strings with a space (`{\tt \textvisiblespace}') between the different strings.
+
+\item[RX:Z:\tagvalue{sequence+}]
+Sequence bases from the unique molecular identifier. 
+These could be either corrected or uncorrected. Unlike {\tt MI}, the value may be non-unique in the file. 
+Should be comprised of a sequence of bases. 
+In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the barcodes with a hyphen (`{\tt -}') between the different barcodes.
+
+If the bases represent corrected bases, the original sequence can be stored in {\tt OX} (similar to {\tt OQ} storing the original qualities of bases.)
+
+\item[QX:Z:\tagvalue{qualities+}] 
+Phred quality of the unique molecular identifier sequence in the {\tt RX} tag. 
+Same encoding as {\sf QUAL}, i.e., Phred score + 33.
+The qualities here may have been corrected (Raw bases and qualities can be stored in {\tt OX} and {\tt BZ} respectively.)
+The lengths of the {\tt QX} and the {\tt RX} tags must match. 
 In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the quality strings with a space (`{\tt \textvisiblespace}') between the different strings.
 
 \item[RT:Z:\tagvalue{sequence}]
