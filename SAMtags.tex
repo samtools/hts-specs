@@ -62,6 +62,7 @@ or
   {\tt CC} & Z & Reference name of the next hit \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM}) \\
   {\tt CO} & Z & Free-text comments \\
+  {\tt CR} & Z & Cellular barcode sequence as reported by the sequencer (uncorrected) with the respective quality scores stored in CY\\
   {\tt CP} & i & Leftmost coordinate of the next hit \\
   {\tt CQ} & Z & Color read base qualities \\
   {\tt CS} & Z & Color read sequence \\
@@ -96,6 +97,7 @@ or
   {\tt PU} & Z & Platform unit \\
   {\tt Q2} & Z & Phred quality of the mate/next segment sequence in the {\tt R2} tag \\
   {\tt QT} & Z & Phred quality of the sample-barcode sequence in the {\tt BC} (or {\tt RT}) tag \\
+  {\tt CY} & Z & Phred quality of the cellular-barcode sequence in the {\tt CR} tag \\
   {\tt QX} & Z & Quality score of the unique molecular identifier in the {\tt RX} tag \\
   {\tt R2} & Z & Sequence of the mate/next segment in the template \\
   {\tt RG} & Z & Read group \\
@@ -270,6 +272,15 @@ In the case of multiple unique molecular identifiers (e.g., one on each end of t
 Molecular Identifier. 
 A unique ID within the SAM file for the source molecule from which this read is derived. 
 All reads with the same {\tt MI} tag represent the group of reads derived from the same source molecule. 
+
+\item[CR:Z:\tagvalue{str}]
+Cellular barcode. 
+Cellular barcode sequence as reported by the sequencer (uncorrected) with the respective quality scores stored in {\tt CY}. All reads with the same {\tt CR} tag derive from the same cell. 
+
+\item[CY:Z:\tagvalue{qualities+}] 
+Phred quality of the cellular barcode sequence in the {\tt CR} tag. 
+Same encoding as {\sf QUAL}, i.e., Phred score + 33.
+The lengths of the {\tt CY} and the {\tt CR} tags must match. 
 
 \item[OX:Z:\tagvalue{sequence+}] 
 Raw (uncorrected) unique molecular identifier bases, with any quality scores (optionally) stored in the {\tt BZ} tag. 
