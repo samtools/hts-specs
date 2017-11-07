@@ -10,7 +10,8 @@ PDFS =	BCFv1_qref.pdf \
 	tabix.pdf \
 	VCFv4.1.pdf \
 	VCFv4.2.pdf \
-	VCFv4.3.pdf
+	VCFv4.3.pdf \
+	FileExtensions.pdf
 
 pdf: $(PDFS:%=new/%)
 
@@ -24,6 +25,7 @@ new/SAMtags.pdf: SAMtags.tex new/SAMtags.ver
 new/VCFv4.1.pdf: VCFv4.1.tex new/VCFv4.1.ver
 new/VCFv4.2.pdf: VCFv4.2.tex new/VCFv4.2.ver
 new/VCFv4.3.pdf: VCFv4.3.tex new/VCFv4.3.ver
+new/FileExtensions.pdf: FileExtensions.tex new/FileExtensions.ver
 
 
 new/%.pdf: %.tex
