@@ -4,7 +4,7 @@ title: htsget protocol
 suppress_footer: true
 ---
 
-# Htsget retrieval API spec v0.2rc
+# Htsget retrieval API spec v1.0.0
 
 # Design principles
 
@@ -27,21 +27,19 @@ Explicitly this API does NOT:
 
 All API invocations are made to a configurable HTTP(S) endpoint, receive URL-encoded query string parameters, and return JSON output. Successful requests result with HTTP status code 200 and have UTF8-encoded JSON in the response body. The server may provide responses with chunked transfer encoding. The client and server may mutually negotiate HTTP/2 upgrade using the standard mechanism.
 
+The JSON response is an object with the single key `htsget` as described in the [Response JSON fields](#response-json-fields) and [Error Response JSON fields](#error-response-json-fields) sections.  This ensures that, apart from whitespace differences, the message always starts with the same prefix.  The presence of this prefix can be used as part of a client's response validation.
+
 Any timestamps that appear in the response from an API method are given as [ISO 8601] date/time format.
 
 HTTP responses may be compressed using [RFC 2616] `transfer-coding`, not `content-coding`.
 
 Requests adhering to this specification MAY include an `Accept` header specifying the htsget protocol version they are using:
 
-    Accept: application/vnd.ga4gh.htsget.v0.2rc+json
+    Accept: application/vnd.ga4gh.htsget.v1.0.0+json
 
 JSON responses SHOULD include a `Content-Type` header describing the htsget protocol version defining the JSON schema used in the response, e.g.,
 
-    Content-Type: application/vnd.ga4gh.htsget.v0.2rc+json; charset=utf-8
-
-## Authentication
-
-Requests to the retrieval API endpoint may be authenticated by means of an OAuth2 bearer token included in the request headers, as detailed in [RFC 6750]. Briefly, the client supplies the header `Authorization: Bearer xxxx` with each HTTPS request, where `xxxx` is a private token. The mechanisms by which clients originally obtain their authentication tokens, and by which servers verify them, are currently beyond the scope of this specification. Servers may honor non-authenticated requests at their discretion.
+    Content-Type: application/vnd.ga4gh.htsget.v1.0.0+json; charset=utf-8
 
 ## Errors
 
@@ -51,6 +49,12 @@ For errors that are specific to the `htsget` protocol, the response body SHOULD 
 
 ### Error Response JSON fields
 
+<table>
+<tr markdown="block"><td>
+`htsget`
+_object_
+</td><td>
+Container for response object.
 <table>
 <tr markdown="block"><td>
 `error`  
@@ -63,6 +67,8 @@ The type of error. This SHOULD be chosen from the list below.
 _string_
 </td><td>
 A message specific to the error providing information on how to debug the problem. Clients MAY display this message to the user.
+</td></tr>
+</table>
 </td></tr>
 </table>
 
@@ -80,10 +86,25 @@ InvalidRange		| 400	| The requested range cannot be satisfied
 The error type SHOULD be chosen from this table and be accompanied by the specified HTTP status code.  An example of a valid JSON error response is:
 ```json
 {
-   "error": "NotFound",
-   "message": "No such accession 'ENS16232164'"
+   "htsget" : {
+      "error": "NotFound",
+      "message": "No such accession 'ENS16232164'"
+   }
 }
 ```
+## Security
+
+The htsget API enables the retrieval of potentially sensitive genomic data by means of a client/server model. Effective security measures are essential to protect the integrity and confidentiality of these data.
+
+Sensitive information transmitted on public networks, such as access tokens and human genomic data, MUST be protected using Transport Level Security (TLS) version 1.2 or later, as specified in [RFC 5246](https://tools.ietf.org/html/rfc5246).
+
+If the data holder requires client authentication and/or authorization, then the client's HTTPS API request MUST present an OAuth 2.0 bearer access token as specified in [RFC 6750](https://tools.ietf.org/html/rfc6750), in the `Authorization` request header field with the `Bearer` authentication scheme:
+
+```
+Authorization: Bearer [access_token]
+```
+
+The policies and processes used to perform user authentication and authorization, and the means through which access tokens are issued, are beyond the scope of this API specification. GA4GH recommends the use of the OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for authentication and authorization.
 
 ## CORS
 
@@ -208,6 +229,12 @@ Example: `fields=QNAME,FLAG,POS`.
 
 <table>
 <tr markdown="block"><td>
+`htsget`
+_object_
+</td><td>
+Container for response object.
+<table>
+<tr markdown="block"><td>
 `format`  
 _string_
 </td><td>
@@ -248,6 +275,39 @@ _optional hex string_
 MD5 digest of the blob resulting from concatenating all of the "payload" data --- the url data blocks.
 </td></tr>
 </table>
+</td></tr>
+</table>
+
+An example of a JSON response is:
+```json
+{
+   "htsget" : {
+      "format" : "BAM",
+      "urls" : [
+         {
+            "url" : "data:application/vnd.ga4gh.bam;base64,QkFNAQ=="
+         },
+         {
+            "url" : "https://htsget.blocksrv.example/sample1234/header"
+         },
+         {
+            "url" : "https://htsget.blocksrv.example/sample1234/run1.bam",
+            "headers" : {
+               "Authorization" : "Bearer xxxx",
+               "Range" : "bytes=65536-1003750"
+             }
+         },
+         {
+            "url" : "https://htsget.blocksrv.example/sample1234/run1.bam",
+            "headers" : {
+               "Authorization" : "Bearer xxxx",
+               "Range" : "bytes=2744831-9375732"
+            }
+         }
+      ]
+   }
+}
+```
 
 ## Response data blocks
 
@@ -268,11 +328,12 @@ While the blocks must be finally concatenated in the given order, the client may
 2. must accept GET requests
 3. should provide CORS
 4. should allow multiple request retries, within reason
-5. should use HTTPS rather than plain HTTP except for testing or internal-only purposes (for security + in-flight corruption detection)
-6. Server must send the response with either the Content-Length header, or chunked transfer encoding, or both. Clients must detect premature response truncation.
-7. Client and URL endpoint may mutually negotiate HTTP/2 upgrade using the standard mechanism.
-8. Client must follow 3xx redirects from the URL, subject to typical fail-safe mechanisms (e.g. maximum number of redirects), always supplying the headers, if any.
-If a byte range HTTP header accompanies the URL, then the client MAY decompose this byte range into several sub-ranges and open multiple parallel, retryable requests to fetch them. (The URL and headers must be sufficient to authorize such behavior by the client, within reason.)
+5. should use HTTPS rather than plain HTTP except for testing or internal-only purposes (providing both security and robustness to data corruption in flight)
+6. need not use the same authentication scheme as the API server. URL and `headers` must include any temporary credentials necessary to access the data block. Client must not send the bearer token used for the API, if any, to the data block endpoint, unless copied in the required `headers`.
+7. Server must send the response with either the Content-Length header, or chunked transfer encoding, or both. Clients must detect premature response truncation.
+8. Client and URL endpoint may mutually negotiate HTTP/2 upgrade using the standard mechanism.
+9. Client must follow 3xx redirects from the URL, subject to typical fail-safe mechanisms (e.g. maximum number of redirects), always supplying the `headers`, if any.
+10. If a byte range HTTP header accompanies the URL, then the client MAY decompose this byte range into several sub-ranges and open multiple parallel, retryable requests to fetch them. (The URL and `headers` must be sufficient to authorize such behavior by the client, within reason.)
 
 ### Inline data block URIs
 
@@ -294,7 +355,7 @@ Initial guidelines, which we expect to revise in light of future experience:
 
 ### Security considerations
 
-The URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
+The data block URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
 
 
 # Possible future enhancements
@@ -317,6 +378,8 @@ The URL and headers might contain embedded authentication tokens; therefore, pro
 [ISO 8601]: http://www.iso.org/iso/iso8601
 [RFC 2397]: https://www.ietf.org/rfc/rfc2397.txt
 [RFC 2616]: http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html
+[RFC 5246]: https://tools.ietf.org/html/rfc5246
+[RFC 6749]: https://tools.ietf.org/html/rfc6749
 [RFC 6750]: https://tools.ietf.org/html/rfc6750
 
 <!-- vim:set linebreak: -->

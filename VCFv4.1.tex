@@ -1155,7 +1155,7 @@ Note this is not used in BCF2, but its type is reserved in case this becomes nec
 
 \vspace{0.3cm}
 
-\textbf{Integers} may be encoded as 8, 16, or 32 bit values, in little-endian order.  It is up to the encoder to determine the appropriate ranged value to use when writing the BCF2 file.  For each integer size, the value with all bits set (0x80, 0x8000, 0x80000000) for 8, 16, and 32 bit values, respectively) indicates that the field is a missing value.
+\textbf{Integers} may be encoded as 8, 16, or 32 bit values, in little-endian order.  It is up to the encoder to determine the appropriate ranged value to use when writing the BCF2 file.  For each integer size, the values 0x80, 0x8000, 0x80000000 are interpreted as missing values.
 
 \vspace{0.3cm}
 \textbf{Floats} are encoded as single-precision (32 bit) in the basic format defined by the IEEE-754-1985 standard.  This is the standard representation for floating point numbers on modern computers, with direct support in programming languages like C and Java (see Java's Double class for example).  BCF2 supports the full range of values from -Infinity to +Infinity, including NaN.  BCF2 needs to represent missing values for single precision floating point numbers.  This is accomplished by writing the NaN value as the quiet NaN (qNaN), while the MISSING value is encoded as a signaling NaN.  From the NaN wikipedia entry, we have:
