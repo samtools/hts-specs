@@ -60,12 +60,13 @@ or
   {\tt BC} & Z & Barcode sequence identifying the sample \\
   {\tt BQ} & Z & Offset to base alignment quality (BAQ) \\
   {\tt BZ} & Z & Phred quality of the unique molecular barcode bases in the {\tt OX} tag \\
+  {\tt CB} & Z & Sequence bases of the (possibly corrected) cellular-barcode sequence\\
   {\tt CC} & Z & Reference name of the next hit \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM}) \\
   {\tt CO} & Z & Free-text comments \\
   {\tt CP} & i & Leftmost coordinate of the next hit \\
   {\tt CQ} & Z & Color read base qualities \\
-  {\tt CR} & Z & Sequence bases of the cellular barcode as reported by the sequencer (uncorrected) with the respective quality scores stored in {\tt CY}\\
+  {\tt CR} & Z & Sequence bases of the cellular-barcode as reported by the sequencer (uncorrected) with the respective quality scores stored in {\tt CY}\\
   {\tt CS} & Z & Color read sequence \\
   {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features \\
   {\tt CY} & Z & Phred quality of the cellular-barcode sequence in the {\tt CR} tag \\
@@ -255,12 +256,15 @@ Same encoding as {\sf QUAL}, i.e., Phred score + 33.
 The {\tt OX} tags should match the {\tt BZ} tag in length. 
 In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the quality strings with a space (`{\tt \textvisiblespace}') between the different strings.
 
+\item[CB:Z:\tagvalue{str}]
+Cellular barcode sequence corrected or uncorrected with the respective quality scores (optionally) stored in the {\tt CY} tag. All reads with the same {\tt CB} tag putatively derive from the same cell.
+
 \item[CR:Z:\tagvalue{str}]
   Cellular barcode.
-  Sequence bases of the cellular barcode as reported by the sequencer (uncorrected) with the respective quality scores stored in {\tt CY}. All reads with the same {\tt CR} tag derive from the same cell. 
+  Sequence bases of the cellular-barcode as reported by the sequencer (uncorrected) with the respective quality scores stored in {\tt CY}. All reads with the same {\tt CR} tag putatively derive from the same cell. 
 
-\item[CY:Z:\tagvalue{qualities+}]
-Phred quality of the cellular barcode sequence in the {\tt CR} tag. 
+\item[CY:Z:\tagvalue{qualities+}] 
+Phred quality of the cellular-barcode sequence in the {\tt CB} (or {\tt CR}) tag. 
 Same encoding as {\sf QUAL}, i.e., Phred score + 33.
 The lengths of the {\tt CY} and the {\tt CR} tags must match. 
 
