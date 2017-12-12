@@ -270,18 +270,20 @@ where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
 
 \subsubsection{Reference MD5 calculation}\label{sec:ref-md5}
 The {\tt M5} tag on {\tt @SQ} lines allows reference sequences to be uniquely identified through the MD5 digest of the sequence itself.
-As the digest is based on the sequence and nothing else, it can help resolve ambiguities with reference naming - for example, it allows a quick way of checking that references named `1', `Chr1' and `chr1' in different files are in fact the same.
+As the digest is based on the sequence and nothing else, it can help resolve ambiguities with reference naming.
+For example, it allows a quick way of checking that references named `1', `Chr1' and `chr1' in different files are in fact the same.
 
 The reference sequence must be in the 7-bit US-ASCII character set.
-All valid reference bases can be represented in this set, and it avoids the problem of determining exactly what 8-bit representation may have been intended.
+All valid reference bases can be represented in this set, and it avoids the problem of determining exactly which 8-bit representation may have been used.
 Padding characters (See Section~\ref{sec:padded-sam}) must be represented only using the `*' character. 
 
 The digest is calculated as follows:
 \begin{itemize}
 \item All characters outside of the inclusive range 33 (`\char33') to 126 (`\char126') are stripped out.
-This removes all unprintable and white-space characters including spaces and new lines.  Everything else is retained, even if not a legal nucleotide code.
-\item All lower-case characters and converted to upper-case.
-This operation is equivalent to calling the \href{http://pubs.opengroup.org/onlinepubs/9699919799/functions/toupper.html}{\sl toupper()} on the characters in the \href{http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1\_chap07.html\#tag\_07\_02}{\sl POSIX locale}.
+This removes all unprintable and white-space characters including spaces and new lines.
+Everything else is retained, even if not a legal nucleotide code.
+\item All lower-case characters are converted to upper-case.
+This operation is equivalent to calling \href{http://pubs.opengroup.org/onlinepubs/9699919799/functions/toupper.html}{\sl toupper()} on characters in the \href{http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1\_chap07.html\#tag\_07\_02}{\sl POSIX locale}.
 \item The MD5 digest is calculated as described in \href{https://tools.ietf.org/html/rfc1321}{\sl RFC 1321} and presented as a 32 character lower-case hexadecimal number.
 \end{itemize}
 
