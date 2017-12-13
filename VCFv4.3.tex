@@ -176,7 +176,7 @@ Symbolic alternate alleles specified in the ALT field are described as follows:
 \end{verbatim}
 
 \noindent \textbf{Structural Variants} \newline
-In symbolic alternate alleles for structural variants, the ID field indicates the type of structural variant, and can be a colon-separated list of types and subtypes.
+In symbolic alternate alleles for structural variants, the ID field indicates the type of structural variant, and consists of a type and an optional colon-separated list of subtypes.
 ID values are case sensitive strings and must not contain whitespace or angle brackets.
 The first level type must be one of the following:
 \begin{itemize}
@@ -188,7 +188,9 @@ The first level type must be one of the following:
   \item BND Breakend
 \end{itemize}
 
-\noindent Variant subtypes should be used for maximum specificity. Reserved subtypes include:
+\noindent The list of first level symbolic alleles that represent structural variants is a closed set. Any symbolic alleles with a first level type other than one of those listed above are considered to be non-structural symbolic alleles.\newline
+
+\noindent Variant subtypes should be used to add specificity to the maximum extent supported by the data. Reserved subtypes include:
 \newline
 
 \begin{tabular}{l l}
@@ -204,12 +206,18 @@ INS:ME:LINE1  &  Insertion of LINE1 element relative to the reference \\
 INS:ME:SVA  &  Insertion of SVA element relative to the reference \\
 INS:ME:HERV  &  Insertion of HERV element relative to the reference \\
 \\
-DUP:TANDEM  &  Tandem duplication, original orientation \\
-DUP:TANDEM:INV:LEFT  &  Tandem duplication to left of original, inverted orientation \\
-DUP:TANDEM:INV:RIGHT  &  Tandem duplication to right of original, inverted orientation \\
-\end{tabular}\newline
+DUP:TANDEM  &  Tandem duplication, in same orientation as original \\
+DUP:INV-BEFORE  &  Tandem duplication, inserted before original in inverted orientation \\
+DUP:INV-AFTER  &  Tandem duplication, inserted after original in inverted orientation \\
+\end{tabular}\newline \newline
 
-See examples below for further guidance.
+\noindent Variants should be written using the most precise type that can be determined by the variant caller. For example, if the insertion site of a new copy of a LINE1 element cannot be determined, it would be specified as a DUP of the originating LINE1 element. However if the new insertion site can be identified, the variant should be specified as INS:ME:LINE1 at the insertion site.\newline
+
+\noindent Note that the DUP type is not restricted to tandem duplications and that the DUP subtypes have different breakpoints than their parent type.\newline
+
+\noindent Variant subtypes are an open set and is it valid for a variant caller to define a subtype not specified in the above list. Such subtypes are considered to be instances of the first reserved subtype, with breakpoint and copy number semantics matching the reserved type. For example, INS:ME:PELEMENT is a valid caller-defined subtype, but INV:FOLDBACK is not since foldback inversions do not result in the same breakpoint and copy number changes as a simple inversion.\newline
+
+\noindent See examples below for further guidance.
 
 \bigskip
 
@@ -577,7 +585,7 @@ SVTYPE is a primitive basic data type and must be specified for all structural v
 ##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
 \end{verbatim}
 \normalsize
-SVLEN indicates the relative size of the ALT allele compared to the REF allele. If ALT is longer than REF (e.g. insertions), SVLEN must be positive; if ALT is shorter than REF (e.g. deletions), SVLEN must be negative. One SVLEN value for each ALT allele.
+SVLEN indicates the relative size of the ALT allele compared to the REF allele. If ALT is longer than REF (e.g. insertions), SVLEN must be positive; if ALT is shorter than REF (e.g. deletions), SVLEN must be negative. Simple inversions will have SVLEN=0. The size of the inversion can be determined by the POS field and the END attribute. One SVLEN value for each ALT allele.
 
 \footnotesize
 \begin{verbatim}
