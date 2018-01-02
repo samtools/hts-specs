@@ -867,7 +867,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf l\_read\_name} & Length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint8\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf mapq} & Mapping quality (=\underline{\sf MAPQ}). & {\tt uint8\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf bin} & BAI index bin, see Section~\ref{sec:bin-field}  & {\tt uint16\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf n\_cigar\_op} & Number of operations in \underline{\sf CIGAR}. & {\tt uint16\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf n\_cigar\_op} & Number of operations in \underline{\sf CIGAR}, see Section~\ref{sec:ncigar} & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf flag} & Bitwise flags (= \underline{\sf FLAG})\footnotemark\ & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
@@ -875,7 +875,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf read\_name} & Read name,\footnotemark\ {\tt NUL}-terminated (\underline{\sf QNAME} plus a trailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$; other characters mapped to `{\tt N}'; high nybble first (1st base in the highest 4-bit of the 1st byte) & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$. See Section~\ref{sec:seq} & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
   & \multicolumn{5}{c|}{\textcolor{gray}{\it List of auxiliary data (until the end of the alignment block)}} \\\cline{3-6}
   & & {\sf tag} & Two-character tag & {\tt char[2]} & \\\cline{3-6}
@@ -888,20 +888,7 @@ underlined word in uppercase denotes a field in the SAM format.
 \footnotetext{As noted in Section~\ref{sec:alnrecord}, reserved {\sf FLAG} bits
 should be written as zero and ignored on reading by current software.}
 \stepcounter{footnote}
-\footnotetext{With 16 bits, {\sf n\_cigar\_op} can keep at most 65535 CIGAR
-operations in BAM files. For an alignment with more CIGAR operations, BAM
-stores the real {\sf CIGAR}, encoded the same way as the {\sf cigar} field in
-BAM, in the {\tt CG} optional tag of type `{\tt B,I}', and sets {\sf CIGAR} to
-`{\tt kSmN}' as a placeholder, where `{\tt k}' equals {\sf l\_seq}, `{\tt m}'
-is the reference sequence length in the alignment, and `{\tt S}' and `{\tt N}'
-are the soft-clipping and reference-clip CIGAR operators, respectively -- i.e.
-in the binary form, {\sf n\_cigar\_op}=2 and {\sf cigar}={\tt [k\char60\char60
-4\char124{4},m\char60\char60 4\char124{3}]}. If tag {\tt CG} is present and
-the first CIGAR operation clips the entire read, a BAM parsing library is
-expected to update {\sf n\_cigar\_op} and {\sf cigar} with the real CIGAR
-stored in the {\tt CG} tag and remove the now-redundant {\tt CG} tag.}
-\stepcounter{footnote}
-\footnotetext{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
+\footnotetext{For backward compatibility, an absent {\sf QNAME} (represented as `{\tt *}' in SAM) is stored as a C string {\tt "*\char92 0"}.}
 
 \subsubsection{BIN field calculation}\label{sec:bin-field}
 {\sf BIN} is calculated using the {\sf reg2bin()} function in
@@ -913,6 +900,25 @@ Section~\ref{sec:recommended-practice}) the alignment is treated as
 being length one.
 Note unmapped reads with {\sf POS} $0$ (which becomes $-1$ in BAM) therefore
 use {\sf reg2bin(-1, 0)} which is $4680$.
+
+\subsubsection{N\_CIGAR\_OP field}\label{sec:ncigar}
+With 16 bits, {\sf n\_cigar\_op} can keep at most 65535 CIGAR
+operations in BAM files. For an alignment with more CIGAR operations, BAM
+stores the real {\sf CIGAR}, encoded the same way as the {\sf cigar} field in
+BAM, in the {\tt CG} optional tag of type `{\tt B,I}', and sets {\sf CIGAR} to
+`\textit{k}{\tt S}\textit{m}{\tt N}' as a placeholder, where `\textit{k}' equals {\sf l\_seq}, `\textit{m}'
+is the reference sequence length in the alignment, and `{\tt S}' and `{\tt N}'
+are the soft-clipping and reference-clip CIGAR operators, respectively -- i.e.
+in the binary form, {\sf n\_cigar\_op}=2 and {\sf cigar}={\tt [\textit{k}\char60\char60
+4\char124{4},\textit{m}\char60\char60 4\char124{3}]}. If tag {\tt CG} is present and
+the first CIGAR operation clips the entire read, a BAM parsing library is
+expected to update {\sf n\_cigar\_op} and {\sf cigar} with the real CIGAR
+stored in the {\tt CG} tag and remove the now-redundant {\tt CG} tag.
+
+\subsubsection{SEQ encoding}\label{sec:seq}
+Sequence is encoded in 4-bit values, with adjacent bases packed into the same byte starting with the highest 4 bits first.
+For a sequence with an odd numbered length the bottom 4 bits of the last byte are undefined, but we recommend writing these as zero.
+The case-insensitive base codes `{\tt =ACMGRSVTWYHKDBN}' are mapped to $[0,15]$ respectively with all other characters mapping to `{\tt N}' (value 15).
 
 \subsubsection{Auxiliary data encoding}\label{sec:aux-type-codes}
 Optional alignment fields are stored in BAM as a two character tag followed by a single type character and then a variable-length value.
@@ -1171,6 +1177,7 @@ specification with its own version numbering.\footnote{
 
 \begin{itemize}
 \item Permit UTF-8 in a few header tags. (Mar 2018)
+\item Add support for $>65535$ cigar operations. (Jul 2017)
 \item Add {\tt @SQ AH} header tag. (Mar 2017)
 \item Auxiliary tags migrated to SAMtags document. (Sep 2016)
 \item Z and H auxiliary tags are permitted to be zero length. (Jun 2016)
