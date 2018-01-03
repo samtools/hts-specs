@@ -511,7 +511,7 @@ explicitly limited in SAM.  However, BAM can represent values in the
 range~$[-2^{31},2^{32})$, so in practice this is the realistic range
 of values for SAM's `{\tt i}' as well.}
 \stepcounter{footnote}
-\footnotetext{For example, a byte array $[{\tt 0x1a},{\tt 0xe3},{\tt 0x1}]$ corresponds to a Hex string `{\tt 1AE301}'.}
+\footnotetext{For example, the six-character Hex string `{\tt 1AE301}' represents the byte array $[{\tt 0x1a},{\tt 0xe3},{\tt 0x1}]$.}
 \end{center}
 For an integer or numeric array (type `{\tt B}'), the first letter indicates the type of numbers
 in the following comma separated array. The letter can be one of `{\tt cCsSiIf}', corresponding to
@@ -940,7 +940,7 @@ i & -2147483648 ... 2147483647 & Signed 32-bit integer \\
 I & 0 ... 4294967295 & Unsigned 32-bit integer \\
 f & Any valid IEEE 754-2008 binary32 value & Single-precision floating point \\
 Z & {\tt [\,\,\,!-\char126]*} & Printable string, terminated by NUL \\
-H & {\tt ([0-9A-F][0-9A-F])*} & Hexadecimal string, terminated by NUL \\
+H & {\tt ([0-9A-F][0-9A-F])*} & Hexadecimal string (ASCII), terminated by NUL \\
 B & Depends on subtype & Numeric array, see below \\
 \hline
 \end{tabular}
