@@ -21,10 +21,10 @@ Past SAM/BAM maintainers include Jay Carey, Tim Fennell, and Nils Homer.
 ### VCF/BCF
 
 * Cristina Yenyxe Gonzalez Garcia (@cyenyxe)
-* David Roazen (@droazen)
+* Louis Bergelson (@lbergelson)
 * Petr Danecek (@pd3)
 
-Past VCF/BCF maintainers include Ryan Poplin.
+Past VCF/BCF maintainers include Ryan Poplin and David Roazen.
 
 ### Htsget
 
