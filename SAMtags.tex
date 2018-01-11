@@ -60,7 +60,7 @@ or
   {\tt BC} & Z & Barcode sequence identifying the sample \\
   {\tt BQ} & Z & Offset to base alignment quality (BAQ) \\
   {\tt BZ} & Z & Phred quality of the unique molecular barcode bases in the {\tt OX} tag \\
-  {\tt CB} & Z & Sequence bases of the (possibly corrected) cellular-barcode sequence\\
+  {\tt CB} & Z & Cell identifier \\
   {\tt CC} & Z & Reference name of the next hit \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM}) \\
   {\tt CO} & Z & Free-text comments \\
@@ -257,7 +257,12 @@ The {\tt OX} tags should match the {\tt BZ} tag in length.
 In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the quality strings with a space (`{\tt \textvisiblespace}') between the different strings.
 
 \item[CB:Z:\tagvalue{str}]
-Cellular barcode sequence corrected or uncorrected with the respective quality scores (optionally) stored in the {\tt CY} tag. All reads with the same {\tt CB} tag putatively derive from the same cell.
+
+  Cell identifier based on the (possibly corrected) cellular-barcode
+  sequence ({\tt CR}). The identifier may include non-nucleotide
+  characters. The respective quality scores are (optionally) stored in
+  the {\tt CY} tag. All reads with the same {\tt CB} tag putatively
+  derive from the same cell.
 
 \item[CR:Z:\tagvalue{str}]
   Cellular barcode.
