@@ -157,13 +157,23 @@ The reference sequence name, for example "chr1", "1", or "chrX". If unspecified,
 The server SHOULD reply with a `NotFound` error if the requested reference does not exist.
 </td></tr>
 <tr markdown="block"><td>
+`referenceMD5`  
+_optional_
+</td><td>
+The MD5 checksum uniquely representing the reference sequence as a lower-case hexadecimal string, calculated as the MD5 of the upper-case sequence excluding all whitespace characters (this is equivalent to SQ:M5 in SAM).
+
+The server SHOULD reply with a `NotFound` error if the requested reference does not exist.
+
+The server SHOULD reply with an `InvalidInput` if `referenceName` and `referenceMD5` are both specified and are incompatible.
+</td></tr>
+<tr markdown="block"><td>
 `start`  
 _optional 32-bit unsigned integer_
 </td><td>
 The start position of the range on the reference, 0-based, inclusive. 
 
 The server SHOULD respond with an `InvalidInput` error if `start` is specified and a reference is not specified
-(see `referenceName`).
+(see `referenceName` and `referenceMD5`).
 
 The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater
 than `end`.
@@ -175,7 +185,7 @@ _optional 32-bit unsigned integer_
 The end position of the range on the reference, 0-based exclusive.
 
 The server SHOULD respond with an `InvalidInput` error if `end` is specified and a reference is not specified
-(see `referenceName`).
+(see `referenceName` and `referenceMD5`).
 
 The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater
 than `end`.
