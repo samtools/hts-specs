@@ -252,7 +252,7 @@ Study ids from which variants are to be returned.
 `format`  
 _optional string_
 </td><td>
-Request variant data in this format. Allowed values: VCF.
+Request variant data in this format. Allowed values: BCF, VCF.
 
 The server SHOULD reply with an `UnsupportedFormat` error if the requested format is not supported.
 [^a]
@@ -329,7 +329,7 @@ Container for response object.
 `format`  
 _string_
 </td><td>
-Read data format. Default: BAM. Allowed values: BAM,CRAM.
+Read data format. Default: BAM. Allowed values: BAM, CRAM.
 </td></tr>
 <tr markdown="block"><td>
 `urls`  
