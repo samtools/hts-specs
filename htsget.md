@@ -230,9 +230,11 @@ Example: `fields=QNAME,FLAG,POS`.
 
     GET /variants/<id>
 
-The core mechanic for accessing specified variant data. The JSON response is a "ticket" similar to `reads` method.
+The core mechanic for accessing specified variant data. The JSON response is a "ticket" allowing the caller to obtain the desired data in the specified format, which may involve follow-on requests to other endpoints, as detailed below.
 
 The client can request only variants overlapping a given genomic range. The response may however contain a superset of the desired results, including all records overlapping the range, and potentially other records not overlapping the range; the client should filter out such extraneous records if necessary. Successful requests with empty result sets still produce a valid response in the requested format (e.g. including header and EOF marker).
+
+## URL parameters
 
 <table>
 <tr markdown="block"><td>
