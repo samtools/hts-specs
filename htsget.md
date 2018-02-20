@@ -239,8 +239,9 @@ The client can request only variants overlapping a given genomic range. The resp
 `id`  
 _required_
 </td><td>
-Study ids from which variants are to be returned.
+A string specifying which variants to return.
 
+The format of the string is left to the discretion of the API provider, including allowing embedded "/" characters. Strings could be VariantSetIds as defined by the GA4GH API, or any other format the API provider chooses (e.g. "/data/platinum/NA12878", "/byStudy/PRJEB4019").
 </td></tr>
 </table>
 
