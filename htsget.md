@@ -114,14 +114,16 @@ If a request to the URL of an API method includes the `Origin` header, its conte
 The values of `Origin` and `Access-Control-Request-Headers` (if any) of the request will be propagated to `Access-Control-Allow-Origin` and `Access-Control-Allow-Headers` respectively in the preflight response.
 The `Access-Control-Max-Age` of the preflight response is set to the equivalent of 30 days.
 
+# Request
 
-# Method: get reads by ID
+## Methods
 
     GET /reads/<id>
+    GET /variants/<id>
 
-The core mechanic for accessing specified reads data. The JSON response is a "ticket" allowing the caller to obtain the desired data in the specified format, which may involve follow-on requests to other endpoints, as detailed below.
+These are the core mechanics for accessing specified reads and variants data. The JSON response is a "ticket" allowing the caller to obtain the desired data in the specified format, which may involve follow-on requests to other endpoints, as detailed below.
 
-The client can request only reads overlapping a given genomic range. The response may however contain a superset of the desired results, including all records overlapping the range, and potentially other records not overlapping the range; the client should filter out such extraneous records if necessary. Successful requests with empty result sets still produce a valid response in the requested format (e.g. including header and EOF marker).
+The client can request only records overlapping a given genomic range. The response may however contain a superset of the desired results, including all records overlapping the range, and potentially other records not overlapping the range; the client should filter out such extraneous records if necessary. Successful requests with empty result sets still produce a valid response in the requested format (e.g. including header and EOF marker).
 
 ## URL parameters
 
@@ -130,9 +132,15 @@ The client can request only reads overlapping a given genomic range. The respons
 `id`  
 _required_
 </td><td>
-A string specifying which reads to return.
+A string specifying which records to return.
 
-The format of the string is left to the discretion of the API provider, including allowing embedded "/" characters. Strings could be ReadGroupSetIds as defined by the GA4GH API, or any other format the API provider chooses (e.g. "/data/platinum/NA12878", "/byRun/ERR148333").
+The format of the string is left to the discretion of the API provider, including allowing embedded "/" characters. Strings could be any format the API provider chooses, such as the following:
+
+* ReadGroupSetIds or VariantSetIds as defined by the GA4GH API
+* Studies: PRJEB4019 or /byStudy/PRJEB4019
+* Samples: NA12878 or /data/platinum/NA12878
+* Runs: ERR148333 or /byRun/ERR148333
+
 </td></tr>
 </table>
 
@@ -143,7 +151,10 @@ The format of the string is left to the discretion of the API provider, includin
 `format`  
 _optional string_
 </td><td>
-Request read data in this format. Default: BAM. Allowed values: BAM,CRAM.
+Request data in this format. The allowed values for each type of record are:
+
+* Reads: BAM (default), CRAM.
+* Variants: VCF (default), BCF.
 
 The server SHOULD reply with an `UnsupportedFormat` error if the requested format is not supported.
 [^a]
@@ -162,11 +173,9 @@ _optional 32-bit unsigned integer_
 </td><td>
 The start position of the range on the reference, 0-based, inclusive. 
 
-The server SHOULD respond with an `InvalidInput` error if `start` is specified and a reference is not specified
-(see `referenceName`).
+The server SHOULD respond with an `InvalidInput` error if `start` is specified and a reference is not specified (see `referenceName`).
 
-The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater
-than `end`.
+The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater than `end`.
 </td></tr>
 <tr markdown="block"><td>
 `end`  
@@ -174,17 +183,15 @@ _optional 32-bit unsigned integer_
 </td><td>
 The end position of the range on the reference, 0-based exclusive.
 
-The server SHOULD respond with an `InvalidInput` error if `end` is specified and a reference is not specified
-(see `referenceName`).
+The server SHOULD respond with an `InvalidInput` error if `end` is specified and a reference is not specified (see `referenceName`).
 
-The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater
-than `end`.
+The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater than `end`.
 </td></tr>
 <tr markdown="block"><td>
 `fields`  
 _optional_
 </td><td>
-A list of fields to include, see below
+A list of fields to include, see below.
 Default: all
 </td></tr>
 <tr markdown="block"><td>
@@ -224,98 +231,6 @@ SEQ	| Read bases
 QUAL	| Base quality scores
 
 Example: `fields=QNAME,FLAG,POS`.
-
-
-# Method: get variants by ID
-
-    GET /variants/<id>
-
-The core mechanic for accessing specified variant data. The JSON response is a "ticket" allowing the caller to obtain the desired data in the specified format, which may involve follow-on requests to other endpoints, as detailed below.
-
-The client can request only variants overlapping a given genomic range. The response may however contain a superset of the desired results, including all records overlapping the range, and potentially other records not overlapping the range; the client should filter out such extraneous records if necessary. Successful requests with empty result sets still produce a valid response in the requested format (e.g. including header and EOF marker).
-
-## URL parameters
-
-<table>
-<tr markdown="block"><td>
-`id`  
-_required_
-</td><td>
-A string specifying which variants to return.
-
-The format of the string is left to the discretion of the API provider, including allowing embedded "/" characters. Strings could be VariantSetIds as defined by the GA4GH API, or any other format the API provider chooses (e.g. "/data/platinum/NA12878", "/byStudy/PRJEB4019").
-</td></tr>
-</table>
-
-
-## Query parameters
-
-<table>
-<tr markdown="block"><td>
-`format`  
-_optional string_
-</td><td>
-Request variant data in this format. Allowed values: BCF, VCF.
-
-The server SHOULD reply with an `UnsupportedFormat` error if the requested format is not supported.
-[^a]
-</td></tr>
-<tr markdown="block"><td>
-`referenceName` 
-_optional_
-</td><td>
-The reference sequence name, for example "chr1", "1", or "chrX". If unspecified, all variants (mapped and unmapped) are returned. [^b]
-
-The server SHOULD reply with a `NotFound` error if the requested reference does not exist.
-</td></tr>
-<tr markdown="block"><td>
-`start`  
-_optional 32-bit unsigned integer_
-</td><td>
-The start position of the range on the reference, 0-based, inclusive. 
-
-The server SHOULD respond with an `InvalidInput` error if `start` is specified and a reference is not specified
-(see `referenceName`).
-
-The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater
-than `end`.
-</td></tr>
-<tr markdown="block"><td>
-`end`  
-_optional 32-bit unsigned integer_
-</td><td>
-The end position of the range on the reference, 0-based exclusive.
-
-The server SHOULD respond with an `InvalidInput` error if `end` is specified and a reference is not specified
-(see `referenceName`).
-
-The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater
-than `end`.
-</td></tr>
-<tr markdown="block"><td>
-`fields`  
-_optional_
-</td><td>
-A list of fields to include, see below
-Default: all
-</td></tr>
-<tr markdown="block"><td>
-`tags`  
-_optional_
-</td><td>
-A comma separated list of tags to include, default: all. If the empty string is specified (tags=) no tags are included. 
-
-The server SHOULD respond with an `InvalidInput` error if `tags` and `notags` intersect.
-</td></tr>
-<tr markdown="block"><td>
-`notags`  
-_optional_
-</td><td>
-A comma separated list of tags to exclude, default: none. 
-
-The server SHOULD respond with an `InvalidInput` error if `tags` and `notags` intersect.
-</td></tr>
-</table>
 
 # Response
 
