@@ -247,7 +247,11 @@ Container for response object.
 `format`  
 _string_
 </td><td>
-Read data format. Default: BAM. Allowed values: BAM, CRAM.
+Response data in this format. The allowed values for each type of record are:
+
+* Reads: BAM (default), CRAM.
+* Variants: VCF (default), BCF.
+
 </td></tr>
 <tr markdown="block"><td>
 `urls`  
