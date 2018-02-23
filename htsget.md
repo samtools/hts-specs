@@ -118,10 +118,12 @@ The `Access-Control-Max-Age` of the preflight response is set to the equivalent 
 
 ## Methods
 
+The recommended endpoints to access reads and variants data are:
+
     GET /reads/<id>
     GET /variants/<id>
 
-These are the core mechanics for accessing specified reads and variants data. The JSON response is a "ticket" allowing the caller to obtain the desired data in the specified format, which may involve follow-on requests to other endpoints, as detailed below.
+The JSON response is a "ticket" allowing the caller to obtain the desired data in the specified format, which may involve follow-on requests to other endpoints, as detailed below.
 
 The client can request only records overlapping a given genomic range. The response may however contain a superset of the desired results, including all records overlapping the range, and potentially other records not overlapping the range; the client should filter out such extraneous records if necessary. Successful requests with empty result sets still produce a valid response in the requested format (e.g. including header and EOF marker).
 
