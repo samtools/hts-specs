@@ -134,9 +134,9 @@ The client can request only records overlapping a given genomic range. The respo
 `id`  
 _required_
 </td><td>
-A string specifying which records to return.
+A string identifying which records to return.
 
-The format of the string is left to the discretion of the API provider, including allowing embedded "/" characters. Strings could be any format the API provider chooses, such as the following:
+The format of this identifier is left to the discretion of the API provider, including allowing embedded "/" characters. The following would be valid identifiers:
 
 * ReadGroupSetIds or VariantSetIds as defined by the GA4GH API
 * Studies: PRJEB4019 or /byStudy/PRJEB4019
