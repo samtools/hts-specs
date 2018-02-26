@@ -22,6 +22,19 @@ https://cdn.rawgit.com/samtools/hts-specs/master/htsget_interop.html
         };
 
         var endpoints = {
+            Sanger: {
+                nm: "Sanger",
+                datasets: {
+                    NA12878_b37: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12878" }, 
+                    NA12878_hg38: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12878_GRCH38" },
+                    NA12891_b37: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12891" }, 
+                    NA12891_hg38: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12891_GRCH38" },
+                    NA12892_b37: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12892" }, 
+                    NA12892_hg38: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12892_GRCH38" },
+                    ENCFF284YOU: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/ENCFF284YOU_GRCH38" },
+                    ENCFF000VWO: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/ENCFF000VWO" }
+                }
+            },
             DNAnexus_AWS: {
                 nm: "DNAx/AWS",
                 datasets: {
@@ -56,19 +69,6 @@ https://cdn.rawgit.com/samtools/hts-specs/master/htsget_interop.html
                     NA12892_b37: { url: "http://35.196.212.220/reads/ga4gh-demo-public/NA12892.bam" },
                     ENCFF284YOU: { url: "http://35.196.212.220/reads/ga4gh-demo-public/ENCFF284YOU.bam" },
                     ENCFF000VWO: { url: "http://35.196.212.220/reads/ga4gh-demo-public/ENCFF000VWO.bam" }
-                }
-            },
-            Sanger: {
-                nm: "Sanger",
-                datasets: {
-                    NA12878_b37: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12878" }, 
-                    NA12878_hg38: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12878_GRCH38" },
-                    NA12891_b37: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12891" }, 
-                    NA12891_hg38: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12891_GRCH38" },
-                    NA12892_b37: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12892" }, 
-                    NA12892_hg38: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/NA12892_GRCH38" },
-                    ENCFF284YOU: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/ENCFF284YOU_GRCH38" },
-                    ENCFF000VWO: { url: "https://htsget.wtsi-npg-test.co.uk:9090/npg_ranger/ga4gh/sample/ENCFF000VWO" }
                 }
             }
         };
