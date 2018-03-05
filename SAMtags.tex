@@ -253,6 +253,29 @@ Free-text comments.
 \end{description}
 
 \subsection{Barcodes}
+DNA barcodes can be used to identify the provenance of the underlying reads.
+There are currently three varieties of barcodes that may co-exist: Sample Barcode, Cell Barcode, and Unique Molecular Identifier (UMI).
+\begin{itemize}
+\item
+Despite its name, the {\it Sample} Barcode identifies the {\it Library} and allows multiple libraries to be combined and sequenced together.
+After sequencing, the reads can be separated according to this barcode and placed in different ``read groups'' each corresponding to a library.
+Since the library was generated from a sample, knowing the library should inform of the sample.
+The barcode itself can be included in the {\tt PU} field in the {\tt RG} header line.
+Since the {\tt PU} field should be globally unique, it is advisable to include specific information such as flowcell barcode and lane.
+The {\tt ID} field of the {\tt RG} header line is not an appropriate place for the barcode as it is treated as mutable by several tools as it might be modified, for example when merging files.
+
+\item
+The {\it Cell} Barcode is similar to the sample barcode but there is (normally) no control over the assignment of cells to barcodes (whose sequence could be random or predetermined).
+The Cell Barcode can help identify when reads come from different cells in a ``single-cell'' sequencing experiment.
+
+\item
+The UMI is intended to identify the (single- or double-stranded) molecule at the time that the barcode was introduced.
+This can be used to inform duplicate marking and make consensus calling in ultra-deep sequencing. 
+Additionally, the UMI can be used to (informatically) link reads that were generated from the same long molecule, enabling long-range phasing and better informed mapping. 
+In some experimental setups opposite strands of the same double-stranded DNA molecule get related barcodes. 
+These templates can also be considered duplicates even though technically they may have different UMIs.
+Multiple UMIs can be added by a protocol, possibly at different time-points, which means that specific knowledge of the protocol may be needed in order to analyze the resulting data correctly. 
+\end{itemize}
 
 \begin{description}
 \item[BC:Z:\tagvalue{sequence}]
