@@ -257,16 +257,16 @@ In the case of multiple unique molecular identifiers (e.g., one on each end of t
 
 \item[CB:Z:\tagvalue{str}]
 Cell identifier based on the cellular-barcode sequence ({\tt CR}), with a correction optionally applied. The sequence may optionally be followed by a dash (`{\tt -}') and one or more alphanumeric characters to form an identifier. All reads with the same {\tt CB} tag putatively derive from the same cell.
-In the case of the cell identifier being based on multiple cellular-barcode sequences the recommended implementation concatenates all the barcodes with a hyphen (`{\tt -}') between the different barcodes.
 
 \item[CR:Z:\tagvalue{str}]
-Cellular barcode. Sequence bases of the cellular-barcode as reported by the sequencer (uncorrected) with the respective quality scores stored in {\tt CY}. All reads with the same {\tt CR} tag putatively derive from the same cell. 
+Cellular barcode. Sequence bases of the cellular-barcode as reported by the sequencer (uncorrected) with the respective quality scores stored in {\tt CY}. All reads with the same {\tt CR} tag putatively derive from the same cell. In the case of the cellular barcode being based on multiple barcode sequences the recommended implementation concatenates all the barcodes with a hyphen (`{\tt -}') between the different barcodes.
 
 \item[CY:Z:\tagvalue{qualities+}] 
 Phred quality of the cellular-barcode sequence in the {\tt CR} tag. 
 Same encoding as {\sf QUAL}, i.e., Phred score + 33.
 The lengths of the {\tt CY} and the {\tt CR} tags must match. 
-  
+In the case of the cellular barcode being based on multiple barcode sequences the recommended implementation concatenates all the quality strings with a hyphen (`{\tt -}') between the different strings.
+
 \item[MI:Z:\tagvalue{str}]
 Molecular Identifier. 
 A unique ID within the SAM file for the source molecule from which this read is derived. 
