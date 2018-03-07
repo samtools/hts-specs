@@ -265,7 +265,7 @@ Cellular barcode. Sequence bases of the cellular-barcode as reported by the sequ
 Phred quality of the cellular-barcode sequence in the {\tt CR} tag. 
 Same encoding as {\sf QUAL}, i.e., Phred score + 33.
 The lengths of the {\tt CY} and the {\tt CR} tags must match. 
-In the case of the cellular barcode being based on multiple barcode sequences the recommended implementation concatenates all the quality strings with a hyphen (`{\tt -}') between the different strings.
+In the case of the cellular barcode being based on multiple barcode sequences the recommended implementation concatenates all the quality strings with with spaces (`{\tt \textvisiblespace}') between the different strings.
 
 \item[MI:Z:\tagvalue{str}]
 Molecular Identifier. 
