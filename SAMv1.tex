@@ -8,6 +8,29 @@
 \usepackage{makecell}
 \usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
 \usepackage[title]{appendix}
+\usepackage[calc]{picture}
+
+\newlength{\bytewidth}
+\newlength{\bytetotalheight}
+\newlength{\bytedepth}
+\newcommand*\byteboxsetup[1][2.1em]{\setlength{\bytewidth}{#1}
+  \settototalheight{\bytetotalheight}{MQgjpqy}
+  \settodepth{\bytedepth}{Qgjpqy}
+  \addtolength{\bytetotalheight}{8pt}\addtolength{\bytedepth}{4pt}}
+
+\newcommand*{\byteboxAux}[3]{\raisebox{-\bytedepth}
+ {\begin{picture}(#1\bytewidth,\bytetotalheight)
+    \multiput(0,0)(0,\bytetotalheight){2}{\line(1,0){#1\bytewidth}}
+    #3
+    \put(#1\bytewidth,0){\line(0,1){\bytetotalheight}}
+    \put(0,\bytedepth){\makebox[#1\bytewidth][c]{#2}}
+    \newcount\nticks \nticks #1\relax \advance\nticks -1\relax
+    \multiput(\bytewidth,0)(\bytewidth,0){\nticks}{\line(0,1){3pt}}
+  \end{picture}\strut}}
+
+% Use as e.g. \firstbytebox{2}{Tag}\bytebox{1}{\tt s}\bytebox{2}{int16\_t}
+\newcommand*{\firstbytebox}[2]{\byteboxAux{#1}{#2}{\put(0,0){\line(0,1){\bytetotalheight}}}}
+\newcommand*{\bytebox}[2]{\byteboxAux{#1}{#2}{}}
 
 \makeindex
 
@@ -921,48 +944,65 @@ For a sequence with an odd numbered length the bottom 4 bits of the last byte ar
 The case-insensitive base codes `{\tt =ACMGRSVTWYHKDBN}' are mapped to $[0,15]$ respectively with all other characters mapping to `{\tt N}' (value 15).
 
 \subsubsection{Auxiliary data encoding}\label{sec:aux-type-codes}
-Optional alignment fields are stored in BAM as a two character tag followed by a single type character and then a variable-length value.
-The type encoding is similar to SAM, apart from integer values where BAM uses the type to indicate the size in bytes of the stored value (SAM always uses {\tt i}, regardless of magnitude).
+Optional alignment fields are stored immediately after each other immediately
+following the {\sf qual} field, and are included in {\sf block\_size}.
+Each field is represented as a two-character tag followed by a single type
+character and then its value, whose length is determined by the field's type.
 
-The type codes used in BAM, and permissible values are:
+\newcommand*{\tagfield}[2]{\firstbytebox{2}{\em tag}\bytebox{1}{\tt #1}#2}
 
-\begin{center}
-\begin{tabular}{|c|l|l|}
-\hline
-{\bf Type} & {\bf Allowed values} & {\bf Description} \\
-\hline
-A & {\tt [!-\char126]} & Printable character \\
-c & -128 ... 127 & Signed 8-bit integer \\
-C & 0 ... 255 & Unsigned 8-bit integer \\
-s & -32768 ... 32767 & Signed 16-bit integer \\
-S & 0 ... 65535 & Unsigned 16-bit integer \\
-i & -2147483648 ... 2147483647 & Signed 32-bit integer \\
-I & 0 ... 4294967295 & Unsigned 32-bit integer \\
-f & Any valid IEEE 754-2008 binary32 value & Single-precision floating point \\
-Z & {\tt [\,\,\,!-\char126]*} & Printable string, terminated by NUL \\
-H & {\tt ([0-9A-F][0-9A-F])*} & Hexadecimal string (ASCII), terminated by NUL \\
-B & Depends on subtype & Numeric array, see below \\
-\hline
-\end{tabular}
+Single character `{\tt A}' fields have a total length of 4~bytes,
+with the value represented as a single byte:
+\begin{center}\small\byteboxsetup
+\tagfield{A}{\bytebox{1}{char}}
 \end{center}
 
-{\tt B} array type tags take the following form:
+While all single (i.e., non-array) integer types are stored in SAM as `{\tt i}',
+in BAM any of `{\tt cCsSiI}' may be used together with the correspondingly-sized
+binary integer value, chosen according to the field value's magnitude.
+Similarly floating point `{\tt f}' fields are represented as IEEE 754-2008
+binary32 values.
+Thus BAM numeric fields have a total length of~4, 5, or~7~bytes:
+\begin{center}\small\byteboxsetup\begin{tabular}{l@{\hspace{1in}}l}
+\tagfield{c}{\bytebox{1}{i8}} \quad (i.e., {\tt int8\_t})
+    & \tagfield{i}{\bytebox{4}{int32\_t}} \\
+\tagfield{C}{\bytebox{1}{u8}} \quad (i.e., {\tt uint8\_t})
+    & \tagfield{I}{\bytebox{4}{uint32\_t}} \\
+\tagfield{s}{\bytebox{2}{int16\_t}}
+    & \tagfield{f}{\bytebox{4}{float}} \\
+\tagfield{S}{\bytebox{2}{uint16\_t}}
+    &
+\end{tabular}\end{center}
 
-\begin{center}
-\begin{tabular}{|ll|l|}
-\hline
-{\bf Field} & & {\bf Description} \\
-\hline
-tag & & Two-character tag \\
-\hline
-{val\_type} & & Value type: {\tt B} for array tags \\
-\hline
-value & \multicolumn{1}{|l|}{sub\_type} & Array data type, matches {\tt /\char94[cCsSiIf]/}; meaning as in the table above \\\cline{2-3}
- & \multicolumn{1}{|l|}{array\_length} & 32-bit integer \\\cline{2-3}
- & \multicolumn{1}{|l|}{array\_data} & {\tt array\_length * (size of sub\_type)} bytes \\
-\hline
-\end{tabular}
-\end{center}
+\newcommand*{\byteboxvector}[2]{\bytebox{#1}{#2}\bytebox{#1}{#2}\makebox[1.5\bytewidth][c]{$\cdots$}\firstbytebox{#1}{#2}}
+
+String fields and hex-formatted byte arrays are represented as
+{\tt NUL}-terminated text strings:%
+\footnote{The BAM representation of `{\tt H}' field values as textual
+hexadecimal digits rather than binary data is for historical reasons.
+Modern applications may prefer to use `{\tt B,C}' array fields rather
+than `{\tt H}' fields.}
+\begin{center}\small\byteboxsetup\begin{tabular}{l}
+\tagfield{Z}{\byteboxvector{1}{char}\bytebox{1}{\tt NUL}} \\
+\tagfield{H}{\byteboxvector{2}{hex hex}\bytebox{1}{\tt NUL}}
+\end{tabular}\end{center}
+
+\newcommand*{\arraytagfield}[3]{\tagfield{B}{\bytebox{1}{\tt #1}\bytebox{4}{\em count}\byteboxvector{#2}{#3}}}
+
+The representation of a `{\tt B}' array field starts with a sub-type character
+similar to the numeric field types above and an {\tt int32\_t} \emph{count}
+giving the number of elements in the array.
+The array elements follow, encoded as binary integers or IEEE floats sized
+according to the sub-type:
+\begin{center}\small\byteboxsetup\begin{tabular}{l}
+\arraytagfield{c}{1}{i8} \quad (i.e., {\tt int8\_t} elements) \\
+\arraytagfield{C}{1}{u8} \quad (i.e., {\tt uint8\_t} elements) \\
+\arraytagfield{s}{2}{int16\_t} \\
+\arraytagfield{S}{2}{uint16\_t} \\
+\arraytagfield{i}{4}{int32\_t} \\
+\arraytagfield{I}{4}{uint32\_t} \\
+\arraytagfield{f}{4}{float}
+\end{tabular}\end{center}
 
 \pagebreak
 
