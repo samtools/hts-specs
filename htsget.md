@@ -114,14 +114,18 @@ If a request to the URL of an API method includes the `Origin` header, its conte
 The values of `Origin` and `Access-Control-Request-Headers` (if any) of the request will be propagated to `Access-Control-Allow-Origin` and `Access-Control-Allow-Headers` respectively in the preflight response.
 The `Access-Control-Max-Age` of the preflight response is set to the equivalent of 30 days.
 
+# Request
 
-# Method: get reads by ID
+## Methods
+
+The recommended endpoints to access reads and variants data are:
 
     GET /reads/<id>
+    GET /variants/<id>
 
-The core mechanic for accessing specified reads data. The JSON response is a "ticket" allowing the caller to obtain the desired data in the specified format, which may involve follow-on requests to other endpoints, as detailed below.
+The JSON response is a "ticket" allowing the caller to obtain the desired data in the specified format, which may involve follow-on requests to other endpoints, as detailed below.
 
-The client can request only reads overlapping a given genomic range. The response may however contain a superset of the desired results, including all records overlapping the range, and potentially other records not overlapping the range; the client should filter out such extraneous records if necessary. Successful requests with empty result sets still produce a valid response in the requested format (e.g. including header and EOF marker).
+The client can request only records overlapping a given genomic range. The response may however contain a superset of the desired results, including all records overlapping the range, and potentially other records not overlapping the range; the client should filter out such extraneous records if necessary. Successful requests with empty result sets still produce a valid response in the requested format (e.g. including header and EOF marker).
 
 ## URL parameters
 
@@ -130,9 +134,15 @@ The client can request only reads overlapping a given genomic range. The respons
 `id`  
 _required_
 </td><td>
-A string specifying which reads to return.
+A string identifying which records to return.
 
-The format of the string is left to the discretion of the API provider, including allowing embedded "/" characters. Strings could be ReadGroupSetIds as defined by the GA4GH API, or any other format the API provider chooses (e.g. "/data/platinum/NA12878", "/byRun/ERR148333").
+The format of this identifier is left to the discretion of the API provider, including allowing embedded "/" characters. The following would be valid identifiers:
+
+* ReadGroupSetIds or VariantSetIds as defined by the GA4GH API
+* Studies: PRJEB4019 or /byStudy/PRJEB4019
+* Samples: NA12878 or /data/platinum/NA12878
+* Runs: ERR148333 or /byRun/ERR148333
+
 </td></tr>
 </table>
 
@@ -143,7 +153,10 @@ The format of the string is left to the discretion of the API provider, includin
 `format`  
 _optional string_
 </td><td>
-Request read data in this format. Default: BAM. Allowed values: BAM,CRAM.
+Request data in this format. The allowed values for each type of record are:
+
+* Reads: BAM (default), CRAM.
+* Variants: VCF (default), BCF.
 
 The server SHOULD reply with an `UnsupportedFormat` error if the requested format is not supported.
 [^a]
@@ -225,6 +238,8 @@ QUAL	| Base quality scores
 
 Example: `fields=QNAME,FLAG,POS`.
 
+# Response
+
 ## Response JSON fields
 
 <table>
@@ -238,7 +253,11 @@ Container for response object.
 `format`  
 _string_
 </td><td>
-Read data format. Default: BAM. Allowed values: BAM,CRAM.
+Response data in this format. The allowed values for each type of record are:
+
+* Reads: BAM (default), CRAM.
+* Variants: VCF (default), BCF.
+
 </td></tr>
 <tr markdown="block"><td>
 `urls`  
