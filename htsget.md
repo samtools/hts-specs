@@ -175,11 +175,9 @@ _optional 32-bit unsigned integer_
 </td><td>
 The start position of the range on the reference, 0-based, inclusive. 
 
-The server SHOULD respond with an `InvalidInput` error if `start` is specified and a reference is not specified
-(see `referenceName`).
+The server SHOULD respond with an `InvalidInput` error if `start` is specified and a reference is not specified (see `referenceName`).
 
-The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater
-than `end`.
+The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater than `end`.
 </td></tr>
 <tr markdown="block"><td>
 `end`  
@@ -187,17 +185,15 @@ _optional 32-bit unsigned integer_
 </td><td>
 The end position of the range on the reference, 0-based exclusive.
 
-The server SHOULD respond with an `InvalidInput` error if `end` is specified and a reference is not specified
-(see `referenceName`).
+The server SHOULD respond with an `InvalidInput` error if `end` is specified and a reference is not specified (see `referenceName`).
 
-The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater
-than `end`.
+The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater than `end`.
 </td></tr>
 <tr markdown="block"><td>
 `fields`  
 _optional_
 </td><td>
-A list of fields to include, see below
+A list of fields to include, see below.
 Default: all
 </td></tr>
 <tr markdown="block"><td>
