@@ -331,7 +331,7 @@ There are 8 fixed fields per record.  Fixed fields are:
   \item INFO - additional information: (String, no semi-colons or equals-signs permitted; commas are permitted only as delimiters for lists of
   values; characters with special meaning can be encoded using the percent encoding, see Section~\ref{character-encoding}; space characters are allowed)
   INFO fields are encoded as a semicolon-separated series of short keys with optional values in the format: $<$key$>$=$<$data$>$[,data].
-  INFO keys must match the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, although ``1000G'' is allowed as a special legacy value. Duplicate fields are not allowed. Arbitrary keys are permitted, although the sub-fields listed in Table~\ref{table:reserved-info} are reserved (albeit optional).
+  INFO keys must match the regular expression \texttt{\^{}([A-Za-z\_][0-9A-Za-z\_.]*|1000G)\$}, please note that ``1000G'' is allowed as a special legacy value. Duplicate fields are not allowed. Arbitrary keys are permitted, although the sub-fields listed in Table~\ref{table:reserved-info} are reserved (albeit optional).
 
   \begin{table}[htbp]
     \centering
