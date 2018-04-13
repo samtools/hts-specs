@@ -959,7 +959,9 @@ with the value represented as a single byte:
 
 While all single (i.e., non-array) integer types are stored in SAM as `{\tt i}',
 in BAM any of `{\tt cCsSiI}' may be used together with the correspondingly-sized
-binary integer value, chosen according to the field value's magnitude.
+binary integer value, chosen according to the field value's magnitude.%
+\footnote{The signedness and size used for each integer value is an
+implementation choice, but is typically the smallest that suffices.}
 Similarly floating point `{\tt f}' fields are represented as IEEE 754-2008
 binary32 values.
 Thus BAM numeric fields have a total length of~4, 5, or~7~bytes:
