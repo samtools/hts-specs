@@ -885,15 +885,15 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of alignments (until the end of the file)}} \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf block\_size} & Total length of the alignment record, excluding this field & {\tt int32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position. & {\tt int32\_t} & [-1] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf l\_read\_name} & Length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$). & {\tt uint8\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf mapq} & Mapping quality (=\underline{\sf MAPQ}). & {\tt uint8\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_read\_name} & Length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$) & {\tt uint8\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf mapq} & Mapping quality (=\underline{\sf MAPQ}) & {\tt uint8\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf bin} & BAI index bin, see Section~\ref{sec:bin-field}  & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf n\_cigar\_op} & Number of operations in \underline{\sf CIGAR}, see Section~\ref{sec:ncigar} & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf flag} & Bitwise flags (= \underline{\sf FLAG})\footnotemark\ & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf mate\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf next\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf read\_name} & Read name,\footnotemark\ {\tt NUL}-terminated (\underline{\sf QNAME} plus a trailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
