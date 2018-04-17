@@ -255,7 +255,8 @@ where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
   \multicolumn{2}{|l}{\tt @RG} & Read group. Unordered multiple {\tt @RG} lines are allowed.\\\cline{2-3}
   & {\tt ID}* & Read group identifier. Each {\tt @RG} line must have a unique {\tt ID}. The value of {\tt ID}
   is used in the RG tags of alignment records. Must be unique among all read groups in header section.  Read group IDs may be modified when merging SAM files in order to handle collisions.\\\cline{2-3}
-  & {\tt BC} & Barcode sequence placed during library preparation identifying the sample/library.
+  & {\tt BC} & Barcode sequence identifying the sample/library.
+  The sequence is the expected bases read by the instrument in the absence of sequencing errors.
   In the case of multiple Sample Barcodes (e.g., one on each end of the template) the recommended implementation concatenates all the barcodes and places a hyphen (`{\tt -}') between the barcodes from the same template.\\\cline{2-3}
   & {\tt CN} & Name of sequencing center producing the read.\\\cline{2-3}
   & {\tt DS} & Description.  UTF-8 encoding may be used.\\\cline{2-3}
