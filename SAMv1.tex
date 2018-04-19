@@ -1077,7 +1077,7 @@ boundaries.
 For an alignment starting beyond 64Mbp, we always need to seek to some
 chunks in bin 0, which can be avoided by using a linear index. In the
 linear index, for each tiling 16384bp window on the reference, we record
-the smallest file offset of the alignments that start in the
+the smallest file offset of the alignments that overlap with the
 window. Given a region [rbeg,rend), we only need to visit a chunk whose
 end file offset is larger than the file offset of the 16kbp window
 containing rbeg.
