@@ -60,7 +60,7 @@ or
   {\tt BQ} & Z & Offset to base alignment quality (BAQ) \\
   {\tt BZ} & Z & Phred quality of the unique molecular barcode bases in the {\tt OX} tag \\
   {\tt CC} & Z & Reference name of the next hit \\
-  {\tt CG} & B,I & BAM only: {\sf CIGAR} in BAM's binary encoding if (and only if) it consists of $>$65535 operators \\
+  {\tt CG} & B:I & BAM only: {\sf CIGAR} in BAM's binary encoding if (and only if) it consists of $>$65535 operators \\
   {\tt CM} & i & Edit distance between the color sequence and the color reference (see also {\tt NM}) \\
   {\tt CO} & Z & Free-text comments \\
   {\tt CP} & i & Leftmost coordinate of the next hit \\
@@ -70,7 +70,7 @@ or
   {\tt E2} & Z & The 2nd most likely base calls \\
   {\tt FI} & i & The index of segment in the template \\
   {\tt FS} & Z & Segment suffix \\
-  {\tt FZ} & B,S & Flow signal intensities \\
+  {\tt FZ} & B:S & Flow signal intensities \\
   {\tt GC} & ? & Reserved for backwards compatibility reasons \\
   {\tt GQ} & ? & Reserved for backwards compatibility reasons \\
   {\tt GS} & ? & Reserved for backwards compatibility reasons \\
@@ -354,7 +354,7 @@ are all percent encoded as in the {\tt CT} tag.
 \subsection{Technology-specific data}
 
 \begin{description}
-\item[FZ:B,S:\tagvalue{intensities}]
+\item[FZ:B:S,\tagvalue{intensities}]
 Flow signal intensities on the original strand of the read, stored as {\tt (uint16\_t) round(value * 100.0)}.
 \end{description}
 
