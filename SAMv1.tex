@@ -255,6 +255,9 @@ where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
   \multicolumn{2}{|l}{\tt @RG} & Read group. Unordered multiple {\tt @RG} lines are allowed.\\\cline{2-3}
   & {\tt ID}* & Read group identifier. Each {\tt @RG} line must have a unique {\tt ID}. The value of {\tt ID}
   is used in the RG tags of alignment records. Must be unique among all read groups in header section.  Read group IDs may be modified when merging SAM files in order to handle collisions.\\\cline{2-3}
+  & {\tt BC} & Barcode sequence identifying the sample/library.
+  The sequence is the expected bases read by the instrument in the absence of sequencing errors.
+  If there are several barcodes for the sample/library (e.g., one on each end of the template), the BC value is the barcode sequences concatenated together and separated by hyphens (`{\tt -}').\\\cline{2-3}
   & {\tt CN} & Name of sequencing center producing the read.\\\cline{2-3}
   & {\tt DS} & Description.  UTF-8 encoding may be used.\\\cline{2-3}
   & {\tt DT} & Date the run was produced (ISO8601 date or date/time).\\\cline{2-3}
@@ -1218,6 +1221,7 @@ specification with its own version numbering.\footnote{
 \subsection*{1.5: 23 May 2013 to current}
 
 \begin{itemize}
+\item Add {\tt @RG BC} header tag. (Apr 2018)
 \item Permit UTF-8 in a few header tags. (Mar 2018)
 \item Add support for $>65535$ cigar operations. (Jul 2017)
 \item Add {\tt @SQ AH} header tag. (Mar 2017)
