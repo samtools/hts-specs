@@ -59,7 +59,7 @@ not. Each alignment line has 11 mandatory fields for essential alignment
 information such as mapping position, and variable number of optional
 fields for flexible or aligner specific information.
 
-This specification is for version 1.5 of the SAM and BAM formats.  Each SAM and
+This specification is for version 1.6 of the SAM and BAM formats.  Each SAM and
 BAM file may optionally specify the version being used via the
 {\tt @HD VN} tag. For full version history see Appendix~\ref{sec:history}. 
 
@@ -95,7 +95,7 @@ properly aligned\slash multiple segments;
 properly aligned\slash multiple segments.}
 \begin{framed}\small
 \begin{verbatim}
-@HD VN:1.5 SO:coordinate
+@HD VN:1.6 SO:coordinate
 @SQ SN:ref LN:45
 r001   99 ref  7 30 8M2I4M1D3M = 37  39 TTAGATAAAGGATACTG *
 r002    0 ref  9 30 3S6M1P1I4M *  0   0 AAAAGATAAGGATA    *
@@ -707,7 +707,7 @@ three alignments are all shifted by 2. {\sf CIGAR} of alignments bridging the
 
 \begin{framed}\small
 \begin{verbatim}
-@HD VN:1.5 SO:coordinate
+@HD VN:1.6 SO:coordinate
 @SQ SN:ref LN:47
 ref   516 ref  1  0 14M2D31M   *  0   0 AGCATGTTAGATAAGATAGCTGTGCTAGTAGGCAGTCAGCGCCAT *
 r001   99 ref  7 30 14M1D3M    = 39  41 TTAGATAAAGGATACTG *
@@ -1220,12 +1220,17 @@ separate {\sl Sequence Alignment/Map Optional Fields Specification}.%
 \href{http://samtools.github.io/hts-specs/SAMtags.pdf}{\tt SAMtags.pdf}
 at \url{https://github.com/samtools/hts-specs}.}
 
-\subsection*{1.5: 23 May 2013 to current}
+\subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
 \item Add {\tt @RG BC} header tag. (Apr 2018)
 \item Permit UTF-8 in a few header tags. (Mar 2018)
-\item Add support for $>65535$ cigar operations. (Jul 2017)
+\item\textbf{Add support for CIGAR strings with more than 65,535 operations.} (Nov 2017)
+\end{itemize}
+
+\subsection*{1.5: 23 May 2013 to November 2017}
+
+\begin{itemize}
 \item Add {\tt @SQ AH} header tag. (Mar 2017)
 \item Auxiliary tags migrated to SAMtags document. (Sep 2016)
 \item Z and H auxiliary tags are permitted to be zero length. (Jun 2016)

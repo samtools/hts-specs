@@ -424,7 +424,11 @@ Cellular barcode tags CB, CR, and CY added.
 
 \subsubsection*{November 2017}
 
-CG tag added.
+SAM version number {\tt VN:1.6} introduced, indicating the addition of the CG tag representation of very long CIGAR strings.
+Files that contain records with more than 65,535 CIGAR operators should not declare a version number lower than~1.6 in their {\tt @HD} headers.
+% Technically only BAM files containing records with CG tags need to avoid
+% declaring VN<1.6, but recommending that SAM and CRAM files with long CIGAR
+% strings also declare VN:1.6+ aids file format conversion.
 
 \subsubsection*{August 2017}
 
