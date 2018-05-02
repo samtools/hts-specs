@@ -207,6 +207,7 @@ for any associated quality values.
 Other canonical alignments in a chimeric alignment, formatted as a semicolon-delimited list.
 Each element in the list represents a part of the chimeric alignment. Conventionally, at a supplementary line, the first element points to the primary line.
 \emph{Strand} is either `{\tt +}' or `{\tt -}', indicating positive/negative strand, corresponding to FLAG bit 0x10.
+\emph{Pos} is a 1-based coordinate.
 
 \item[SM:i:\tagvalue{}]
 Template-independent mapping quality.
@@ -301,7 +302,7 @@ Deprecated alternative to {\tt BC} tag originally used at Sanger.
 Original CIGAR, usually before realignment.
 
 \item[OP:i:\tagvalue{pos}]
-Original mapping position, usually before realignment.
+Original 1-based mapping position, usually before realignment.
 
 \item[OQ:Z:\tagvalue{qualities}]
 Original base quality, usually before recalibration.
