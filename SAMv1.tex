@@ -185,7 +185,7 @@ In the header, each line is TAB-delimited and, apart from {\tt @CO} lines,
 each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
 is a two-character string that defines the format and content of {\tt VALUE}.
 Thus header lines match {\tt
-  /\char94@[A-Z][A-Z](\char92t[A-Za-z][A-Za-z0-9]:[
+  /\char94@(HD|SQ|RG|PG)(\char92t[A-Za-z][A-Za-z0-9]:[
   -\char126]+)+\$/} or {\tt /\char94@CO\char92t.*/}.
 
 The following table describes the header record types that may be used
@@ -529,7 +529,7 @@ i & {\tt [-+]?[0-9]+} & Signed integer\footnotemark\\
 f & {\tt [-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?} & Single-precision floating number \\
 Z & {\tt [\,\,\,!-\char126]*} & Printable string, including space\\
 H & {\tt ([0-9A-F][0-9A-F])*} & Byte array in the Hex format\footnotemark\\
-B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)+} & Integer or numeric array\\
+B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)*} & Integer or numeric array\\
 \hline
 \end{tabular}
 \addtocounter{footnote}{-1}
@@ -944,8 +944,10 @@ stored in the {\tt CG} tag and remove the now-redundant {\tt CG} tag.
 
 \subsubsection{SEQ encoding}\label{sec:seq}
 Sequence is encoded in 4-bit values, with adjacent bases packed into the same byte starting with the highest 4 bits first.
-For a sequence with an odd numbered length the bottom 4 bits of the last byte are undefined, but we recommend writing these as zero.
+When {\sf l\_seq} is odd the bottom 4 bits of the last byte are undefined, but we recommend writing these as zero.
 The case-insensitive base codes `{\tt =ACMGRSVTWYHKDBN}' are mapped to $[0,15]$ respectively with all other characters mapping to `{\tt N}' (value 15).
+
+Omitted sequence, represented in SAM as `{\tt *}', is represented by {\sf l\_seq} being 0 and {\sf seq} and {\sf qual} zero-length.
 
 \subsubsection{Auxiliary data encoding}\label{sec:aux-type-codes}
 Optional alignment fields are stored immediately after each other immediately
@@ -1224,6 +1226,7 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item B array optional fields may have no entries---this was already representable in BAM, clarified that empty arrays are permitted in SAM too. (Jul 2018)
 \item Add {\tt @SQ DS} header tag. (Jul 2018)
 \item Add {\tt @RG BC} header tag. (Apr 2018)
 \item Permit UTF-8 in a few header tags. (Mar 2018)
@@ -1268,7 +1271,6 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.3: July 2010 to April 2011}
 
 \begin{itemize}
-\item Add CIGAR N intron/skip operator. (Dec 2010)
 \item Add {\tt RG PG} header field. (Nov 2010)
 \item Add BAM description and index sections. (Nov 2010)
 \item \textbf{Removal of FLAG letters.} (July 2010)
