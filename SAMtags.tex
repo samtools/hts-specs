@@ -193,8 +193,13 @@ Mapping quality of the mate/next segment.
 \item[NH:i:\tagvalue{}]
 Number of reported alignments that contains the query in the current record.
 
-\item[NM:i:\tagvalue{}]
-Edit distance to the reference, including ambiguous bases but excluding clipping.
+\item[NM:i:\tagvalue{count}]
+Number of differences (mismatches plus inserted and deleted bases) between the sequence and reference, counting only (case-insensitive) A, C, G and T bases in sequence and reference as potential matches, with everything else being a mismatch.
+Note this means that ambiguity codes in both sequence and reference that match each other, such as `{\tt N}' in both, or compatible codes such as `{\tt A}' and `{\tt R}', are still counted as mismatches.
+The special sequence base `{\tt =}' will always be considered to be a match, even if the reference is ambiguous at that point.
+Alignment reference skips, padding, soft and hard clipping (`{\tt N}', `{\tt P}', `{\tt S}' and `{\tt H}' {\sf CIGAR} operations) do not count as mismatches, but insertions and deletions count as one mismatch per base.
+
+Note that historically this has been ill-defined and both data and tools exist that disagree with this definition.
 
 \item[PQ:i:\tagvalue{}]
 Phred likelihood of the template, conditional on both the mapping being correct.
@@ -436,6 +441,10 @@ This appendix lists when standard tags were initially defined or significantly c
 
 \setlength{\parindent}{0pt}
 \newcommand*{\gap}{\vspace*{2ex}}
+
+\subsubsection*{July 2018}
+
+Clarified the calculation of NM score.
 
 \subsubsection*{May 2018}
 
