@@ -162,7 +162,17 @@ certain special characters used to define special cases:
 \begin{itemize}
   \item A: The field has one value per alternate allele. The values must be in the same order as listed in the ALT column (described in section \ref{data-lines}).
   \item R: The field has one value for each possible allele, including the reference. The order of the values must be the reference allele first, then the alternate alleles as listed in the ALT column.
-  \item G: The field has one value for each possible genotype. The values must be in the same order as prescribed in section \ref{genotype-fields:genotype-ordering} (see \textsc{Genotype Ordering}).
+  \item G: The field has one value for each possible genotype.
+           Note that INFO tags declared as Number=G can have different number
+           of values at each data line depending on the number of alleles and
+           the ploidy it represents and does not have to correspond to the
+           ploidy of samples in FORMAT fields. For example, with one alternate
+           allele, the tag can have two values (corresponding to the two
+           possible haploid genotypes R,A); three values (corresponding to the
+           three possible diploid genotypes RR, RA, AA); etc.  The values must
+           be in the same order as prescribed in section
+           \ref{genotype-fields:genotype-ordering} (see \textsc{Genotype
+           Ordering}).
   \item . (dot): The number of possible values varies, is unknown or unbounded.
 \end{itemize}
 
