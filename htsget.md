@@ -41,6 +41,14 @@ JSON responses SHOULD include a `Content-Type` header describing the htsget prot
 
     Content-Type: application/vnd.ga4gh.htsget.v1.0.0+json; charset=utf-8
 
+## Data format assumptions
+
+The protocol is agnostic to the specific details of the data formats that can be exchanged. However, a few key underlying assumptions are made:
+
+1. Queries over a genomic range `(referenceName, start, end)` can be mapped to a contiguous block of bytes interpretable by clients;
+
+2. The data format is composed of `headers` and `data` sections. The `headers` section contains metadata pertaining to the information encoded in the `data` section and is at the beginning of byte stream. Ordinarily both the `headers` and `data` sections of the stream are required for it to be well-formed, but there are situations in which a client may wish to retrieve either in isolation (see below).
+
 ## Errors
 
 The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when an error condition is detected.  In the case of transient server errors, (e.g., 503 and other 5xx status codes), the client SHOULD implement appropriate retry logic as discussed in [Reliability & performance considerations](#reliability--performance-considerations) below.
@@ -190,6 +198,12 @@ The server SHOULD respond with an `InvalidInput` error if `end` is specified and
 The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater than `end`.
 </td></tr>
 <tr markdown="block"><td>
+`headers_only`  
+_optional_ integer (boolean)
+</td><td>
+If 1, only return data-format specific metadata headers in the returned data stream and not the data content. If 0, include both these headers and body data (the default). The server SHOULD respond if an `InvalidInput` error if any other values are provided. Default: 0
+</td></tr>
+<tr markdown="block"><td>
 `fields`  
 _optional_
 </td><td>
@@ -233,6 +247,12 @@ SEQ	| Read bases
 QUAL	| Base quality scores
 
 Example: `fields=QNAME,FLAG,POS`.
+
+### Format headers and data
+
+Clients may wish to retrieve either the headers or data sections of the requested byte stream in isolation. For example, a client may wish to first fetch the header of a BAM stream to interrogate its metadata before performing other queries. Or, a client may already have the headers for a particular VCF file and wish to make many queries over small regions, and avoid the overhead of repeatedly downloading the headers.
+
+These use-cases are enabled by the `headers` and `data` parameters. Each of these is a boolean (0,1) flag indicating whether the server should include these sections in the response stream. By default these are both true, ensuring that well-formed streams are returned unless the client specifically requests otherwise. 
 
 # Response
 
