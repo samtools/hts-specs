@@ -1214,9 +1214,11 @@ This lists the date of each tagged SAM version along with changes that
 have been made while that version was current.  The key changes
 that caused the version number to change are shown in bold.
 
-Note the auxiliary tags have now moved to their own
-specification with its own version numbering.\footnote{
-\href{http://samtools.github.io/hts-specs/SAMtags.pdf}{http://samtools.github.io/hts-specs/SAMtags.pdf}}
+Additions and changes to the standard predefined tags are listed in the
+separate {\sl Sequence Alignment/Map Optional Fields Specification}.%
+\footnote{See Appendix~A of
+\href{http://samtools.github.io/hts-specs/SAMtags.pdf}{\tt SAMtags.pdf}
+at \url{https://github.com/samtools/hts-specs}.}
 
 \subsection*{1.5: 23 May 2013 to current}
 
@@ -1234,28 +1236,22 @@ specification with its own version numbering.\footnote{
 \item Add meaning to reverse FLAG on unmapped reads. (Mar 2015)
 \item Document the {\tt idxstats} .bai elements. (Nov 2014)
 \item Addition of CSI index. (Sep 2014)
-\item Add {\tt MC} auxiliary tag. (Dec 2013)
 \item Add {\tt @PG DS} header field. (Dec 2013)
 \item Document the BAM EOF byte values. (Dec 2013)
 \item Glossary of alignment types. (May 2013)
-\item Add {\tt SA:Z} tag; PNEXT/RNEXT points to next read, not
-  segment.  (May 2013)
+\item Note that PNEXT/RNEXT points to next read, not segment. (May 2013)
 \item \textbf{Add SUPPLEMENTARY flag bit}. (May 2013)
 \end{itemize}
 
 \subsection*{1.4: 21 April 2011 to May 2013}
 
 \begin{itemize}
-\item Add guide to using sequence annotations ({\tt CT/PT tags}). (Mar 2012)
+\item Add guide to using sequence annotations ({\tt CT/PT} tags). (Mar 2012)
 \item Increase max reference length from $2^{29}$ to $2^{31}$. (Sep
   2011)
-\item Add {\tt CO} and {\tt RT} auxiliary tags. (Sep 2011)
 \item Clarify {\tt @SQ M5} header tag generation. (Sep 2011)
-\item Describe padded alignments and add {\tt CT/PT tags}. (Sep 2011)
-\item Add {\tt BC} barcode auxiliary tag. (Sep 2011)
-\item Change {\tt FZ} tag from type {\tt H} to type {\tt B,S}. (Aug 2011)
+\item Describe padded alignments. (Sep 2011)
 \item Add {\tt @RG FO}, {\tt KS} header fields. (Apr 2011)
-\item Add {\tt FZ} auxiliary tag. (Apr 2011)
 \item Clarify chaining of PG records. (Apr 2011)
 \item \textbf{Add {\tt B} array auxiliary tag type.} (Apr 2011)\
 \item \textbf{Permit IUPAC in SEQ and {\tt MD} auxiliary tag.} (Apr 2011)
@@ -1265,9 +1261,7 @@ specification with its own version numbering.\footnote{
 \subsection*{1.3: July 2010 to April 2011}
 
 \begin{itemize}
-\item Re-add {\tt CC} and {\tt CP} auxiliary tags. (Mar 2011)
 \item Add CIGAR N intron/skip operator. (Dec 2010)
-\item Add {\tt BQ} BAQ tag. (Nov 2010)
 \item Add {\tt RG PG} header field. (Nov 2010)
 \item Add BAM description and index sections. (Nov 2010)
 \item \textbf{Removal of FLAG letters.} (July 2010)

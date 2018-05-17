@@ -411,17 +411,112 @@ to \mailtourl{samtools-devel@lists.sourceforge.net}.
 
 \begin{appendices}
 \appendix
-\section{SAM Tags History}\label{sec:history}
+\section{Tag History}
 
-This lists the date of each tagged SAM version along with changes that
-have been made while that version was current.  
+This appendix lists when standard tags were initially defined or significantly changed, and other historical events that affect how tags are interpreted or what files they may appear in.
 
-\subsection*{1.5: 23 May 2013 to current}
-\begin{itemize}
-\item Cellular barcode tags CB, CR, and CY added. (May 2018)
-\item Add UMI-related tags (RX, QX, OX, BZ, MI) and clarified usage of sample barcode tag BC. (August 2017)
-\item SAMtags.txt (this file) created with tags from SAMv1 
-\end{itemize}
+\setlength{\parindent}{0pt}
+\newcommand*{\gap}{\vspace*{2ex}}
+
+\subsubsection*{May 2018}
+
+Cellular barcode tags CB, CR, and CY added.
+
+\subsubsection*{November 2017}
+
+CG tag added.
+
+\subsubsection*{August 2017}
+
+Unique molecular identifier tags BZ, MI, OX, QX, and RX added.
+
+Usage of sample barcode tag BC clarified.
+
+\subsubsection*{June 2017}
+
+Corrected the description of the E2 (second-most-likely bases) tag, which was previously unclear as to whether it contains bases or base qualities.
+
+\subsubsection*{September 2016}
+
+Predefined tags, previously listed as a brief table within the main SAM specification, have been split out into this new document.
+There is now space for clearer and more complete tag descriptions.
+
+\subsubsection*{February 2014}
+
+MC tag added.
+
+\subsubsection*{May 2013}
+
+SAM version number {\tt VN:1.5} introduced, with limited impact for tags other than indicating that the CT/PT annotation tag definitions are considered finalised.
+
+\gap
+SA tag added.
+
+\subsubsection*{March 2012}
+
+Descriptions of CT and PT annotation tags significantly clarified.
+
+\subsubsection*{October 2011}
+
+Sample barcode tags QT and RT added, with RT being identified as a deprecated alternative to BC.
+
+% These were actually added in late September as RT/PT, but RT was changed to
+% CT (see samtools-devel, "Potential clash of RT tags (annotation vs barcode)",
+% October 2011) before read-annotation-RT appeared in the wild.
+Read annotation tags CT and PT added.
+
+\subsubsection*{September 2011}
+
+% This was actually August 29th, but let's call it September.
+FZ tag's type changed from {\tt H} to {\tt B,S}-array.
+
+BC and CO tags added.
+
+\subsubsection*{April 2011}
+
+SAM version number {\tt VN:1.4} introduced, indicating the addition of the {\tt B}-array tag type.
+Files that contain records with {\tt B}-array fields should not declare a version number lower than~1.4 in their {\tt @HD} headers.
+
+\gap
+FZ tag added, with type {\tt H}.
+
+MD tag description changed to allow IUPAC ambiguity codes in addition to {\tt ACGTN}.
+
+\subsubsection*{March 2011}
+
+CC and CP tags reinstated with their original meanings.
+
+\subsubsection*{November 2010}
+
+BQ tag added.
+
+\subsubsection*{July 2010}
+
+The specification was rewritten as a \LaTeX\ document specifying SAM version number {\tt VN:1.3}.
+
+\gap
+Tags FI, FS, OC, OP, OQ, and TC added.
+
+Tags GC, GQ, and GS listed as reserved for backwards compatibility.
+
+Existing CC, CP, and MF tags removed and noted as reserved for backwards compatibility.
+
+\subsubsection*{July 2009}
+
+The original SAM ``0.1.2-draft'' specification specified version number {\tt VN:1.0} and defined a total of thirty standard tags:
+
+\begin{center}
+\begin{tabular}{l@{\qquad}l@{\qquad}l@{\qquad}l@{\qquad}l}
+AM & CS & IH & NM & RG \\
+AS & E2 & LB & PG & S2 \\
+CC & H0 & MD & PQ & SM \\
+CM & H1 & MF & PU & SQ \\
+CP & H2 & MQ & Q2 & U2 \\
+CQ & HI & NH & R2 & UQ
+\end{tabular}
+\end{center}
+
+At this time, SQ and S2 were already deprecated in favour of E2 and U2.
 
 \end{appendices}
 
