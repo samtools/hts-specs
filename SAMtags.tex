@@ -100,11 +100,11 @@ or
   {\tt PT} & Z & Read annotations for parts of the padded read sequence \\
   {\tt PU} & Z & Platform unit \\
   {\tt Q2} & Z & Phred quality of the mate/next segment sequence in the {\tt R2} tag \\
-  {\tt QT} & Z & Phred quality of the sample-barcode sequence in the {\tt BC} (or {\tt RT}) tag \\
+  {\tt QT} & Z & Phred quality of the sample barcode sequence in the {\tt BC} tag \\
   {\tt QX} & Z & Quality score of the unique molecular identifier in the {\tt RX} tag \\
   {\tt R2} & Z & Sequence of the mate/next segment in the template \\
   {\tt RG} & Z & Read group \\
-  {\tt RT} & Z & Barcode sequence (deprecated; use {\tt BC} instead) \\
+  {\tt RT} & ? & Reserved for backwards compatibility reasons \\
   {\tt RX} & Z & Sequence bases of the (possibly corrected) unique molecular identifier \\
   {\tt S2} & ? & Reserved for backwards compatibility reasons \\
   {\tt SA} & Z & Other canonical alignments in a chimeric alignment \\
@@ -261,7 +261,7 @@ The {\tt BC} tag should match the {\tt QT} tag in length.
 In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the barcodes and places a hyphen (`{\tt -}') between the barcodes from the same template. 
 
 \item[QT:Z:\tagvalue{qualities}] 
-Phred quality of the sample-barcode sequence in the {\tt BC} (or {\tt RT}) tag. 
+Phred quality of the sample barcode sequence in the {\tt BC} tag.
 Same encoding as {\sf QUAL}, i.e., Phred score + 33.
 In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the quality strings with spaces (`{\tt \textvisiblespace}') between the different strings from the same template. 
 
@@ -312,9 +312,6 @@ Same encoding as {\sf QUAL}, i.e., Phred score + 33.
 The qualities here may have been corrected (Raw bases and qualities can be stored in {\tt OX} and {\tt BZ} respectively.)
 The lengths of the {\tt QX} and the {\tt RX} tags must match.
 In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the quality strings with a space (`{\tt \textvisiblespace}') between the different strings.
-
-\item[RT:Z:\tagvalue{sequence}]
-Deprecated alternative to {\tt BC} tag originally used at Sanger.
 \end{description}
 
 \subsection{Original data}
@@ -421,6 +418,8 @@ This appendix lists when standard tags were initially defined or significantly c
 \subsubsection*{May 2018}
 
 Cellular barcode tags CB, CR, and CY added.
+
+Removed the RT tag, which was a long-deprecated synonym for BC.
 
 \subsubsection*{November 2017}
 
