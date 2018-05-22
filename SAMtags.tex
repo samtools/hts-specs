@@ -434,7 +434,7 @@ Usage of sample barcode tag BC clarified.
 
 \subsubsection*{June 2017}
 
-Corrected the description of the E2 tag, which previously wrongly claimed E2 to be encoded as per {\sf QUAL}.
+Corrected the description of the E2 (second-most-likely bases) tag, which was previously unclear as to whether it contains bases or base qualities.
 
 \subsubsection*{September 2016}
 
@@ -447,7 +447,7 @@ MC tag added.
 
 \subsubsection*{May 2013}
 
-SAM version number {\tt VN:1.5} introduced, indicating the addition of the {\sc supplementary} flag (bit 0x800).
+SAM version number {\tt VN:1.5} introduced, with limited impact for tags other than indicating that the CT/PT annotation tag definitions are considered finalised.
 
 SA tag added.
 
@@ -496,9 +496,9 @@ The specification was rewritten as a \LaTeX\ document specifying SAM version num
 \gap
 Tags FI, FS, OC, OP, OQ, and TC added.
 
-Tags GC, GQ, and GS added and reserved for backwards compatibility.
+Tags GC, GQ, and GS listed as reserved for backwards compatibility.
 
-Existing CC, CP, and MF tags noted as reserved for backwards compatibility.
+Existing CC, CP, and MF tags removed and noted as reserved for backwards compatibility.
 
 \subsubsection*{July 2009}
 
