@@ -5,8 +5,9 @@
 \usepackage[title]{appendix}
 
 \newcommand{\mailtourl}[1]{\href{mailto:#1}{\tt #1}}
-\newcommand{\tagvalue}[1]{\tt #1}
-\newcommand{\tagregex}[1]{\tt #1}
+\newcommand{\tagvalue}[1]{{\tt #1}}
+\newcommand{\tagregex}[1]{{\tt #1}}
+\newcommand{\metavar}[1]{{\rm\emph{#1}}}
 
 \begin{document}
 
@@ -358,14 +359,21 @@ Same encoding as {\sf QUAL}.
 
 \subsection{Annotation and Padding}
 
+The SAM format can be used to represent \emph{de novo} assemblies, generally by using padded reference sequences and the annotation tags described here.
+See the \emph{Guide for Describing Assembly Sequences} in the \href{http://samtools.github.io/hts-specs/SAMv1.pdf}{\emph{SAM Format Specification}} for full details of this representation.
+
 \begin{description}
-\item[CT:Z:\tagregex{\emph{strand};\emph{type}(;\emph{key}(=\emph{value}))*}]
+\item[CT:Z:\tagregex{\metavar{strand};\metavar{type}(;\metavar{key}(=\metavar{value})?)*}]
+\hfill\\
 Complete read annotation tag, used for consensus annotation dummy features.
 
 The {\tt CT} tag is intended primarily for annotation
 dummy reads, and consists of a \emph{strand}, \emph{type} and zero or
 more \emph{key}=\emph{value} pairs, each separated with semicolons.
-The \emph{strand} field has four values as in GFF3, and supplements FLAG
+The \emph{strand} field has four values as in GFF3,\footnote{The
+Generic Feature Format version 3 (GFF3) specification can be found at
+\href{http://www.sequenceontology.org/}{\tt http://sequenceontology.org}.}
+and supplements FLAG
 bit 0x10 to allow unstranded (`{\tt .}'), and stranded but unknown strand
 (`{\tt ?}') annotation. For these and annotation on the forward strand
 (\emph{strand} set to `{\tt +}'), do not set FLAG bit 0x10. For
@@ -381,21 +389,23 @@ macro (with the C locale). For example a percent sign becomes
 %NOTE - This leaves open the possibility of allowing multiple such
 %entries for a single CT tag to be combined with | as in the PT tag.
 
-\item[PT:Z:\tagregex{\tt \emph{start};\emph{end};\emph{strand};\emph{type}(;\emph{key}(=\emph{value}))*(\char92|\emph{start};\emph{end};\emph{strand};\emph{type}(;\emph{key}(=\emph{value}))*)*}]
+\item[PT:Z:\tagregex{\metavar{annotag}(\char92|\metavar{annotag})*}]\enskip where each \metavar{annotag} matches\quad\tagregex{\metavar{start};\metavar{end};\metavar{strand};\metavar{type}(;\metavar{key}(=\metavar{value})?)*}
+\hfill\\
 Read annotations for parts of the padded read sequence.
 
-The {\tt PT} tag value has the format of a series of
+The {\tt PT} tag value has the format of a series of annotation
 tags separated by `{\tt |}', each annotating a sub-region of the read.
 Each tag consists of \emph{start}, \emph{end}, \emph{strand},
 \emph{type} and zero or more \emph{key}{\tt =}\emph{value} pairs, each
 separated with semicolons. \emph{Start} and \emph{end} are 1-based
 positions between one and the sum of the {\tt M/I/D/P/S/=/X}
 {\sf CIGAR} operators, i.e. {\sf SEQ} length plus any pads.  Note
-any editing of the CIGAR string may require updating the `{\tt PT}'
+any editing of the CIGAR string may require updating the {\tt PT}
 tag coordinates, or even invalidate them.
 As in GFF3, \emph{strand} is one of `{\tt +}' for forward strand tags,
 `{\tt -}' for reverse strand, `{\tt .}' for unstranded or `{\tt ?}'
 for stranded but unknown strand.
+
 The \emph{type} and any \emph{keys} and their optional \emph{values}
 are all percent encoded as in the {\tt CT} tag.
 \end{description}

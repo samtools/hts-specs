@@ -688,7 +688,12 @@ reference sequence, but it is also able to describe alignments against a padded
 reference. In the latter case, we say we are using a \emph{padded SAM}. A padded
 SAM is a valid SAM, but with the difference that the reference and positions in
 use are padded. There may be more than one way to describe the padded
-representation. We recommend the following.
+representation.
+We recommend the following; see also the discussion in Cock {\it et al.}%
+\footnote{Peter J. A. Cock, James K. Bonfield, Bastien Chevreux, and Heng Li,
+{\bf SAM/BAM format v1.5 extensions for \emph{de novo} assemblies},
+{\sl bioRxiv 020024};
+\href{http://dx.doi.org/10.1101/020024}{doi:10.1101/020024}.}
 
 In a padded SAM, alignments and coordinates are described with respect to the
 padded reference sequence. Unlike traditional padded representations like
@@ -726,8 +731,10 @@ sequence and the reference annotations in SAM when necessary. For a reference
 sequence in SAM, {\sf QNAME} should be identical to {\sf RNAME}, {\sf POS} set
 to 1 and {\sf FLAG} to 516 (filtered and unmapped); for an annotation, {\sf
 FLAG} should be set to 768 (filtered and secondary) with no restriction to {\sf
-QNAME}. Dummy reads for annotation would typically have an `{\tt CT}' tag to
-hold the annotation information, see Section~\ref{sec:recommended-practice}.
+QNAME}.
+Dummy reads for annotation would typically have a {\tt CT} tag to hold the annotation information; see the discussion of dummy reads in Section~\ref{sec:recommended-practice}.
+See also the separate {\sl Optional Fields Specification} for full details of the {\tt CT} and {\tt PT} annotation tags.%
+\footnote{See \emph{Annotation and Padding} in \href{http://samtools.github.io/hts-specs/SAMtags.pdf}{\tt SAMtags.pdf}.}
 
 \pagebreak
 
