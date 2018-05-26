@@ -7,7 +7,7 @@ description: >
 baseurl: "/hts-specs"
 url: "http://samtools.github.io"
 github_username: samtools
-exclude: ["*.tex", img, new, Makefile, MAINTAINERS.md, README.md]
+exclude: ["*.sh", "*.tex", img, new, Makefile, MAINTAINERS.md, README.md]
 
 # Build settings
 markdown: kramdown

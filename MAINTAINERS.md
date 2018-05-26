@@ -63,6 +63,4 @@ Therefore:
 * If a series of changes are being made or several pull requests are being merged at once, the PDF updates can be batched up and just made once at the end.
 * Conversely, if there are changes pending to several (even unrelated) PDFs, there is no reason not to commit them all at once.
 
-If you are working on several PDFs at once, be careful in step 3 and perhaps use `make clean new/VCFv4.2.pdf new/VCFv4.3.pdf; make VCFv4.2.pdf VCFv4.3.pdf` to ensure that spurious “-dirty” commit hashes don't make their way into your PDFs.
-
 <!-- vim:set linebreak: -->
