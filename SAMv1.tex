@@ -1205,29 +1205,33 @@ int reg2bins(int beg, int end, uint16_t list[MAX_BIN])
 }
 
 \subsection{Splitting BAM}\label{sec:code}
-A BAM file can be processed in parallel by dividing the file into splits
-(typically of a fixed, but arbitrary, number of bytes) and for each split
-processing alignments from the first known alignment after the split start
-up to the first known alignment of the next split.
+A BAM file can be processed in parallel by conceptually dividing the file into
+splits (typically of a fixed, but arbitrary, number of bytes) and for each
+split processing alignments from the first known alignment after the split
+start up to the first known alignment of the next split.
 
 A splitting BAM index is a linear index of virtual file offsets of alignment
 start positions. The index must contain the virtual file offset for the first
-alignment (in the case of a non-empty BAM), and a virtual file offset for
-the overall length of the BAM file. It does not need to contain a virtual
-file offset for every alignment, merely a subset. A granularity of $n$ means
-that an offset is written for every $n$ alignments.
+alignment, and a virtual file offset for the overall length of the BAM
+file.\footnote{In the unlikely event the BAM file has no alignment records,
+the index will consist of a single entry for the overall length of the
+BAM file.} It does not need to contain a virtual file offset for every
+alignment, merely a subset. A granularity of $n$ means that an offset is
+written for every $n$ alignments.
 
-To find the alignments for a split that covers a byte range {\tt [beg, end)}
+To find the alignments for a split that covers a byte range {\tt [beg,\,end)}
 use the index to find the smallest virtual file offset, {\tt v1}, that falls
 in this range, and the smallest virtual file offset, {\tt v2}, that is
 greater than or equal to {\tt end}. If {\tt v1} does not exist, then the
 split has no alignments. Otherwise, it has alignments in the range
-{\tt [v1, v2)}. This method will map a set of contiguous, non-overlapping
+{\tt [v1,\,v2)}. This method will map a set of contiguous, non-overlapping
 {\it file ranges} that cover the whole BAM file to a set of contiguous,
 non-overlapping {\it virtual file ranges} that cover the whole file.
 
-Splitting BAM index files have a {\tt .sbi} suffix, and contain a
-header followed by a list of ascending virtual files offsets.
+Splitting BAM index filenames have a {\tt .sbi} extension added to the BAM
+filename (so {\tt foo.bam.sbi} is the splitting BAM index filename for
+{\tt foo.bam}). Index files contain a header followed by a sorted list of
+virtual files offsets in ascending order.
 
 \begin{table}[ht]
 \centering
