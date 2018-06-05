@@ -88,7 +88,7 @@
     col\_beg}=2, {\tt col\_end}=3, {\tt meta}=`{\tt \#}' and {\tt
     skip}=0.
 \item Given a zero-based, half-closed and half-open region {\tt
-    [beg,end)}, the {\tt bin} number is calculated with the following C
+  [beg,\,end)}, the {\tt bin} number is calculated with the following C
   function:
 \begin{verbatim}
 int reg2bin(int beg, int end) {
@@ -101,7 +101,7 @@ int reg2bin(int beg, int end) {
   return 0;
 }
 \end{verbatim}
-\item The list of bins that may overlap a region {\tt [beg,end)} can be
+\item The list of bins that may overlap a region {\tt [beg,\,end)} can be
   obtained with the following C function.
 \begin{verbatim}
 #define MAX_BIN (((1<<18)-1)/7)

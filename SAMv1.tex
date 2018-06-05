@@ -230,7 +230,7 @@ The {\tt SN} tags and all individual {\tt AN} names in all {\tt @SQ} lines
 must be distinct.
   The value of this field is used in the
   alignment records in {\sf RNAME} and {\sf RNEXT} fields. Regular expression: {\tt [!-)+-\char60\char62-\char126][!-\char126]*}\\\cline{2-3}
-  & {\tt LN}* & Reference sequence length. \emph{Range}: {\tt [1,2$^{31}$-1]}\\\cline{2-3}
+  & {\tt LN}* & Reference sequence length. \emph{Range}: $[1,\,2^{31}-1]$\\\cline{2-3}
   & {\tt AH} & Indicates that this sequence is an alternate locus.%
 \footnote{See \url{https://www.ncbi.nlm.nih.gov/grc/help/definitions} for descriptions of \emph{alternate locus} and \emph{primary assembly}.}
   The value is the locus in the primary assembly for which this sequence is an alternative, in the format `\emph{chr}{\tt :}\emph{start}{\tt -}\emph{end}', `\emph{chr}' (if known), or `{\tt *}' (if unknown), where `\emph{chr}' is a sequence in the primary assembly.
@@ -346,14 +346,14 @@ of the mandatory fields in the SAM format:
   {\bf Col} & {\bf Field} & {\bf Type} & {\bf Regexp/Range} & {\bf Brief description} \\
   \hline
   1 & {\sf QNAME} & String & \verb:[!-?A-~]{1,254}: & Query template NAME\\
-  2 & {\sf FLAG} & Int & {\tt [0,2$^{16}$-1]} & bitwise FLAG \\
+  2 & {\sf FLAG} & Int & $[0,\,2^{16}-1]$ & bitwise FLAG \\
   3 & {\sf RNAME} & String & {\tt \char92*|[!-()+-\char60\char62-\char126][!-\char126]*} & Reference sequence NAME\\
-  4 & {\sf POS} & Int & {\tt [0,2$^{31}$-1]} & 1-based leftmost mapping POSition \\
-  5 & {\sf MAPQ} & Int & {\tt [0,2$^8$-1]} & MAPping Quality \\
+  4 & {\sf POS} & Int & $[0,\,2^{31}-1]$ & 1-based leftmost mapping POSition \\
+  5 & {\sf MAPQ} & Int & $[0,\,2^8-1]$ & MAPping Quality \\
   6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
   7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next read\\
-  8 & {\sf PNEXT} & Int & {\tt [0,2$^{31}$-1]} & Position of the mate/next read \\
-  9 & {\sf TLEN} & Int & {\tt [-2$^{31}$+1,2$^{31}$-1]} & observed Template LENgth \\
+  8 & {\sf PNEXT} & Int & $[0,\,2^{31}-1]$ & Position of the mate/next read \\
+  9 & {\sf TLEN} & Int & $[-2^{31}+1,\,2^{31}-1]$ & observed Template LENgth \\
   10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & segment SEQuence\\
   11 & {\sf QUAL} & String & {\tt [!-\char126]+} & ASCII of Phred-scaled base QUALity+33 \\
   \hline
@@ -1081,7 +1081,7 @@ For an alignment starting beyond 64Mbp, we always need to seek to some
 chunks in bin 0, which can be avoided by using a linear index. In the
 linear index, for each tiling 16384bp window on the reference, we record
 the smallest file offset of the alignments that overlap with the
-window. Given a region [rbeg,rend), we only need to visit a chunk whose
+window. Given a region [rbeg,\,rend), we only need to visit a chunk whose
 end file offset is larger than the file offset of the 16kbp window
 containing rbeg.
 
@@ -1107,11 +1107,11 @@ scheme which consists of three types of bins: bin 0 spans 0-144kbp, bin
 An alignment starting at 65kbp and ending at 67kbp would have a bin
 number 8, which is the smallest bin containing the alignment. Similarly,
 an alignment starting at 51kbp and ending at 70kbp would go to bin 2,
-while an alignment between [40k,49k] to bin 0. Suppose we want to find
-all the alignments overlapping region [65k,71k). We first calculate that
+while an alignment between [40k,\,49k] to bin 0. Suppose we want to find
+all the alignments overlapping region [65k,\,71k). We first calculate that
 bin 0, 2 and 8 overlap with this region and then traverse the alignments
 in these bins to find the required alignments. With a binning index
-alone, we need to visit the alignment at [40k,49k] as it belongs to bin
+alone, we need to visit the alignment at [40k,\,49k] as it belongs to bin
 0. But with a linear index, we know that such an alignment stops before
 64kbp and cannot overlap the specified region. A seek call can thus be
 saved.
