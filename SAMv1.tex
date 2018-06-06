@@ -1204,34 +1204,25 @@ int reg2bins(int beg, int end, uint16_t list[MAX_BIN])
 \end{verbatim}
 }
 
-\subsection{Splitting BAM}\label{sec:code}
-A BAM file can be processed in parallel by conceptually dividing the file into
-splits (typically of a fixed, but arbitrary, number of bytes) and for each
-split processing alignments from the first known alignment after the split
-start up to the first known alignment of the next split.
+\subsection{The SBI index format for BGZF files}\label{sec:code}
+The SBI format is a binary file format to provide random access to records in
+files that have been block compressed with BGZF.
 
-A splitting BAM index is a linear index of virtual file offsets of alignment
-start positions. The index must contain the virtual file offset for the first
-alignment, and a virtual file offset for the overall length of the BAM
-file.\footnote{In the unlikely event the BAM file has no alignment records,
-the index will consist of a single entry for the overall length of the
-BAM file.} It does not need to contain a virtual file offset for every
-alignment, merely a subset. A granularity of $n$ means that an offset is
-written for every $n$ alignments.
+SBI facilitates parallel processing of BGZF data files. Since records are
+indexed by their virtual file offset rather than position in the genome, unlike
+the BAI and CSI formats, SBI does not suffer from skew due to uneven
+distribution of records across the genome. Furthermore, SBI does not require
+that the data file is coordinate sorted.
 
-To find the alignments for a split that covers a byte range {\tt [beg,\,end)}
-use the index to find the smallest virtual file offset, {\tt v1}, that falls
-in this range, and the smallest virtual file offset, {\tt v2}, that is
-greater than or equal to {\tt end}. If {\tt v1} does not exist, then the
-split has no alignments. Otherwise, it has alignments in the range
-{\tt [v1,\,v2)}. This method will map a set of contiguous, non-overlapping
-{\it file ranges} that cover the whole BAM file to a set of contiguous,
-non-overlapping {\it virtual file ranges} that cover the whole file.
+SBI is a linear index that contains virtual file offsets of record start
+positions. The granularity of the index indicates the number of records between
+subsequent offsets in the index. A granularity of $-1$ means that there is not
+a fixed number of records between subsequent offsets in the index.
 
-Splitting BAM index filenames have a {\tt .sbi} extension added to the BAM
-filename (so {\tt foo.bam.sbi} is the splitting BAM index filename for
-{\tt foo.bam}). Index files contain a header followed by a sorted list of
-virtual files offsets in ascending order.
+SBI filenames have a {\tt .sbi} extension added to the name of the file it is
+an index for. For example, {\tt foo.bam.sbi} is the SBI filename for
+{\tt foo.bam}. Index files contain a header followed by a sorted list of
+virtual file offsets in ascending order.
 
 \begin{table}[ht]
 \centering
@@ -1240,11 +1231,42 @@ virtual files offsets in ascending order.
   \cline{1-6}
   \multicolumn{3}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf magic} & Magic string & {\tt char[4]} & {\tt SBI\char92 1}\\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf granularity} & Number of alignments between offsets, or $-1$ if unspecified & {\tt int32\_t} & \\\cline{1-6}
-  \multicolumn{6}{|c|}{\textcolor{gray}{\it List of offsets}} \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf offset} & Virtual file offset of the alignment & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf file\_length} & Length of the BGZF file in bytes & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf n\_records} & Total number of records & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf first\_offset} & Virtual file offset of the start of the first record & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf end\_offset} & Virtual file offset of the end of the last record & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf granularity} & Number of records between offsets, or $-1$ if unspecified & {\tt int32\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf n\_offsets} & Number of virtual file offsets & {\tt int32\_t} & \\\cline{1-6}
+  \multicolumn{6}{|c|}{\textcolor{gray}{\it List of offsets (n=n\_offsets)}} \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf offset} & Virtual file offset of the start of the record & {\tt uint64\_t} & \\\cline{1-6}
 \end{tabular}}
 \end{table}
+
+In the unlikely event the data file has no records, {\sf first\_offset} and
+{\sf end\_offset} will both be equal to the the virtual file offset of the end
+of the header, or, equivalently, the virtual file offset of the start of the
+footer of the file. In this case, {\sf n\_offsets} will be 0, and the list of
+virtual file offsets will be empty.
+
+The main uses for the index are:
+
+\begin{itemize}
+\item Splitting a file for parallel processing.
+To find the records for a split that covers a byte range {\tt [beg,\,end)} use
+the index to find the smallest virtual file offset, {\tt v1}, that falls in
+this range, and the smallest virtual file offset, {\tt v2}, that is greater
+than or equal to {\tt end}. If {\tt v1} does not exist, then the split has no
+records. Otherwise, it has records that start in the range {\tt [v1,\,v2)}.
+This method will map a set of contiguous, non-overlapping {\it file ranges}
+that cover the whole data file to a set of contiguous, non-overlapping
+{\it virtual file ranges} that cover the whole data file.
+
+\item Finding the $n$th record in a file.
+For an index with granularity $g$, find the virtual file offset at position
+$\lfloor n/g \rfloor$ in the index. Seek to the record in the data file at this
+position, and then read a further $n \bmod g$ records to find the desired
+record.
+\end{itemize}
 
 \pagebreak
 
