@@ -1215,9 +1215,16 @@ distribution of records across the genome. Furthermore, SBI does not require
 that the data file is coordinate sorted.
 
 SBI is a linear index that contains virtual file offsets of record start
-positions. The granularity of the index indicates the number of records between
-subsequent offsets in the index. A granularity of $-1$ means that there is not
-a fixed number of records between subsequent offsets in the index.
+positions. The index must contain the virtual file offset for the first record,
+and a final sentinel virtual file offset for the position at which the next
+record would start if it were added to the file.\footnote{In the unlikely event
+the data file has no records, the index will consist solely of the sentinel
+offset.}
+
+The granularity of the index indicates the number of records between
+subsequent offsets in the index (excluding the sentinel offset). A granularity
+of $-1$ means that there is not a fixed number of records between subsequent
+offsets in the index.
 
 SBI filenames have a {\tt .sbi} extension added to the name of the file it is
 an index for. For example, {\tt foo.bam.sbi} is the SBI filename for
@@ -1233,20 +1240,12 @@ virtual file offsets in ascending order.
   \multicolumn{3}{|l|}{\sf magic} & Magic string & {\tt char[4]} & {\tt SBI\char92 1}\\\cline{1-6}
   \multicolumn{3}{|l|}{\sf file\_length} & Length of the BGZF file in bytes & {\tt uint64\_t} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf n\_records} & Total number of records & {\tt uint64\_t} & \\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf first\_offset} & Virtual file offset of the start of the first record & {\tt uint64\_t} & \\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf end\_offset} & Virtual file offset of the end of the last record & {\tt uint64\_t} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf granularity} & Number of records between offsets, or $-1$ if unspecified & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf n\_offsets} & Number of virtual file offsets & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of offsets (n=n\_offsets)}} \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf offset} & Virtual file offset of the start of the record & {\tt uint64\_t} & \\\cline{1-6}
 \end{tabular}}
 \end{table}
-
-In the unlikely event the data file has no records, {\sf first\_offset} and
-{\sf end\_offset} will both be equal to the the virtual file offset of the end
-of the header, or, equivalently, the virtual file offset of the start of the
-footer of the file. In this case, {\sf n\_offsets} will be 0, and the list of
-virtual file offsets will be empty.
 
 The main uses for the index are:
 
