@@ -280,6 +280,12 @@ _optional object_
 </td><td>
 For HTTPS URLs, the server may supply a JSON object containing one or more string key-value pairs which the client MUST supply as headers with any request to the URL. For example, if headers is `{"Range": "bytes=0-1023", "Authorization": "Bearer xxxx"}`, then the client must supply the headers `Range: bytes=0-1023` and `Authorization: Bearer xxxx` with the HTTPS request to the URL.
 </td></tr>
+<tr markdown="block"><td>
+`class`
+_string_
+</td><td>
+For file formats whose specification describes a header and a body, the class indicates which of the two will be retrieved when querying this URL. The allowed values are `header` and `body`.
+</td></tr>
 </table>
 
 </td></tr>
@@ -300,24 +306,28 @@ An example of a JSON response is:
       "format" : "BAM",
       "urls" : [
          {
-            "url" : "data:application/vnd.ga4gh.bam;base64,QkFNAQ=="
+            "url" : "data:application/vnd.ga4gh.bam;base64,QkFNAQ==",
+            "class" : "header"
          },
          {
-            "url" : "https://htsget.blocksrv.example/sample1234/header"
+            "url" : "https://htsget.blocksrv.example/sample1234/header",
+            "class" : "header"
          },
          {
             "url" : "https://htsget.blocksrv.example/sample1234/run1.bam",
             "headers" : {
                "Authorization" : "Bearer xxxx",
                "Range" : "bytes=65536-1003750"
-             }
+             },
+            "class" : "body"
          },
          {
             "url" : "https://htsget.blocksrv.example/sample1234/run1.bam",
             "headers" : {
                "Authorization" : "Bearer xxxx",
                "Range" : "bytes=2744831-9375732"
-            }
+            },
+            "class" : "body"
          }
       ]
    }
