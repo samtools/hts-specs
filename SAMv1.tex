@@ -1206,7 +1206,7 @@ int reg2bins(int beg, int end, uint16_t list[MAX_BIN])
 
 \subsection{The SBI index format for BGZF files}\label{sec:code}
 The SBI format is a binary file format to provide random access to records in
-files that have been block compressed with BGZF.
+data files that have been block compressed with BGZF.
 
 SBI facilitates parallel processing of BGZF data files. Since records are
 indexed by their virtual file offset rather than position in the genome, unlike
@@ -1238,7 +1238,9 @@ virtual file offsets in ascending order.
   \cline{1-6}
   \multicolumn{3}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf magic} & Magic string & {\tt char[4]} & {\tt SBI\char92 1}\\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf file\_length} & Length of the BGZF file in bytes & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf file\_length} & Length of the data file in bytes & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf md5} & MD5 hash of the data file, or 16 \textbackslash0 bytes if unspecified & {\tt byte[16]} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf uuid} & UUID for the data file, or 16 \textbackslash0 bytes if unspecified & {\tt byte[16]} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf n\_records} & Total number of records & {\tt uint64\_t} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf granularity} & Number of records between offsets, or $-1$ if unspecified & {\tt int32\_t} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf n\_offsets} & Number of virtual file offsets & {\tt int32\_t} & \\\cline{1-6}
