@@ -1223,7 +1223,7 @@ offset.}
 
 The granularity of the index indicates the number of records between
 subsequent offsets in the index (excluding the sentinel offset). A granularity
-of $-1$ means that there is not a fixed number of records between subsequent
+of 0 means that there is not a fixed number of records between subsequent
 offsets in the index.
 
 SBI filenames have a {\tt .sbi} extension added to the name of the file it is
@@ -1242,8 +1242,8 @@ virtual file offsets in ascending order.
   \multicolumn{3}{|l|}{\sf md5} & MD5 hash of the data file, or 16 \textbackslash0 bytes if unspecified & {\tt byte[16]} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf uuid} & UUID for the data file, or 16 \textbackslash0 bytes if unspecified & {\tt byte[16]} & \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf n\_records} & Total number of records & {\tt uint64\_t} & \\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf granularity} & Number of records between offsets, or $-1$ if unspecified & {\tt int32\_t} & \\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf n\_offsets} & Number of virtual file offsets & {\tt int32\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf granularity} & Number of records between offsets, or 0 if unspecified & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf n\_offsets} & Number of virtual file offsets & {\tt uint64\_t} & \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of offsets (n=n\_offsets)}} \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf offset} & Virtual file offset of the start of the record & {\tt uint64\_t} & \\\cline{1-6}
 \end{tabular}}
