@@ -531,6 +531,22 @@ For file formats whose specification describes a header and a body, the class in
 Either all or none of the URLs in the response MUST have a class attribute.
 If `class` fields are not supplied, no assumptions can be made about which data blocks contain headers, body records, or parts of both.
 </td></tr>
+<tr markdown="block"><td>
+
+`ETag`  
+_optional string_
+</td><td>
+
+The _entity-tag_ that would be returned to a request for the URL.
+</td></tr>
+<tr markdown="block"><td>
+
+`Last-Modified`  
+_optional string_
+</td><td>
+
+The last modification _HTTP-date_ that would be returned to a request for the URL.
+</td></tr>
 </table>
 
 </td></tr>
@@ -595,7 +611,7 @@ An example of a JSON response is:
 While the blocks must be finally concatenated in the given order, the client may fetch them in parallel and/or reuse cached data from URLs that have previously been downloaded.
 
 When making a series of requests to fetch reads or variants within different regions of the same `<id>` resource, clients may wish to avoid re-fetching the SAM/CRAM/VCF headers each time, especially if they are large.
-If the ticket contains `class` fields, the client may reuse previously downloaded and parsed headers rather than re-fetching the `header`-class URLs.
+If the ticket contains `class` fields and/or cache control fields, the client may reuse previously downloaded and parsed headers rather than re-fetching the `header`-class URLs, as described below.
 
 ### HTTPS data block URLs
 
@@ -619,6 +635,20 @@ The client obtains the data block by decoding the embedded base64 payload.
 2. client should ignore the media type (if any), treating the payload as a partial blob.
 
 Note: the base64 text should not be additionally percent encoded.
+
+### Avoiding re-fetching ticket array URLs
+
+Clients may use `class` fields and the usual HTTP cache control mechanisms to avoid re-fetching URLs in the ticket array whose contents the client has already downloaded.
+For example, when making multiple requests to fetch reads (or variants) within different regions of the same `<id>` resource, usually the SAM/CRAM (or VCF) headers will not change between requests.
+When the headers are large and the requested regions are small, the headers will constitute most of the downloaded data and it will be advantageous to avoid re-fetching this unchanged data.
+
+If classes are specified in the ticket, zero or more of the entries at the start of the `urls` array will have class `header`.
+When the client has previously downloaded the resource's SAM/VCF headers, it may reuse these known headers rather than re-fetching the `header`-class URLs.
+(The boundary between the contents of the final `header` URL and the first `body` URL must be at the start of the first data record, as described in FIXME FOOTNOTE FOR BAM/CRAM/VCF/BCF.
+If the resource is BGZF-compressed, the end of the contents of the final `header` URL must be the end of a BGZF block.)
+
+Clients SHOULD use the usual HTTP caching facilities (`Cache-Control`; `ETag`/`If-None-Match` and/or `Last-Modified`/`If-Modified-Since`) to ensure that reused cached data is still valid.
+If the server has provided `ETag` or `Last-Modified` ticket fields for a particular URL, the client can use them to avoid making even a request/304 round trip for that URL.
 
 ## Reliability & performance considerations
 
