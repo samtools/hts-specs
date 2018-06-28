@@ -1525,8 +1525,10 @@ BCF2 site information encoding
 \begin{tabular}{ | p{2cm} | p{2.5cm} | p{9.5cm} | } \hline
 Field & Type & Notes \\ \hline
 fmt\_key & typed int & Format key as an offset into the dictionary \\ \hline
-fmt\_type & uint8\_t+ & Typing byte of each individual value, possibly followed by a typed int for the vector length.  In effect this is the same as the typing value for a single vector, but for genotype values it appears only once before the array of genotype field values \\ \hline
-fmt\_values	(by fmt type) & Array of values & The information of each individual is concatenated in the vector.  Every value is of the same fmt type.  Variable-length vectors are padded with END\_OF\_VECTOR values; a string is stored as a vector of char \\  \hline
+fmt\_type & uint8\_t+ & Typing byte of each individual value, possibly followed by a typed int for the vector length.  
+In effect this is the same as the typing value for a single vector, but for genotype values it appears only once before the array of genotype field values \\ \hline
+fmt\_values	(by fmt type) & Array of values & The information of each individual is concatenated in the vector.  Every value is of the same fmt type.  
+Variable-length vectors are padded with END\_OF\_VECTOR values; a string is stored as a vector of char \\  \hline
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1555,7 +1557,11 @@ The encoding is as follows:
 \vspace{0.3cm}
 \begin{tabular}{|p{2cm} | p{10cm}|} \hline
 Bit & Meaning \\ \hline
-5,6,7,8 bits & The number of elements of the upcoming type. For atomic values, the size must be 1. If the size is set to 15, this indicates that the vector has 15 or more elements, and that the subsequent BCF2 byte stream contains a typed Integer indicating the true size of the vector. If the size is between 2-14, then this Integer is omitted from the stream and the upcoming stream begins immediately with the first value of the vector.  A size of 0 indicates that the value is MISSING. \\ \hline
+5,6,7,8 bits & The number of elements of the upcoming type. 
+For atomic values, the size must be 1. 
+If the size is set to 15, this indicates that the vector has 15 or more elements, and that the subsequent BCF2 byte stream contains a typed Integer indicating the true size of the vector. 
+If the size is between 2-14, then this Integer is omitted from the stream and the upcoming stream begins immediately with the first value of the vector.  
+A size of 0 indicates that the value is MISSING. \\ \hline
 1,2,3,4 bits & Type \\ \hline
 \end{tabular}
 \vspace{0.3cm}
@@ -1716,7 +1722,11 @@ Suppose this INFO field contains the ``AC=.'', indicating that the AC field is m
 The correct representation is as the typed pair of AC followed by a MISSING vector of type 8-bit integer: 0x01.
 
 \vspace{0.3cm}
-\textbf{Vectors of mixed length} --- In some cases genotype fields may be vectors whose length differs among samples.  For example, some CNV call sets encode different numbers of genotype likelihoods for each sample, given the large number of potential copy number states, rather padding all samples to have the same number of fields.  For example, one sample could have CN0:0,CN1:10 and another CN0:0,CN1:10,CN2:10.  In the situation when a genotype field contain vector values of different lengths, these are represented in BCF2 by a vector of the maximum length per sample, with all values in the each vector aligned to the left, and END\_OF\_VECTOR values assigned to all values not present in the original vector.  The BCF2 encoder / decoder must automatically add and remove these END\_OF\_VECTOR values from the vectors. Note that the use of END\_OF\_VECTOR means that it is legal to encode a vector VCF field with MISSING values.
+\textbf{Vectors of mixed length} --- In some cases genotype fields may be vectors whose length differs among samples.  
+For example, some CNV call sets encode different numbers of genotype likelihoods for each sample, given the large number of potential copy number states, rather padding all samples to have the same number of fields.  
+For example, one sample could have CN0:0,CN1:10 and another CN0:0,CN1:10,CN2:10.  
+In the situation when a genotype field contain vector values of different lengths, these are represented in BCF2 by a vector of the maximum length per sample, with all values in the each vector aligned to the left, and END\_OF\_VECTOR values assigned to all values not present in the original vector.  
+The BCF2 encoder / decoder must automatically add and remove these END\_OF\_VECTOR values from the vectors. Note that the use of END\_OF\_VECTOR means that it is legal to encode a vector VCF field with MISSING values.
 
 For example, suppose I have two samples, each with a FORMAT field X.  
 Sample A has values [1], while sample B has [2,3].  
