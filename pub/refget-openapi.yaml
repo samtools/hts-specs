@@ -1,0 +1,216 @@
+openapi: 3.0.0
+servers:
+  - url: 'https://seqapi.herokuapp.com'
+  - url: 'http://seqapi.herokuapp.com'
+info:
+  description: >-
+    System for retrieving sequence and metadata concerning a reference sequence
+    object by hash identifiers
+  version: '0.2.0'
+  title: refget API
+  contact:
+    name: GA4GH Security Notifications
+    email: security-notification@ga4gh.org
+    url: https://www.ga4gh.org/
+tags:
+  - name: Metadata
+    description: Services linked to retriving metadata from an idetifier
+  - name: Sequence
+    description: Services linked to fetching sequence from an idetifier
+  - name: Services
+    description: Housekeeping services
+paths:
+  /service-info:
+    get:
+      summary: Retrieve a summary of features this API deployment supports
+      operationId: serviceInfo
+      tags:
+        - Services
+      responses:
+        '200':
+          description: Display of all known configurations for a service deployment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInfo'
+        '415':
+          $ref: '#/components/responses/BadFormat'
+  /ping:
+    get:
+      summary: Return a ping text indicating the service is up
+      description: An endpoint that is meant to return a simple response and a 2XX success code
+      operationId: ping
+      tags:
+        - Services
+      responses:
+        '200':
+          description: Display a ping message
+        '415':
+          $ref: '#/components/responses/BadFormat'
+  '/sequence/{id}':
+    get:
+      summary: Get a sequence from a hash
+      operationId: sequence
+      description: |
+        Retrieve a reference sequence using a hash function
+      tags:
+        - Sequence
+      parameters:
+        - in: path
+          name: id
+          description: The identifier to use. Should be a checksum hash identifier
+          required: true
+          schema:
+            type: string
+            default: 6681ac2f62509cfc220d78751b8dc524
+        - in: query
+          name: start
+          description: Request a subsequence of the data (0-based)
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: end
+          description: Request a subsequence of the data by specifying the end
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+        - in: header
+          name: Range
+          required: false
+          description: >-
+            Specify a substring as a range not using query parameters. Note
+            start is in Ensembl-style start coordinates i.e. the first base of a
+            sequence is 1 not 0 as in the start parameter. Example is 'bytes:
+            1-10'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: >-
+            Successful retrieval of sequence. Returned as a single string with
+            no line breaks
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: >-
+                  MSSPTPPGGQRTLQKRKQGSSQKVAASAPKKNTNSNNSILKIYSDEATGLRVDPLVVLFLAVGFIFSVVALHVISKVAGKLF
+        '400':
+          description: Invalid input; normally due to range parameter usage
+        '404':
+          description: Sequence was not found
+        '415':
+          $ref: '#/components/responses/BadFormat'
+        '416':
+          description: Invalid range request specified
+  '/sequence/{id}/metadata':
+    get:
+      summary: Get reference metadata from a hash
+      description: Retrieve a metadata about a reference sequence using a hash identifier
+      operationId: metadata
+      tags:
+        - Metadata
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: The identifier to use. Should be a checksum hash
+          schema:
+            type: string
+            default: 6681ac2f62509cfc220d78751b8dc524
+      responses:
+        '200':
+          description: Successful retrieval of sequence metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metadata'
+        '404':
+          description: Sequence hash was not found
+        '415':
+          $ref: '#/components/responses/BadFormat'
+components:
+  responses:
+    BadFormat:
+      description: The requested data format is not supported by the endpoint
+    NotFound:
+      description: The requested resource was not found
+  schemas:
+    Metadata:
+      type: object
+      description: Holds information about a sequence checksum
+      properties:
+        id:
+          type: string
+          description: Query identifier. Normally the default checksum for a given service
+          example: 6681ac2f62509cfc220d78751b8dc524
+        md5:
+          type: string
+          description: MD5 checksum of the reference sequence
+          example: 6681ac2f62509cfc220d78751b8dc524
+        trunc512:
+          type: string
+          description: >-
+            Truncated, to 48 characters, SHA-512 checksum of the reference
+            sequence encoded as a HEX string
+          example: 959cb1883fc1ca9ae1394ceb475a356ead1ecceff5824ae7
+        length:
+          type: integer
+          format: int64
+          description: An decimal integer of the length of the reference sequence
+        aliases:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alias'
+      required:
+        - id
+        - length
+        - md5
+        - aliases
+    Alias:
+      type: object
+      description: Allows the assignment of an identifier or alias to a naming authority
+      properties:
+        alias:
+          type: string
+          description: Free text alias for a given sequence
+          example: chr1
+        naming_authority:
+          type: string
+          description: 'Name of the authority, which issued the given alias'
+      required:
+        - alias
+        - naming_authority
+    ServiceInfo:
+      type: object
+      description: Describes the capabilities of an API implementation
+      properties:
+        supported_api_versions:
+          type: array
+          items:
+            type: string
+            description: Supported versions by this API
+            example: 0.2.0
+        circular_locations:
+          type: boolean
+          description: Indicates if the service supports circular location queries
+        subsequence_limit:
+          type: integer
+          format: int64
+          nullable: true
+          description: Maximum length of sequence which may be requested using start and/or end query parameters
+        algorithms:
+          type: array
+          items:
+            type: string
+            description: An array of strings listing the digest algorithms that are supported
+            example:
+              - md5
+              - trunc512
+      required:
+        - supported_api_versions
+        - circular_locations
+        - algorithms

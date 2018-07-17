@@ -26,6 +26,7 @@ Specifications:
 - [VCF v4.2](VCFv4.2.pdf)
 - [VCF v4.3](VCFv4.3.pdf)
 - [Htsget](htsget.html)
+- [Refget](refget.html)
 </div>
 <div class="mainbar">
 {% for line in readme_lines offset: 8 %}

@@ -45,6 +45,8 @@ Transfer protocols
 
 **[Htsget.md]** describes the _hts-get_ retrieval protocol, which enables parallel streaming access to data sharded across multiple URLs or files.
 
+**[Refget.md]** enables access to reference sequences using an identifier derived from the sequence itself.
+
 [SAMv1.tex]:    http://samtools.github.io/hts-specs/SAMv1.pdf
 [SAMtags.tex]:  http://samtools.github.io/hts-specs/SAMtags.pdf
 [CRAMv2.1.tex]: http://samtools.github.io/hts-specs/CRAMv2.1.pdf
@@ -57,6 +59,7 @@ Transfer protocols
 [BCFv1_qref.tex]: http://samtools.github.io/hts-specs/BCFv1_qref.pdf
 [BCFv2_qref.tex]: http://samtools.github.io/hts-specs/BCFv2_qref.pdf
 [Htsget.md]:    http://samtools.github.io/hts-specs/htsget.html
+[Refget.md]:    https://samtools.github.io/hts-specs/refget.html
 
 [ena-cram]:   http://www.ebi.ac.uk/ena/about/cram_toolkit
 [htslib]:     https://github.com/samtools/htslib

@@ -30,6 +30,11 @@ Past VCF/BCF maintainers include Ryan Poplin and David Roazen.
 
 * Mike Lin (@mlin)
 
+### Refget
+
+* Andy Yates (@andrewyatz)
+* Matt Laird (@lairdm)
+
 [ga4gh-ff]:  https://www.ga4gh.org/howwework/workstreams/#lsg
 
 
