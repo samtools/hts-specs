@@ -294,7 +294,7 @@ Fixed fields are:
   \item ID - identifier: Semi-colon separated list of unique identifiers where available.
   If this is a dbSNP variant the rs number(s) should be used.
   No identifier should be present in more than one data record.
-  If there is no identifier available, then the missing value should be used.
+  If there is no identifier available, then the MISSING value should be used.
   (String, no white-space or semi-colons permitted, duplicate values not allowed.)
   \item REF - reference base(s): Each base must be one of A,C,G,T,N (case insensitive).
   Multiple bases are permitted.
@@ -307,20 +307,21 @@ Fixed fields are:
 
   \item ALT - alternate base(s): Comma separated list of alternate non-reference alleles.
   These alleles do not have to be called in any of the samples.
-  Options are base Strings made up of the bases A,C,G,T,N,*, (case insensitive) or a missing value `.' (no variant) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends.
+  Options are base Strings made up of the bases A,C,G,T,N,*, (case insensitive) or a MISSING value `.' (no variant) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends.
   The `*' allele is reserved to indicate that the allele is missing due to an overlapping deletion.
-  If there are no alternative alleles, then the missing value must be used.
+  If there are no alternative alleles, then the MISSING value must be used.
   Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.
   (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
   \item QUAL - quality: Phred-scaled quality score for the assertion made in ALT. i.e. $-10log_{10}$ prob(call in ALT is wrong).
   If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant).
-  If unknown, the missing value must be specified. (Float)
+  If unknown, the MISSING value must be specified. (Float)
   \item FILTER - filter status: PASS if this position has passed all filters, i.e. a call is made at this position.
   Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g. ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples.
   `0' is reserved and must not be used as a filter String.
-  If filters have not been applied, then this field must be set to the missing value.
+  If filters have not been applied, then this field must be set to the MISSING value.
   (String, no white-space or semi-colons permitted, duplicate values not allowed.)
   \item INFO - additional information: (String, no semi-colons or equals-signs permitted; commas are permitted only as delimiters for lists of values; characters with special meaning can be encoded using the percent encoding, see Section~\ref{character-encoding}; space characters are allowed)
+
   INFO fields are encoded as a semicolon-separated series of short keys with optional values in the format: $<$key$>$=$<$data$>$[,data].
   INFO keys must match the regular expression \texttt{\^{}([A-Za-z\_][0-9A-Za-z\_.]*|1000G)\$}, please note that ``1000G'' is allowed as a special legacy value.
   Duplicate fields are not allowed.
@@ -370,9 +371,10 @@ The first sub-field must always be the genotype (GT) if it is present.
 There are no required sub-fields.
 Additional Genotype fields can be defined in the meta-information, however, software support for such fields is not guaranteed.
 
-If any of the fields is missing, it is replaced with the missing value.
+If any of the fields is missing, it is replaced with the MISSING value.
 For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing.
 Trailing fields can be dropped, with the exception of the GT field, which should always be present if specified in the FORMAT field.
+
 
 As with the INFO field, there are several common, reserved keywords that are standards across the community.
 See their detailed definitions below, as well as table~\ref{table:reserved-genotypes} for their reference Number, Type and Description.
@@ -1523,8 +1525,10 @@ BCF2 site information encoding
 \begin{tabular}{ | p{2cm} | p{2.5cm} | p{9.5cm} | } \hline
 Field & Type & Notes \\ \hline
 fmt\_key & typed int & Format key as an offset into the dictionary \\ \hline
-fmt\_type & uint8\_t+ & Typing byte of each individual value, possibly followed by a typed int for the vector length.  In effect this is the same as the typing value for a single vector, but for genotype values it appears only once before the array of genotype field values \\ \hline
-fmt\_values	(by fmt type) & Array of values & The information of each individual is concatenated in the vector.  Every value is of the same fmt type.  Variable-length vectors are padded with missing values; a string is stored as a vector of char \\  \hline
+fmt\_type & uint8\_t+ & Typing byte of each individual value, possibly followed by a typed int for the vector length.  
+In effect this is the same as the typing value for a single vector, but for genotype values it appears only once before the array of genotype field values \\ \hline
+fmt\_values	(by fmt type) & Array of values & The information of each individual is concatenated in the vector.  Every value is of the same fmt type.  
+Variable-length vectors are padded with END\_OF\_VECTOR values; a string is stored as a vector of char \\  \hline
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1553,7 +1557,11 @@ The encoding is as follows:
 \vspace{0.3cm}
 \begin{tabular}{|p{2cm} | p{10cm}|} \hline
 Bit & Meaning \\ \hline
-5,6,7,8 bits & The number of elements of the upcoming type. For atomic values, the size must be 1. If the size is set to 15, this indicates that the vector has 15 or more elements, and that the subsequent BCF2 byte stream contains a typed Integer indicating the true size of the vector. If the size is between 2-14, then this Integer is omitted from the stream and the upcoming stream begins immediately with the first value of the vector.  A size of 0 indicates that the value is MISSING. \\ \hline
+5,6,7,8 bits & The number of elements of the upcoming type. 
+For atomic values, the size must be 1. 
+If the size is set to 15, this indicates that the vector has 15 or more elements, and that the subsequent BCF2 byte stream contains a typed Integer indicating the true size of the vector. 
+If the size is between 2-14, then this Integer is omitted from the stream and the upcoming stream begins immediately with the first value of the vector.  
+A size of 0 indicates that the value is MISSING. \\ \hline
 1,2,3,4 bits & Type \\ \hline
 \end{tabular}
 \vspace{0.3cm}
@@ -1580,8 +1588,8 @@ In BCF2 characters are simply represented by strings with a single element 0,4,6
 
 \textbf{Integers} may be encoded as 8, 16, or 32 bit values, in little-endian order.
 It is up to the encoder to determine the appropriate ranged value to use when writing the BCF2 file.
-For integer types, the values 0x80, 0x8000, 0x80000000 are interpreted as missing values and 0x81, 0x8001, 0x80000001 as end-of-vector indicators (for 8, 16, and 32 bit values, respectively).
-Note that the end-of-vector byte is not part of the vector itself and only end-of-vector bytes can follow.
+For integer types, the values 0x80, 0x8000, 0x80000000 are interpreted as missing values and 0x81, 0x8001, 0x80000001 as END\_OF\_VECTOR indicators (for 8, 16, and 32 bit values, respectively).
+Note that the END\_OF\_VECTOR byte is not part of the vector itself and only END\_OF\_VECTOR bytes can follow.
 In total, eight values are reserved for future use: 0x80-0x87, 0x8000-0x8007, 0x80000000-0x80000007.
 
 \vspace{0.3cm}
@@ -1597,18 +1605,20 @@ For example, a bit-wise example of a IEEE floating-point standard single precisi
 If a = 1, it is a quiet NaN; if a is zero and the payload is nonzero, then it is a signaling NaN.
 \end{quote}
 
-\noindent A good way to understand these values is to play around with the IEEE encoder webiste.
+\noindent A good way to understand these values is to play around with the IEEE encoder website.
 
 \vspace{0.3cm}
-\noindent Similarly to integers, the float value of 0x7F800001 is interpreted as a missing value and 0x7F800002 as the end-of-vector indicator. Note that the end-of-vector byte is not part of the vector itself and only end-of-vector bytes can follow.
-In total, eight values are reservd for future use:
+\noindent Similarly to integers, the float value of 0x7F800001 is interpreted as a MISSING value and 0x7F800002 as the END\_OF\_VECTOR indicator. 
+Note that the END\_OF\_VECTOR byte is not part of the vector itself and only END\_OF\_VECTOR bytes can follow.
+In total, eight values are reserved for future use:
+
 
 \vspace{0.1cm}
 \begin{tabular}{| l | c | l |} \hline
 \textbf{Value}   & \textbf{32-bit precision} & \textbf{Hexadecimal representation} \\ \hline
 NaN	    & 0b0111 1111 1100 0000 0000 0000 0000 0000 & 0x7FC00000 \\ \hline
-missing & 0b0111 1111 1000 0000 0000 0000 0000 0001 & 0x7F800001 \\ \hline
-end-of-vector & 0b0111 1111 1000 0000 0000 0000 0000 0010 & 0x7F800002 \\ \hline
+MISSING & 0b0111 1111 1000 0000 0000 0000 0000 0001 & 0x7F800001 \\ \hline
+END\_OF\_VECTOR & 0b0111 1111 1000 0000 0000 0000 0000 0010 & 0x7F800002 \\ \hline
 reserved & 0b0111 1111 1000 0000 0000 0000 0000 0011 & 0x7F800003 \\ \hline
 $\ldots$ & $\ldots$ & $\ldots$ \\ \hline
 reserved & 0b0111 1111 1000 0000 0000 0000 0000 0111 & 0x7F800007 \\ \hline
@@ -1619,7 +1629,7 @@ reserved & 0b0111 1111 1000 0000 0000 0000 0000 0111 & 0x7F800007 \\ \hline
 Instead, VCF Character values must be encoded by a single character string. See also \ref{character-encoding}.
 
 \vspace{0.3cm}
-\textbf{Flags} values -- which can only appear in INFO fields -- in BCF2 should be encoded by any non-MISSING value.
+\textbf{Flags} values -- which can only appear in INFO fields -- in BCF2 should be encoded by any non-reserved value.
 The recommended best practice is to encode the value as an 1-element INT8 (type 0x11) with value of 1 to indicate present.
 Because FLAG values can only be encoded in INFO fields, BCF2 provides no mechanism to encode FLAG values in genotypes, but could be easily extended to do so if allowed in a future VCF version.
 
@@ -1670,7 +1680,7 @@ This works because strings in VCF cannot contain `{ \tt ,}' (it's a field separa
 % For efficiency
 % reasons we put a comma at the start of the collapsed string, so that just the
 % first character can be examined to determine if the string is collapsed.
-%
+%END\_OF\_VECTOR
 % To be concrete, suppose we have a info field around X=[A,B,C,D].  This is
 % encoded in BCF2 as a single string ``,A,B,C,D'' of size 8, so it would have
 % type byte 0x87 followed by the ASCII encoding 0x2C 0x41 0x2C 0x42 0x2C 0x43
@@ -1680,7 +1690,7 @@ This works because strings in VCF cannot contain `{ \tt ,}' (it's a field separa
 
 \textbf{Vectors} --- The BCF2 type byte may indicate that the upcoming data stream contains not a single value but a fixed length vector of values.
 The vector values occur in order (1st, 2nd, 3rd, etc) encoded as expected for the type declared in the vector's type byte.
-For example, a vector of 3 16-bit integers would be layed out as first the vector type byte, followed immediately by 3 2-byte values for each integer, including a total of 7 bytes.
+For example, a vector of 3 16-bit integers would be laid out as first the vector type byte, followed immediately by 3 2-byte values for each integer, including a total of 7 bytes.
 
 Missing values in vectors are handled slightly differently from atomic values.
 There are two possibilities for missing values:
@@ -1712,56 +1722,56 @@ Suppose this INFO field contains the ``AC=.'', indicating that the AC field is m
 The correct representation is as the typed pair of AC followed by a MISSING vector of type 8-bit integer: 0x01.
 
 \vspace{0.3cm}
-\textbf{Vectors of mixed length} --- In some cases genotype fields may be vectors whose length differs among samples.
-For example, some CNV call sets encode different numbers of genotype likelihoods for each sample, given the large number of potential copy number states, rather padding all samples to have the same number of fields.
-For example, one sample could have CN0:0,CN1:10 and another CN0:0,CN1:10,CN2:10.
-In the situation when a genotype field contain vector values of different lengths, these are represented in BCF2 by a vector of the maximum length per sample, with all values in the each vector aligned to the left, and MISSING values assigned to all values not present in the original vector.
-The BCF2 encoder / decoder must automatically add and remove these MISSING values from the vectors.
+\textbf{Vectors of mixed length} --- In some cases genotype fields may be vectors whose length differs among samples.  
+For example, some CNV call sets encode different numbers of genotype likelihoods for each sample, given the large number of potential copy number states, rather padding all samples to have the same number of fields.  
+For example, one sample could have CN0:0,CN1:10 and another CN0:0,CN1:10,CN2:10.  
+In the situation when a genotype field contain vector values of different lengths, these are represented in BCF2 by a vector of the maximum length per sample, with all values in the each vector aligned to the left, and END\_OF\_VECTOR values assigned to all values not present in the original vector.  
+The BCF2 encoder / decoder must automatically add and remove these END\_OF\_VECTOR values from the vectors. Note that the use of END\_OF\_VECTOR means that it is legal to encode a vector VCF field with MISSING values.
 
-For example, suppose I have two samples, each with a FORMAT field X.  Sample A has values [1], while sample B has [2,3].
-In BCF2 this would be encoded as [1, MISSING] and [2, 3].
-Diving into the complete details, suppose X is at offset 3 in the dictionary, which is encoded by the typed INT8 descriptor 0x11 followed by the value 0x03.
-Next we have the type of the each format field, which here is a 2 element INT8 vector: 0x21.
-Next we have the encoding for each sample, A = 0x01 0x80 followed by B = 0x02 0x03.
+For example, suppose I have two samples, each with a FORMAT field X.  
+Sample A has values [1], while sample B has [2,3].  
+In BCF2 this would be encoded as [1, END\_OF\_VECTOR] and [2, 3]. 
+Diving into the complete details, suppose X is at offset 3 in the dictionary, which is encoded by the typed INT8 descriptor 0x11 followed by the value 0x03. 
+Next we have the type of the each format field, which here is a 2 element INT8 vector: 0x21.  
+Next we have the encoding for each sample, A = 0x01 0x81 followed by B = 0x02 0x03.  
 All together we have:
 
 \vspace{0.3cm}
 \begin{tabular}{|p{2cm} | l |} \hline
 0x11 0x03 & X dictionary offset \\ \hline
 0x21 & each value is a 2 element INT8 value \\ \hline
-0x01 0x80 & A is [1, MISSING] \\ \hline
+0x01 0x81 & A is [1, END\_OF\_VECTOR] \\ \hline
 0x02 0x03 & B is [2, 3] \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
-Note that this means that it's illegal to encode a vector VCF field with missing values; the BCF2 codec should signal an error in this case.
 
 \vspace{0.3cm}
 A \textbf{Genotype (GT) field} is encoded in a typed integer vector (can be 8, 16, or even 32 bit if necessary) with the number of elements equal to the maximum ploidy among all samples at a site.
 For one individual, each integer in the vector is organized as $(allele+1) << 1 \mid phased$ where allele is set to -1 if the allele in GT is a dot `.' (thus the higher bits are all 0).
-The vector is padded with the end-of-vector values if the GT having fewer ploidy.
-We note specifically that except for the end-of-vector byte, no other negative values are allowed in the GT array.
+The vector is padded with the END\_OF\_VECTOR values if the GT having fewer ploidy.
+We note specifically that except for the END\_OF\_VECTOR byte, no other negative values are allowed in the GT array.
 
 Examples:
 
 \vspace{0.3cm}
 \small
 \begin{tabular}{|p{2.5cm} | p{10cm} | p{3cm}|} \hline
-0/1 & in standard format $(0 + 1) << 1 \mid 0$ followed by $(1 + 1) << 1 \mid 0$ & 0x02 0x04 \\ \hline
-0/1, 1/1, and 0/0 & three samples encoded consecutively & 0x020404040202 \\ \hline
-$0\mid1$ & $(1 + 1) << 1 \mid 1$ = 0x05 preceded by the standard first byte value 0x04 & 0x0405 \\ \hline
-./. & where both alleles are missing & 0x00 0x00 \\ \hline
+0/1 & in standard format $(0 + 1) << 1 \mid 0$ followed by $(1 + 1) << 1 \mid 0$ & 0x02 04 \\ \hline
+0/1, 1/1, and 0/0 & three samples encoded consecutively & 0x02 04 04 04 02 02 \\ \hline
+$0\mid1$ & $(1 + 1) << 1 \mid 1$ = 0x05 preceded by the standard first byte value 0x02 & 0x02 05 \\ \hline
+./. & where both alleles are missing & 0x00 00 \\ \hline
 0 & as a haploid it is represented by a single byte & 0x02 \\ \hline
 1 & as a haploid it is represented by a single byte & 0x04 \\ \hline
-0/1/2 & is tetraploid, with alleles & 0x02 0x04 0x06 \\ \hline
-$0/1\mid2$ & is tetraploid with a single phased allele & 0x02 0x04 0x07 \\ \hline
-0 and 0/1 & pad out the final allele for the haploid individual & 0x04 0x80 0x02 0x04\\ \hline
+0/1/2 & is tetraploid, with alleles & 0x02 04 06 \\ \hline
+$0/1\mid2$ & is tetraploid with a single phased allele & 0x02 04 07 \\ \hline
+0 and 0/1 & pad out the final allele for the haploid individual & 0x02 81 02 04\\ \hline
 \end{tabular}
 \normalsize
 
 \vspace{0.3cm}
 The final example is something seen on chrX when we have a haploid male and a diploid female.
-The spare male allele is just assigned the missing value.
+The male genotype vector is terminated prematurely by the END\_OF\_VECTOR value.
 \vspace{0.3cm}
 
 \textbf{Misc. notes}
@@ -2036,8 +2046,8 @@ Therefore, also \#\#PEDIGREE newly requires a unique ID.
 \subsection{Changes between BCFv2.1 and BCFv2.2}
 \begin{itemize}
 \item BCF header lines can include optional IDX field
-\item We introduce end-of-vector byte and reserve 8 values for future use
-\item Clarified that except the end-of-vector byte, no other negative values are allowed in the GT array 
+\item We introduce END\_OF\_VECTOR byte and reserve 8 values for future use
+\item Clarified that except the END\_OF\_VECTOR byte, no other negative values are allowed in the GT array 
 \item String vectors in BCF do not need to start with comma, as the number of values is indicated already in the definition of the tag in the header.
 \item The implicit filter PASS was described inconsistently throughout BCFv2.1: It is encoded as the first entry in the dictionary, not the last.
 \end{itemize}
