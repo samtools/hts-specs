@@ -11,3 +11,4 @@ GNUmakefile
 
 /new/*.pdf
 /_site
+/diff

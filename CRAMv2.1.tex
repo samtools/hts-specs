@@ -13,7 +13,6 @@
 
 \usepackage{graphicx}
 \usepackage{array}
-\usepackage{ulem}
 \usepackage{fixltx2e}
 \usepackage{amssymb}
 \usepackage{fancyhdr}
@@ -85,6 +84,8 @@ define how logical data types are stored in CRAM. Data in CRAM is stored either
 as as bits or as bytes. Writing values as bits and bytes is described in detail 
 below.
 
+
+CHANGES HERE
 \subsection{\textbf{Logical data types}}
 
 \begin{description}
@@ -113,7 +114,6 @@ An array of any logical data type: \texttt{<}type\texttt{>}[ ]
 
 \subsection{\textbf{Writing bits to a bit stream}}
 
-A bit stream consists of a sequence of 1s and 0s. The bits are written most significant 
 bit first where new bits are stacked to the right and full bytes on the left are 
 written out. In a bit stream the last byte will be incomplete if less than 8 bits 
 have been written to it. In this case the bits in the last byte are shifted to 

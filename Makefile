@@ -12,18 +12,24 @@ PDFS =	BCFv1_qref.pdf \
 	VCFv4.2.pdf \
 	VCFv4.3.pdf
 
+diffs: $(PDFS:%=diffs/%)
+
+diffs/%.pdf: %.tex 
+	mkdir -p diffs
+	scripts/makediff.sh $<
+
 pdf: $(PDFS:%=new/%)
 
 %.pdf: new/%.pdf
 	cp $^ $@
 
 new/CRAMv2.1.pdf: CRAMv2.1.tex new/CRAMv2.1.ver
-new/CRAMv3.pdf: CRAMv3.tex new/CRAMv3.ver
-new/SAMv1.pdf: SAMv1.tex new/SAMv1.ver
-new/SAMtags.pdf: SAMtags.tex new/SAMtags.ver
-new/VCFv4.1.pdf: VCFv4.1.tex new/VCFv4.1.ver
-new/VCFv4.2.pdf: VCFv4.2.tex new/VCFv4.2.ver
-new/VCFv4.3.pdf: VCFv4.3.tex new/VCFv4.3.ver
+new/CRAMv3.pdf:   CRAMv3.tex   new/CRAMv3.ver
+new/SAMv1.pdf:    SAMv1.tex    new/SAMv1.ver
+new/SAMtags.pdf:  SAMtags.tex  new/SAMtags.ver
+new/VCFv4.1.pdf:  VCFv4.1.tex  new/VCFv4.1.ver
+new/VCFv4.2.pdf:  VCFv4.2.tex  new/VCFv4.2.ver
+new/VCFv4.3.pdf:  VCFv4.3.tex  new/VCFv4.3.ver
 
 PDFLATEX = pdflatex
 
@@ -36,8 +42,7 @@ new/VCFv4.1.ver new/VCFv4.2.ver new/VCFv4.3.ver: img/all_orientations-400x296.pn
 
 new/%.ver: %.tex
 	@test -d new || mkdir new
-	scripts/genversion.sh $^ > $@
-
+	scripts/genversion.sh $< > $@
 
 mostlyclean:
 	-rm -f new/*.aux new/*.log new/*.out new/*.toc new/*.ver
@@ -45,6 +50,5 @@ mostlyclean:
 clean: mostlyclean
 	-rm -f $(PDFS:%=new/%)$(if $(wildcard new),; rmdir new)
 	-rm -rf _site
-
 
 .PHONY: all pdf mostlyclean clean

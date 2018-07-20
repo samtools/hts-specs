@@ -57,6 +57,8 @@ not. Each alignment line has 11 mandatory fields for essential alignment
 information such as mapping position, and variable number of optional
 fields for flexible or aligner specific information.
 
+Yossi Was Here (testing latex diff)
+
 This specification is for version 1.6 of the SAM and BAM formats.  Each SAM and
 BAM file may optionally specify the version being used via the
 {\tt @HD VN} tag. For full version history see Appendix~\ref{sec:history}. 
@@ -77,7 +79,7 @@ ref      AGCATGTTAGATAA**GATAGCTGTGCTAGTAGGCAGTCAGCGCCAT
 
 +r001/1        TTAGATAAAGGATA*CTG
 +r002         aaaAGATAA*GGATA
-+r003       gcctaAGCTAA
++r003       gcctaAGCTAAchanges in verbatim
 +r004                     ATAGCT..............TCAGC
 -r003                            ttagctTAGGC
 -r001/2                                        CAGCGGCAT
@@ -346,14 +348,14 @@ of the mandatory fields in the SAM format:
   \hline
   1 & {\sf QNAME} & String & \verb:[!-?A-~]{1,254}: & Query template NAME\\
   2 & {\sf FLAG} & Int & $[0,\,2^{16}-1]$ & bitwise FLAG \\
-  3 & {\sf RNAME} & String & {\tt \char92*|[!-()+-\char60\char62-\char126][!-\char126]*} & Reference sequence NAME\\
+  3 & {\sf RNAME} & String HEHEE& {\tt \char92*|[!-()+-\char60\char62-\char126][!-\char126]*} & Reference sequence NAME\\
   4 & {\sf POS} & Int & $[0,\,2^{31}-1]$ & 1-based leftmost mapping POSition \\
   5 & {\sf MAPQ} & Int & $[0,\,2^8-1]$ & MAPping Quality \\
   6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
   7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next read\\
   8 & {\sf PNEXT} & Int & $[0,\,2^{31}-1]$ & Position of the mate/next read \\
   9 & {\sf TLEN} & Int & $[-2^{31}+1,\,2^{31}-1]$ & observed Template LENgth \\
-  10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & segment SEQuence\\
+  10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} &\\
   11 & {\sf QUAL} & String & {\tt [!-\char126]+} & ASCII of Phred-scaled base QUALity+33 \\
   \hline
 \end{tabular}

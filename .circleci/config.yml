@@ -1,0 +1,49 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: htsspecs/circle-ci-image:0.4
+    steps:
+      - checkout
+      - run: 
+          name: Compile the LaTeX
+          command: |
+              make
+              mkdir pdfs
+              cp new/*.pdf pdfs
+              mkdir logs
+              cp new/*.log logs
+
+      - run: 
+          name: Compile the diff LaTeX files
+          command: |
+              mergebase=$(git merge-base HEAD origin/master)
+              echo $mergebase
+
+              mkdir -p diffs
+              make --touch diffs
+
+              # Avoid timing issues
+              sleep 2  
+
+              touch $(git diff-tree --name-only $mergebase HEAD) || true
+
+              # Rebuild the actually changed PDFs, and remove the merely touched ones
+              make diffs
+              find diffs -empty -delete -mindepth 1
+
+      - run:
+          name: Post PDFs to Github PR
+          command: |
+              alias node=nodejs
+              npm i circle-github-bot
+              scripts/pdf_comment.js
+      - store_artifacts:
+          path: pdfs
+      - store_artifacts: 
+          path: logs
+      - store_artifacts:
+          path: diffs
+
+      
+
