@@ -25,10 +25,11 @@ new/VCFv4.1.pdf: VCFv4.1.tex new/VCFv4.1.ver
 new/VCFv4.2.pdf: VCFv4.2.tex new/VCFv4.2.ver
 new/VCFv4.3.pdf: VCFv4.3.tex new/VCFv4.3.ver
 
+PDFLATEX = pdflatex
 
 new/%.pdf: %.tex
-	pdflatex --output-directory new $<
-	while grep -q 'Rerun to get [a-z-]* right' new/$*.log; do pdflatex --output-directory new $< || exit; done
+	$(PDFLATEX) --output-directory new $<
+	while grep -q 'Rerun to get [a-z-]* right' new/$*.log; do $(PDFLATEX) --output-directory new $< || exit; done
 
 new/CRAMv2.1.ver new/CRAMv3.ver: img/CRAMFileFormat2-1-fig001.png img/CRAMFileFormat2-1-fig002.png img/CRAMFileFormat2-1-fig003.png img/CRAMFileFormat2-1-fig004.png img/CRAMFileFormat2-1-fig005.png img/CRAMFileFormat2-1-fig006.png img/CRAMFileFormat2-1-fig007.png
 

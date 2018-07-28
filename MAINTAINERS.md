@@ -58,6 +58,23 @@ So the usual workflow when editing these documents is (for example, when working
 (Optionally, verify that it contains the correct commit hash for your source changes.)
 Now commit your _.pdf_ changes, separately from any source changes.
 
+### Customising the build
+
+You may wish to create a file named _GNUmakefile_ (which GNU Make will read in preference to _Makefile_) as follows:
+
+```make
+include Makefile
+
+PDFLATEX = texfot pdflatex
+
+%+test.pdf: new/%.pdf
+	cp $^ $@
+```
+
+Using `texfot` (where available) hides many of TeX's less interesting log messages.
+Adding a rule for individualised PDF filenames allows you to type e.g. `make SAMv1+test.pdf` to generate distinctively-named working PDFs in the main directory.
+If you are working on separate changes in several _hts-specs_ directories at once, using different filenames for each directory helps identify which PDFs you're viewing.
+
 ### Rationale
 
 It is a little inconvenient having the working PDFs down in a subdirectory, but this is outweighed by the convenience of being able to switch between Git branches etc without trouble — as there would be if updated working PDFs were in the main directory, overwriting the checked-in PDFs.
