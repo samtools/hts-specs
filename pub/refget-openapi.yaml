@@ -98,6 +98,14 @@ paths:
                 type: string
                 example: >-
                   MSSPTPPGGQRTLQKRKQGSSQKVAASAPKKNTNSNNSILKIYSDEATGLRVDPLVVLFLAVGFIFSVVALHVISKVAGKLF
+        '206':
+          description: Successful retrieval of subsequence as a single string with no line breaks
+        '302':
+          description: Redirecting the client where the sequence can be retrieved
+        '303':
+          description: Redirecting the client where the sequence can be retrieved
+        '307':
+          description: Redirecting the client where the sequence can be retrieved
         '400':
           description: Invalid input; normally due to range parameter usage
         '404':
@@ -106,11 +114,7 @@ paths:
           $ref: '#/components/responses/BadFormat'
         '416':
           description: Invalid range request specified
-        '206':
-          description: Successful retrieval of subsequence as a single string with no line breaks
-        '303':
-          description: Redirecting the client where the sequence can be retrieved
-        '501': 
+        '501':
           description: The specified request is not supported by the server          
   '/sequence/{id}/metadata':
     get:
