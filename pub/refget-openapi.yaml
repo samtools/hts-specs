@@ -20,7 +20,7 @@ tags:
   - name: Services
     description: Housekeeping services
 paths:
-  /service-info:
+  '/sequence/service-info/:
     get:
       summary: Retrieve a summary of features this API deployment supports
       operationId: serviceInfo
@@ -143,28 +143,31 @@ components:
       type: object
       description: Holds information about a sequence checksum
       properties:
-        id:
-          type: string
-          description: Query identifier. Normally the default checksum for a given service
-          example: 6681ac2f62509cfc220d78751b8dc524
-        md5:
-          type: string
-          description: MD5 checksum of the reference sequence
-          example: 6681ac2f62509cfc220d78751b8dc524
-        trunc512:
-          type: string
-          description: >-
-            Truncated, to 48 characters, SHA-512 checksum of the reference
-            sequence encoded as a HEX string
-          example: 959cb1883fc1ca9ae1394ceb475a356ead1ecceff5824ae7
-        length:
-          type: integer
-          format: int64
-          description: An decimal integer of the length of the reference sequence
-        aliases:
-          type: array
-          items:
-            $ref: '#/components/schemas/Alias'
+        metadata:
+          type: object
+          properties:
+            id:
+              type: string
+              description: Query identifier. Normally the default checksum for a given service
+              example: 6681ac2f62509cfc220d78751b8dc524
+            md5:
+              type: string
+              description: MD5 checksum of the reference sequence
+              example: 6681ac2f62509cfc220d78751b8dc524
+            trunc512:
+              type: string
+              description: >-
+                Truncated, to 48 characters, SHA-512 checksum of the reference
+                sequence encoded as a HEX string
+              example: 959cb1883fc1ca9ae1394ceb475a356ead1ecceff5824ae7
+            length:
+              type: integer
+              format: int64
+              description: An decimal integer of the length of the reference sequence
+            aliases:
+              type: array
+              items:
+                $ref: '#/components/schemas/Alias'
       required:
         - id
         - length
