@@ -32,6 +32,9 @@
 \newcommand*{\firstbytebox}[2]{\byteboxAux{#1}{#2}{\put(0,0){\line(0,1){\bytetotalheight}}}}
 \newcommand*{\bytebox}[2]{\byteboxAux{#1}{#2}{}}
 
+\newcommand*{\cclass}[1]{{\rm\sf :#1:}}
+\newcommand*{\caret}{\textsuperscript{$\wedge$}}
+
 \begin{document}
 
 \input{SAMv1.ver}
@@ -176,6 +179,31 @@ almost entirely overlapping with each other; except the single-best optimal
 mapping, all the other mappings get mapping quality $<$Q3
 and are ignored by most SNP/INDEL callers.}
 
+\subsubsection{Character set restrictions}\label{sec:charset}
+
+Reference sequence names, CIGAR strings, and several other field types are used as values or parts of values of other fields in SAM and related formats such as VCF.
+To ensure that these other fields' representations are unambiguous, these field types disallow particular delimiter characters.
+
+Query or read names may contain any printable ASCII characters in the range \verb"[!-~]" apart from `\verb"@"', so that SAM alignment lines can be easily distinguished from header lines.
+(They are also limited in length.)
+
+Reference sequence names may contain any printable ASCII characters in the range {\tt [!-\verb:~:]} apart from backslashes, commas, quotation marks, and brackets---i.e., apart from `{\tt \verb:\:\,,\,"`'\,()\,[]\,\verb:{}:\,<>}'---and may not start with `{\tt *}' or `{\tt =}'.%
+\footnote{Characters that are \emph{not} disallowed include `{\tt |}', which historically appeared in reference names derived from NCBI FASTA files, and `{\tt :}', which appears in HLA allele names.
+Appendix~\ref{sec:parse-region} describes approaches for parsing \emph{name}{\tt [:}\emph{begin}{\tt -}\emph{end}{\tt ]} region notation unambiguously even though \emph{name} may itself contain colons.}
+
+Thus they match the following regular expression:
+\begin{center}
+{\tt [\verb"0-9A-Za-z!#$%&+./:;?@^_|~-"][\verb"0-9A-Za-z!#$%&*+./:;=?@^_|~-"]*}
+\end{center}
+
+% Pedantically this should be [[:rname:]^*=][[:rname:]]*, but we take advantage
+% of POSIX (Issue 7) section 9.3.5/8 to elide the excess brackets for clarity.
+\newcommand*{\rnameRegexp}{[\cclass{rname}\caret*=][\cclass{rname}]*}
+
+\noindent
+For clarity, elsewhere in this specification we write this set of allowed characters as a character class~{\tt [\cclass{rname}]} and extend the POSIX regular expression notation to use {\tt\caret *=} to indicate the omission of `{\tt *}' and `{\tt =}' from the character class.
+Thus this regular expression can be written more clearly as {\tt\rnameRegexp}.
+
 \subsection{The header section}
 Each header line begins with the character `{\tt @}' followed by
 one of the two-letter header record type codes defined in this section.
@@ -235,7 +263,7 @@ For example, {\tt @HD SO:queryname SS:coordinate:TLEN} would indicate that the d
 The {\tt SN} tags and all individual {\tt AN} names in all {\tt @SQ} lines
 must be distinct.
   The value of this field is used in the
-  alignment records in {\sf RNAME} and {\sf RNEXT} fields. Regular expression: {\tt [!-)+-\char60\char62-\char126][!-\char126]*}\\\cline{2-3}
+  alignment records in {\sf RNAME} and {\sf RNEXT} fields. Regular expression: {\tt\rnameRegexp}\\\cline{2-3}
   & {\tt LN}* & Reference sequence length. \emph{Range}: $[1,\,2^{31}-1]$\\\cline{2-3}
   & {\tt AH} & Indicates that this sequence is an alternate locus.%
 \footnote{See \url{https://www.ncbi.nlm.nih.gov/grc/help/definitions} for descriptions of \emph{alternate locus} and \emph{primary assembly}.}
@@ -246,13 +274,12 @@ A comma-separated list of alternative names that tools may use when referring
 to this reference sequence.%
 \footnote{For example, given `{\tt @SQ SN:MT AN:chrMT,M,chrM LN:16569}',
 tools can ensure that a user's request for any of `MT', `chrMT', `M',
-or~`chrM' succeeds and refers to the same sequence.
-Note the restricted set of characters allowed in an alternative name.}
+or~`chrM' succeeds and refers to the same sequence.}
 These alternative names are not used elsewhere within the SAM file;
 in particular, they must not appear in alignment records' {\sf RNAME}
 or~{\sf RNEXT} fields.
 \emph{Regular expression}: \emph{name}{\tt (,}\emph{name}{\tt )*}
-where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
+where \emph{name} is {\tt\rnameRegexp}\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
   & {\tt DS} & Description.  UTF-8 encoding may be used.\\\cline{2-3}
   & {\tt M5} & MD5 checksum of the sequence.  See Section~\ref{sec:ref-md5}\\\cline{2-3}
@@ -354,11 +381,11 @@ of the mandatory fields in the SAM format:
   \hline
   1 & {\sf QNAME} & String & \verb:[!-?A-~]{1,254}: & Query template NAME\\
   2 & {\sf FLAG} & Int & $[0,\,2^{16}-1]$ & bitwise FLAG \\
-  3 & {\sf RNAME} & String & {\tt \char92*|[!-()+-\char60\char62-\char126][!-\char126]*} & Reference sequence NAME\\
+  3 & {\sf RNAME} & String & {\tt \verb"\*"|\rnameRegexp} & Reference sequence NAME\footnotemark \\
   4 & {\sf POS} & Int & $[0,\,2^{31}-1]$ & 1-based leftmost mapping POSition \\
   5 & {\sf MAPQ} & Int & $[0,\,2^8-1]$ & MAPping Quality \\
   6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
-  7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next read\\
+  7 & {\sf RNEXT} & String & {\tt \verb"\*"|=|\rnameRegexp} & Reference name of the mate/next read \\
   8 & {\sf PNEXT} & Int & $[0,\,2^{31}-1]$ & Position of the mate/next read \\
   9 & {\sf TLEN} & Int & $[-2^{31}+1,\,2^{31}-1]$ & observed Template LENgth \\
   10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & segment SEQuence\\
@@ -366,6 +393,9 @@ of the mandatory fields in the SAM format:
   \hline
 \end{tabular}
 \end{center}
+
+\footnotetext{Reference sequence names may contain any printable ASCII characters with the exception of certain punctuation characters, and may not start with `{\tt *}' or `{\tt =}'.
+See Section~\ref{sec:charset} for details and an explanation of the {\tt [\cclass{rname}]} notation.}
 
 \begin{enumerate}
 \item {\sf QNAME}: Query template NAME. Reads/segments having identical {\sf QNAME}
@@ -1227,6 +1257,41 @@ int reg2bins(int beg, int end, uint16_t list[MAX_BIN])
 
 \begin{appendices}
 \appendix
+\section{Parsing region notation}\label{sec:parse-region}
+
+Parsing region notation such as \emph{name}{\tt [:}\emph{begin}{\tt [-}\emph{end}{\tt ]]} (in which omission of the outer bracketed portion indicates a request for the entire reference sequence) would be simple if \emph{name} could not itself contain `{\tt :}' characters, but this is not the case.
+(No such notation containing an optional `{\tt :}' appears in the SAM format itself, but various tools use this notation as a convenient way for their users to specify regions of interest.)
+
+The set of valid reference sequence names is usually already known when parsing this notation---for example, because the associated {\tt @SQ} headers have already been encountered.
+Tools can use this set to determine unambiguously which colons could delimit a known-valid reference sequence name.
+
+In pseudocode form, a string~\emph{str} can be parsed as follows:
+
+\begin{tabbing}
+\qquad\quad
+\= consider the rightmost `{\tt :}' character, if any, of \emph{str} \+\\
+if \emph{str} is of the form `\emph{prefix}{\tt :NUM}' \= or `\emph{prefix}{\tt :NUM-NUM}' \\
+\> or generally `\emph{prefix}{\tt :}\emph{suffix}' for some plausible interval suffix \\
+then \\
+\qquad \= if both \emph{prefix} and \emph{str} are in the known set then\quad{\sf\ldots error: ambiguous representation} \\
+\> else if \emph{prefix} is in the known set then return (\emph{prefix}, {\tt NUM}\ldots{\tt NUM}) \\
+\> else if \emph{str} is in the known set then return (\emph{str}, entire sequence) \\
+\> else\quad{\sf\ldots error: unknown reference sequence name} \\
+\\
+else\qquad{\sf\ldots either {\sl str} does not contain a colon or the suffix is not plausibly numeric}
+\\
+\> if \emph{str} is in the known set then return (\emph{str}, entire sequence) \\
+\> else\quad{\sf\ldots error: unknown reference sequence name or invalid interval syntax}
+\end{tabbing}
+
+\noindent
+The check leading to ``{\sf error: ambiguous representation}'' is important as it prevents confusing interpretations of actually ambiguous input.
+Typically the set of valid reference sequence names will not contain names that are prefixes of other names in the set, so in practice this error will not usually be encountered in non-malicious data.
+
+Either in addition to this algorithm or as an alternative to it, tools can use additional delimiter characters to make an unambigiously parsable notation.
+We recommend a convention using curly brackets around the reference sequence name--- \verb"{"\emph{name}\verb"}"{\tt [:}\emph{begin}{\tt [-}\emph{end}{\tt ]]} ---as being memorable, easily typed, unambiguous, and not expanded by most shells.
+% (RNAME cannot contain commas, so Bash's {a,b} brace expansion won't occur.)
+
 \section{SAM Version History}\label{sec:history}
 
 This lists the date of each tagged SAM version along with changes that
@@ -1242,6 +1307,11 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item\textbf{Restricted the allowable punctuation characters in reference sequence names} (in {\tt @SQ SN}, {\sf RNAME}, etc).
+The sets of characters allowed in {\tt @SQ SN} and {\tt @SQ AN} are now identical, which enlarges the previous {\tt AN} set. (Jan 2019)
+
+We recommend that implementations validating reference sequence names do so using the rules in Section~\ref{sec:charset}; are more lenient for files declaring $\mbox{\tt @HD VN} \leq 1.5$; and validate {\tt AN} only against these rules, not the previous more restrictive {\tt AN} rules.
+
 \item Add {\tt @HD SS} sorting details header tag. (Oct 2018)
 \item B array optional fields may have no entries---this was already representable in BAM, clarified that empty arrays are permitted in SAM too. (Jul 2018)
 \item Add {\tt @SQ DS} header tag. (Jul 2018)
@@ -1253,6 +1323,7 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.5: 23 May 2013 to November 2017}
 
 \begin{itemize}
+\item Add {\tt @SQ AN} header tag, allowing only alphanumeric and `\verb"*+.@_|-"' characters in its names. (Jul 2017)
 \item Add {\tt @SQ AH} header tag. (Mar 2017)
 \item Auxiliary tags migrated to SAMtags document. (Sep 2016)
 \item Z and H auxiliary tags are permitted to be zero length. (Jun 2016)
