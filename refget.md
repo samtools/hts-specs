@@ -72,7 +72,7 @@ Authorization: Bearer [access_token]
 The policies and processes used to perform user authentication and authorization, and the means through which access tokens are issued, are beyond the scope of this API specification. GA4GH recommends the use of the OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for authentication and authorization.
 
 ## Checksum calculation
-The supported checksum algorithms are `MD5` and a SHA-512 based system called `TRUNC512` (see later for details). Servers MUST support sequence retrieval by one or more of these algorithms, and are encouraged to support all to maximize interoperability. To provide CRAM Reference Registry compatibility an implementation must support MD5.
+The supported checksum algorithms are `MD5` (a 32 character HEX string) and a SHA-512 based system called `TRUNC512` (a 48 character HEX string, see later for details). Servers MUST support sequence retrieval by one or more of these algorithms, and are encouraged to support all to maximize interoperability. To provide CRAM Reference Registry compatibility an implementation must support MD5.
 
 When calculating the checksum for a sequence, all non-base symbols (\n, spaces, etc) must be removed and then uppercase the rest. The allowed alphabet for checksum calculation is uppercase ASCII (`0x41`-`0x5A` or `A-Z`).
 
@@ -498,12 +498,17 @@ The VMC, Variant Modelling Collaboration, is a complementary GA4GH effort to mod
 
 The algorithm performs a SHA-512 digest of a sequence and creates a hex encoding of the first 24 bytes of the digest. An implementation may do this by sub-slicing the digest or sub-stringing 48 characters from a SHA-512 hex string. Analysis performed by VMC suggests this should be sufficient to avoid message collisions. Should a message collision occur within this scheme then the number of bytes retained from the checksum will be increased.
 
+### Checksum Identifier Identification
+
+When a checksum identifier is given to an implementation, it is the server's repsonsiblity to compute what kind of identifier (`MD5` or `TRUNC512`) has been given. Both can be deduced based on length; `MD5` is 32 characters long and `TRUNC512` is 48 characters long. Should we support alternative checksum based identifiers and require a more complex method to resolve their identification this will be defined in future specification versions.
+
 ## Possible Future API Enhancements
 
 - Allow POST requests for batch downloads
 - Formally define more sequence formattings (e.g. fasta, protobuf)
 - Allow reference sequence checksums to be bundled together e.g. to represent a reference genome
 - Support groups/collections of sequences based on checksums
+- Support other methods of identifying the checksum identifier aside from length
 
 ## Contributors
 
