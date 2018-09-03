@@ -365,11 +365,11 @@ Fixed fields are:
 
 \subsubsection{Genotype fields}
 If genotype information is present, then the same types of data must be present for all samples.
-First a FORMAT field is given specifying the data types and order (colon-separated FORMAT ids matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed).
+First a FORMAT field is given specifying the data types and order (colon-separated FORMAT keys matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate keys are not allowed).
 This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format.
-The first sub-field must always be the genotype (GT) if it is present.
-There are no required sub-fields.
-Additional Genotype fields can be defined in the meta-information, however, software support for such fields is not guaranteed.
+The first key must always be the genotype (GT) if it is present.
+There are no required keys.
+Additional Genotype keys can be defined in the meta-information, however, software support for them is not guaranteed.
 
 If any of the fields is missing, it is replaced with the MISSING value.
 For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing.
