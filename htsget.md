@@ -162,6 +162,13 @@ The server SHOULD reply with an `UnsupportedFormat` error if the requested forma
 [^a]
 </td></tr>
 <tr markdown="block"><td>
+`class`  
+_optional string_
+</td><td>
+A list of URL classes to include, see below.
+Default: all
+</td></tr>
+<tr markdown="block"><td>
 `referenceName` 
 _optional_
 </td><td>
