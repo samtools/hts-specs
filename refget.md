@@ -120,7 +120,7 @@ Content-type: text/vnd.ga4gh.refget.v1.0.0+plain
 
 | Parameter | Data Type | Required | Description                                                                                                                                                                                                         |
 |-----------|-----------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`      | string    | Yes      | A string specifying the sequence to be returned. The identifier shall be a checksum derived from the sequence using one of the supported checksum algorithms, or an alias for the sequence supported by the server. |
+| `id`      | string    | Yes      | A string specifying an identifier for the sequence to be returned. The identifier shall be a checksum derived from the sequence using one of the supported checksum algorithms, or a server specific checksum algorithm identifier. |
 
 #### Query parameters
 
@@ -167,7 +167,7 @@ Content-type: application/vnd.ga4gh.refget.v1.0.0+json
 
 | Parameter | Data Type | Required | Description                                                                                                                                                                                                         |
 |-----------|-----------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`      | string    | Yes      | A string specifying identifier to retrieve aliases for. The identifier shall be a checksum derived from the sequence using one of the supported checksum algorithms, or an alias for the sequence supported by the server. |
+| `id`      | string    | Yes      | A string specifying an identifier to retrieve metadata for. The identifier shall be a checksum derived from the sequence using one of the supported checksum algorithms, or a server specific checksum algorithm identifier. |
 
 #### Response
 
@@ -355,6 +355,17 @@ GAGACTGCTG
 ```
 
 Any bytes added for formatting to the returned output should not be taken in to account when processing a Range request.
+
+## Alternative Checksum Algorithms
+
+Refget implementations MUST support the `MD5` identifier space SHOULD support `TRUNC512`. Non-standard identifiers are allowed but MUST conform to the following requirements:
+
+1. Non-standard identifiers must be based on a hash algorithm dervied from sequence content
+2. Non-standard identifiers must not clash with the `MD5` and `TRUNC512` identifier space
+  - Note `TRUNC512` is allowed to grow in length should collisions in the current implementation be detected
+3. Non-standard identifiers must not clash with other identifiers on your server i.e. they must be unique.
+
+Any alternative identifier scheme MUST be declared in the `/sequence/service-info` endpoint under `algorithms`.
 
 ## TRUNC512 Algorithm Details
 
