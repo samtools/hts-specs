@@ -4,10 +4,21 @@ title: refget protocol
 suppress_footer: true
 ---
 
-# Refget API Specification v0.2
+# Refget API Specification v1.0.0
+
+## Introduction
+
+Reference sequences are fundamental to genomic analysis and interpretation however naming is a serious issue. For example the reference genomic sequence GRCh38/1 is also known as hg38/chr1, CM000663.2 and NC_000001.11. In addition there is no standardised way to access reference sequence from providers such as INSDC (ENA, Genbank, DDBJ), Ensembl or UCSC. 
+
+Refget enables access to reference sequences using an identifier derived from the sequence itself. 
+
+Refget uses a hash algorithm (by default `MD5`) to generate a checksum identifier, which is digest of the underlying sequence. This removes the need for a single accessioning authority to identify a reference sequence and improves the provenance of sequence used in analysis. In addition refget defines a simple scheme to retrieve reference sequence via this checksum identifier.
+
+Refget is intended to be used in any scenario where full or partial access to reference sequence is required e.g. the CRAM file format or a genome browser.
 
 ## Design principles
-Refget enables access to reference sequences using an identifier derived from the sequence itself. The API has the following features:
+
+The API has the following features:
 
 - The checksum algorithm used to derive the sequence identifier shall be a mainstream algorithm available standard across multiple platforms and programming languages.
 - The client may request a sub-sequence, which the server is expected to honour
@@ -16,13 +27,13 @@ Explicitly this API does NOT:
 
 - Provide a way to discover identifiers for valid sequences. Clients obtain these via some out of band mechanism
 
-## OpenAPI 3.0 Description
+## OpenAPI Description
 
-An OpenAPI description of this specification is available and [describes the 0.2 version](pub/refget-openapi.yaml).
+An OpenAPI description of this specification is available and [describes the 1.0.0 version](pub/refget-openapi.yaml). OpenAPI is a language independent way of describing REST services and is compatible with a number of [third party tools](http://openapi.tools/).
 
 ## Protocol essentials
 
-All API invocations are made to a configurable HTTP(S) endpoint, receive URL-encoded query string parameters, and return text or other allowed formatting as requested by the user. Successful requests result with HTTP status code 200 and have the appropriate text encoding in the response body as defined for each endpoint. The server may provide responses with chunked transfer encoding. The client and server may mutually negotiate HTTP/2 upgrade using the standard mechanism.
+All API invocations are made to a configurable HTTP(S) endpoint, receive URL-encoded query string parameters and HTTP headers, and return text or other allowed formatting as requested by the user. Successful requests result with HTTP status code 200 and have the appropriate text encoding in the response body as defined for each endpoint. The server may provide responses with chunked transfer encoding. The client and server may mutually negotiate HTTP/2 upgrade using the standard mechanism.
 
 The response for sequence retrieval has a character set of US-ASCII and consists solely of the requested sequence or sub-sequence with no line breaks. Other formatting of the response sequence may be allowed by the server, subject to standard negotiation with the client via the Accept header.
 
@@ -142,9 +153,25 @@ The server shall return the requested sequence or sub-sequence as a single strin
 
 On success and either a whole sequence or sub-sequence is returned the server shall issue a 200 status code if the entire sequence is returned or 206 if a sub-sequence is returned via a Range header.
 
+If start and end query parameter are specified and equal each other, the server should respond with a zero length string i.e.
+
+```
+GET /sequence/9f5b68f3ebc5f7b06a9b2e2b55297403?start=0&end=0
+
+```
+
 If a start and/or end query parameter are specified the server should include a `Accept-Ranges: none` header in the response.
 
 If the identifier is not known by the server, a 404 status code and `NotFound` error shall be returned.
+
+#### Example text request
+
+The following response has been cut for brevity.
+
+```
+GET /sequence/9f5b68f3ebc5f7b06a9b2e2b55297403
+CTGTCAGCCCGGTTTTCAAGGAGCACACACCAAAAATGCACCAAAGCTTACATCCATACAAACACCCGCA ....
+```
 
 ### Method: Get known metadata for an id
 
@@ -347,7 +374,19 @@ However a start/end for the same 10bp would be:
 ?start=5&end=15
 ```
 
-Any formatting of the sequence a server might allow is applied after the the sub-sequence is selected, for example a server that supported returning fasta the result for the prior example could be:
+A Range header to retrieve a single base pair would be:
+
+```
+Range: bytes=0-0
+```
+
+The returned subsequence would be the first `C` of the sequence. A URL parameter for the same region would be
+
+```
+?start=0&end=1
+```
+
+Any formatting of the sequence a server might allow is applied after the sub-sequence is selected, for example a server that supported returning fasta the result for the prior example could be:
 
 ```
 >9f5b68f3ebc5f7b06a9b2e2b55297403 5-14
@@ -488,7 +527,7 @@ Key to generating reproducible checksums is the normalisation algorithm applied 
 - VMC
   - VMC requires sequence to be a string of IUPAC codes for either nucelotide or protein sequence
 
-Considering the requirements of the three systems the specification designers felt it was sufficient to restrict input to the inclusive range `65` (`0x41`/`A`) to `90` (`0x5A`/`Z`). Changes to this normalisation algorthim would require a new checksum identifer to be used.
+Considering the requirements of the three systems the specification designers felt it was sufficient to restrict input to the inclusive range `65` (`0x41`/`A`) to `90` (`0x5A`/`Z`). Changes to this normalisation algorthim would require a new checksum identifier to be used.
 
 ### Checksum Choice
 
@@ -520,6 +559,7 @@ The following people have contributed to the design of this specification.
 - Matthew Laird
 - Somesh Chaturvedi
 - Rishi Nag
+- Reece Hart
 
 # Appendix
 
