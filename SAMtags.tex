@@ -215,13 +215,11 @@ Same encoding as {\sf QUAL}.
 Sequence of the mate/next segment in the template.  See also {\tt Q2}
 for any associated quality values.
 
-\item[SA:Z:\tagregex{{\tt (}\sf{RNAME}{\tt ,}\sf{POS}{\tt ,}\emph{strand}{\tt ,}\sf{CIGAR}{\tt ,}\sf{MAPQ}{\tt ,}\sf{NM}{\tt ;)}+}]
-The tag encodes the values of other canonical alignments in a chimeric alignment, formatted as a semicolon-delimited list. 
-Where \emph{strand} encodes the 0x10 bit of {\sf FLAG}---indicating positive/negative strand---such that it is '+' if the bit is unset and '--' if the bit is set.
-The other values are taken directly from the canonical read.
-Each element in the list represents a part of the chimeric alignment. 
-Conventionally, when present at a supplementary line, the first element points to the primary line.
-\emph{\sf POS} is a 1-based coordinate.
+\item[SA:Z:\tagregex{{\tt (}\emph{rname}{\tt ,}\emph{pos}{\tt ,}\emph{strand}{\tt ,}\emph{CIGAR}{\tt ,}\emph{mapQ}{\tt ,}\emph{NM}{\tt ;)}+}]
+Other canonical alignments in a chimeric alignment, formatted as a semicolon-delimited list.
+Each element in the list represents a part of the chimeric alignment. Conventionally, at a supplementary line, the first element points to the primary line.
+\emph{Strand} is either `{\tt +}' or `{\tt -}', indicating positive/negative strand, corresponding to FLAG bit 0x10.
+\emph{Pos} is a 1-based coordinate.
 
 \item[SM:i:\tagvalue{score}]
 Template-independent mapping quality, i.e., the mapping quality if the read were mapped as a single read rather than as part of a read pair or template.
@@ -351,14 +349,14 @@ In the case of multiple unique molecular identifiers (e.g., one on each end of t
 \begin{description}
 \item[OA:Z:\tagregex{{\tt (}\sf{RNAME}{\tt,\,}\sf{POS}{\tt,\,}\emph{strand}{\tt,\,}\sf{CIGAR}{\tt,\,}\sf{MAPQ}{\tt,\,}\sf{NM}{\tt; )}+}]
 The tag encodes the original alignment information of the record prior to realignment or unalignment by subsequent tool. 
-The resulting string is the result of joining the following6 values with commas `,' (no additional spaces):
+The resulting string is the result of joining the following 6 values with commas `,' (no additional spaces):
 \begin{itemize}
-\item {\sf RNAME} must be stated explicitly: the use of \,`=', which is allowed in {\sf RNEXT}, is not allowed here. 
+\item {\sf RNAME}, which must be stated explicitly; the use of \,`{\tt =}', which is allowed in {\sf RNEXT}, is not allowed here. 
 \item POS is 1-based.
-\item Strand is either ?+? or ?-?, indicating positive/negative strand, corresponding to FLAG bit 0x10. 
+\item Strand is either `{\tt +}' or `'{\tt -}`, indicating positive/negative strand, corresponding to bit 0x10 of FLAG (unset/set). 
 \item CIGAR as a string.
-\item mapq as a numeric string.
-\item NM (as a numeric string). It may be omitted, but the comma delimiter must be retained so that the string can be easily parsed into the 6 subfields.
+\item MAPQ as a numeric string.
+\item NM, the value of the {\tt NM} tag. It may be omitted, but the comma delimiter must be retained so that the string can be easily parsed into the 6 subfields.
 \end{itemize}
 In the presence of an existing {\tt OA} tag, a subsequent tool may append another set of original alignment information after the semicolon,
 adding to---rather than replacing---the existing {\tt OA} information.
@@ -478,7 +476,9 @@ This appendix lists when standard tags were initially defined or significantly c
 
 
 \subsection*{September 2018}
-Add OA tag for recording original/previous alignment information. 
+Added the OA tag for recording original/previous alignment information. 
+
+Deprecated the OC and OP tags.
 
 \subsubsection*{July 2018}
 
