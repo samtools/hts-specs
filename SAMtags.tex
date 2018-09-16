@@ -351,18 +351,19 @@ In the case of multiple unique molecular identifiers (e.g., one on each end of t
 \begin{description}
 \item[OA:Z:\tagregex{{\tt (}\sf{RNAME}{\tt,\,}\sf{POS}{\tt,\,}\emph{strand}{\tt,\,}\sf{CIGAR}{\tt,\,}\sf{MAPQ}{\tt,\,}\sf{NM}{\tt; )}+}]
 The tag encodes the original alignment information of the record prior to realignment or unalignment by subsequent tool. 
-Here \emph{Strand} is either `{\tt +}' or `{\tt -}', indicating whether the read has been reverse-complemented, which corresponds to FLAG bit 0x10.
-That is, \emph{Strand} is `+' if the bit is unset and `-' if the bit is set.
-The resulting string is the result of joining the 6 values with commas `,' (no additional spaces).
-If  {\tt NM} is unknown it may be omitted, but the comma delimiter must be retained so that the string can be easily parsed into the 6 subfields.
+The resulting string is the result of joining the following6 values with commas `,' (no additional spaces):
+\begin{itemize}
+\item {\sf RNAME} must be stated explicitly: the use of \,`=', which is allowed in {\sf RNEXT}, is not allowed here. 
+\item POS is 1-based.
+\item Strand is either ?+? or ?-?, indicating positive/negative strand, corresponding to FLAG bit 0x10. 
+\item CIGAR as a string.
+\item mapq as a numeric string.
+\item NM (as a numeric string). It may be omitted, but the comma delimiter must be retained so that the string can be easily parsed into the 6 subfields.
+\end{itemize}
 In the presence of an existing {\tt OA} tag, a subsequent tool may append another set of original alignment information after the semicolon,
 adding to---rather than replacing---the existing {\tt OA} information.
 
-Note 1: While commas are legal characters in sequence names, it is forbidden to have an {\tt OA} tag with such sequences.
-
-Note 2: {\sf RNAME} must be stated explicitly: the use of \,`=', which is allowed in {\sf RNEXT}, is not allowed here.
-
-Note 3: The {\tt OA} field is designed to provide record-level information that can be useful for understanding the provenance of the information in a record. 
+The {\tt OA} field is designed to provide record-level information that can be useful for understanding the provenance of the information in a record. 
 It is not designed to provide a complete history of the template alignment information. 
 In particular, realignments resulting in the the removal of Secondary or Supplementary records will cause the loss of all tags associated with those records, and may alternatively leave the {\tt SA} tag in an invalid state.
 
