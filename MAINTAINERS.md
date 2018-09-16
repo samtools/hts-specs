@@ -30,7 +30,20 @@ Past VCF/BCF maintainers include Ryan Poplin and David Roazen.
 
 * Mike Lin (@mlin)
 
-[ga4gh-ff]:  https://genomicsandhealth.org/working-groups/our-work/file-formats
+### Refget
+
+* Andy Yates (@andrewyatz)
+* Matt Laird (@lairdm)
+
+[ga4gh-ff]:  https://www.ga4gh.org/howwework/workstreams/#lsg
+
+
+## Updating the specifications
+
+Minor editorial fixes where there is no likelihood of controversy may be done directly on the **master** branch.
+Larger changes should be proposed as pull requests so that they can be discussed and refined.
+(Even those with write access to the **samtools/hts-specs** repository should in general create their pull request branches within their own **hts-specs** forks.
+This way when the main repository is forked again, the new fork is created with a minimum of extraneous volatile branches.)
 
 
 ## Generating PDF specification documents
@@ -49,6 +62,23 @@ So the usual workflow when editing these documents is (for example, when working
 3. Type `make clean SAMv1.pdf` to regenerate the PDF and copy it to the main directory.
 (Optionally, verify that it contains the correct commit hash for your source changes.)
 Now commit your _.pdf_ changes, separately from any source changes.
+
+### Customising the build
+
+You may wish to create a file named _GNUmakefile_ (which GNU Make will read in preference to _Makefile_) as follows:
+
+```make
+include Makefile
+
+PDFLATEX = texfot pdflatex
+
+%+test.pdf: new/%.pdf
+	cp $^ $@
+```
+
+Using `texfot` (where available) hides many of TeX's less interesting log messages.
+Adding a rule for individualised PDF filenames allows you to type e.g. `make SAMv1+test.pdf` to generate distinctively-named working PDFs in the main directory.
+If you are working on separate changes in several _hts-specs_ directories at once, using different filenames for each directory helps identify which PDFs you're viewing.
 
 ### Rationale
 

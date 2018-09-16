@@ -185,7 +185,7 @@ In the header, each line is TAB-delimited and, apart from {\tt @CO} lines,
 each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
 is a two-character string that defines the format and content of {\tt VALUE}.
 Thus header lines match {\tt
-  /\char94@[A-Z][A-Z](\char92t[A-Za-z][A-Za-z0-9]:[
+  /\char94@(HD|SQ|RG|PG)(\char92t[A-Za-z][A-Za-z0-9]:[
   -\char126]+)+\$/} or {\tt /\char94@CO\char92t.*/}.
 
 The following table describes the header record types that may be used
@@ -230,7 +230,7 @@ The {\tt SN} tags and all individual {\tt AN} names in all {\tt @SQ} lines
 must be distinct.
   The value of this field is used in the
   alignment records in {\sf RNAME} and {\sf RNEXT} fields. Regular expression: {\tt [!-)+-\char60\char62-\char126][!-\char126]*}\\\cline{2-3}
-  & {\tt LN}* & Reference sequence length. \emph{Range}: {\tt [1,2$^{31}$-1]}\\\cline{2-3}
+  & {\tt LN}* & Reference sequence length. \emph{Range}: $[1,\,2^{31}-1]$\\\cline{2-3}
   & {\tt AH} & Indicates that this sequence is an alternate locus.%
 \footnote{See \url{https://www.ncbi.nlm.nih.gov/grc/help/definitions} for descriptions of \emph{alternate locus} and \emph{primary assembly}.}
   The value is the locus in the primary assembly for which this sequence is an alternative, in the format `\emph{chr}{\tt :}\emph{start}{\tt -}\emph{end}', `\emph{chr}' (if known), or `{\tt *}' (if unknown), where `\emph{chr}' is a sequence in the primary assembly.
@@ -248,6 +248,7 @@ or~{\sf RNEXT} fields.
 \emph{Regular expression}: \emph{name}{\tt (,}\emph{name}{\tt )*}
 where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
+  & {\tt DS} & Description.  UTF-8 encoding may be used.\\\cline{2-3}
   & {\tt M5} & MD5 checksum of the sequence.  See Section~\ref{sec:ref-md5}\\\cline{2-3}
   & {\tt SP} & Species.\\\cline{2-3}
   & {\tt UR} & URI of the sequence.  This value may start with one of the standard
@@ -346,14 +347,14 @@ of the mandatory fields in the SAM format:
   {\bf Col} & {\bf Field} & {\bf Type} & {\bf Regexp/Range} & {\bf Brief description} \\
   \hline
   1 & {\sf QNAME} & String & \verb:[!-?A-~]{1,254}: & Query template NAME\\
-  2 & {\sf FLAG} & Int & {\tt [0,2$^{16}$-1]} & bitwise FLAG \\
+  2 & {\sf FLAG} & Int & $[0,\,2^{16}-1]$ & bitwise FLAG \\
   3 & {\sf RNAME} & String & {\tt \char92*|[!-()+-\char60\char62-\char126][!-\char126]*} & Reference sequence NAME\\
-  4 & {\sf POS} & Int & {\tt [0,2$^{31}$-1]} & 1-based leftmost mapping POSition \\
-  5 & {\sf MAPQ} & Int & {\tt [0,2$^8$-1]} & MAPping Quality \\
+  4 & {\sf POS} & Int & $[0,\,2^{31}-1]$ & 1-based leftmost mapping POSition \\
+  5 & {\sf MAPQ} & Int & $[0,\,2^8-1]$ & MAPping Quality \\
   6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
   7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next read\\
-  8 & {\sf PNEXT} & Int & {\tt [0,2$^{31}$-1]} & Position of the mate/next read \\
-  9 & {\sf TLEN} & Int & {\tt [-2$^{31}$+1,2$^{31}$-1]} & observed Template LENgth \\
+  8 & {\sf PNEXT} & Int & $[0,\,2^{31}-1]$ & Position of the mate/next read \\
+  9 & {\sf TLEN} & Int & $[-2^{31}+1,\,2^{31}-1]$ & observed Template LENgth \\
   10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & segment SEQuence\\
   11 & {\sf QUAL} & String & {\tt [!-\char126]+} & ASCII of Phred-scaled base QUALity+33 \\
   \hline
@@ -528,7 +529,7 @@ i & {\tt [-+]?[0-9]+} & Signed integer\footnotemark\\
 f & {\tt [-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?} & Single-precision floating number \\
 Z & {\tt [\,\,\,!-\char126]*} & Printable string, including space\\
 H & {\tt ([0-9A-F][0-9A-F])*} & Byte array in the Hex format\footnotemark\\
-B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)+} & Integer or numeric array\\
+B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)*} & Integer or numeric array\\
 \hline
 \end{tabular}
 \addtocounter{footnote}{-1}
@@ -687,7 +688,12 @@ reference sequence, but it is also able to describe alignments against a padded
 reference. In the latter case, we say we are using a \emph{padded SAM}. A padded
 SAM is a valid SAM, but with the difference that the reference and positions in
 use are padded. There may be more than one way to describe the padded
-representation. We recommend the following.
+representation.
+We recommend the following; see also the discussion in Cock {\it et al.}%
+\footnote{Peter J. A. Cock, James K. Bonfield, Bastien Chevreux, and Heng Li,
+{\bf SAM/BAM format v1.5 extensions for \emph{de novo} assemblies},
+{\sl bioRxiv 020024};
+\href{http://dx.doi.org/10.1101/020024}{doi:10.1101/020024}.}
 
 In a padded SAM, alignments and coordinates are described with respect to the
 padded reference sequence. Unlike traditional padded representations like
@@ -725,8 +731,10 @@ sequence and the reference annotations in SAM when necessary. For a reference
 sequence in SAM, {\sf QNAME} should be identical to {\sf RNAME}, {\sf POS} set
 to 1 and {\sf FLAG} to 516 (filtered and unmapped); for an annotation, {\sf
 FLAG} should be set to 768 (filtered and secondary) with no restriction to {\sf
-QNAME}. Dummy reads for annotation would typically have an `{\tt CT}' tag to
-hold the annotation information, see Section~\ref{sec:recommended-practice}.
+QNAME}.
+Dummy reads for annotation would typically have a {\tt CT} tag to hold the annotation information; see the discussion of dummy reads in Section~\ref{sec:recommended-practice}.
+See also the separate {\sl Optional Fields Specification} for full details of the {\tt CT} and {\tt PT} annotation tags.%
+\footnote{See \emph{Annotation and Padding} in \href{http://samtools.github.io/hts-specs/SAMtags.pdf}{\tt SAMtags.pdf}.}
 
 \pagebreak
 
@@ -943,8 +951,10 @@ stored in the {\tt CG} tag and remove the now-redundant {\tt CG} tag.
 
 \subsubsection{SEQ encoding}\label{sec:seq}
 Sequence is encoded in 4-bit values, with adjacent bases packed into the same byte starting with the highest 4 bits first.
-For a sequence with an odd numbered length the bottom 4 bits of the last byte are undefined, but we recommend writing these as zero.
+When {\sf l\_seq} is odd the bottom 4 bits of the last byte are undefined, but we recommend writing these as zero.
 The case-insensitive base codes `{\tt =ACMGRSVTWYHKDBN}' are mapped to $[0,15]$ respectively with all other characters mapping to `{\tt N}' (value 15).
+
+Omitted sequence, represented in SAM as `{\tt *}', is represented by {\sf l\_seq} being 0 and {\sf seq} and {\sf qual} zero-length.
 
 \subsubsection{Auxiliary data encoding}\label{sec:aux-type-codes}
 Optional alignment fields are stored immediately after each other immediately
@@ -1081,7 +1091,7 @@ For an alignment starting beyond 64Mbp, we always need to seek to some
 chunks in bin 0, which can be avoided by using a linear index. In the
 linear index, for each tiling 16384bp window on the reference, we record
 the smallest file offset of the alignments that overlap with the
-window. Given a region [rbeg,rend), we only need to visit a chunk whose
+window. Given a region [rbeg,\,rend), we only need to visit a chunk whose
 end file offset is larger than the file offset of the 16kbp window
 containing rbeg.
 
@@ -1107,11 +1117,11 @@ scheme which consists of three types of bins: bin 0 spans 0-144kbp, bin
 An alignment starting at 65kbp and ending at 67kbp would have a bin
 number 8, which is the smallest bin containing the alignment. Similarly,
 an alignment starting at 51kbp and ending at 70kbp would go to bin 2,
-while an alignment between [40k,49k] to bin 0. Suppose we want to find
-all the alignments overlapping region [65k,71k). We first calculate that
+while an alignment between [40k,\,49k] to bin 0. Suppose we want to find
+all the alignments overlapping region [65k,\,71k). We first calculate that
 bin 0, 2 and 8 overlap with this region and then traverse the alignments
 in these bins to find the required alignments. With a binning index
-alone, we need to visit the alignment at [40k,49k] as it belongs to bin
+alone, we need to visit the alignment at [40k,\,49k] as it belongs to bin
 0. But with a linear index, we know that such an alignment stops before
 64kbp and cannot overlap the specified region. A seek call can thus be
 saved.
@@ -1223,6 +1233,8 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item B array optional fields may have no entries---this was already representable in BAM, clarified that empty arrays are permitted in SAM too. (Jul 2018)
+\item Add {\tt @SQ DS} header tag. (Jul 2018)
 \item Add {\tt @RG BC} header tag. (Apr 2018)
 \item Permit UTF-8 in a few header tags. (Mar 2018)
 \item\textbf{Add support for CIGAR strings with more than 65,535 operations.} (Nov 2017)
@@ -1266,7 +1278,6 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.3: July 2010 to April 2011}
 
 \begin{itemize}
-\item Add CIGAR N intron/skip operator. (Dec 2010)
 \item Add {\tt RG PG} header field. (Nov 2010)
 \item Add BAM description and index sections. (Nov 2010)
 \item \textbf{Removal of FLAG letters.} (July 2010)

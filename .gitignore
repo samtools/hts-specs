@@ -8,4 +8,5 @@
 *.dvi
 *.ps
 
+GNUmakefile
 /_site
