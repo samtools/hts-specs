@@ -69,6 +69,10 @@ So the usual workflow when editing these documents is (for example, when working
 (Optionally, verify that it contains the correct commit hash for your source changes.)
 Now commit your _.pdf_ changes, separately from any source changes.
 
+The _Makefile_ can also generate PDFs highlighting the typeset differences between TeX source versions, invoked by typing `make [OLD=commit [NEW=commit]] diff/SPEC.pdf`.
+By default, this compares the working _SPEC.tex_ file to the checked-out **HEAD**.
+Specify `OLD` to compare the working file to a different commit, or specify both `OLD` and `NEW` to show changes in _SPEC_ between two commits.
+
 ### Customising the build
 
 You may wish to create a file named _GNUmakefile_ (which GNU Make will read in preference to _Makefile_) as follows:

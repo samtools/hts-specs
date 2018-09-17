@@ -9,5 +9,8 @@
 
 GNUmakefile
 
+/diff/*.idx
+/diff/*.pdf
+/diff/*.tex
 /new/*.pdf
 /_site

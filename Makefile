@@ -17,13 +17,13 @@ pdf: $(PDFS:%=new/%)
 %.pdf: new/%.pdf
 	cp $^ $@
 
-new/CRAMv2.1.pdf: CRAMv2.1.tex new/CRAMv2.1.ver
-new/CRAMv3.pdf: CRAMv3.tex new/CRAMv3.ver
-new/SAMv1.pdf: SAMv1.tex new/SAMv1.ver
-new/SAMtags.pdf: SAMtags.tex new/SAMtags.ver
-new/VCFv4.1.pdf: VCFv4.1.tex new/VCFv4.1.ver
-new/VCFv4.2.pdf: VCFv4.2.tex new/VCFv4.2.ver
-new/VCFv4.3.pdf: VCFv4.3.tex new/VCFv4.3.ver
+new/CRAMv2.1.pdf diff/CRAMv2.1.pdf: CRAMv2.1.tex new/CRAMv2.1.ver
+new/CRAMv3.pdf   diff/CRAMv3.pdf:   CRAMv3.tex   new/CRAMv3.ver
+new/SAMv1.pdf    diff/SAMv1.pdf:    SAMv1.tex    new/SAMv1.ver
+new/SAMtags.pdf  diff/SAMtags.pdf:  SAMtags.tex  new/SAMtags.ver
+new/VCFv4.1.pdf  diff/VCFv4.1.pdf:  VCFv4.1.tex  new/VCFv4.1.ver
+new/VCFv4.2.pdf  diff/VCFv4.2.pdf:  VCFv4.2.tex  new/VCFv4.2.ver
+new/VCFv4.3.pdf  diff/VCFv4.3.pdf:  VCFv4.3.tex  new/VCFv4.3.ver
 
 PDFLATEX = pdflatex
 
@@ -39,16 +39,27 @@ new/%.ver: %.tex
 	scripts/genversion.sh $^ > $@
 
 
+diff diffs: $(PDFS:%=diff/%)
+
+OLD = HEAD
+NEW =
+
+diff/%.pdf: %.tex
+	TEXINPUTS=:..:../new latexdiff-vc --pdf --dir diff --force --git --subtype ONLYCHANGEDPAGE --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
+
+
 show-styles:
 	@sed -n '/\\usepackage/s/.*{\(.*\)}$$/\1/p' *.tex | sort | uniq -c
 
 
 mostlyclean:
 	-rm -f new/*.aux new/*.log new/*.out new/*.toc new/*.ver
+	-rm -f diff/*.idx diff/*.out diff/*.tex diff/*.toc
 
 clean: mostlyclean
 	-rm -f $(PDFS:%=new/%)$(if $(wildcard new),; rmdir new)
+	-rm -f $(PDFS:%=diff/%)$(if $(wildcard diff),; rmdir diff)
 	-rm -rf _site
 
 
-.PHONY: all pdf show-styles mostlyclean clean
+.PHONY: all pdf diff diffs show-styles mostlyclean clean
