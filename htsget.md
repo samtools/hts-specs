@@ -167,7 +167,7 @@ _optional_
 </td><td>
 The reference sequence name, for example "chr1", "1", or "chrX". If unspecified, all records are returned regardless of position.
   
-For the reads endpoint: if "\*", unplaced unmapped reads are returned. If unspecified, all reads (mapped and unmapped) are returned. (*Unplaced* reads are the subset of unmapped reads completely without location information, i.e., with RNAME and POS field values of "*" and 0 respectively. See the [SAM specification](http://samtools.github.io/hts-specs/SAMv1.pdf) for details of this concept)
+For the reads endpoint: if "\*", unplaced unmapped reads are returned. If unspecified, all reads (mapped and unmapped) are returned. (*Unplaced unmapped* reads are the subset of unmapped reads completely without location information, i.e., with RNAME and POS field values of "*" and 0 respectively. See the [SAM specification](http://samtools.github.io/hts-specs/SAMv1.pdf) for details of placed and unplaced unmapped reads.)
 
 The server SHOULD reply with a `NotFound` error if the requested reference does not exist.
 </td></tr>
@@ -177,7 +177,7 @@ _optional 32-bit unsigned integer_
 </td><td>
 The start position of the range on the reference, 0-based, inclusive. 
 
-The server SHOULD respond with an `InvalidInput` error if `start` is specified and either no reference is specified, or `referenceName` is "\*".
+The server SHOULD respond with an `InvalidInput` error if `start` is specified and either no reference is specified or `referenceName` is "\*".
 
 The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater than `end`.
 </td></tr>
@@ -187,7 +187,7 @@ _optional 32-bit unsigned integer_
 </td><td>
 The end position of the range on the reference, 0-based exclusive.
 
-The server SHOULD respond with an `InvalidInput` error if `end` is specified and a reference is unspecified or "\*" (see `referenceName`).
+The server SHOULD respond with an `InvalidInput` error if `end` is specified and either no reference is specified or `referenceName` is "\*".
 
 The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater than `end`.
 </td></tr>
