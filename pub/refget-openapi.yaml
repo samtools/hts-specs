@@ -14,9 +14,9 @@ info:
     url: https://www.ga4gh.org/
 tags:
   - name: Metadata
-    description: Services linked to retriving metadata from an idetifier
+    description: Services linked to retrieving metadata from an identifier
   - name: Sequence
-    description: Services linked to fetching sequence from an idetifier
+    description: Services linked to fetching sequence from an identifier
   - name: Services
     description: Housekeeping services
 paths:
@@ -81,10 +81,9 @@ paths:
           name: Range
           required: false
           description: >-
-            Specify a substring as a range not using query parameters. Note
-            start is in Ensembl-style start coordinates i.e. the first base of a
-            sequence is 1 not 0 as in the start parameter. Example is 'bytes:
-            1-10'
+            Specify a substring as a single HTTP Range.
+            One byte range is permitted, and is 0-based inclusive.
+            For example, 'Range: bytes=0-9' corresponds to '?start=0&end=10'.
           schema:
             type: string
       responses:
