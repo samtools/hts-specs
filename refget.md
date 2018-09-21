@@ -142,8 +142,6 @@ The server shall return the requested sequence or sub-sequence as a single strin
 
 On success and either a whole sequence or sub-sequence is returned the server shall issue a 200 status code if the entire sequence is returned or 206 if a sub-sequence is returned via a Range header.
 
-If a start and/or end query parameter are specified the server should include a `Accept-Ranges: none` header in the response.
-
 If the identifier is not known by the server, a 404 status code and `NotFound` error shall be returned.
 
 ### Method: Get known metadata for an id
