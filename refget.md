@@ -556,6 +556,7 @@ The following people have contributed to the design of this specification.
 - Rob Davies
 - Rasko Leinonen
 - Oliver Hofmann
+- Thomas Keane
 - Heidi Sofia
 - Mike Love
 - Gustavo Glusman
