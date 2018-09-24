@@ -12,7 +12,7 @@ Reference sequences are fundamental to genomic analysis and interpretation howev
 
 Refget enables access to reference sequences using an identifier derived from the sequence itself. 
 
-Refget uses a hash algorithm (by default `MD5`) to generate a checksum identifier, which is digest of the underlying sequence. This removes the need for a single accessioning authority to identify a reference sequence and improves the provenance of sequence used in analysis. In addition refget defines a simple scheme to retrieve reference sequence via this checksum identifier.
+Refget uses a hash algorithm (by default `MD5`) to generate a checksum identifier, which is a digest of the underlying sequence. This removes the need for a single accessioning authority to identify a reference sequence and improves the provenance of sequence used in analysis. In addition refget defines a simple scheme to retrieve reference sequence via this checksum identifier.
 
 Refget is intended to be used in any scenario where full or partial access to reference sequence is required e.g. the CRAM file format or a genome browser.
 
@@ -22,6 +22,7 @@ The API has the following features:
 
 - The checksum algorithm used to derive the sequence identifier shall be a mainstream algorithm available standard across multiple platforms and programming languages.
 - The client may request a sub-sequence, which the server is expected to honour
+- Refget was designed to enable access to nucleotide sequences, however other sequences could be provided via the same mechanism e.g. cDNA, CDS, mRNA or proteins
 
 Explicitly this API does NOT:
 
