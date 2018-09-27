@@ -28,8 +28,7 @@ new/VCFv4.3.pdf: VCFv4.3.tex new/VCFv4.3.ver
 PDFLATEX = pdflatex
 
 new/%.pdf: %.tex
-	$(PDFLATEX) --output-directory new $<
-	while grep -q 'Rerun to get [a-z-]* right' new/$*.log; do $(PDFLATEX) --output-directory new $< || exit; done
+	scripts/rerun.sh new/$* $(PDFLATEX) --output-directory new $<
 
 new/CRAMv2.1.ver new/CRAMv3.ver: img/CRAMFileFormat2-1-fig001.png img/CRAMFileFormat2-1-fig002.png img/CRAMFileFormat2-1-fig003.png img/CRAMFileFormat2-1-fig004.png img/CRAMFileFormat2-1-fig005.png img/CRAMFileFormat2-1-fig006.png img/CRAMFileFormat2-1-fig007.png
 
@@ -40,7 +39,7 @@ new/%.ver: %.tex
 
 
 mostlyclean:
-	-cd new && rm -f *.aux *.idx *.log *.out *.toc *.ver
+	-cd new && rm -f *.aux *.log *.out *.toc *.ver
 
 clean: mostlyclean
 	-cd new && rm -f $(PDFS)
