@@ -8,4 +8,6 @@
 *.ps
 
 GNUmakefile
+
+/new/*.pdf
 /_site

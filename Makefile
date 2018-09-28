@@ -35,14 +35,15 @@ new/CRAMv2.1.ver new/CRAMv3.ver: img/CRAMFileFormat2-1-fig001.png img/CRAMFileFo
 new/VCFv4.1.ver new/VCFv4.2.ver new/VCFv4.3.ver: img/all_orientations-400x296.png img/derivation-400x267.png img/erosion-400x211.png img/inserted_contig-400x247.png img/inserted_sequence-400x189.png img/inversion-400x95.png img/microhomology-400x248.png img/multiple_mates-400x280.png img/phasing-400x259.png img/reciprocal_rearrangement-400x192.png img/telomere-400x251.png
 
 new/%.ver: %.tex
-	./genversion.sh $^ > $@
+	@test -d new || mkdir new
+	scripts/genversion.sh $^ > $@
 
 
 mostlyclean:
-	-cd new && rm -f *.aux *.log *.out *.toc *.ver
+	-rm -f new/*.aux new/*.log new/*.out new/*.toc new/*.ver
 
 clean: mostlyclean
-	-cd new && rm -f $(PDFS)
+	-rm -f $(PDFS:%=new/%)$(if $(wildcard new),; rmdir new)
 	-rm -rf _site
 
 
