@@ -62,6 +62,17 @@ Responses from the server MUST include a Content-Type header containing the enco
 Content-Type: text/vnd.ga4gh.refget.v1.0.0+plain; charset=us-ascii
 ```
 
+## Internet Media Types Handling
+
+When responding to a request a server MUST use the fully specified media type for that endpoint. When determining if a request is well-formed, a server MUST allow a internet type to degrade like so
+
+- `text/vnd.ga4gh.refget.v1.0.0+plain; charset=us-ascii`
+  - `text/vnd.ga4gh.refget.v1.0.0+plain`
+  - `text/plain`
+- `application/vnd.ga4gh.refget.v1.0.0+json; charset=us-ascii`
+  - `application/vnd.ga4gh.refget.v1.0.0+json`
+  - `application/json`
+
 ## Errors
 The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when an error condition is detected. In the case of transient server errors (e.g., 503 and other 5xx status codes), the client SHOULD implement appropriate retry logic. For example, if a client sends an alphanumeric string for a parameter that is specified as unsigned integer the server MUST reply with `Bad Request`.
 
@@ -70,7 +81,7 @@ The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when a
 | `Bad Request`            | 400              | Cannot process due to malformed request, the requested parameters do not adhere to the specification |
 | `Unauthorized`           | 401              | Authorization provided is invalid                                                                    |
 | `Not Found`              | 404              | The resource requested was not found                                                                 |
-| `Unsupported Media Type` | 415              | The requested sequence formatting is not supported by the server                                     |
+| `Not Acceptable`         | 406              | The requested  formatting is not supported by the server                                     |
 | `Range Not Satisfiable`  | 416              | The Range request cannot be satisfied                                                                |
 | `Not Implemented`        | 501              | The specified request is not supported by the server                                                 |
 
@@ -150,7 +161,7 @@ Content-type: text/vnd.ga4gh.refget.v1.0.0+plain
 | Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Range`   | string                  | Optional | Range header as specified in [RFC 7233](https://tools.ietf.org/html/rfc7233#section-3.1), however only a single byte range per GET request is supported by the specification. The byte range of the sequence to return, 0-based inclusive of start and end bytes specified. The server MUST respond with a `Bad Request` error if both a Range header and start or end query parameters are specified. The server MUST respond with a `Bad Request` error if one or more ranges are out of bounds of the sequence.                                                                                                                     |
-| `Accept`    | string                  | Optional | The formatting of the returned sequence, defaults to `text/vnd.ga4gh.refget.v1.0.0+plain` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Unsupported Media Type` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+| `Accept`    | string                  | Optional | The formatting of the returned sequence, defaults to `text/vnd.ga4gh.refget.v1.0.0+plain` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
 
 #### Response
 
@@ -200,6 +211,12 @@ Content-type: application/vnd.ga4gh.refget.v1.0.0+json
 | Parameter | Data Type | Required | Description                                                                                                                                                                                                         |
 |-----------|-----------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `id`      | string    | Yes      | A string specifying identifier to retrieve aliases for. The identifier shall be a checksum derived from the sequence using one of the supported checksum algorithms, or an alias for the sequence supported by the server. |
+
+#### Request parameters
+
+| Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+|-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v1.0.0+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
 
 #### Response
 
@@ -296,6 +313,12 @@ Unless negotiated with the client and allowed by the server, the default encodin
 ```
 Content-type: application/vnd.ga4gh.refget.v1.0.0+json
 ```
+
+#### Request parameters
+
+| Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+|-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v1.0.0+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
 
 #### Response
 The server shall return a document detailing specifications of the service implementation. A JSON encoded response shall have the following fields:
