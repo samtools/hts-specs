@@ -5,6 +5,10 @@ suppress_footer: true
 ---
 
 # Refget API Specification v0.2
+{:.no_toc}
+
+* Do not remove this line (it will not be displayed)
+{:toc}
 
 ## Design principles
 Refget enables access to reference sequences using an identifier derived from the sequence itself. The API has the following features:

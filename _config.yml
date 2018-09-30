@@ -13,3 +13,4 @@ exclude: ["*.sh", "*.tex", img, new, Makefile, MAINTAINERS.md, README.md]
 markdown: kramdown
 kramdown:
   parse_block_html: true
+  toc_levels: 1..3
