@@ -269,6 +269,7 @@ The header line names the 8 fixed, mandatory columns. These columns are as follo
 \end{enumerate}
 
 If genotype data is present in the file, these are followed by a FORMAT column header, then an arbitrary number of sample IDs.
+Duplicate sample IDs are not allowed.
 The header line is tab-delimited and there must be no tab characters at the end of the line.
 
 \subsection{Data lines}
@@ -322,15 +323,15 @@ Fixed fields are:
   (String, no white-space or semi-colons permitted, duplicate values not allowed.)
   \item INFO - additional information: (String, no semi-colons or equals-signs permitted; commas are permitted only as delimiters for lists of values; characters with special meaning can be encoded using the percent encoding, see Section~\ref{character-encoding}; space characters are allowed)
 
-  INFO fields are encoded as a semicolon-separated series of short keys with optional values in the format: $<$key$>$=$<$data$>$[,data].
+  INFO fields are encoded as a semicolon-separated series of short keys with optional values in the format: key[=data[,data]].
   INFO keys must match the regular expression \texttt{\^{}([A-Za-z\_][0-9A-Za-z\_.]*|1000G)\$}, please note that ``1000G'' is allowed as a special legacy value.
-  Duplicate fields are not allowed.
-  Arbitrary keys are permitted, although the sub-fields listed in Table~\ref{table:reserved-info} are reserved (albeit optional).
+  Duplicate keys are not allowed.
+  Arbitrary keys are permitted, although those listed in Table~\ref{table:reserved-info} are reserved (albeit optional).
 
   \begin{table}[htbp]
     \centering
     \begin{tabularx}{\textwidth}{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | X | }
-	Field		& Number	& Type		& Description \\ \hline
+	Key		& Number	& Type		& Description \\ \hline
 	AA		& 1		& String	& Ancestral allele \\
 	AC		& A		& Integer	& Allele count in genotypes, for each ALT allele, in the same order as listed  \\
 	AD		& R		& Integer	& Total read depth for each allele \\
@@ -353,23 +354,23 @@ Fixed fields are:
 	VALIDATED	& 0		& Flag		& Validated by follow-up experiment \\
 	1000G		& 0		& Flag		& 1000 Genomes membership \\
     \end{tabularx}
-    \caption{Reserved INFO fields}
+    \caption{Reserved INFO keys}
     \label{table:reserved-info}
   \end{table}
 
-  The exact format of each INFO sub-field should be specified in the meta-information (as described above).
+  The exact format of each INFO key should be specified in the meta-information (as described above).
   Example for an INFO field: DP=154;MQ=52;H2.
   Keys without corresponding values may be used to indicate group membership (e.g. H2 indicates the SNP is found in HapMap 2).
-  See Section~\ref{sv-info-keys} for additional reserved INFO sub-fields used to encode structural variants.
+  See Section~\ref{sv-info-keys} for additional reserved INFO keys used to encode structural variants.
 \end{enumerate}
 
 \subsubsection{Genotype fields}
 If genotype information is present, then the same types of data must be present for all samples.
-First a FORMAT field is given specifying the data types and order (colon-separated FORMAT ids matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate fields are not allowed).
+First a FORMAT field is given specifying the data types and order (colon-separated FORMAT keys matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate keys are not allowed).
 This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format.
-The first sub-field must always be the genotype (GT) if it is present.
-There are no required sub-fields.
-Additional Genotype fields can be defined in the meta-information, however, software support for such fields is not guaranteed.
+The first key must always be the genotype (GT) if it is present.
+There are no required keys.
+Additional Genotype keys can be defined in the meta-information, however, software support for them is not guaranteed.
 
 If any of the fields is missing, it is replaced with the MISSING value.
 For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing.
@@ -400,7 +401,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       PQ		& 1		& Integer	& Phasing quality \\
       PS		& 1		& Integer	& Phase set \\
   \end{tabularx}
-  \caption{Reserved genotype fields}
+  \caption{Reserved genotype keys}
   \label{table:reserved-genotypes}
 \end{table}
 
@@ -797,7 +798,7 @@ The following page contains examples of structural variants encoded in VCF:
 \begin{verbatim}
 VCF STRUCTURAL VARIANT EXAMPLE
 
-##fileformat=VCFv4.1
+##fileformat=VCFv4.3
 ##fileDate=20100501
 ##reference=1000GenomesPilot-NCBI36
 ##assembly=ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/sv/breakpoint_assemblies.fasta
@@ -820,11 +821,11 @@ VCF STRUCTURAL VARIANT EXAMPLE
 ##ALT=<ID=INV,Description="Inversion">
 ##ALT=<ID=CNV,Description="Copy number variable region">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-##FORMAT=<ID=GQ,Number=1,Type=Float,Description="Genotype quality">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">
 ##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
 ##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
 #CHROM POS     ID        REF              ALT          QUAL FILTER INFO                                                               FORMAT       NA00001
-1      2827694 rs2376870 CGTGGATGCGGGGAC  C            .    PASS   SVTYPE=DEL;END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14                 GT:GQ        1/1:13.9
+1      2827694 rs2376870 CGTGGATGCGGGGAC  C            .    PASS   SVTYPE=DEL;END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14                 GT:GQ        1/1:14
 2       321682 .         T                <DEL>        6    PASS   SVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62         GT:GQ        0/1:12
 2     14477084 .         C                <DEL:ME:ALU> 12   PASS   SVTYPE=DEL;END=14477381;SVLEN=-297;CIPOS=-22,18;CIEND=-12,32       GT:GQ        0/1:12
 3      9425916 .         C                <INS:ME:L1>  23   PASS   SVTYPE=INS;END=9425916;SVLEN=6027;CIPOS=-16,22                     GT:GQ        1/1:15
@@ -1255,7 +1256,7 @@ The PEDIGREE lines would look like:
 \begin{figure}[ht]
 \centering
 \includegraphics[width=4in,height=2.67in]{img/derivation-400x267.png}
-\caption{Pegigree example}
+\caption{Pedigree example}
 \end{figure}
 
 \begin{verbatim}

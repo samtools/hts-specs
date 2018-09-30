@@ -375,12 +375,11 @@ The data block URL and headers might contain embedded authentication tokens; the
 
 # Possible future enhancements
 
-1. add a mechanism to request reads from more than one ID at a time (e.g. for a trio)
-2. allow clients to provide a suggested data block size to the server
-3. consider adding other data types (e.g. variants)
-4. add POST support (if and when request sizes get large)
-5. [mlin] add a way to request all unmapped reads (e.g. by passing `*` for `referenceName`)
-6. [dglazer] add a way to request reads in GA4GH binary format [^d] (e.g. fmt=proto)
+* add a mechanism to request reads from more than one ID at a time (e.g. for a trio)
+* allow clients to provide a suggested data block size to the server
+* add POST support (if and when request sizes get large)
+* [mlin] add a way to request all unmapped reads (e.g. by passing `*` for `referenceName`)
+* [dglazer] add a way to request reads in GA4GH binary format [^d] (e.g. fmt=proto)
 
 ## Existing clarification suggestions
 

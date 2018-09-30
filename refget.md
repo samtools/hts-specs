@@ -5,6 +5,10 @@ suppress_footer: true
 ---
 
 # Refget API Specification v1.0.0
+{:.no_toc}
+
+* Do not remove this line (it will not be displayed)
+{:toc}
 
 ## Introduction
 
@@ -99,7 +103,7 @@ Authorization: Bearer [access_token]
 The policies and processes used to perform user authentication and authorization, and the means through which access tokens are issued, are beyond the scope of this API specification. GA4GH recommends the use of the OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for authentication and authorization.
 
 ## Checksum calculation
-The supported checksum algorithms are `MD5` and a SHA-512 based system called `TRUNC512` (see later for details). Servers MUST support sequence retrieval by one or more of these algorithms, and are encouraged to support all to maximize interoperability. To provide CRAM Reference Registry compatibility an implementation must support MD5.
+The supported checksum algorithms are `MD5` (a 32 character HEX string) and a SHA-512 based system called `TRUNC512` (a 48 character HEX string, see later for details). Servers MUST support sequence retrieval by one or more of these algorithms, and are encouraged to support all to maximize interoperability. To provide CRAM Reference Registry compatibility an implementation must support MD5.
 
 When calculating the checksum for a sequence, all non-base symbols (\n, spaces, etc) must be removed and then uppercase the rest. The allowed alphabet for checksum calculation is uppercase ASCII (`0x41`-`0x5A` or `A-Z`).
 
@@ -147,7 +151,7 @@ Content-type: text/vnd.ga4gh.refget.v1.0.0+plain
 
 | Parameter | Data Type | Required | Description                                                                                                                                                                                                         |
 |-----------|-----------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`      | string    | Yes      | A string specifying the sequence to be returned. The identifier shall be a checksum derived from the sequence using one of the supported checksum algorithms, or an alias for the sequence supported by the server. |
+| `id`      | string    | Yes      | A string specifying an identifier to retrieve sequence for using one of the defined checksum algorithms or a server-specific checksum algorithm.|
 
 #### Query parameters
 
@@ -210,7 +214,7 @@ Content-type: application/vnd.ga4gh.refget.v1.0.0+json
 
 | Parameter | Data Type | Required | Description                                                                                                                                                                                                         |
 |-----------|-----------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`      | string    | Yes      | A string specifying identifier to retrieve aliases for. The identifier shall be a checksum derived from the sequence using one of the supported checksum algorithms, or an alias for the sequence supported by the server. |
+| `id`      | string    | Yes      | A string specifying an identifier to retrieve metadata for using one of the defined checksum algorithms or a server-specific checksum algorithm.|
 
 #### Request parameters
 
@@ -423,6 +427,18 @@ GAGACTGCTG
 
 Any bytes added for formatting to the returned output should not be taken in to account when processing a Range request.
 
+## Alternative Checksum Algorithms
+
+Refget implementations MUST support the `MD5` identifier space and SHOULD support `TRUNC512`. Non-standard identifiers are allowed but they MUST conform to the following requirements:
+
+1. Non-standard identifiers must be based on an algorithm, which uses normalised sequence content as input
+2. The algorithm used SHOULD be a hash function
+3. Non-standard identifiers must not clash with the `MD5` and `TRUNC512` identifier space
+  - Note `TRUNC512` is allowed to grow in length should collisions in the current implementation be detected
+4. Non-standard identifiers must not clash with other identifiers on your server i.e. they must be unique.
+
+Any alternative identifier scheme MUST be declared in the `/sequence/service-info` endpoint under `algorithms`.
+
 ## TRUNC512 Algorithm Details
 
 Below details the `TRUNC512` algorithm in Python and Perl including how to round-trip this to and from VMC representations.
@@ -565,12 +581,17 @@ The VMC, Variant Modelling Collaboration, is a complementary GA4GH effort to mod
 
 The algorithm performs a SHA-512 digest of a sequence and creates a hex encoding of the first 24 bytes of the digest. An implementation may do this by sub-slicing the digest or sub-stringing 48 characters from a SHA-512 hex string. Analysis performed by VMC suggests this should be sufficient to avoid message collisions. Should a message collision occur within this scheme then the number of bytes retained from the checksum will be increased.
 
+### Checksum Identifier Identification
+
+When a checksum identifier is given to an implementation, it is the server's repsonsiblity to compute what kind of identifier (`MD5` or `TRUNC512`) has been given. Both can be deduced based on length; `MD5` is 32 characters long and `TRUNC512` is 48 characters long. Should we support alternative checksum based identifiers and require a more complex method to resolve their identification this will be defined in future specification versions.
+
 ## Possible Future API Enhancements
 
 - Allow POST requests for batch downloads
 - Formally define more sequence formattings (e.g. fasta, protobuf)
 - Allow reference sequence checksums to be bundled together e.g. to represent a reference genome
 - Support groups/collections of sequences based on checksums
+- Support other methods of identifying the checksum identifier aside from length
 
 ## Contributors
 
