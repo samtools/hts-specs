@@ -171,7 +171,7 @@ Content-type: text/vnd.ga4gh.refget.v1.0.0+plain
 
 The server shall return the requested sequence or sub-sequence as a single string in uppercase ASCII text (bytes 0x41-0x5A) with no line terminators or other formatting characters. The server may return the sequence in an alternative formatting, such as JSON or FASTA, if requested by the client via the `Accept` header and the format is supported by the server.
 
-On success and either a whole sequence or sub-sequence is returned the server shall issue a 200 status code if the entire sequence is returned or 206 if a sub-sequence is returned via a Range header.
+On success and either a whole sequence or sub-sequence is returned the server MUST issue a 200 status code if the entire sequence is returned. A server SHOULD return a 206 status code if a Range header was specified and the request was successful.
 
 If start and end query parameter are specified and equal each other, the server should respond with a zero length string i.e.
 
