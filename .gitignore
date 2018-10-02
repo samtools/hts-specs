@@ -1,5 +1,4 @@
 *.aux
-*.idx
 *.log
 *.out
 *.toc
@@ -9,4 +8,6 @@
 *.ps
 
 GNUmakefile
+
+/new/*.pdf
 /_site

@@ -91,6 +91,8 @@ Therefore:
 * The PDF should not be updated in a merge commit (as commits from one or the other of the merge's parents will not be recorded), and there's not much point updating it in a pull request.
 * So pull requests need to be merged, and then their PDFs updated separately as a non-merge commit on **master**.
 * If a series of changes are being made or several pull requests are being merged at once, the PDF updates can be batched up and just made once at the end.
+(Sometimes anticipated changes become delayed.
+When PDF updates have been pending awaiting other changes for **one week**, they should be committed without waiting further.)
 * Conversely, if there are changes pending to several (even unrelated) PDFs, there is no reason not to commit them all at once.
 
 <!-- vim:set linebreak: -->
