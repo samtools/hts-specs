@@ -4,29 +4,45 @@ title: refget protocol
 suppress_footer: true
 ---
 
-# Refget API Specification v0.2
+# Refget API Specification v1.0.0
 {:.no_toc}
 
 * Do not remove this line (it will not be displayed)
 {:toc}
 
+## Introduction
+
+Reference sequences are fundamental to genomic analysis and interpretation however naming is a serious issue. For example the reference genomic sequence GRCh38/1 is also known as hg38/chr1, CM000663.2 and NC_000001.11. In addition there is no standardised way to access reference sequence from providers such as INSDC (ENA, Genbank, DDBJ), Ensembl or UCSC. 
+
+Refget enables access to reference sequences using an identifier derived from the sequence itself. 
+
+Refget uses a hash algorithm (by default `MD5`) to generate a checksum identifier, which is a digest of the underlying sequence. This removes the need for a single accessioning authority to identify a reference sequence and improves the provenance of sequence used in analysis. In addition refget defines a simple scheme to retrieve reference sequence via this checksum identifier.
+
+Refget is intended to be used in any scenario where full or partial access to reference sequence is required e.g. the CRAM file format or a genome browser.
+
 ## Design principles
-Refget enables access to reference sequences using an identifier derived from the sequence itself. The API has the following features:
+
+The API has the following features:
 
 - The checksum algorithm used to derive the sequence identifier shall be a mainstream algorithm available standard across multiple platforms and programming languages.
 - The client may request a sub-sequence, which the server is expected to honour
+- Refget was designed to enable access to nucleotide sequences, however other sequences could be provided via the same mechanism e.g. cDNA, CDS, mRNA or proteins
 
 Explicitly this API does NOT:
 
 - Provide a way to discover identifiers for valid sequences. Clients obtain these via some out of band mechanism
 
-## OpenAPI 3.0 Description
+## OpenAPI Description
 
-An OpenAPI description of this specification is available and [describes the 0.2 version](pub/refget-openapi.yaml).
+An OpenAPI description of this specification is available and [describes the 1.0.0 version](pub/refget-openapi.yaml). OpenAPI is a language independent way of describing REST services and is compatible with a number of [third party tools](http://openapi.tools/).
+
+## Compliance
+
+Implementors can check if their refget implementations conform to the specification by using our [compliance suite](https://github.com/ga4gh/refget-compliance-suite). A summary of all known public implementations is available from our [compliance report website](https://andrewyatz.github.io/refget-compliance/).
 
 ## Protocol essentials
 
-All API invocations are made to a configurable HTTP(S) endpoint, receive URL-encoded query string parameters, and return text or other allowed formatting as requested by the user. Successful requests result with HTTP status code 200 and have the appropriate text encoding in the response body as defined for each endpoint. The server may provide responses with chunked transfer encoding. The client and server may mutually negotiate HTTP/2 upgrade using the standard mechanism.
+All API invocations are made to a configurable HTTP(S) endpoint, receive URL-encoded query string parameters and HTTP headers, and return text or other allowed formatting as requested by the user. Successful requests result with HTTP status code 200 and have the appropriate text encoding in the response body as defined for each endpoint. The server may provide responses with chunked transfer encoding. The client and server may mutually negotiate HTTP/2 upgrade using the standard mechanism.
 
 The response for sequence retrieval has a character set of US-ASCII and consists solely of the requested sequence or sub-sequence with no line breaks. Other formatting of the response sequence may be allowed by the server, subject to standard negotiation with the client via the Accept header.
 
@@ -50,6 +66,17 @@ Responses from the server MUST include a Content-Type header containing the enco
 Content-Type: text/vnd.ga4gh.refget.v1.0.0+plain; charset=us-ascii
 ```
 
+## Internet Media Types Handling
+
+When responding to a request a server MUST use the fully specified media type for that endpoint. When determining if a request is well-formed, a server MUST allow a internet type to degrade like so
+
+- `text/vnd.ga4gh.refget.v1.0.0+plain; charset=us-ascii`
+  - `text/vnd.ga4gh.refget.v1.0.0+plain`
+  - `text/plain`
+- `application/vnd.ga4gh.refget.v1.0.0+json; charset=us-ascii`
+  - `application/vnd.ga4gh.refget.v1.0.0+json`
+  - `application/json`
+
 ## Errors
 The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when an error condition is detected. In the case of transient server errors (e.g., 503 and other 5xx status codes), the client SHOULD implement appropriate retry logic. For example, if a client sends an alphanumeric string for a parameter that is specified as unsigned integer the server MUST reply with `Bad Request`.
 
@@ -58,7 +85,7 @@ The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when a
 | `Bad Request`            | 400              | Cannot process due to malformed request, the requested parameters do not adhere to the specification |
 | `Unauthorized`           | 401              | Authorization provided is invalid                                                                    |
 | `Not Found`              | 404              | The resource requested was not found                                                                 |
-| `Unsupported Media Type` | 415              | The requested sequence formatting is not supported by the server                                     |
+| `Not Acceptable`         | 406              | The requested  formatting is not supported by the server                                     |
 | `Range Not Satisfiable`  | 416              | The Range request cannot be satisfied                                                                |
 | `Not Implemented`        | 501              | The specified request is not supported by the server                                                 |
 
@@ -111,7 +138,7 @@ If a sub-sequence is requested, the response must only contain the specified sub
 
 If `start` and `end` are set to the same value the server should return a 0-length string.
 
-A server may support circular chromosomes as a reference sequence, but this is not mandatory. If a reference sequence represents a circular chromosome and the server supports circular chromosomes, a sub-sequence query with a start greater than the end will return the sequence from the start location to the end of the reference, immediately followed by the sequence from the first base to the end. If the server supports circular chromosomes and the chromosome is not circular or the range is outside the bounds of the chromosome the server shall return `Range Not Satisfiable`. Otherwise if circular chromosomes are not supported, a `Not Implemented` shall be returned. Sub-sequences of circular chromosomes across the origin may not be requested via the Range header.
+A server may support circular chromosomes as a reference sequence, but this is not mandatory. If a reference sequence represents a circular chromosome and the server supports circular chromosomes, a sub-sequence query with a start greater than the end will return the sequence from the start location to the end of the reference, immediately followed by the sequence from the first base to the end. If the server supports circular chromosomes and the chromosome is not circular or the range is outside the bounds of the chromosome the server shall return `Range Not Satisfiable`. Otherwise if circular chromosomes are not supported, a `Not Implemented` shall be returned. Sub-sequences of circular chromosomes across the origin may not be requested via the Range header. The starting point of a circular chromosome is determined by an external authority and not by the refget implementation.
 
 ##### Default encoding
 Unless negotiated with the client and allowed by the server, the default encoding for this method is:
@@ -138,15 +165,33 @@ Content-type: text/vnd.ga4gh.refget.v1.0.0+plain
 | Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Range`   | string                  | Optional | Range header as specified in [RFC 7233](https://tools.ietf.org/html/rfc7233#section-3.1), however only a single byte range per GET request is supported by the specification. The byte range of the sequence to return, 0-based inclusive of start and end bytes specified. The server MUST respond with a `Bad Request` error if both a Range header and start or end query parameters are specified. The server MUST respond with a `Bad Request` error if one or more ranges are out of bounds of the sequence.                                                                                                                     |
-| `Accept`    | string                  | Optional | The formatting of the returned sequence, defaults to `text/vnd.ga4gh.refget.v1.0.0+plain` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Unsupported Media Type` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+| `Accept`    | string                  | Optional | The formatting of the returned sequence, defaults to `text/vnd.ga4gh.refget.v1.0.0+plain` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
 
 #### Response
 
 The server shall return the requested sequence or sub-sequence as a single string in uppercase ASCII text (bytes 0x41-0x5A) with no line terminators or other formatting characters. The server may return the sequence in an alternative formatting, such as JSON or FASTA, if requested by the client via the `Accept` header and the format is supported by the server.
 
-On success and either a whole sequence or sub-sequence is returned the server shall issue a 200 status code if the entire sequence is returned or 206 if a sub-sequence is returned via a Range header.
+On success and either a whole sequence or sub-sequence is returned the server MUST issue a 200 status code if the entire sequence is returned. A server SHOULD return a 206 status code if a Range header was specified and the request was successful.
+
+If start and end query parameter are specified and equal each other, the server should respond with a zero length string i.e.
+
+```
+GET /sequence/9f5b68f3ebc5f7b06a9b2e2b55297403?start=0&end=0
+
+```
+
+If a start and/or end query parameter are specified the server should include a `Accept-Ranges: none` header in the response.
 
 If the identifier is not known by the server, a 404 status code and `NotFound` error shall be returned.
+
+#### Example text request
+
+The following response has been cut for brevity.
+
+```
+GET /sequence/9f5b68f3ebc5f7b06a9b2e2b55297403
+CTGTCAGCCCGGTTTTCAAGGAGCACACACCAAAAATGCACCAAAGCTTACATCCATACAAACACCCGCA ....
+```
 
 ### Method: Get known metadata for an id
 
@@ -170,6 +215,12 @@ Content-type: application/vnd.ga4gh.refget.v1.0.0+json
 | Parameter | Data Type | Required | Description                                                                                                                                                                                                         |
 |-----------|-----------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `id`      | string    | Yes      | A string specifying an identifier to retrieve metadata for using one of the defined checksum algorithms or a server-specific checksum algorithm.|
+
+#### Request parameters
+
+| Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+|-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v1.0.0+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
 
 #### Response
 
@@ -267,6 +318,12 @@ Unless negotiated with the client and allowed by the server, the default encodin
 Content-type: application/vnd.ga4gh.refget.v1.0.0+json
 ```
 
+#### Request parameters
+
+| Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+|-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v1.0.0+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+
 #### Response
 The server shall return a document detailing specifications of the service implementation. A JSON encoded response shall have the following fields:
 
@@ -349,7 +406,19 @@ However a start/end for the same 10bp would be:
 ?start=5&end=15
 ```
 
-Any formatting of the sequence a server might allow is applied after the the sub-sequence is selected, for example a server that supported returning fasta the result for the prior example could be:
+A Range header to retrieve a single base pair would be:
+
+```
+Range: bytes=0-0
+```
+
+The returned subsequence would be the first `C` of the sequence. A URL parameter for the same region would be
+
+```
+?start=0&end=1
+```
+
+Any formatting of the sequence a server might allow is applied after the sub-sequence is selected, for example a server that supported returning fasta the result for the prior example could be:
 
 ```
 >9f5b68f3ebc5f7b06a9b2e2b55297403 5-14
@@ -502,7 +571,7 @@ Key to generating reproducible checksums is the normalisation algorithm applied 
 - VMC
   - VMC requires sequence to be a string of IUPAC codes for either nucelotide or protein sequence
 
-Considering the requirements of the three systems the specification designers felt it was sufficient to restrict input to the inclusive range `65` (`0x41`/`A`) to `90` (`0x5A`/`Z`). Changes to this normalisation algorthim would require a new checksum identifer to be used.
+Considering the requirements of the three systems the specification designers felt it was sufficient to restrict input to the inclusive range `65` (`0x41`/`A`) to `90` (`0x5A`/`Z`). Changes to this normalisation algorthim would require a new checksum identifier to be used.
 
 ### Checksum Choice
 
@@ -532,6 +601,7 @@ The following people have contributed to the design of this specification.
 - Rob Davies
 - Rasko Leinonen
 - Oliver Hofmann
+- Thomas Keane
 - Heidi Sofia
 - Mike Love
 - Gustavo Glusman
@@ -539,6 +609,7 @@ The following people have contributed to the design of this specification.
 - Matthew Laird
 - Somesh Chaturvedi
 - Rishi Nag
+- Reece Hart
 
 # Appendix
 

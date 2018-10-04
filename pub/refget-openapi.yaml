@@ -6,7 +6,7 @@ info:
   description: >-
     System for retrieving sequence and metadata concerning a reference sequence
     object by hash identifiers
-  version: '0.2.0'
+  version: '1.0.0'
   title: refget API
   contact:
     name: GA4GH Security Notifications
