@@ -92,7 +92,7 @@ or
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
   {\tt NH} & i & Number of reported alignments that contain the query in the current record \\
   {\tt NM} & i & Edit distance to the reference \\
-  {\tt OA} & Z & Original Alignment \\
+  {\tt OA} & Z & Original alignment \\
   {\tt OC} & Z & Original CIGAR (deprecated; use {\tt OA} instead) \\
   {\tt OP} & i & Original mapping position (deprecated; use {\tt OA} instead) \\
   {\tt OQ} & Z & Original base quality \\
@@ -347,13 +347,13 @@ In the case of multiple unique molecular identifiers (e.g., one on each end of t
 \subsection{Original data}
 
 \begin{description}
-\item[OA:Z:\tagregex{{\tt (}\sf{RNAME}{\tt,\,}\sf{POS}{\tt,\,}\emph{strand}{\tt,\,}\sf{CIGAR}{\tt,\,}\sf{MAPQ}{\tt,\,}\sf{NM}{\tt; )}+}]
-The tag encodes the original alignment information of the record prior to realignment or unalignment by subsequent tool. 
-The resulting string is the result of joining the following 6 values with commas `,' (no additional spaces):
+\item[OA:Z:\tagregex{(\metavar{RNAME},\metavar{POS},\metavar{strand},\metavar{CIGAR},\metavar{MAPQ},\metavar{NM};)+}]
+The original alignment information of the record prior to realignment or unalignment by a subsequent tool.
+The resulting string is the result of joining the following six values with commas `,' (no additional spaces):
 \begin{itemize}
-\item {\sf RNAME}, which must be stated explicitly; the use of \,`{\tt =}', which is allowed in {\sf RNEXT}, is not allowed here. 
+\item {\sf RNAME}, which must be stated explicitly; the use of `{\tt =}', which is allowed in {\sf RNEXT}, is not allowed here.
 \item POS is 1-based.
-\item Strand is either `{\tt +}' or `'{\tt -}`, indicating positive/negative strand, corresponding to bit 0x10 of FLAG (unset/set). 
+\item Strand is either `{\tt +}' or `{\tt -}', indicating positive/negative strand, corresponding to bit 0x10 of FLAG (unset/set).
 \item CIGAR as a string.
 \item MAPQ as a numeric string.
 \item NM, the value of the {\tt NM} tag. It may be omitted, but the comma delimiter must be retained so that the string can be easily parsed into the 6 subfields.
@@ -367,11 +367,11 @@ In particular, realignments resulting in the the removal of Secondary or Supplem
 
 \item[OC:Z:\tagvalue{cigar}]
 Original CIGAR, usually before realignment.
-Deprecated by the more general {\tt OA}.
+Deprecated in favour of the more general {\tt OA}.
 
 \item[OP:i:\tagvalue{pos}]
 Original {\sf POS}, usually before realignment.
-Deprecated by the more general {\tt OA}.
+Deprecated in favour of the more general {\tt OA}.
 
 \item[OQ:Z:\tagvalue{qualities}]
 Original base quality, usually before recalibration.
@@ -474,8 +474,7 @@ This appendix lists when standard tags were initially defined or significantly c
 \setlength{\parindent}{0pt}
 \newcommand*{\gap}{\vspace*{2ex}}
 
-
-\subsection*{September 2018}
+\subsubsection*{October 2018}
 Added the OA tag for recording original/previous alignment information. 
 
 Deprecated the OC and OP tags.
