@@ -17,6 +17,9 @@
 \usepackage{fixltx2e}
 \usepackage{amssymb}
 \usepackage{fancyhdr}
+\usepackage{amsmath}
+\usepackage{algpseudocode}
+\usepackage{threeparttable}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
@@ -170,8 +173,9 @@ bits. Alternatively, two codes can be combined, where the first contains the num
 of bits to read. 
 
 \subsection{\textbf{Writing bytes to a byte stream}}
+\label{subsec:writing-bytes}
 
-The interpretation of byte stream is straightforward. CRAM uses little \emph{endiannes} 
+The interpretation of byte stream is straightforward. CRAM uses little \emph{endianness} 
 for bytes when applicable and defines the following storage data types:
 
 \begin{description}
@@ -286,9 +290,9 @@ NULL & 0 & none & series not preserved\tabularnewline
 EXTERNAL & 1 & int block content id & the block content identifier used to associate 
 external data blocks with data series\tabularnewline
 \hline
-GOLOMB & 2 & int offset, int M & Golomb coding\tabularnewline
+Deprecated (GOLOMB) & 2 & int offset, int M & Golomb coding\tabularnewline
 \hline
-HUFFMAN\_INT & 3 & int array, int array & coding with int values\tabularnewline
+HUFFMAN & 3 & int array, int array & coding with int/byte values\tabularnewline
 \hline
 BYTE\_ARRAY\_LEN & 4 & encoding\texttt{<}int\texttt{>} array length, encoding\texttt{<}byte\texttt{>} 
 bytes & coding of byte arrays with array length\tabularnewline
@@ -300,7 +304,7 @@ BETA & 6 & int offset, int number of bits & binary coding\tabularnewline
 \hline
 SUBEXP & 7 & int offset, int K & subexponential coding\tabularnewline
 \hline
-GOLOMB\_RICE & 8 & int offset, int log2m & Golomb-Rice coding\tabularnewline
+Deprecated (GOLOMB\_RICE) & 8 & int offset, int log$_{\text{2}}$m & Golomb-Rice coding\tabularnewline
 \hline
 GAMMA & 9 & int offset & Elias gamma coding\tabularnewline
 \hline
@@ -570,6 +574,7 @@ into the file.
 \end{itemize}
 
 \subsection{\textbf{Compression header block}}
+\label{subsec:compression-header}
 
 The compression header block consists of 3 parts: preservation map, data series 
 encoding map and tag encoding map.
@@ -600,55 +605,31 @@ section\tabularnewline
 \subsubsection*{Data series encodings}
 
 Each data series has an encoding. These encoding are stored in a map with byte[2] 
-keys:
+keys and are decoded in approximately this order\footnote{The precise order is defined in section~\ref{sec:record}.}:
 
+\begin{threeparttable}[t]
 \begin{tabular}{|l|l|>{\raggedright}p{100pt}|>{\raggedright}p{220pt}|}
 \hline
 \textbf{Key} & \textbf{Value data type} & \textbf{Name} & \textbf{Value}\tabularnewline
 \hline
-BF & encoding\texttt{<}int\texttt{>} & bit flags & see separate section\tabularnewline
+BF & encoding\texttt{<}int\texttt{>} & BAM bit flags & see separate section\tabularnewline
 \hline
-AP & encoding\texttt{<}int\texttt{>} & in-seq positions & 0-based alignment start 
-delta from previous record *\tabularnewline
+CF & encoding\texttt{<}int\texttt{>} & CRAM bit flags & see specific section\tabularnewline
 \hline
-FP & encoding\texttt{<}int\texttt{>} & in-read positions & positions of the read 
-features\tabularnewline
+RI & encoding\texttt{<}int\texttt{>} & reference id & record reference id from
+the BAM file header\tabularnewline
 \hline
 RL & encoding\texttt{<}int\texttt{>} & read lengths & read lengths\tabularnewline
 \hline
-DL & encoding\texttt{<}int\texttt{>} & deletion lengths & base-pair deletion lengths\tabularnewline
-\hline
-NF & encoding\texttt{<}int\texttt{>} & distance to next fragment & number of records 
-to the next fragment*\tabularnewline
-\hline
-BA & encoding\texttt{<}byte\texttt{>} & bases & bases\tabularnewline
-\hline
-QS & encoding\texttt{<}byte\texttt{>} & quality scores & quality scores\tabularnewline
-\hline
-BB & encoding\texttt{<}byte[ ]\texttt{>} & stretches of bases & bases\tabularnewline
-\hline
-QQ & encoding\texttt{<}byte[ ]\texttt{>} & stretches of quality scores & quality scores\tabularnewline
-\hline
-FC & encoding\texttt{<}byte\texttt{>} & read features codes & see separate section\tabularnewline
-\hline
-FN & encoding\texttt{<}int\texttt{>} & number of read features & number of read 
-features in each record\tabularnewline
-\hline
-BS & encoding\texttt{<}byte\texttt{>} & base substitution codes & base substitution 
-codes\tabularnewline
-\hline
-IN & encoding\texttt{<}byte[ ]\texttt{>} & insertion & inserted bases\tabularnewline
+AP & encoding\texttt{<}int\texttt{>} & in-seq positions & 0-based alignment start
+delta from previous record *\tabularnewline
 \hline
 RG & encoding\texttt{<}int\texttt{>} & read groups & read groups. Special value 
 `-1' stands for no group.\tabularnewline
 \hline
-MQ & encoding\texttt{<}int\texttt{>} & mapping qualities & mapping quality scores 
- \tabularnewline
+RN\tnote{a} & encoding\texttt{<}byte[ ]\texttt{>} & read names & read names\tabularnewline
 \hline
-TL & encoding\texttt{<}int\texttt{>} & tag ids  & list of tag ids, see tag encoding 
-section\tabularnewline
-\hline
-RN & encoding\texttt{<}byte[ ]\texttt{>} & read names & read names\tabularnewline
+MF & encoding\texttt{<}int\texttt{>} & next mate bit flags & see specific section\tabularnewline
 \hline
 NS & encoding\texttt{<}int\texttt{>} & next fragment reference sequence id & reference 
 sequence ids for the next fragment \tabularnewline
@@ -658,15 +639,30 @@ for the next fragment\tabularnewline
 \hline
 TS & encoding\texttt{<}int\texttt{>} & template size & template sizes\tabularnewline
 \hline
-MF & encoding\texttt{<}int\texttt{>} & next mate bit flags & see specific section\tabularnewline
+NF & encoding\texttt{<}int\texttt{>} & distance to next fragment & number of records
+to the next fragment\tnote{b}\tabularnewline
 \hline
-CF & encoding\texttt{<}int\texttt{>} & compression bit flags & see specific section\tabularnewline
+TL\tnote{c} & encoding\texttt{<}int\texttt{>} & tag ids  & list of tag ids, see tag encoding
+section\tabularnewline
 \hline
-TM & encoding\texttt{<}int\texttt{>} & test mark & a prefix expected before every 
-record, for debugging purposes.\tabularnewline
+FN & encoding\texttt{<}int\texttt{>} & number of read features & number of read
+features in each record\tabularnewline
 \hline
-RI & encoding\texttt{<}int\texttt{>} & reference id & record reference id from 
-the BAM file header\tabularnewline
+FC & encoding\texttt{<}byte\texttt{>} & read features codes & see separate section\tabularnewline
+\hline
+FP & encoding\texttt{<}int\texttt{>} & in-read positions & positions of the read
+features\tabularnewline
+\hline
+DL & encoding\texttt{<}int\texttt{>} & deletion lengths & base-pair deletion lengths\tabularnewline
+\hline
+BB & encoding\texttt{<}byte[ ]\texttt{>} & stretches of bases & bases\tabularnewline
+\hline
+QQ & encoding\texttt{<}byte[ ]\texttt{>} & stretches of quality scores & quality scores\tabularnewline
+\hline
+BS & encoding\texttt{<}byte\texttt{>} & base substitution codes & base substitution
+codes\tabularnewline
+\hline
+IN & encoding\texttt{<}byte[ ]\texttt{>} & insertion & inserted bases\tabularnewline
 \hline
 RS & encoding\texttt{<}int\texttt{>} & reference skip length & number of skipped 
 bases for the `N' read feature\tabularnewline
@@ -677,37 +673,48 @@ HC & encoding\texttt{<}int\texttt{>} & hard clip & number of hard clipped bases\
 \hline
 SC & encoding\texttt{<}byte[ ]\texttt{>} & soft clip & soft clipped bases\tabularnewline
 \hline
+MQ & encoding\texttt{<}int\texttt{>} & mapping qualities & mapping quality scores\tabularnewline
+\hline
+BA & encoding\texttt{<}byte\texttt{>} & bases & bases\tabularnewline
+\hline
+QS & encoding\texttt{<}byte\texttt{>} & quality scores & quality scores\tabularnewline
+\hline
 \end{tabular}
 
-* The data series is reset for each slice. 
+\begin{tablenotes}
+\item{a} Note RN this is decoded after MF if the record is detached from the mate and we are attempting to auto-generate read names.
+\item{b} The count is reset for each slice so NF can only refer to a record later within this slice.
+\item{c} TL is followed by decoding the tag values themselves, in order of appearance in the tag dictionary.
+\end{tablenotes}
+\end{threeparttable}
 
-\subsubsection*{Encoding tags}
+\subsubsection*{Tag encodings}
+\label{subsubsec:tags}
 
 The TL (tag list) data series represents combined information about the number 
 of tags in a record and their ids. 
 
-Let $L_{i}=\{T_{i0}, T_{i1}, \ldots, T_{ix}\}$
-be sorted list of all tag ids for a record $R_{i}$, where $i$ is the sequential 
-record index and $T_{ij}$ denotes $j$-th tag id in the record. We recommend 
-alphabetical sort order. The list of unique $L_{i}$ is assigned sequential 
+Let $L_{i}=\{T_{i0}, T_{i1}, \ldots, T_{ix-1}\}$
+be sorted list of all $x$ tag ids for a record $R_{i}$, where $i$ is the sequential
+record index and $T_{ij}$ denotes $j$-th tag id in the record.
+The list of unique $L_{i}$ is assigned sequential
 integer numbers starting with 0. These integer numbers represent the TL data series. 
-The sorted list of unique $L_{i}$ is stored as the TD value in the preservation 
-map. Using TD, an integer from the TL data series can be mapped back into a list 
-of tag ids. 
+The list of unique $L_{i}$ is stored as the TD value in the preservation map, see section \ref{subsec:compression-header}.
+Using TD, an integer from the TL data series can be mapped back into a list of tag ids.
 
 The TD is written as byte array consisting of $L_{i}$ values separated 
 with \textbackslash{}0. Each $L_{i}$ value is written as a sequence 
 of 3 bytes: tag id followed by tag value type. For example AMiOQZ\textbackslash{}0OQZ\textbackslash{}0, 
-where the TD consists of just two values: integer 0 for tags \{AM:i,OQ:Z\} and 
-1 for tag \{OQ:Z\}.
+where the TD consists of just two values: integer 0 for tag list \{AM:i, OQ:Z\} and
+1 for tag list \{OQ:Z\}.
 
-\subsubsection*{Encoding tag values}
+\subsubsection*{Tag values}
 
-The encodings used for different tags are stored in a map. The map has integer 
-keys composed of the two letter tag abbreviation followed by the tag type as defined 
+The encodings used for each tag type (2 character ID plus 1 character type) are stored in a map.
+The map has integer keys composed of the two letter tag abbreviation followed by the tag type as defined
 in the SAM specification, for example `OQZ' for `OQ:Z'. The three bytes form a 
 big endian integer and are written as ITF8. For example, 3-byte representation 
-of OQ:Z is \{0x4F, 0x51, 0x5A\} and these bytes are intepreted as the integer 0x004F515A. 
+of OQ:Z is \{0x4F, 0x51, 0x5A\} and these bytes are interpreted as the integer 0x004F515A. 
 The integer is finally written as ITF8.
 
 \begin{tabular}{|l|l|l|>{\raggedright}p{160pt}|}
@@ -771,7 +778,7 @@ per BAM auxiliary fields.\tabularnewline
 \end{tabular}
 
 The optional tags are encoded in the same manner as BAM tags.  I.e. a
-series of binary encoded tags contatenated together where each tag
+series of binary encoded tags concatenated together where each tag
 consists of a 2 byte key (matching [A-Za-z][A-Za-z0-9]) followed by a
 1 byte type ([AfZHcCsSiIB]) followed by a string of bytes in a format
 defined by the type.
@@ -864,7 +871,7 @@ e0 45 4f 46 & itf8 & 4542278 & alignment start\tabularnewline
 \hline
 00 & itf8 & 0 & alignment span\tabularnewline
 \hline
-00 & itf8 & 0 & nof records\tabularnewline
+00 & itf8 & 0 & number of records\tabularnewline
 \hline
 00 & itf8 & 0 & global record counter\tabularnewline
 \hline
@@ -912,6 +919,7 @@ is:
 0f 00 00 00 ff ff ff ff 0f e0 45 4f 46 00 00 00 00 01 00 05 bd d9 4f 00 01 00 06 06 01 00 01 00 01 00 ee 63 01 4b
 
 \section{\textbf{Record structure}}
+\label{sec:record}
 
 CRAM record is based on the SAM record but has additional features allowing for 
 more efficient data storage.  In contrast to BAM record CRAM record uses bits as 
@@ -920,143 +928,379 @@ which output variable length binary codes can be used directly in CRAM. On the
 other hand, data series that do not require binary coding can be stored separately 
 in external blocks with some other compression applied to them independently.
 
+As CRAM data series may be interleaved within the same blocks\footnote{Interleaving can sometimes provide better compression, however it also adds dependency between types of data meaning it is not possible to selectively decode one data series if it co-locates with another data series in the same block.} understanding the order in which CRAM data series must be decoded is vital.
+
+The overall flowchart is below, with more detailed description in the subsequent sections.
+
+\algnewcommand\algorithmicto{\text{ \textbf{to} }}
+
 \subsection{\textbf{CRAM record}}
 
 Both mapped and unmapped reads start with the following fields. Please note that 
 the data series type refers to the logical data type and the data series name corresponds 
 to the data series encoding map.
 
-\begin{tabular}{|>{\raggedright}p{36pt}|>{\raggedright}p{70pt}|>{\raggedright}p{75pt}|>{\raggedright}p{90pt}|>{\raggedright}p{171pt}|}
+\begin{tabular}{|>{\raggedright}p{70pt}|>{\raggedright}p{75pt}|>{\raggedright}p{90pt}|>{\raggedright}p{171pt}|}
 \hline
- & \textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
+\textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
 \hline
-1 & int & BF & CRAM bit flags & see CRAM record bit flags\tabularnewline
+int & BF & BAM bit flags & see BAM bit flags below\tabularnewline
 \hline
-2 & int & CF  & compression bit flags & see compression bit flags\tabularnewline
+int & CF & CRAM bit flags & see CRAM bit flags below\tabularnewline
 \hline
-3 & int & RI & ref id & reference sequence id, not used for single reference slices, 
-reserved for future multiref slices. \tabularnewline
+- & - & Positional data & See section \ref{subsec:positions}\tabularnewline
 \hline
-4 & int & RL & read length & the length of the read\tabularnewline
+- & - & Read names & See section \ref{subsec:names}\tabularnewline
 \hline
-5 & int & AP & alignment start & the alignment start position *1\tabularnewline
+- & - & Mate records & See section \ref{subsec:mate}\tabularnewline
 \hline
-6 & int & RG & read group & the read group identifier\tabularnewline
+- & - & Auxiliary tags & See section \ref{subsec:tags}\tabularnewline
 \hline
-7 & byte & QS & quality scores & quality scores are stored depending on the value 
-of the `mapped QS included' field\tabularnewline
-\hline
-8 & byte[ ] & RN & read name & the read names (if preserved)\tabularnewline
-\hline
-9 & *2 & *2 & mate record & *2 (if not the last record)\tabularnewline
-\hline
-10 & int & TL & tag ids & tag ids *3\tabularnewline
-\hline
-11 & byte[ ] & - & tag values & tag values *3\tabularnewline
+- & - & Sequences & See sections \ref{subsec:mapped} and \ref{subsec:unmapped}\tabularnewline
 \hline
 \end{tabular}
 
-*1 The AP data series is delta encoded for reads mapped to a single reference slice 
-and normal integer value in all other cases. 
+\subsubsection*{\textbf{BAM bit flags (BF data series)}}
 
-*2 See \emph{mate record} section.
+The following flags are duplicated from the SAM and BAM specification, with identical meaning.
+Note however some of these flags can be derived during decode, so may be omitted in the CRAM file and the bits computed based on both reads of a pair-end library residing within the same slice.
 
-*3 See\emph{ tag encoding} section.
-
-The CRAM record structure for mapped reads has the following additional fields:
-
-\begin{tabular}{|>{\raggedright}p{36pt}|>{\raggedright}p{70pt}|>{\raggedright}p{74pt}|>{\raggedright}p{85pt}|>{\raggedright}p{177pt}|}
-\hline
- & \textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
-\hline
-1 & *1 & *1 & read feature records & *1\tabularnewline
-\hline
-2 & byte & MQ & mapping quality & read mapping quality\tabularnewline
-\hline
-\end{tabular}
-
-*1 See read feature record specification below.
-
-The CRAM record structure for unmapped reads has the following additional fields:
-
-\begin{tabular}{|>{\raggedright}p{8pt}|>{\raggedright}p{88pt}|>{\raggedright}p{83pt}|>{\raggedright}p{85pt}|>{\raggedright}p{178pt}|}
-\hline
- & \textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
-\hline
-1 & byte[read length] & BA & bases & the read bases\tabularnewline
-\hline
-\end{tabular}
-
-\subsection{\textbf{Read bases}}
-
-CRAM format supports ACGTN bases only. All non-ACGTN read bases must be replaced 
-with N (unknown) base. In case of mismatching non-ACGTN read base and non-ACGTN 
-reference base a ReadBase read feature should be used to capture the fact that 
-the read base should be restored as N base. 
-
-\subsection{\textbf{CRAM record bit flags (BF data series)}}
-
-The following flags are defined for each CRAM read record:
-
+\begin{threeparttable}[t]
 \begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
 \hline
 \textbf{Bit flag} & \textbf{Comment} & \textbf{Description}\tabularnewline
 \hline
-0x1 & ! 0x40 \&\& ! 0x80 & template having multiple segments in sequencing\tabularnewline
+0x1 &  & template having multiple segments in sequencing\tabularnewline
 \hline
 0x2 &  & each segment properly aligned according to the aligner\tabularnewline
 \hline
-0x4 &  & segment unmapped\tabularnewline
+0x4 &  & segment unmapped\tnote{a}\tabularnewline
 \hline
-0x8 & calculated* or stored in the mate's info & next segment in the template unmapped\tabularnewline
+0x8 & calculated\tnote{b}\ \ or stored in the mate's info & next segment in template unmapped\tabularnewline
 \hline
 0x10 &  & SEQ being reverse complemented\tabularnewline
 \hline
-0x20 & calculated* or stored in the mate's info & SEQ of the next segment in the 
+0x20 & calculated\tnote{b}\ \ or stored in the mate's info & SEQ of the next segment in the
 template being reversed\tabularnewline
 \hline
-0x40 &  & the first segment in the template\tabularnewline
+0x40 &  & the first segment in the template\tnote{c}\tabularnewline
 \hline
-0x80 &  & the last segment in the template\tabularnewline
+0x80 &  & the last segment in the template\tnote{c}\tabularnewline
 \hline
 0x100 &  & secondary alignment\tabularnewline
 \hline
 0x200 &  & not passing quality controls\tabularnewline
 \hline
-0x400 &  & PCR or optical duplicate\tabularnewline
+0x400 &  & PCT or optical duplicate\tabularnewline
 \hline
 0x800 &  & Supplementary alignment\tabularnewline
 \hline
 \end{tabular}
+\begin{tablenotes}
+\item[a] Bit 0x4 is the only reliable place to tell whether the read is unmapped.  If 0x4 is set, no assumptions may be made about bits 0x2, 0x100 and 0x800.
+\item[b] For segments within the same slice.
+\item[c] Bits 0x40 and 0x80 reflect the read ordering within each template inherent in the sequencing technology used, which may be independent from the actual mapping orientation.
+If 0x40 and 0x80 are both set, the read is part of a linear template (one where the template sequence is expected to be in a linear order), but it is neither the first nor the last read.
+If both 0x40 and 0x80 are unset, the index of the read in the template is unknown.
+This may happen for a non-linear template (such as one constructed by stitching together other templates) or when this information is lost during data processing.
+\end{tablenotes}
+\end{threeparttable}
 
-* For segments within the same slice.
+\subsubsection*{\textbf{CRAM bit flags (CF data series)}}
 
-\subsection{\textbf{Read feature records}}
+The CRAM bit flags (also known as compression bit flags) expressed as an integer represent the CF data series. 
+The following compression flags are defined for each CRAM read record:
 
-Read features are used to store read details that are expressed using read coordinates 
-(e.g. base differences respective to the reference sequence). The read feature 
-records start with the number of read features followed by the read features themselves:
-
-\begin{tabular}{|>{\raggedright}p{36pt}|>{\raggedright}p{65pt}|>{\raggedright}p{84pt}|>{\raggedright}p{90pt}|>{\raggedright}p{168pt}|}
+\begin{tabular}{|>{\raggedright}p{39pt}|>{\raggedright}p{150pt}|>{\raggedright}p{242pt}|}
 \hline
- & \textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
+\textbf{Bit flag} & \textbf{Name} & \textbf{Description}\tabularnewline
 \hline
-1 & int & FN & number of read features & the number of read features\tabularnewline 
+0x1 & quality scores stored as array & quality scores can be stored as read features
+or as an array similar to read bases.\tabularnewline
 \hline
-2\textsuperscript{*1}  & int & FP & in-read-position & position of the read feature\tabularnewline 
+0x2 & detached & mate information is stored verbatim (e.g. because the pair spans multiple slices or the fields differ to the CRAM computed method)\tabularnewline
 \hline
-3\textsuperscript{*1} & byte & FC & read feature code & \textsuperscript{*2}\tabularnewline
+0x4 & has mate downstream & tells if the next segment should be expected further
+in the stream\tabularnewline
 \hline
-4\textsuperscript{*1} & \textsuperscript{*2} & \textsuperscript{*2} & read feature data & \textsuperscript{*2}\tabularnewline
+0x8 & decode sequence as ``*'' & informs the decoder that the sequence
+is unknown and that any encoded reference differences are present only to
+recreate the CIGAR string.\tabularnewline
 \hline
 \end{tabular}
 
-*1 Repeated for each read feature.
 
-*2 See \emph{read feature codes} below.
+The following pseudocode describes the general process of decoding an entire CRAM record.
+The sequence data itself is in one of two encoding formats depending on whether the record is aligned (mapped).
+
+\subsubsection*{\textbf{Decode pseudocode}}
+\newlength{\maxwidth}
+\newcommand{\algalign}[2] % #1 = text to left, #2 = text to right
+{\makebox[\maxwidth][l]{$#1{}$}${}#2$}
+
+\begin{algorithmic}[1]
+\Procedure{DecodeRecord}{}
+\settowidth{\maxwidth}{CRAM\_flags\quad}
+\State \algalign{BAM\_flags}{\gets}  \Call{ReadItem}{BF, Integer}
+\State \algalign{CRAM\_flags}{\gets} \Call{ReadItem}{CF, Integer}
+\State \Call{DecodePositions}{}\Comment{See section \ref{subsec:positions}}
+\State \Call{DecodeNames}{}\Comment{See section \ref{subsec:names}}
+\State \Call{DecodeMateData}{}\Comment{See section \ref{subsec:mate}}
+\State \Call{DecodeTagData}{}\Comment{See section \ref{subsec:tags}}
+\Statex
+
+\If{$(BF$ AND $4) \ne 0$}\Comment{Unmapped flag}
+  \State \Call{DecodeMappedRead}{}\Comment{See section \ref{subsec:mapped}}
+\Else
+  \State \Call{DecodeUnmappedRead}{}\Comment{See section \ref{subsec:unmapped}}
+\EndIf
+\EndProcedure
+\end{algorithmic}
+
+\subsection{\textbf{CRAM positional data}}
+\label{subsec:positions}
+
+Following the bit-wise BAM and CRAM flags, CRAM encodes positional related data including reference, alignment positions and length, and read-group.
+Positional data is stored for both mapped and unmapped sequences, as unmapped data may still be ``placed'' at a specific location in the genome (without being aligned).
+Typically this is done to keep a sequence pair (paired-end or mate-pair sequencing libraries) together when one of the pair aligns and the other does not.
+
+The AP data series is delta encoded for reads mapped to a position-sorted slice containing data from a single reference, and as a normal integer value in all other cases.
+
+\begin{tabular}{|>{\raggedright}p{70pt}|>{\raggedright}p{75pt}|>{\raggedright}p{90pt}|>{\raggedright}p{171pt}|}
+\hline
+\textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
+\hline
+int & RI & ref id & reference sequence id (only present in multiref slices)\tabularnewline
+\hline
+int & RL & read length & the length of the read\tabularnewline
+\hline
+int & AP & alignment start & the alignment start position\tabularnewline
+\hline
+int & RG & read group & the read group identifier expressed as the N\textsuperscript{th} record in the header, starting from 0 with -1 for no group\tabularnewline
+\hline
+\end{tabular}
+
+\vskip 20pt
+\begin{algorithmic}[1]
+\Procedure{DecodePositions}{}
+\If{$slice\_header.reference\_sequence\_id = -2$}
+  \State $reference\_id\gets$ \Call{ReadItem}{RI, Integer}
+\Else
+  \State $reference\_id\gets slice\_header.reference\_sequence\_id$
+\EndIf
+\State $read\_length \gets$ \Call{ReadItem}{RL, Integer}
+\If{$container\_pmap.AP\_delta \ne 0$}
+    \State Initialise $last\_position$ to 0 if first record in slice
+    \State $alignment\_position \gets$ \Call{ReadItem}{AP, Integer} + $last\_position$
+    \State $last\_position \gets alignment\_position$
+\Else
+    \State $alignment\_position \gets$ \Call{ReadItem}{AP, Integer}
+\EndIf
+\State $read\_group \gets$ \Call{ReadItem}{RG, Integer}
+\EndProcedure
+\end{algorithmic}
+
+\subsection{Read names (RN data series)}
+\label{subsec:names}
+
+Read names can be preserved in the CRAM format, but this is optional and is governed by the \texttt{RN} preservation map key in the container compression header. See section \ref{subsec:compression-header}.
+When read names are not preserved the CRAM decoder should generate names, typically based on the file name and a numeric ID of the read using the record counter field of the slice header block.
+Note read names may still be preserved even when the \texttt{RN} compression header key indicates otherwise, such as where a read is part of a read-pair and the pair spans multiple slices.
+In this situation the record will be marked as detached (see the CF data series) and the mate data below (section \ref{subsec:mate}) will contain the read name.
+
+\begin{tabular}{|>{\raggedright}p{70pt}|>{\raggedright}p{75pt}|>{\raggedright}p{90pt}|>{\raggedright}p{171pt}|}
+\hline
+\textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
+\hline
+byte[] & RN & read names & read names\tabularnewline
+\hline
+\end{tabular}
+
+\vskip 20pt
+\begin{algorithmic}[1]
+\Procedure{DecodeNames}{}
+\If{$container\_pmap.read\_names\_included = 1$}
+  \State $read\_name \gets$ \Call{ReadItem}{RN, Byte[]}
+\Else
+  \State $read\_name \gets$ \Call{GenerateName}{}
+\EndIf
+\Statex
+\EndProcedure
+\end{algorithmic}
+
+\subsection{\textbf{Mate record}}
+\label{subsec:mate}
+
+There are two ways in which mate information can be preserved in CRAM: number of records downstream (distance, within this slice) to the next fragment in the template and a special mate record if the next fragment is not in the current slice.
+In the latter case the record is labelled as ``detached'', see the CF data series.
+
+For mates within the slice only the distance is captured, and only for the first record.  The mate has neither detached nor downstream flags set in the CF data series.
+
+\begin{tabular}{|>{\raggedright}p{68pt}|>{\raggedright}p{115pt}|>{\raggedright}p{228pt}|}
+\hline
+\textbf{Data series type} & \textbf{Data series name} & \textbf{Description}\tabularnewline
+\hline
+int & NF & the number of records to the next fragment\tabularnewline
+\hline
+\end{tabular}
+
+In the above case, the NS (mate reference name), NP (mate position) and TS (template size) fields for both records should be derived once the mate has also been decoded.
+Mate reference name and position are obvious and simply copied from the mate.
+The template size is computed using the method described in the SAM specification; the inclusive distance from the leftmost to rightmost mapped bases with the sign being positive for the leftmost record and negative for the rightmost record.
+
+If the next fragment is not found within this slice then the following structure is included into the CRAM record.
+Note there are cases where read-pairs within the same slice may be marked as detached and use this structure, such as to store mate-pair information that does not match the algorithm used by CRAM for computing the mate data on-the-fly.
+
+\begin{tabular}{|>{\raggedright}p{66pt}|>{\raggedright}p{117pt}|>{\raggedright}p{228pt}|}
+\hline
+\textbf{Data series type} & \textbf{Data series name} & \textbf{Description}\tabularnewline
+\hline
+int & MF & next mate bit flags, see table below\tabularnewline
+\hline
+byte[ ] & RN & the read name (if and only if not known already)\tabularnewline
+\hline
+int & NS & mate reference sequence identifier \tabularnewline
+\hline
+int & NP & mate alignment start position \tabularnewline
+\hline
+int & TS & the size of the template (insert size)\tabularnewline
+\hline
+\end{tabular}
+
+\subsubsection*{Next mate bit flags (MF data series)}
+
+The next mate bit flags expressed as an integer represent the MF data series.
+These represent the missing bits we excluded from the BF data series (when compared to the full SAM/BAM flags).
+The following bit flags are defined:
+
+\begin{tabular}{|>{\raggedright}p{47pt}|>{\raggedright}p{134pt}|>{\raggedright}p{250pt}|}
+\hline
+\textbf{Bit flag} & \textbf{Name} & \textbf{Description}\tabularnewline
+\hline
+0x1 & mate negative strand bit & the bit is set if the mate is on the negative
+strand\tabularnewline
+\hline
+0x2 & mate mapped bit & the bit is set if the mate is mapped\tabularnewline
+\hline
+\end{tabular}
+
+
+\subsubsection*{\textbf{Decode mate pseudocode}}
+
+In the following pseudocode we are assuming the current record is $this$ and its mate is $next\_frag$.
+
+\begin{algorithmic}[1]
+\Procedure{DecodeMateData}{}
+\If{$CF$ AND $2$}\Comment{Detached from mate}
+  \State $mate\_flags\gets $ \Call{ReadItem}{MF,Integer}
+  \If{$mate\_flags$ AND 1}
+    \State $bam\_flags\gets bam\_flags$\ OR\ 0x20\Comment{Mate is reverse-complemented}
+  \EndIf
+  \If{$mate\_flags$ AND 2}
+    \State $bam\_flags\gets bam\_flags$\ OR\ 0x08\Comment{Mate is unmapped}
+  \EndIf
+  \If{$container\_pmap.read\_names\_included \ne 1$}
+    \State $read\_name \gets$ \Call{ReadItem}{RN, Byte[]}
+  \EndIf
+\settowidth{\maxwidth}{mate\_position\ }
+\State \algalign{mate\_ref\_id}{\gets}  \Call{ReadItem}{NS, Integer}
+\State \algalign{mate\_position}{\gets} \Call{ReadItem}{NP, Integer}
+\State \algalign{template\_size}{\gets} \Call{ReadItem}{TS, Integer}
+\ElsIf{$CF$ AND $4$}\Comment{Mate is downstream}
+  \If{$next\_frag.bam\_flags$ AND 0x10}
+    \State $this.bam\_flags \gets this.bam\_flags$\ OR\ 0x20\Comment{next segment reverse complemented}
+  \EndIf
+  \If{$next\_frag.bam\_flags$ AND 0x04}
+    \State $this.bam\_flags \gets this.bam\_flags$\ OR\ 0x08\Comment{next segment unmapped}
+  \EndIf
+  \State $next\_frag\gets$ \Call{ReadItem}{NF,Integer}
+  \State Resolve $mate\_ref\_id$ for $this$ record and $this+next\_frag$ once both have been decoded
+  \State Resolve $mate\_position$ for $this$ record and $this+next\_frag$ once both have been decoded
+  \State Find leftmost and rightmost mapped coordinate in records $this$ and $this+next\_frag$.
+  \State For leftmost of $this$ and $this+next\_frag$ record: $template\_size\gets rightmost-leftmost+1$
+  \State For rightmost of $this$ and $this+next\_frag$ record: $template\_size\gets -(rightmost-leftmost+1)$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+
+Note as with the SAM specification a template may be permitted to have more than two alignment records.
+In this case the ``mate'' for each record is considered to be the next record, with the mate for the last record being the first to form a circular list.
+The above algorithm is a simplification that does not deal with this scenario.
+The full method needs to observe when record $this+NF$ is also labelled as having an additional mate downstream.
+One recommended approach is to resolve the mate information in a second pass, once the entire slice has been decoded.
+The final segment in the mate chain needs to set $bam\_flags$ fields 0x20 and 0x08 accordingly based on the first segment.
+This is also not listed in the above algorithm, for brevity.
+
+\subsection{Auxiliary tags}
+\label{subsec:tags}
+
+Tags are encoded using a tag line (TL data series) integer into the tag dictionary (TD field in the compression header preservation map, see section \ref{subsec:compression-header}).
+See section \ref{subsubsec:tags} for a more detailed description of this process.
+
+\begin{tabular}{|>{\raggedright}p{70pt}|>{\raggedright}p{75pt}|>{\raggedright}p{90pt}|>{\raggedright}p{200pt}|}
+\hline
+\textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
+\hline
+int & TL & tag line & an index into the tag dictionary (TD)\tabularnewline
+\hline
+* & ??? & tag name/type & 3 character key (2 tag identifier and 1 tag type), as specified by the tag dictionary\tabularnewline
+\hline
+\end{tabular}
+
+\vskip 20pt
+\begin{algorithmic}[1]
+\Procedure{DecodeTagData}{}
+\State $tag\_line\gets$ \Call{ReadItem}{TL,Integer}
+\ForAll {$ele \in container\_pmap.tag\_dict(tag\_line)$}
+  \State $name\gets$ first two characters of $ele$
+  \State $tag(type)\gets$ last character of $ele$
+  \State $tag(name)\gets$ \Call{ReadItem}{$ele$, Byte[]}
+\EndFor
+\EndProcedure
+\end{algorithmic}
+
+In the above procedure, $name$ is a two letter tag name and $type$ is one of the permitted types documented in the SAM/BAM specification.
+Type is \texttt{c} (signed 8-bit integer), \texttt{C} (unsigned 8-bit integer), \texttt{s} (signed 16-bit integer), \texttt{S} (unsigned 16-bit integer), \texttt{i} (signed 32-bit integer), \texttt{I} (unsigned 32-bit integer), \texttt{f} (32-bit float), \texttt{Z} (nul-terminated string), \texttt{H} (nul-terminated string of hex digits) and \texttt{B} (binary data in array format with the first byte being one of c,C,s,S,i,I,f using the meaning above, a 32-bit integer for the number of array elements, followed by array data encoded using the specified format).  All integers are little endian encoded.
+
+For example a SAM tag \texttt{MQ:i} has name \texttt{MQ} and type \texttt{i} and will be decoded using one of MQc, MQC, MQs, MQS, MQi and MQI data series depending on size and sign of the integer value.
+
+\subsection{\textbf{Mapped reads}}
+\label{subsec:mapped}
+
+\subsubsection*{\textbf{Read feature records}}
+\label{subsec:features}
+
+Read features are used to store read details that are expressed using read coordinates 
+(e.g. base differences respective to the reference sequence). The read feature 
+records start with the number of read features followed by the read features themselves.
+Finally the single mapping quality and per-base quality scores are stored.
+
+\begin{threeparttable}[t]
+\begin{tabular}{|>{\raggedright}p{88pt}|>{\raggedright}p{83pt}|>{\raggedright}p{85pt}|>{\raggedright}p{180pt}|}
+\hline
+\textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
+\hline
+int & FN & number of read features & the number of read features\tabularnewline
+\hline
+int & FP & in-read-position\tnote{a} & position of the read feature\tabularnewline 
+\hline
+byte & FC & read feature code\tnote{a} & See feature codes below\tabularnewline
+\hline
+* & * & read feature data\tnote{a} & See feature codes below\tabularnewline
+\hline
+int & MQ & mapping qualities & mapping quality score\tabularnewline
+\hline
+byte[read length] & QS & quality scores & the base qualities, if preserved\tabularnewline
+\hline
+\end{tabular}
+\begin{tablenotes}
+\item[a] Repeated FN times, once for each read feature.
+\end{tablenotes}
+\end{threeparttable}
 
 \subsubsection*{Read feature codes}
 
+Each feature code has its own associated data series containing further information specific to that feature.
 The following codes are used to distinguish variations in read coordinates:
 
 \begin{tabular}{|>{\raggedright}p{91pt}|>{\raggedright}p{45pt}|>{\raggedright}p{72pt}|>{\raggedright}p{66pt}|>{\raggedright}p{132pt}|}
@@ -1139,96 +1383,84 @@ base in the alphabetical order: A, C, G, T and N.
 Note: the last two bits of each substitution code are redundant but still required 
 to simplify the reading. 
 
-\subsection{\textbf{Mate record}}
+\subsubsection*{Decode mapped read pseudocode}
 
-There are two ways in which mate information can be preserved in CRAM: number of 
-records downstream (distance) to the next fragment in the template and a special 
-mate record if the next fragment is not in the current slice. Combination of the 
-two approaches allows to fully restore BAM level mate information and efficiently 
-store it in the CRAM file. 
+\begin{algorithmic}[1]
+\Procedure{DecodeMappedRead}{}
+  \State $feature\_number\gets$ \Call{ReadItem}{FN, Integer} 
+  \For{$i\gets 1 \algorithmicto feature\_number$}
+    \State \Call{DecodeFeature}{}
+  \EndFor
+  \State $mapping\_quality\gets$ \Call{ReadItem}{MQ, Integer} 
+  \If{$container\_pmap.preserve\_quality\_scores$}
+    \For{$i\gets 1 \algorithmicto read\_length$}
+      \State $quality\_score\gets$ \Call{ReadItem}{QS, Integer} 
+    \EndFor
+  \EndIf
+\EndProcedure
+\Statex
+\Procedure{DecodeFeature}{}
+    \settowidth{\maxwidth}{feature\_position\ }
+    \State \algalign{feature\_code}{\gets}       \Call{ReadItem}{FC, Integer} 
+    \State \algalign{feature\_position}{\gets}   \Call{ReadItem}{FP, Integer} 
+    \settowidth{\maxwidth}{substitution\_code\ }
+    \If{$feature\_code = $`B'}
+      \State \algalign{base}{\gets}              \Call{ReadItem}{BA, Byte}
+      \State \algalign{quality\_score}{\gets}    \Call{ReadItem}{QS, Byte}
+    \ElsIf{$feature\_code = $`X'}
+      \State \algalign{substitution\_code}{\gets} \Call{ReadItem}{BS, Byte}
+    \ElsIf{$feature\_code = $`I'}
+      \State \algalign{inserted\_bases}{\gets}   \Call{ReadItem}{IN, Byte[]}
+    \ElsIf{$feature\_code = $`S'}
+      \State \algalign{softclip\_bases}{\gets}   \Call{ReadItem}{SC, Byte[]}
+    \ElsIf{$feature\_code = $`H'}
+      \State \algalign{hardclip\_length}{\gets}  \Call{ReadItem}{HC, Integer}
+    \ElsIf{$feature\_code = $`P'}
+      \State \algalign{pad\_length}{\gets}       \Call{ReadItem}{PD, Integer}
+    \ElsIf{$feature\_code = $`D'}
+      \State \algalign{deletion\_length}{\gets}  \Call{ReadItem}{DL, Integer}
+    \ElsIf{$feature\_code = $`N'}
+      \State \algalign{ref\_skip\_length}{\gets} \Call{ReadItem}{RS, Integer}
+    \ElsIf{$feature\_code = $`i'}
+      \State \algalign{base}{\gets}              \Call{ReadItem}{BA, Byte}
+    \ElsIf{$feature\_code = $`b'}
+      \State \algalign{bases}{\gets}             \Call{ReadItem}{BB, Byte[]}
+    \ElsIf{$feature\_code = $`q'}
+      \State \algalign{quality\_scores}{\gets}   \Call{ReadItem}{QQ, Byte[]}
+    \ElsIf{$feature\_code = $`Q'}
+      \State \algalign{quality\_score}{\gets}    \Call{ReadItem}{QS, Byte}
+    \EndIf
+\EndProcedure
+\end{algorithmic}
 
-For mates within the slice only the distance is captured:
+\subsection{\textbf{Unmapped reads}}
+\label{subsec:unmapped}
 
-\begin{tabular}{|>{\raggedright}p{7pt}|>{\raggedright}p{68pt}|>{\raggedright}p{115pt}|>{\raggedright}p{228pt}|}
+The CRAM record structure for unmapped reads has the following additional fields:
+
+\begin{tabular}{|>{\raggedright}p{88pt}|>{\raggedright}p{83pt}|>{\raggedright}p{85pt}|>{\raggedright}p{180pt}|}
 \hline
- & \textbf{Data series type} & \textbf{Data series name} & \textbf{Description}\tabularnewline
+\textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
 \hline
-1 & int & NF & the number of records to the next fragment\tabularnewline
+byte[read length] & BA & bases & the read bases\tabularnewline
+\hline
+byte[read length] & QS & quality scores & the base qualities, if preserved\tabularnewline
 \hline
 \end{tabular}
 
-If the next fragment is not found within the horizon then the following structure 
-is included into the CRAM record:
-
-\begin{tabular}{|>{\raggedright}p{6pt}|>{\raggedright}p{66pt}|>{\raggedright}p{117pt}|>{\raggedright}p{228pt}|}
-\hline
- & \textbf{Data series type} & \textbf{Data series name} & \textbf{Description}\tabularnewline
-\hline
-1 & byte & MF & next mate bit flags, see table below\tabularnewline
-\hline
-2 & byte[ ] & RN & the read name\tabularnewline
-\hline
-3 & int & NS & mate reference sequence identifier \tabularnewline
-\hline
-4 & int & NP & mate alignment start position \tabularnewline
-\hline
-5 & int & TS & the size of the template (insert size)\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{}
-
-\subsubsection*{Next mate bit flags (MF data series)}
-
-The next mate bit flags expressed as an integer represent the MF data series. The 
-following bit flags are defined:
-
-\begin{tabular}{|>{\raggedright}p{47pt}|>{\raggedright}p{134pt}|>{\raggedright}p{250pt}|}
-\hline
-\textbf{Bit flag} & \textbf{Name} & \textbf{Description}\tabularnewline
-\hline
-0x1 & mate negative strand bit & the bit is set if the mate is on the negative 
-strand\tabularnewline
-\hline
-0x2 & mate mapped bit & the bit is set if the mate is mapped\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{Read names (RN data series)}
-
-Read names can be preserved in the CRAM format. However, it is anticipated that 
-in the majority of cases original read names will not be preserved and sequential 
-integer numbers will be used as read names. Read names may also be used to associate 
-fragments into templates when the fragments are too far apart to be referenced 
-by the number of CRAM records. In this case the read names are not required to 
-be the same as the original ones. Their only two requirements are:
-
-$\bullet$ read name must be the same for all fragments of the same template
-
-$\bullet$ read name of a template must be unique within a file
-
-\subsection{\textbf{Compression bit flags (CF data series)}}
-
-The compression bit flags expressed as an integer represent the CF data series. 
-The following compression flags are defined for each CRAM read record:
-
-\begin{tabular}{|>{\raggedright}p{39pt}|>{\raggedright}p{150pt}|>{\raggedright}p{242pt}|}
-\hline
-\textbf{Bit flag} & \textbf{Name} & \textbf{Description}\tabularnewline
-\hline
-0x1 & quality scores stored as array & quality scores can be stored as read features 
-or as an array similar to read bases.\tabularnewline
-\hline
-0x2 & detached & the next segment is out of horizon\tabularnewline
-\hline
-0x4 & has mate downstream & tells if the next segment should be expected further 
-in the stream\tabularnewline
-\hline
-0x8 & decode sequence as ``*'' & informs the decoder that the sequence
-is unknown and that any encoded reference differences are present only to
-recreate the CIGAR string.\tabularnewline
-\hline
-\end{tabular}
+\vskip20pt
+\begin{algorithmic}[1]
+\Procedure{DecodeUnmappedRead}{}
+  \For{$i\gets 1 \algorithmicto read\_length$}
+    \State $base\gets$ \Call{ReadItem}{BA, Byte}
+  \EndFor
+  \If{$container\_pmap.preserve\_quality\_scores$}
+    \For{$i\gets 1 \algorithmicto read\_length$}
+      \State $quality\_score\gets$ \Call{ReadItem}{QS, Byte}
+    \EndFor
+  \EndIf
+\EndProcedure
+\end{algorithmic}
 
 \section{\textbf{Reference sequences}}
 
@@ -1319,9 +1551,518 @@ This allows to apply BAM indexing to CRAM files, however it introduces some over
 in seeking specific alignment start because all preceding records in the slice 
 must be read and discarded.
 
-\section{\textbf{Appendix}}
+\section{\textbf{Encodings}}
 
-\subsection{\textbf{External encoding}}
+% FIXME: we have a mishash of coding, encoding and codec.  We should
+% go through the entire document and be consistent.
+
+\subsection{\textbf{Introduction}}
+
+The basic idea for codings is to efficiently represent some values in binary format. 
+This can be achieved in a number of ways that most frequently involve some knowledge 
+about the nature of the values being encoded, for example, distribution statistics. 
+The methods for choosing the best encoding and determining its parameters are very 
+diverse and are not part of the CRAM format specification, which only describes 
+how the information needed to decode the values should be stored.
+
+Note two of the encodings (Golomb and Golomb-Rice) are listed as deprecated.
+These are still formally part of the CRAM specification, but have not been used by the primary implementations and may not be well supported.
+Therefore their use is permitted, but not recommended.
+
+\subsubsection*{Offset}
+
+Many of the codings listed below encode positive integer numbers. An integer offset 
+value is used to allow any integer numbers and not just positive ones to be encoded. 
+It can also be used for monotonically decreasing distributions with the maximum 
+not equal to zero. For example, given offset is 10 and the value to be encoded 
+is 1, the actually encoded value would be offset+value=11. Then when decoding, 
+the offset would be subtracted from the decoded value. 
+
+\subsection{External: codec ID 1}
+
+Can encode types \textit{Byte}, \textit{Integer}.
+
+External coding is simply storage of data verbatim to an external block with a given ID.
+If the type is \textit{Byte} the data is stored as-is, otherwise for \textit{Integer} type the data is stored in ITF8.
+
+\subsubsection*{Parameters}
+
+CRAM format defines the following parameters of external coding: 
+
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
+\tabularnewline
+\hline
+itf8 & external id & id of an external block containing the byte stream\tabularnewline
+\hline
+\end{tabular}
+
+\subsection{Huffman coding: codec ID 3}
+
+Can encode types \textit{Byte}, \textit{Integer}.
+
+Huffman coding replaces symbols (values to encode) by binary codewords, with common symbols having shorter codewords such that the total message of binary codewords is shorter than using uniform binary codeword lengths.
+The general process consists of the following steps.
+
+\begin{itemize}
+\item Obtain symbol code lengths.
+\begin{itemize}
+\item If encoding:\\
+- Compute symbol frequencies.\\
+- Compute code lengths from frequencies.
+\item If decoding:\\
+- Read code lengths from codec parameters.
+\end{itemize}
+
+\item Compute canonical Huffman codewords from code lengths\footnote{\url{https://en.wikipedia.org/wiki/Canonical_Huffman_code}}.
+
+\item Encode or decode bits as per the symbol to codeword table.
+Codewords have the ``prefix property'' that no codeword is a prefix of another codeword, enabling unambiguous decode bit by bit.
+\end{itemize}
+
+The use of canonical Huffman codes means that we only need to store the code lengths and use the same algorithm in both encoder and decoder to generate the codewords.
+This is achieved by ensuring our symbol alphabet has a natural sort order and codewords are assigned in numerical order.
+
+\textbf{Important note: for alphabets with only one value, the codeword will be zero bits long.}
+This makes the Huffman codec an efficient mechanism for specifying constant values.
+
+\subsubsection*{Canonical code computation}
+
+\begin{enumerate}
+\item Sort the alphabet ascending using bit-lengths and then using numerical order 
+of the values.
+
+\item The first symbol in the list gets assigned a codeword which is the same length 
+as the symbol's original codeword but all zeros. This will often be a single zero 
+('0').
+
+\item Each subsequent symbol is assigned the next binary number in sequence, ensuring
+that following codes are always higher in value.
+
+\item When you reach a longer codeword, then after incrementing, append zeros until 
+the length of the new codeword is equal to the length of the old codeword.
+\end{enumerate}
+
+\subsubsection*{Examples}
+
+\begin{tabular}{|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|}
+\hline
+\textbf{Symbol} & \textbf{Code length} & \textbf{Codeword}\tabularnewline
+\hline
+A & 1 & 0\tabularnewline
+\hline
+B & 3 & 100\tabularnewline
+C & 3 & 101\tabularnewline
+D & 3 & 110\tabularnewline
+\hline
+E & 4 & 1110\tabularnewline
+F & 4 & 1111\tabularnewline
+\hline
+\end{tabular}
+
+\subsubsection*{Parameters}
+
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
+\tabularnewline
+\hline
+itf8[ ] & alphabet & list of all encoded symbols (values)\tabularnewline
+\hline
+itf8[ ] & bit-lengths & array of bit-lengths for each symbol in the alphabet\tabularnewline
+\hline
+\end{tabular}
+
+\subsection{Byte array coding}
+
+Often there is a need to encode an array of bytes where the length is not predetermined.
+For example the read identifiers differ per alignment record, possibly with different lengths, and this length must be stored somewhere.
+There are two choices available: storing the length explicitly (BYTE\_ARRAY\_LEN) or continuing to read bytes until a termination value is seen (BYTE\_ARRAY\_STOP).
+
+Note in contrast to this, quality values are known to be the same length as the sequence which is an already known quantity, so this does not need to be encoded using the byte array codecs.
+
+\subsubsection*{BYTE\_ARRAY\_LEN: codec ID 4}
+
+Can encode types \textit{Byte[]}.
+
+Byte arrays are captured length-first, meaning that the length of every array element is written using an additional encoding.
+For example this could be a HUFFMAN encoding or another EXTERNAL block.
+The length is decoded first followed by the data, followed by the next length and data, and so on.
+
+This encoding can therefore be considered as a nested encoding, with each pair of nested encodings containing their own set of parameters.
+The byte stream for parameters of the BYTE\_ARRAY\_LEN encoding is therefore the concatenation of the length and value encoding parameters as described in section~\ref{subsec:writing-bytes}.
+
+The parameter for BYTE\_ARRAY\_LEN are listed below:
+
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
+\tabularnewline
+\hline
+encoding\texttt{<}int\texttt{>} & lengths encoding & an encoding describing how 
+the arrays lengths are captured\tabularnewline
+\hline
+encoding\texttt{<}byte\texttt{>} & values encoding & an encoding describing how 
+the values are captured\tabularnewline
+\hline
+\end{tabular}
+
+For example, the bytes specifying a BYTE\_ARRAY\_LEN encoding, including the codec and parameters, for a 16-bit X0 auxiliary tag (``X0C'') may use HUFFMAN encoding to specify the length (always 2 bytes) and an EXTERNAL encoding to store the value to an external block with ID 200.
+
+\begin{tabular}{lll}
+\hline
+\textbf{Bytes} & & \textbf{Meaning}\\
+\hline
+\texttt{0x04}         & & BYTE\_ARRAY\_LEN codec ID                                    \\
+\texttt{0x0a}         & & 10 remaining bytes of BYTE\_ARRAY\_LEN parameters            \\
+\\
+\texttt{0x03}         & & HUFFMAN codec ID, for aux tag lengths                        \\
+\texttt{0x04}         & & 4 more bytes of HUFFMAN parameters                           \\
+\texttt{0x01}         & & Alphabet array size = 1                                      \\
+\texttt{0x02}         & & alphabet symbol; (length = 2)                                \\
+\texttt{0x01}         & & Codeword array size = 1                                      \\
+\texttt{0x00}         & & Code length = 0 (zero bits needed as alphabet is size 1)     \\
+\\
+\texttt{0x01}         & & EXTERNAL codec ID, for aux tag values                        \\
+\texttt{0x02}         & & 2 more bytes of EXTERNAL parameters                          \\
+\texttt{0x80 0xc8}    & & ITF8 encoding for block ID 200                               \\
+\hline
+\end{tabular}
+
+
+
+\subsubsection*{BYTE\_ARRAY\_STOP: codec ID 5}
+
+Can encode types \textit{Byte[]}.
+
+Byte arrays are captured as a sequence of bytes terminated by a special stop byte.
+The data returned does not include the stop byte itself.
+In contrast to BYTE\_ARRAY\_LEN the value is always encoded with EXTERNAL so the parameter is an external id instead of another encoding.
+
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
+\tabularnewline
+\hline
+byte & stop byte & a special byte treated as a delimiter\tabularnewline
+\hline
+itf8 & external id & id of an external block containing the byte stream\tabularnewline
+\hline
+\end{tabular}
+
+\subsection{Beta coding: codec ID 6}
+
+Can encode types \textit{Integer}.
+
+\subsubsection*{Definition}
+
+Beta coding is a most common way to represent numbers in \emph{binary notation} and is sometimes referred to as binary coding.
+The decoder reads the specified fixed number of bits (most significant first) and subtracts the offset value to get the decoded integer.
+
+\subsubsection*{Parameters}
+
+CRAM format defines the following parameters of beta coding: 
+
+\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}\tabularnewline
+\hline
+itf8 & offset & offset is subtracted from each value during decode\tabularnewline
+\hline
+itf8 & length & the number of bits used\tabularnewline
+\hline
+\end{tabular}
+
+\subsubsection*{Examples}
+
+If we have integer values in the range 10 to 15 inclusive, the largest value would traditionally need 4 bits, but with an offset of -10 we can hold values 0 to 5, using a fixed size of 3 bits.
+Using fixed Offset and Length coming from the beta parameters, we decode these values as:
+
+\begin{tabular}{|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|}
+\hline
+Offset & Length & \textbf{Bits} & \textbf{Value}\tabularnewline
+\hline
+-10 & 3 & 000 & 10\tabularnewline
+\hline
+-10 & 3 & 001 & 11\tabularnewline
+\hline
+-10 & 3 & 010 & 12\tabularnewline
+\hline
+-10 & 3 & 011 & 13\tabularnewline
+\hline
+-10 & 3 & 100 & 14\tabularnewline
+\hline
+-10 & 3 & 101 & 15\tabularnewline
+\hline
+\end{tabular}
+
+\subsection{Subexponential coding: codec ID 7}
+
+Can encode types \textit{Integer}.
+
+\subsubsection*{Definition}
+
+Subexponential coding\footnote{Fast progressive lossless image compression, Paul G. Howard and Jeffrey Scott Vitter, 1994. \url{http://www.ittc.ku.edu/~jsv/Papers/HoV94.progressive_FELICS.pdf}} is parametrized by a non-negative integer $k$.
+For values $n < 2^{k+1}$ subexponential coding produces codewords identical to Rice coding \footnote{\url{https://en.wikipedia.org/wiki/Golomb_coding\#Rice_coding}}.  For larger values it grows logarithmically with $n$.
+
+\subsubsection*{Encoding}
+
+\begin{enumerate}
+\item Add $\mathit{offset}$ to $n$.
+
+\item Determine $u$ and $b$ values from $n$
+\begin{align*}
+b =
+\begin{cases}
+  \ k                        & \text{ if $n < 2^k$} \\
+  \ \lfloor log_{2}n \rfloor & \text{ if $n \ge 2^k$}
+\end{cases}
+&\
+&u =
+\begin{cases}
+  \ 0     & \text{ if $n < 2^k$} \\
+  \ b-k+1 & \text{ if $n \ge 2^k$}
+\end{cases}
+\end{align*}
+
+\item Write $u$ in unary form; $u$ 1 bits followed by a single 0 bit.
+
+\item Write the bottom $b$-bits of $n$ in binary form.
+\end{enumerate}
+
+\subsubsection*{Decoding}
+
+\begin{enumerate}
+\item Read $u$ in unary form, counting the number of leading 1s (prefix) in the codeword (discard the trailing 0 bit).
+
+\item Determine $n$ via:
+\begin{enumerate}
+\item if $u = 0$ then read $n$ as a $k$-bit binary number.
+\item if $u \ge 1$ then read $x$ as a $(u + k - 1)$-bit binary. Let $n = 2^{u+k-1} + x$.
+\end{enumerate}
+
+\item Subtract $\mathit{offset}$ from $n$.
+\end{enumerate}
+
+\subsubsection*{Examples}
+
+\begin{tabular}{|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|}
+\hline
+\textbf{Number} & \textbf{Codeword, k=0} & \textbf{Codeword, k=1} & \textbf{Codeword, 
+k=2}\tabularnewline
+\hline
+0 & 0 & 00 & 000\tabularnewline
+\hline
+1 & 10 & 01 & 001\tabularnewline
+\hline
+2 & 1100 & 100 & 010\tabularnewline
+\hline
+3 & 1101 & 101 & 011\tabularnewline
+\hline
+4 & 111000 & 11000 & 1000\tabularnewline
+\hline
+5 & 111001 & 11001 & 1001\tabularnewline
+\hline
+6 & 111010 & 11010 & 1010\tabularnewline
+\hline
+7 & 111011 & 11011 & 1011\tabularnewline
+\hline
+8 & 11110000 & 1110000 & 110000\tabularnewline
+\hline
+9 & 11110001 & 1110001 & 110001\tabularnewline
+\hline
+10 & 11110010 & 1110010 & 110010\tabularnewline
+\hline
+\end{tabular}
+
+\subsubsection*{Parameters}
+
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
+\tabularnewline
+\hline
+itf8 & offset & offset is subtracted from each value during decode\tabularnewline
+\hline
+itf8 & k & the order of the subexponential coding\tabularnewline
+\hline
+\end{tabular}
+
+\subsection{Gamma coding: codec ID 9}
+
+Can encode types \textit{Integer}.
+
+\subsubsection*{Definition}
+
+\emph{Elias gamma code} is a prefix encoding of positive integers. This is a combination 
+of unary coding and beta coding. The first is used to capture the number of bits 
+required for beta coding to capture the value. 
+
+\subsubsection*{Encoding}
+
+\begin{enumerate}
+\item Write it in binary.
+
+\item Subtract $1$ from the number of bits written in step 1 and prepend that many zeros.
+
+\item An equivalent way to express the same process:
+
+\item Separate the integer into the highest power of $2$ it contains ($2N$) and the remaining 
+$N$ binary digits of the integer.
+
+\item Encode $N$ in unary; that is, as $N$ zeroes followed by a one.
+
+\item Append the remaining $N$ binary digits to this representation of $N$.
+\end{enumerate}
+
+\subsubsection*{Decoding}
+
+\begin{enumerate}
+\item Read and count 0s from the stream until you reach the first 1. Call this count 
+of zeroes $N$.
+
+\item Considering the one that was reached to be the first digit of the integer, with 
+a value of $2N$, read the remaining $N$ digits of the integer.
+\end{enumerate}
+
+\subsubsection*{Examples}
+
+\begin{tabular}{|>{\raggedright}p{76pt}|>{\raggedright}p{107pt}|}
+\hline
+\textbf{Value} & \textbf{Codeword}\tabularnewline
+\hline
+1 & 1\tabularnewline
+\hline
+2 & 010\tabularnewline
+\hline
+3 & 011\tabularnewline
+\hline
+4 & 00100\tabularnewline
+\hline
+\end{tabular}
+
+\subsubsection*{Parameters}
+
+\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}\tabularnewline
+\hline
+itf8 & offset & offset to subtract from each value after decode\tabularnewline
+\hline
+\end{tabular}
+
+\subsection{DEPRECATED: Golomb coding: codec ID 2}
+
+Can encode types \textit{Integer}.
+
+Note this codec has not been used in any known CRAM implementation since before CRAM v1.0.
+Nor is it implemented in some of the major software.
+Therefore its use is not recommended.
+
+\subsubsection*{Definition}
+
+\emph{Golomb encoding} is a prefix encoding optimal for representation of random 
+positive numbers following geometric distribution. 
+
+\subsubsection*{Encoding}
+
+\begin{enumerate}
+\item Fix the parameter $M$ to an integer value.
+
+\item For $N$, the number to be encoded, find
+
+\begin{enumerate}
+\item quotient $q = \lfloor N/M \rfloor$
+
+\item remainder $r = N \bmod M$
+\end{enumerate}
+
+\item Generate Codeword
+
+\begin{enumerate}
+\item The Code format : \texttt{<}Quotient Code\texttt{>}\texttt{<}Remainder Code\texttt{>}, 
+where
+
+\item Quotient Code (in unary coding)
+
+\begin{enumerate}
+\item Write a $q$-length string of 1 bits
+
+\item Write a 0 bit
+\end{enumerate}
+
+\item Remainder Code (in truncated binary encoding)
+
+Set $b=\lceil log_{2}(M) \rceil$
+
+\begin{enumerate}
+\item If $r < 2^{b}-M$ code $r$ as plain binary using $b-1$ bits.
+
+\item If $r \ge 2^{b}-M$ code the number $r+2^{b}-M$ in plain binary representation 
+using $b$ bits.
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+
+\subsubsection*{Decoding}
+
+\begin{enumerate}
+\item Read $q$ via unary coding: count the number of 1 bits and consume the following 0 bits.
+\item Set $b=\lceil log_{2}(M) \rceil$
+\item Read $r$ via $b-1$ bits of binary coding
+\item If $r \ge 2^{b}-M$
+\begin{enumerate}
+\item Read 1 single bit, $x$.
+\item Set $r = r*2 + x - (2^{b}-M)$
+\end{enumerate}
+\item Value is $q*M + r - \mathit{offset}$
+\end{enumerate}
+
+\subsubsection*{Examples}
+
+\begin{tabular}{|>{\raggedright}p{76pt}|>{\raggedright}p{107pt}|}
+\hline
+\textbf{Number} & \textbf{Codeword, M=10, (thus b=4)}\tabularnewline
+\hline
+0 & 0000\tabularnewline
+\hline
+4 & 0100\tabularnewline
+\hline
+10 & 10000\tabularnewline
+\hline
+26 & 1101100\tabularnewline
+\hline
+42 & 11110010\tabularnewline
+\hline
+\end{tabular}
+
+\subsubsection*{Parameters}
+
+Golomb coding takes the following parameters: 
+
+\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}\tabularnewline
+\hline
+itf8 & offset & offset is added to each value\tabularnewline
+\hline
+itf8 & M & the golomb parameter (number of bins)\tabularnewline
+\hline
+\end{tabular}
+
+\subsection{DEPRECATED: Golomb-Rice coding: codec ID 8}
+
+Can encode types \textit{Integer}.
+
+Note this codec has not been used in any known CRAM implementation since before CRAM v1.0.
+Nor is it implemented in some of the major software.
+Therefore its use is not recommended.
+
+Golomb-Rice coding is a special case of Golomb coding when the M parameter is a power of 2.
+The reason for this coding is that the division operations in Golomb coding can be replaced with bit shift operators as well as avoiding the extra $r < 2^{b}-M$ check.
+
+\section{\textbf{External compression methods}}
 
 External encoding operates on bytes only. Therefore any data series must be translated 
 into bytes before sending data into an external block. The following agreements 
@@ -1332,6 +2073,24 @@ of bytes.
 
 Strings, like read name, are translated into bytes according to UTF8 rules. In 
 most cases these should coincide with ASCII, making the translation trivial. 
+
+\subsection{\textbf{Gzip}}
+
+The Gzip specification is defined in RFC 1952.
+Gzip in turn is an encapsulation on the Deflate algorithm defined in RFC 1951.
+
+\subsection{\textbf{Bzip2}}
+
+Bzip2 is a compression method utilising the Burrows Wheeler Transform, Move To Front transform, Run Length Encoding and a Huffman entropy encoder. 
+It is often superior to Gzip for textual data.
+
+An informal format specification exists:\\
+\url{https://github.com/dsnet/compress/blob/master/doc/bzip2-format.pdf}
+
+\subsection{\textbf{LZMA}}
+
+LZMA is the Lempel-Ziv Markov chain algorithm.
+CRAM uses the xz Stream format to encapsulate this algorithm, as defined in \url{https://tukaani.org/xz/xz-file-format.txt}.
 
 \subsection{\textbf{rANS codec}}
 
@@ -1392,7 +2151,7 @@ what their relative frequencies are.  The total sum of symbol
 frequencies are normalised to add up to 4095.
 
 Formally, this is an ordered alphabet $\mathbb{A}$ containing symbols $s$ where
-$s_{i}$ with the $i$-th symbol in $\mathbb{A}$, occuring with the frequency $freq_{i}$.
+$s_{i}$ with the $i$-th symbol in $\mathbb{A}$, occurring with the frequency $freq_{i}$.
 
 \textbf{Order-0 encoding}
 
@@ -1474,7 +2233,7 @@ use for the Order-0 table and end the contexts with a nul byte.  After
 each context byte we emit the Order-0 table relating to that context.
 
 One last caveat is that we have no context for the first byte in the
-data stream (infact for 4 equally spaced starting points, see
+data stream (in fact for 4 equally spaced starting points, see
 ``interleaving" below).  We use the ASCII value (`\textbackslash0') as
 the starting context and so need to consider this in our frequency
 table.
@@ -1631,7 +2390,7 @@ We have a reverse lookup table $cfreq\_to\_sym_c$ from 0 to 4095
 
 {
 \setlength{\parindent}{1cm}
-\indent   $cfreq\_to\_sym_c = s_{i} \quad | \quad c: \enskip cfreq_i \leq c <
+\indent   $cfreq\_to\_sym_c = s_{i} \quad where \quad c: \enskip cfreq_i \leq c <
 cfreq_i + freq_i$
 % \\*[8pt]
 % \indent   $cfreq\_to\_sym_c = s_{i} ,
@@ -1643,7 +2402,7 @@ The $x' = C(s,x)$ function used for the ${i}-th symbol ${s} is:
 
 {
 \setlength{\parindent}{1cm}
-\indent    $x' = (x/freq_i) * \mathtt{0x1000} + cfreq_i + (x\%freq_i)$
+\indent    $x' = (x/freq_i) \times \mathtt{0x1000} + cfreq_i + (x \bmod freq_i)$
 }
 
 The $D(x') = (s,x)$ function used to produce the $i$-th symbol $s$ and
@@ -1664,7 +2423,7 @@ We use $L = \mathtt{0x800000}$ and $b = 256$, permitting us to flush out one byt
 at a time (encoded and decoded in reverse order).
 
 Before every encode $C(s,x)$ we renormalise $x$, shifting out the bottom 8
-bits of $x$ until $x < \mathtt{0x80000} * freq_i$.  After finishing encoding we
+bits of $x$ until $x < \mathtt{0x80000} \times freq_i$.  After finishing encoding we
 flush 4 more bytes (lowest 8-bits first) from $x$.
 
 After every decoded $D(x')$ we renormalise $x'$, shifting in the bottom 8
@@ -1685,404 +2444,210 @@ previous byte value as the context for the next byte.  Therefore split
 the input data into 4 approximately equal sized
 fragments\footnote{This was why the `\textbackslash0' $\to$ `a'
   context in the example above had a frequency of 4 instead of 1.}
-starting at $0$, $\lfloor{}len/4\rfloor{}*1$,
-$\lfloor{}len/4\rfloor{}*2$ and $\lfloor{}len/4\rfloor{}*3$.  Each
+starting at $0$, $\lfloor{}len/4\rfloor{}$,
+$\lfloor{}len/4\rfloor{}\times2$ and $\lfloor{}len/4\rfloor{}\times 3$.  Each
 Order-1 codec operates in a cyclic fashion as with Order-0, all
 starting with 0 as their state and sharing the same output buffer. Any
-remainder, when the input buffer is not divisible by 4, is encoded at
-the end by the 4th encoder.
+remainder, when the input buffer is not divisible by 4, is processed at
+the end by the 4th rANS state.
 
 We do not permit Order-1 encoding of data streams smaller than 4
 bytes.
 
-\subsection{\textbf{Codings}}
+\newpage
+\subsubsection*{rANS decode pseudocode}
 
-\subsubsection*{Introduction}
+A na\"ive implementation of a rANS decoder, follows.
+This pseudocode is for clarity only and is not expected to be performant and we would normally rewrite this to use lookup tables for maximum efficiency.
+The function \textsc{ReadByte} below is undefined, but is expected to fetch the next single unsigned byte from an unspecified input source.  Similarly for \textsc{ReadITF8} (variable size inetger) and \textsc{ReadUint32} (32-bit unsigned integer in little endian format).
 
-The basic idea for codings is to efficiently represent some values in binary format. 
-This can be achieved in a number of ways that most frequently involve some knowledge 
-about the nature of the values being encoded, for example, distribution statistics. 
-The methods for choosing the best encoding and determining its parameters are very 
-diverse and are not part of the CRAM format specification, which only describes 
-how the information needed to decode the values should be stored.
+For brevity, we have also omitted error checking and array bounds checks.
 
-\subsubsection*{Offset}
+The interpretation of some pseudocode syntax is listed below.
 
-Most of the codings listed below encode positive integer numbers. An integer offset 
-value is used to allow any integer numbers and not just positive ones to be encoded. 
-It can also be used for monotonically decreasing distributions with the maximum 
-not equal to zero. For example, given offset is 10 and the value to be encoded 
-is 1, the actually encoded value would be offset+value=11. Then when decoding, 
-the offset would be subtracted from the decoded value. 
-
-\subsubsection*{Beta coding}
-
-\subsubsection*{Definition}
-
-Beta coding is a most common way to represent numbers in \emph{binary notation}. 
-
-
-\subsubsection*{Examples}
-
-\begin{tabular}{|>{\raggedright}p{222pt}|>{\raggedright}p{222pt}|}
+\begin{tabular}{ll}
+\textbf{String} & \textbf{Meaning} \\
 \hline
-\textbf{Number} & \textbf{Codeword}\tabularnewline
-\hline
-0 & 0\tabularnewline
-\hline
-1 & 1\tabularnewline
-\hline
-2 & 10\tabularnewline
-\hline
-4 & 100\tabularnewline
-\hline
+$x << y$ & logical shift left of $x$ by $y$ bits. \\
+$x >> y$ & logical shift right of $x$ by $y$ bits.\\
+$x\ \ \&\ \ y$ & bit-wise AND of $x$ and $y$.\\
+$V_i$ & Element $i$ of vector $V$.\\
+      & The entire vector $V$ may be passed into a function.\\
+$W_{i,j}$ & Element $i,j$ of two-dimensional vector $W$.\\
+          & The entire vector $W$ or a one dimensional slice $W_i$ (of size $j$) may be passed into a function.\\
 \end{tabular}
 
-\subsubsection*{Parameters}
-
-CRAM format defines the following parameters of beta coding: 
-
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
-\hline
-\textbf{Data type} & \textbf{Name} & \textbf{Comment}\tabularnewline
-\hline
-itf8 & offset & offset is added to each value\tabularnewline
-\hline
-itf8 & length & the number of bits used\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{Gamma coding}
-
-\subsubsection*{Definition}
-
-\emph{Elias gamma code} is a prefix encoding of positive integers. This is a combination 
-of unary coding and beta coding. The first is used to capture the number of bits 
-required for beta coding to capture the value. 
-
-\subsubsection*{Encoding}
-
-\begin{enumerate}
-\item Write it in binary.
-
-\item Subtract $1$ from the number of bits written in step 1 and prepend that many zeros.
-
-\item An equivalent way to express the same process:
-
-\item Separate the integer into the highest power of $2$ it contains ($2N$) and the remaining 
-$N$ binary digits of the integer.
-
-\item Encode $N$ in unary; that is, as $N$ zeroes followed by a one.
-
-\item Append the remaining $N$ binary digits to this representation of $N$.
-\end{enumerate}
-
-\subsubsection*{Decoding}
-
-\begin{enumerate}
-\item Read and count 0s from the stream until you reach the first 1. Call this count 
-of zeroes $N$.
-
-\item Considering the one that was reached to be the first digit of the integer, with 
-a value of $2N$, read the remaining $N$ digits of the integer.
-\end{enumerate}
-
-\subsubsection*{Examples}
-
-\begin{tabular}{|>{\raggedright}p{76pt}|>{\raggedright}p{107pt}|}
-\hline
-\textbf{Value} & \textbf{Codeword}\tabularnewline
-\hline
-1 & 1\tabularnewline
-\hline
-2 & 010\tabularnewline
-\hline
-3 & 011\tabularnewline
-\hline
-4 & 00100\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{Parameters}
-
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
-\hline
-\textbf{Data type} & \textbf{Name} & \textbf{Comment}\tabularnewline
-\hline
-itf8 & offset & offset is added to each value\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{Golomb coding}
-
-\subsubsection*{Definition}
-
-\emph{Golomb encoding} is a prefix encoding optimal for representation of random 
-positive numbers following geometric distribution. 
-
-\begin{enumerate}
-\item Fix the parameter $M$ to an integer value.
-
-\item For $N$, the number to be encoded, find
-
-\begin{enumerate}
-\item quotient $q = \lfloor N/M \rfloor$
-
-\item remainder $r = N \bmod M$
-\end{enumerate}
-
-\item Generate Codeword
-
-\begin{enumerate}
-\item The Code format : \texttt{<}Quotient Code\texttt{>}\texttt{<}Remainder Code\texttt{>}, 
-where
-
-\item Quotient Code (in unary coding)
-
-\begin{enumerate}
-\item Write a $q$-length string of 1 bits
-
-\item Write a 0 bit
-\end{enumerate}
-
-\item Remainder Code (in truncated binary encoding)
-
-\begin{enumerate}
-\item If $M$ is power of 2, code remainder as binary format. So $log_{2}(M)$ bits are needed. (Rice code)  
-
-\item If $M$ is not a power of 2, set $b=\lceil log_{2}(M) \rceil$
-
-\begin{enumerate}
-\item If $r < 2^{b}-M$ code $r$ as plain binary using $b-1$ bits.
-
-\item If $r \ge 2^{b}$ code the number $r+2^{b}$ in plain binary representation 
-using $b$ bits.
-\end{enumerate}
-\end{enumerate}
-\end{enumerate}
-\end{enumerate}
-
-\subsubsection*{Examples}
-
-\begin{tabular}{|>{\raggedright}p{76pt}|>{\raggedright}p{107pt}|}
-\hline
-\textbf{Number} & \textbf{Codeword, M=10}\tabularnewline
-\hline
-0 & 0000\tabularnewline
-\hline
-4 & 0100\tabularnewline
-\hline
-10 & 10000\tabularnewline
-\hline
-42 & 11110010\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{Parameters}
-
-Golomb coding takes the following parameters: 
-
-\begin{tabular}{|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|>{\raggedright}p{144pt}|}
-\hline
-\textbf{Data type} & \textbf{Name} & \textbf{Comment}\tabularnewline
-\hline
-itf8 & offset & offset is added to each value\tabularnewline
-\hline
-itf8 & M & the golomb parameter (number of bins)\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{Golomb-Rice coding}
-
-Golomb-Rice coding is a special case of Golomb coding when the M parameter is a 
-power of 2. The reason for this coding is that the division operations in Golomb 
-coding can be replaced with bit shift operators. 
-
-\subsubsection*{Subexponential coding}
-
-\subsubsection*{Definition}
-
-Subexponential coding is parametrized by a non-nengative integer $k$. The 
-main feature of the subexponential code is its length. For integers $n < 2k+1$
-the code length increases linearly with $n$, but for larger $n$ 
-it increases logarithmically.
-
-\subsubsection*{Encoding}
-
-\begin{enumerate}
-\item Determine the group index i using the following rules: 
-
-\begin{enumerate}
-\item if $n < 2^{k}$, then $i = 0$. 
-
-\item if $n \ge 2^{k}$ , then determine $i$ such that $2^{i+k-1} \le n < 2^{i+k}$
-\end{enumerate}
-
-\item Form the prefix of $i$ 1s.
-
-\item Insert the separator 0.
-
-\item Form the tail: express the value of $(n - 2^{i+k-1})$ as a 
-$(i + k - 1)$-bit binary number if $i > 0$ and $n$ as a $k$-bit binary number 
-otherwise.
-\end{enumerate}
-
-\subsubsection*{Decoding}
-
-\begin{enumerate}
-\item Let $i$ be the number of leading 1s (prefix) in the codeword.
-
-\item Form a run of 0s of length
-
-\begin{enumerate}
-\item $0$, if $i = 0$
-
-\item $2^{i+k-1}$, otherwise
-\end{enumerate}
-
-\item Skip the next 0 (separator).
-
-\item Compute the length of the tail, $c_{tail}$ as
-
-\begin{enumerate}
-\item $k$, if $i = 0$
-
-\item $k + i - 1$, if $i \ge 1$
-\end{enumerate}
-
-\item The next $c_{tail}$ bits are the tail. Form a run of 0s of length 
-represented by the tail.
-
-\item Append 1 to the run of 0s.
-
-\item Go to step 1 to process the next codeword.
-\end{enumerate}
-
-\subsubsection*{Examples}
-
-\begin{tabular}{|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|}
-\hline
-\textbf{Number} & \textbf{Codeword, k=0} & \textbf{Codeword, k=1} & \textbf{Codeword, 
-k=2}\tabularnewline
-\hline
-0 & 0 & 00 & 000\tabularnewline
-\hline
-1 & 10 & 01 & 001\tabularnewline
-\hline
-2 & 1100 & 100 & 010\tabularnewline
-\hline
-3 & 1101 & 101 & 011\tabularnewline
-\hline
-4 & 111000 & 11000 & 1000\tabularnewline
-\hline
-5 & 111001 & 11001 & 1001\tabularnewline
-\hline
-6 & 111010 & 11010 & 1010\tabularnewline
-\hline
-7 & 111011 & 11011 & 1011\tabularnewline
-\hline
-8 & 11110000 & 1110000 & 110000\tabularnewline
-\hline
-9 & 11110001 & 1110001 & 110001\tabularnewline
-\hline
-10 & 11110010 & 1110010 & 110010\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{Parameters}
-
-\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
-\hline
-\textbf{Data type} & \textbf{Name} & \textbf{Comment}
-\tabularnewline
-\hline
-itf8 & offset & offset is added to each value\tabularnewline
-\hline
-itf8 & k & the order of the subexponential coding\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{Huffman coding}
-
-CRAM uses canonical \emph{huffman coding}, which requires only bit-lengths of codewords 
-to restore data. The canonical huffman code follows two additional rules: the alphabet 
-has a natural sort order and codewords are sorted by their numerical values. Given 
-these rules and a codebook containing bit-lengths for each value in the alphabet 
-the codewords can be easily restored. 
-
-\textbf{Important note: for alphabets with only one value there is no output bits 
-at all. }
-
-\subsubsection*{Code computation}
-
-$\bullet$ Sort the alphabet ascending using bit-lengths and then using numerical order 
-of the values.
-
-$\bullet$ The first symbol in the list gets assigned a codeword which is the same length 
-as the symbol's original codeword but all zeros. This will often be a single zero 
-('0').
-
-$\bullet$ Each subsequent symbol is assigned the next binary number in sequence, ensuring 
-that following codes are always higher in value.
-
-$\bullet$ When you reach a longer codeword, then after incrementing, append zeros until 
-the length of the new codeword is equal to the length of the old codeword.
-
-\subsubsection*{Parameters}
-
-\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
-\hline
-\textbf{Data type} & \textbf{Name} & \textbf{Comment}
-\tabularnewline
-\hline
-itf8[ ] & alphabet & list of all encoded values\tabularnewline
-\hline
-itf8[ ] & bit-lengths & array of bit-lengths for each symbol in the alphabet\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{Byte array coding}
-
-Often there is a need to encode an array of bytes. This can be optimized if the 
-length of the encoded arrays is known. For such cases BYTE\_ARRAY\_LEN and BYTE\_ARRAY\_STOP 
-codings can be used. 
-
-\subsubsection*{BYTE\_ARRAY\_LEN }
-
-Byte arrays are captured length-first, meaning that the length of every array is 
-written using an additional encoding. For example this could be a golomb encoding. 
-The parameter for BYTE\_ARRAY\_LEN are listed below:
-
-\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
-\hline
-\textbf{Data type} & \textbf{Name} & \textbf{Comment}
-\tabularnewline
-\hline
-encoding\texttt{<}int\texttt{>} & lengths encoding & an encoding describing how 
-the arrays lengths are captured\tabularnewline
-\hline
-encoding\texttt{<}byte\texttt{>} & values encoding & an encoding describing how 
-the values are captured\tabularnewline
-\hline
-\end{tabular}
-
-\subsubsection*{BYTE\_ARRAY\_STOP }
-
-Byte arrays are captured as a sequence of bytes teminated by a special stop byteFor 
-example this could be a golomb encoding. The parameter for BYTE\_ARRAY\_STOP are 
-listed below:
-
-\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
-\hline
-\textbf{Data type} & \textbf{Name} & \textbf{Comment}
-\tabularnewline
-\hline
-byte & stop byte & a special byte treated as a delimiter\tabularnewline
-\hline
-itf8 & external id & id of an external block containing the byte stream\tabularnewline
-\hline
-\end{tabular}
-
+\vskip 0.5cm
+
+\begin{algorithmic}[1]
+\Procedure{RansDecode}{$input,\ output$}
+\settowidth{\maxwidth}{$n\_out$}
+\State \algalign{order}{\gets} \Call{ReadByte}{}\Comment{Implicit read from $input$}
+\State \algalign{n\_in}{\gets} \Call{ReadUint32}{}
+\State \algalign{n\_out}{\gets} \Call{ReadUint32}{}
+\State \If{$order = 0$}
+  \State \Call{RansDecode0}{$output,\ n\_out$}
+\Else
+  \State \Call{RansDecode1}{$output,\ n\_out$}
+\EndIf
+\EndProcedure
+\end{algorithmic}
+
+
+\subsubsection*{rANS order-0}
+
+The Order-0 code is the simplest variant.
+Here we also define some of the functions for manipulating the rANS state, which are shared between Order-0 and Order-1 decoders.
+
+\vskip 0.5cm
+
+\begin{algorithmic}[1]
+\Statex (Reads a table of Order-0 symbol frequencies $F_i$
+\Statex (and sets the cumulative frequency table $C_{i+1} = C_i+F_i$)
+\Procedure{ReadFrequencies0}{$F, C$}
+\State $s \gets$ \Call{ReadByte}{}\Comment{Next alphabet symbol}
+\State $last\_sym \gets s$
+\State $rle \gets 0$
+\Repeat
+  \State $f \gets$ \Call{ReadITF8}{}
+  \settowidth{\maxwidth}{$C_s$}
+  \State \algalign{F_s}{\gets} $f$
+  \If{$rle > 0$}
+    \settowidth{\maxwidth}{rle\ }
+    \State \algalign{rle}{\gets} $rle-1$
+    \State \algalign{s}{\gets} $s+1$
+  \Else
+    \State $s \gets$ \Call{ReadByte}{}
+    \If{$s = last\_sym+1$}
+      \State $rle \gets$ \Call{ReadByte}{}
+    \EndIf
+  \EndIf
+  \State $last\_sym \gets s$
+\Until {$s = 0$}
+\Statex \quad\ (Compute cumulative frequencies $C_i$ from $F_i$)
+\State $C_0 \gets 0$
+\For{$s\gets 0 \algorithmicto 255$}
+  \State $C_{s+1} \gets C_s + F_s$
+\EndFor
+\EndProcedure
+
+\Statex
+\Statex (Bottom 12 bits of our rANS state $R$ are our frequency)
+\Function{RansGetCumulativeFreq}{$R$}
+  \State \Return $R$ \& 0xfff
+\EndFunction
+\Statex
+\Statex (Convert frequency to a symbol. Find $s$ such that $C_s \le f < C_{s+1}$)
+\Statex (We would normally implement this via a lookup table)
+\Function{RansGetSymbolFromFreq}{$C, f$}
+  \State $s \gets 0$
+  \While{$f >= C_{s+1}$}
+    \State $s \gets s+1$
+  \EndWhile
+  \State \Return $s$
+\EndFunction
+\Statex
+\Statex (Compute the next rANS state $R$ given frequency $f$ and cumulative freq $c$)
+\Function{RansAdvanceStep}{$R, c, f$}
+  \State \Return $f \times (R >> 12) + (R$ \& 0xfff$) - c$
+\EndFunction
+\Statex
+\Statex (If too small, feed in more bytes to the rANS state $R$)
+\Function{RansRenorm}{$R$}
+  \While{$R < (1 << 23)$}
+    \State $R \gets (R << 8) +$\ \Call{ReadByte}{}
+  \EndWhile
+  \State \Return $R$
+\EndFunction
+\Statex
+\Procedure{RansDecode0}{$output$, $nbytes$}
+  \For{$j\gets 0 \algorithmicto 3$}
+    \State $R_j \gets$ \Call{ReadUint32}{}\Comment{Unsigned 32-bit little endian}
+  \EndFor
+  \State $i \gets 0$
+  \While{$i < nbytes$}
+    \For{$j\gets 0 \algorithmicto 3$}
+      \If{$i+j \ge nbytes$} \Return
+      \EndIf
+      \State $f \gets$ \Call{RansGetCumulativeFreq}{$R_j$}
+      \State $s \gets$ \Call{RansGetSymbolFromFreq}{$C,\ f$}
+      \State $output_{i+j} \gets s$
+      \State $R_j \gets$\ \Call{RansAdvanceStep}{$R_j,\ C_s,\ F_s$}
+      \State $R_j \gets$\ \Call{RansRenorm}{$R_j$}
+    \EndFor
+    \State $i \gets i+4$
+  \EndWhile
+\EndProcedure
+\end{algorithmic}
+
+\subsubsection*{rANS order-1}
+
+As described above, the decode logic is very similar to rANS Order-0 except we have a two dimensional array of frequencies to read and the decode uses the last character as the context for decoding the next one.
+In the pseudocode we demonstrate this by using two dimensional vectors $C_{i,j}$ and $F_{i,j}$.
+For simplicity, we reuse the Order-0 code by referring to $C_i$ and $F_i$ of the 2D vectors to get a single dimensional vector that operates in the same manner as the Order-0 code.
+This is not necessarily the most efficient implementation.
+
+Note the code for dealing with the remaining bytes when an output buffer is not an exact multiple of 4 is less elegant in the Order-1 code.
+This is correct, but it is unfortunately a design oversight.
+
+\vskip 0.5cm
+
+\begin{algorithmic}[1]
+\Statex (Reads a table of Order-1 symbol frequencies $F_{i,j}$
+\Statex (and sets the cumulative frequency table $C_{i,j+1} = C_{i,j}+F_{i,j}$)
+\Procedure{ReadFrequencies1}{$F, C$}
+\State $sym \gets$ \Call{ReadByte}{}\Comment{Next alphabet symbol}
+\State $last\_sym \gets sym$
+\State $rle \gets 0$
+\Repeat
+  \State \Call{ReadFrequencies0}{$F_i, C_i$}
+  \If{$rle > 0$}
+    \settowidth{\maxwidth}{sym}
+    \State \algalign{rle}{\gets} $rle-1$
+    \State \algalign{sym}{\gets} $sym+1$
+  \Else
+    \State $sym \gets$ \Call{ReadByte}{}
+    \If{$sym = last\_sym+1$}
+      \State $rle \gets$ \Call{ReadByte}{}
+    \EndIf
+  \EndIf
+  \State $last\_sym \gets sym$
+\Until {$sym = 0$}
+\EndProcedure
+
+\Statex
+\Procedure{RansDecode1}{$output$, $nbytes$}
+  \For{$j\gets 0 \algorithmicto 3$}
+    \State $R_j \gets$ \Call{ReadUint32}{}\Comment{Unsigned 32-bit little endian}
+    \State $L_j \gets 0$
+  \EndFor
+  \State $i \gets 0$
+  \While{$i < \lfloor nbytes/4 \rfloor$}
+    \For{$j\gets 0 \algorithmicto 3$}
+      \State $f \gets$ \Call{RansGetCumulativeFreq}{$R_j$}
+      \State $s \gets$ \Call{RansGetSymbolFromFreq}{$C_{L_j},\ f$}
+      \State $output_{i + j \times \lfloor nbytes/4 \rfloor} \gets s$
+      \State $R_j \gets$\ \Call{RansAdvanceStep}{$R_j,\ C_{L_j,s},\ F_{L_j,s}$}
+      \State $R_j \gets$\ \Call{RansRenorm}{$R_j$}
+      \State $L_j \gets s$
+    \EndFor
+    \State $i \gets i+1$
+  \EndWhile
+  \Statex \ \ \ \ (Now deal with the remainder if buffer size is not a multiple of 4,)
+  \Statex \ \ \ \ (using rANS state 3 exclusively.)
+  \State $i \gets 4 \times i$
+  \While{$i < nbytes$}
+    \State $f \gets$ \Call{RansGetCumulativeFreq}{$R_3$}
+    \State $s \gets$ \Call{RansGetSymbolFromFreq}{$C_{L_3},\ f$}
+    \State $output_{i + 3 \times \lfloor nbytes/4 \rfloor} \gets s$
+    \State $R_3 \gets$\ \Call{RansAdvanceStep}{$R_3,\ C_{L_3,s},\ F_{L_3,s}$}
+    \State $R_3 \gets$\ \Call{RansRenorm}{$R_3$}
+    \State $L_3 \gets s$
+\EndWhile
+\EndProcedure
+\end{algorithmic}
+
+\section{\textbf{Appendix}}
 \subsection{\textbf{Choosing the container size}}
 
 CRAM format does not constrain the size of the containers. However, the following 
