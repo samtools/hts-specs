@@ -913,10 +913,10 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf next\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf read\_name} & Read name,\footnotemark\ {\tt NUL}-terminated (\underline{\sf QNAME} plus a trailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf read\_name} & Read name, {\tt NUL}-terminated (\underline{\sf QNAME} with trailing `{\tt\verb"\0"}')\footnotemark & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$. See Section~\ref{sec:seq} & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf qual} & Phred-scaled base qualities. See Section~\ref{sec:seq} & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
   & \multicolumn{5}{c|}{\textcolor{gray}{\it List of auxiliary data (until the end of the alignment block)}} \\\cline{3-6}
   & & {\sf tag} & Two-character tag & {\tt char[2]} & \\\cline{3-6}
   & & {\sf val\_type} & Value type: {\tt AcCsSiIfZHB}, see Section~\ref{sec:aux-type-codes} & {\tt char} & \\\cline{3-6}
@@ -955,12 +955,15 @@ the first CIGAR operation clips the entire read, a BAM parsing library is
 expected to update {\sf n\_cigar\_op} and {\sf cigar} with the real CIGAR
 stored in the {\tt CG} tag and remove the now-redundant {\tt CG} tag.
 
-\subsubsection{SEQ encoding}\label{sec:seq}
+\subsubsection{SEQ and QUAL encoding}\label{sec:seq}
 Sequence is encoded in 4-bit values, with adjacent bases packed into the same byte starting with the highest 4 bits first.
 When {\sf l\_seq} is odd the bottom 4 bits of the last byte are undefined, but we recommend writing these as zero.
 The case-insensitive base codes `{\tt =ACMGRSVTWYHKDBN}' are mapped to $[0,15]$ respectively with all other characters mapping to `{\tt N}' (value 15).
 
 Omitted sequence, represented in SAM as `{\tt *}', is represented by {\sf l\_seq} being 0 and {\sf seq} and {\sf qual} zero-length.
+
+Base qualities are stored as bytes in the range $[0,93]$, without any +33 conversion to printable ASCII.
+When base qualities are omitted but the sequence is not, {\sf qual} is filled with {\tt 0xFF} bytes (to length {\sf l\_seq}).
 
 \subsubsection{Auxiliary data encoding}\label{sec:aux-type-codes}
 Optional alignment fields are stored immediately after each other immediately
