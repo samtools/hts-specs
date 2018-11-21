@@ -248,16 +248,19 @@ meanings can be avoided.}
   key is the {\sf RNAME} field, with order defined by the order of {\tt @SQ} lines in the header.  The
   minor sort key is the {\sf POS} field.  For alignments with equal {\sf RNAME} and {\sf POS}, order is
   arbitrary.  All alignments with `{\tt *}' in {\sf RNAME} field follow alignments with some other
-  value but otherwise are in arbitrary order.\\\cline{2-3}
+  value but otherwise are in arbitrary order.
+  For queryname sort, no explicit requirement is made regarding the ordering other than that it be applied consistently throughout the entire file.%
+  \footnote{It is known that widely used software libraries have differing definitions of the queryname sort order, meaning care should be taken when operating on multiple files of varying provenance.
+  Tools may wish to use the sub-sort field to explicitly distinguish between natural and lexicographical ordering.  See Section~\ref{sec:sub-sort}.}\\\cline{2-3}
   & {\tt GO} & Grouping of alignments, indicating that similar alignment records
     are grouped together but the file is not necessarily sorted overall.
     \emph{Valid values}: {\tt none} (default), {\tt query} (alignments are
     grouped by {\sf QNAME}), and {\tt reference} (alignments are grouped by
     {\sf RNAME}/{\sf POS}).\\\cline{1-3}
-  & {\tt SS} & Sub-sorting order of alignments. Valid values are of the form \emph{sort-order}{\tt :}\emph{sub-sort}, where \emph{sort-order} is the same value stored in the {\tt SO} tag and \emph{sub-sort} is an implementation-dependent colon-separated string further describing the sort order.%
+  & {\tt SS} & Sub-sorting order of alignments. Valid values are of the form \emph{sort-order}{\tt :}\emph{sub-sort}, where \emph{sort-order} is the same value stored in the {\tt SO} tag and \emph{sub-sort} is an implementation-dependent colon-separated string further describing the sort order, but with some predefined terms defined in Section~\ref{sec:sub-sort}.
+    For example, if an algorithm relies on a {\tt coordinate} sort that, at each coordinate, is further sorted by query name then the header could contain {\tt @HD SO:coordinate SS:coordinate:queryname}.%
 \footnote{The repetition of \emph{sort-order} enables a limited form of validation.
 For example, {\tt @HD SO:queryname SS:coordinate:TLEN} would indicate that the data has been re-sorted (by query name) by a non-{\tt SS}-aware tool and the {\tt SS} field should be ignored.}
-    For example, if an algorithm relies on a {\tt coordinate} sort that, at each coordinate, is further sorted by query name the header could contain {\tt @HD SO:coordinate SS:coordinate:queryname}.
     If the primary sort is not one of the predefined primary sort orders, then {\tt unsorted} should be used and the subsort is effectively the major sort.
     For example, if sorted by an auxillary tag {\tt MI} then by coordinate then the header could contain {\tt @HD SO:unsorted SS:unsorted:MI:coordinate}.
     \newline
@@ -337,6 +340,24 @@ The {\tt TP} field is often omitted, which implies linear.}\\\cline{2-3}
   \cline{1-3}
 \end{longtable}
 \end{center}
+
+\subsubsection{Defined sub-sort terms}\label{sec:sub-sort}
+
+While the {\tt SS} sub-sort field allows implementation-defined keywords, some terms are predefined with specific meanings.
+
+\begin{description}
+\item[lexicographical] sort order is defined as a character-based dictionary sort with the character order as defined by the POSIX C locale.
+  For example ``abc'', ``abc17'', ``abc5'', ``abc59'' and ``abcd'' are in lexicographical order.
+
+\item[natural] sort order is similar to lexicographical order except that runs of adjacent digits are considered to be numbers embedded within the text string, ordered numerically when compared to each other and ordered as single digits when compared to the surrounding non-digit characters.
+Runs that differ only in the number of leading zeros (thus are numerically tied) are ordered by more-zeros coming before fewer-zeros.
+The characters `\texttt{-}' and `\texttt{.}' are considered as ordinary characters, so apparently negative or fractional values are not treated as part of an embedded number.
+  For example, ``abc'', ``abc+5'', ``abc-5'', ``abc.d'', ``abc03'', ``abc5'', ``abc008'', ``abc08'', ``abc8'', ``abc17'', ``abc17.+'', ``abc17.2'', ``abc17.d'', ``abc59'' and ``abcd'' are in natural order.
+
+\item[umi] is a lexicographical sort by the UMI tag.
+  The {\tt MI} tag should be used for comparing UMIs. The RX tag may be used in its absence but is not guaranteed to be unique across multiple libraries.
+
+\end{description}
 
 \subsubsection{Reference MD5 calculation}\label{sec:ref-md5}
 The {\tt M5} tag on {\tt @SQ} lines allows reference sequences to be uniquely identified through the MD5 digest of the sequence itself.
