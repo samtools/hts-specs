@@ -291,7 +291,9 @@ For HTTPS URLs, the server may supply a JSON object containing one or more strin
 `class`
 _string_
 </td><td>
-For file formats whose specification describes a header and a body, the class indicates which of the two will be retrieved when querying this URL. Either all or none of the URLs in the response must have a class attribute. The allowed values are `header` and `body`.
+For file formats whose specification describes a header and a body, the class indicates which of the two will be retrieved when querying this URL. The allowed values are `header` and `body`.
+
+Either all or none of the URLs in the response must have a class attribute. If it is absent, clients should assume data blocks include both header and body, possibly mixed in one of the blocks.
 </td></tr>
 </table>
 
