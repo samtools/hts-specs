@@ -165,7 +165,7 @@ The server SHOULD reply with an `UnsupportedFormat` error if the requested forma
 `class`  
 _optional string_
 </td><td>
-A list of URL classes to include, see below.
+Allows clients to request the data header only, using `class=header`. It is not possible to return the data body only, because that would not constitute a valid response in any of the supported formats.
 Default: all
 </td></tr>
 <tr markdown="block"><td>
