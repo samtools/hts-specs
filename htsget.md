@@ -166,7 +166,7 @@ The server SHOULD reply with an `UnsupportedFormat` error if the requested forma
 _optional_
 </td><td>
 The reference sequence name, for example "chr1", "1", or "chrX". If unspecified, all records are returned regardless of position.
-  
+
 For the reads endpoint: if "\*", unplaced unmapped reads are returned. If unspecified, all reads (mapped and unmapped) are returned. (*Unplaced unmapped* reads are the subset of unmapped reads completely without location information, i.e., with RNAME and POS field values of "\*" and 0 respectively. See the [SAM specification](http://samtools.github.io/hts-specs/SAMv1.pdf) for details of placed and unplaced unmapped reads.)
 
 The server SHOULD reply with a `NotFound` error if the requested reference does not exist.
