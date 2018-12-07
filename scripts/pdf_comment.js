@@ -1,17 +1,10 @@
 #!/usr/bin/env nodejs
 
-const fs = require('fs'); 
 const bot = require("circle-github-bot").create();
-
-fs.readdirSync("diffs")
-	.filter(s=>s.match(".pdf$"))
-	.map(s=>s.replace(".pdf",""))
-	.forEach(file=> console.log(file))
+const fs = require('fs'); 
 
 const spawnSync = require( 'child_process' );
 const ls = spawnSync.spawnSync( 'git', ["describe" ,"--always"]);
-
-console.log( `git-commit: ${ls.stdout.toString()}` );
 
 function addLink(file){
   text="";
@@ -26,18 +19,24 @@ function addLink(file){
   return text;
 }
 
-if (fs.readdirSync("diffs").size==0) {
+console.log( `git-commit: ${ls.stdout.toString()}` );
+
+const diffPDFs = fs.readdirSync("diffs")
+  .filter(s=>s.match(".pdf$"));
+
+if (diffPDFs.length==0) {
   return;
 }
 
+diffPDFs.map(s => s.replace(".pdf",""))
+  .forEach(file => console.log(file))
 
-var text=`Changed PDFs as of ${ls.stdout.toString().trim()}:` 
+var text=`Changed PDFs as of ${ls.stdout.toString().trim()}:`
 
 text += fs.readdirSync("diffs")
 	.filter(s=>s.match(".pdf$"))
 	.map(s=>s.replace(".pdf",""))
 	.map(file => addLink(file)).join(",")+".";
 
-
 console.log(text)
-bot.comment(text)
+bot.comment(process.env.GH_AUTH_TOKEN, text)
