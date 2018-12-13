@@ -9,6 +9,7 @@
 \usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
 \usepackage[title]{appendix}
 \usepackage[calc]{picture}
+\usepackage{tikz}
 
 \newlength{\bytewidth}
 \newlength{\bytetotalheight}
@@ -560,12 +561,68 @@ Each bit is explained in the following table:
   the next read. If {\sf PNEXT} is 0, no assumptions can be made on
   {\sf RNEXT} and bit 0x20.
 \item {\sf TLEN}: signed observed Template LENgth. If all segments are
-  mapped to the same reference, the unsigned observed template length
-  equals the number of bases from the leftmost mapped base to the
-  rightmost mapped base. The leftmost segment has a plus sign and the
-  rightmost has a minus sign. The sign of segments in the middle is
-  undefined. It is set as 0 for single-segment template or when the
-  information is unavailable.
+  mapped to the same reference sequence, the absolute value of TLEN
+  equals the distance between the mapped end of the template and the
+  mapped start of the template, inclusively (i.e., $\mbox{end}-\mbox{start}+1$).%
+  \footnote{Thus a segment
+    aligning in the forward direction at base 100 for length 50 and a
+    segment aligning in the reverse direction at base 200 for length
+    50 indicate the template covers bases 100 to 249 and has length
+    150.}
+  Note that \textit{mapped base} is defined to be one that aligns to the
+  reference as described by CIGAR, hence excludes soft-clipped bases.
+  The TLEN field is positive for the leftmost segment of the template,
+  negative for the rightmost, and the sign for any middle segment is
+  undefined.  If segments cover the same coordinates then the choice
+  of which is leftmost and rightmost is arbitrary, but the two ends
+  must still have differing signs.
+  It is set as 0 for a single-segment template or when the
+  information is unavailable (e.g., when the first or last segment
+  of a multi-segment template is unmapped or when the two are mapped
+  to different reference sequences).
+
+% If future updates cause this footnote to spill over the page boundary
+% try e.g. \enlargethispage{-10em} to adjust where this page ends.
+  The intention of this field is to indicate where the other end of
+  the template has been aligned without needing to read the remainder
+  of the SAM file.  Unfortunately there has been no
+  clear consensus on the definitions of the template mapped start
+  and end.  Thus the exact definitions are implementation-defined.%
+\footnote{The earliest versions of this specification used $5'$ to
+  $5'$ (in original orientation, TLEN\#1; dashed parts of the reads
+  indicate soft-clipped bases) while later ones used leftmost to
+  rightmost mapped based (TLEN\#2).  Note: these two definitions agree in most
+  alignments, but differ in the case of overlaps where the first
+  segment aligns beyond the start of the last segment.
+
+\begin{center}
+\begin{tikzpicture}[
+    thick, xscale=2, yscale=1.8,
+    read/.style={line width=0.4mm},
+]
+\draw[|-, read] (0,0)   -- (0.8,0)  node[midway, above] {Read 1};
+\draw[->, read, dashed] (0.85,0) -- (1.2,0);
+\draw[|-, read] (3,0) -- (2.2,0) node[midway, above] {Read 2};
+\draw[->, read, dashed] (2.25,0) -- (1.8,0);
+\draw[|<->|,gray!120]     (0,-.2) -- +(3,0) node[midway, below] {TLEN \#1/\#2};
+\node at (1.5,-0.7) {\textit{Unambiguous scenario}};
+\end{tikzpicture}
+\hspace{3cm}% No space means side by side
+\begin{tikzpicture}[
+    thick, xscale=1,yscale=0.9,
+    read/.style={line width=0.4mm},
+]
+\draw[|-, read]         (2.2,0)   -- (5.2,0)    node[very near end, above] {Read 1};
+\draw[->, read, dashed] (5.3,0)   -- (6,0);
+\draw[-|, read]         (1,.3)    -- (4,.3)     node[very near start , above] {Read 2};
+\draw[->, read, dashed] (0.9,.3)  -- (0,.3);
+\draw[|<->|,gray!120]   (1,-0.3)  -- (5.2,-0.3) node[midway, below] {TLEN\#2};
+\draw[|<->|,gray!120]   (2.2,0.65)-- (4,0.65)    node[midway, above] {TLEN\#1};
+\node at (2.7,-1) {\textit{Ambiguous scenario}};
+\end{tikzpicture}
+\end{center}
+}
+
 \item {\sf SEQ}: segment SEQuence. This field can be a `*' when the
   sequence is not stored. If not a `*', the length of the sequence must
   equal the sum of lengths of {\tt M/I/S/=/X} operations in {\sf CIGAR}.
