@@ -691,49 +691,46 @@ QS & encoding\texttt{<}byte\texttt{>} & quality scores & quality scores\tabularn
 \subsubsection*{Tag encodings}
 \label{subsubsec:tags}
 
-The TL (tag list) data series represents combined information about the number 
-of tags in a record and their ids. 
+The tag dictionary (TD) describes the unique combinations of tag id / type that occur on each alignment record.
+For example if we search the id / types present in each record and find only two combinations -- X1:i BC:Z SA:Z: and X1:i: BC:Z -- then we have two dictionary entries in the TD map.
 
-Let $L_{i}=\{T_{i0}, T_{i1}, \ldots, T_{ix-1}\}$
-be sorted list of all $x$ tag ids for a record $R_{i}$, where $i$ is the sequential
-record index and $T_{ij}$ denotes $j$-th tag id in the record.
-The list of unique $L_{i}$ is assigned sequential
-integer numbers starting with 0. These integer numbers represent the TL data series. 
-The list of unique $L_{i}$ is stored as the TD value in the preservation map, see section \ref{subsec:compression-header}.
+Let $L_{i}=\{T_{i0}, T_{i1}, \ldots, T_{ix}\}$ be a list of all tag ids for a record $R_{i}$, where $i$ is the sequential record index and $T_{ij}$ denotes $j$-th tag id in the record.
+The list of unique $L_{i}$ is stored as the TD value in the preservation map.
+Maintaining the order is not a requirement for encoders (hence ``combinations''), but it is permissible and thus different permutations, each encoded with their own elements in TD, should be supported by the decoder.
+Each $L_{i}$ element in TD is assigned a sequential integer number starting with 0.
+These integer numbers are referred to by the TL data series.
 Using TD, an integer from the TL data series can be mapped back into a list of tag ids.
+Thus per alignment record we only need to store tag values and not their ids and types.
 
-The TD is written as byte array consisting of $L_{i}$ values separated 
-with \textbackslash{}0. Each $L_{i}$ value is written as a sequence 
-of 3 bytes: tag id followed by tag value type. For example AMiOQZ\textbackslash{}0OQZ\textbackslash{}0, 
-where the TD consists of just two values: integer 0 for tag list \{AM:i, OQ:Z\} and
-1 for tag list \{OQ:Z\}.
+The TD is written as a byte array consisting of $L_{i}$ values separated with \textbackslash{}0.
+Each $L_{i}$ value is written as a concatenation of 3 byte $T_{ij}$ elements: tag id followed by BAM tag type code (one of A, c, C, s, S, i, I, f, F, Z, H or B, as described in the SAM specification).
+For example the TD for tag lists X1:i BC:Z SA:Z and X1:i BC:Z may be encoded as X1CBCZSAZ\textbackslash{}0X1CBCZ\textbackslash{}0, with X1C indicating a 1 byte unsigned value for tag X1.
 
 \subsubsection*{Tag values}
 
-The encodings used for each tag type (2 character ID plus 1 character type) are stored in a map.
-The map has integer keys composed of the two letter tag abbreviation followed by the tag type as defined
-in the SAM specification, for example `OQZ' for `OQ:Z'. The three bytes form a 
-big endian integer and are written as ITF8. For example, 3-byte representation 
-of OQ:Z is \{0x4F, 0x51, 0x5A\} and these bytes are interpreted as the integer 0x004F515A. 
-The integer is finally written as ITF8.
+The encodings used for different tags are stored in a map.
+The key is 3 bytes formed from the BAM tag id and type code, matching the TD dictionary described above.
+Unlike the Data Series Encoding Map, the key is stored in the map as an ITF8 encoded integer, constructed using $(char1<<16) + (char2<<8) + type$.
+For example, the 3-byte representation of OQ:Z is \{0x4F, 0x51, 0x5A\} and these bytes are intepreted as the integer key 0x004F515A, leading to an ITF8 byte stream \{0xE0, 0x4F, 0x51, 0x5A\}.
 
 \begin{tabular}{|l|l|l|>{\raggedright}p{160pt}|}
 \hline
 \textbf{Key} & \textbf{Value data type} & \textbf{Name} & \textbf{Value}
 \tabularnewline
 \hline
-TAG NAME 1:TAG TYPE 1 & encoding\texttt{<}byte[ ]\texttt{>} & read tag 1 & tag values 
+TAG ID 1:TAG TYPE 1 & encoding\texttt{<}byte[ ]\texttt{>} & read tag 1 & tag values
 (names and types are available in the data series code)\tabularnewline
 \hline
 ... &  & ... & ...\tabularnewline
 \hline
-TAG NAME N:TAG TYPE N & encoding\texttt{<}byte[ ]\texttt{>} & read tag N & ...\tabularnewline
+TAG ID N:TAG TYPE N & encoding\texttt{<}byte[ ]\texttt{>} & read tag N & ...\tabularnewline
 \hline
 \end{tabular}
 
 Note that tag values are encoded as array of bytes. The routines to convert tag 
 values into byte array and back are the same as in BAM with the exception of value 
-type being captured in the tag key rather in the value. 
+type being captured in the tag key rather in the value.
+Hence consuming 1 byte for types `C' and `c', 2 bytes for types `S' and `s', 4 bytes for types `I', `i' and `f', and a variable number of bytes for types `H', `Z' and `B'.
 
 \subsection{\textbf{Slice header block}}
 
