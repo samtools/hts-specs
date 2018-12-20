@@ -354,8 +354,8 @@ The resulting string is the result of joining the following six values with comm
 \item {\sf RNAME}, which must be stated explicitly; the use of `{\tt =}', which is allowed in {\sf RNEXT}, is not allowed here.
 \item POS is 1-based.
 \item Strand is either `{\tt +}' or `{\tt -}', indicating positive/negative strand, corresponding to bit 0x10 of FLAG (unset/set).
-\item CIGAR as a string.
-\item MAPQ as a numeric string.
+\item CIGAR encoded as a string.
+\item MAPQ as a string.
 \item NM, the value of the {\tt NM} tag. It may be omitted, but the comma delimiter must be retained so that the string can be easily parsed into the 6 subfields.
 \end{itemize}
 In the presence of an existing {\tt OA} tag, a subsequent tool may append another set of original alignment information after the semicolon,
