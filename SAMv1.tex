@@ -397,6 +397,10 @@ of the mandatory fields in the SAM format:
 \footnotetext{Reference sequence names may contain any printable ASCII characters with the exception of certain punctuation characters, and may not start with `{\tt *}' or `{\tt =}'.
 See Section~\ref{sec:charset} for details and an explanation of the {\tt [\cclass{rname}]} notation.}
 
+\noindent
+All mapped segments in alignment lines are represented on the forward genomic strand.
+For segments that have been mapped to the reverse strand, the recorded {\sf SEQ} is reverse complemented from the original unmapped sequence and {\sf CIGAR}, {\sf QUAL}, and strand-sensitive optional fields are reversed and thus recorded consistently with the sequence bases as represented.
+
 \begin{enumerate}
 \item {\sf QNAME}: Query template NAME. Reads/segments having identical {\sf QNAME}
 	are regarded to come from the same template. A {\sf QNAME} `{\tt *}'
@@ -443,7 +447,8 @@ Each bit is explained in the following table:
   \item Bit 0x10 indicates whether {\sf SEQ} has been reverse complemented
     and {\sf QUAL} reversed.
     When bit~0x4 is unset, this corresponds to the strand to which the
-    segment has been mapped.
+    segment has been mapped: bit~0x10 unset indicates the forward strand,
+    while set indicates the reverse strand.
     When 0x4 is set, this indicates whether the unmapped read is stored
     in its original orientation as it came off the sequencing machine.
   \item Bits 0x40 and 0x80 reflect the read ordering within each template
