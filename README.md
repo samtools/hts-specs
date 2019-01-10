@@ -18,6 +18,7 @@ Alignment data files
 These formats are discussed on the [samtools-devel mailing list][samdev-ml].
 
 **[CRAMv3.tex]** is the canonical specification for the CRAM format, while **[CRAMv2.1.tex]** describes its now-obsolete predecessor.
+**[CRAMcodecs.tex]** contains details of the CRAM custom compression codecs.
 Further details can be found at [ENA's CRAM toolkit page][ena-cram] and [GA4GH's CRAM page][ga4gh-cram].
 CRAM discussions can also be found on the [samtools-devel mailing list][samdev-ml].
 

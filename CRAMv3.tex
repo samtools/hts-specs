@@ -37,7 +37,7 @@
 
 
 \input{CRAMv3.ver}
-\title{CRAM format specification (version 3.0)}
+\title{CRAM format specification (version 3.1)}
 \author{samtools-devel@lists.sourceforge.net}
 \date{\headdate}
 \maketitle
@@ -57,7 +57,7 @@ last modified on the date shown above.
 
 \section{\textbf{Overview}}
 
-This specification describes the CRAM 3.0 format. 
+This specification describes the CRAM 3.0 and 3.1 formats.
 
 CRAM has the following major objectives:
 
@@ -505,7 +505,7 @@ byte[4] & format magic number & CRAM (0x43 0x52 0x41 0x4d)\tabularnewline
 \hline
 unsigned byte & major format number & 3 (0x3)\tabularnewline
 \hline
-unsigned byte & minor format number & 0 (0x0)\tabularnewline
+unsigned byte & minor format number & 1 (0x1)\tabularnewline
 \hline
 byte[20] & file id & CRAM file identifier (e.g. file name or SHA1 checksum)\tabularnewline
 \hline
@@ -527,7 +527,15 @@ Gained end of file markers; compatible with \textit{2.0}.
 \item[\textit{3.0}]
 Additional compression methods; header and data checksums;
 improvements for unsorted data.
+
+\item[\textit{3.1}]
+Additional EXTERNAL compression codecs only.
 \end {itemize}
+
+CRAM 3.0 and 3.1 differ only in the list of compression
+methods available, so tools that output CRAM 3 without using any 3.1
+codecs should write the header to indicate 3.0 in order to permit
+maximum compatibility.
 
 \section{\textbf{Container header structure}}
 \label{sec:container}
@@ -595,7 +603,7 @@ indicate the offsets of the blocks used in the header container.
 These may optionally be omitted by specifying an array size of zero.
 
 \section{\textbf{Block structure}}
-\label{sec:block}
+\label{sec:block-struct}
 
 Containers consist of one or more blocks. Block compression is applied independently 
 and in addition to any encodings used to compress data within the block. The block 
@@ -606,12 +614,17 @@ have the following header structure with the data stored in the `block data' fie
 \textbf{Data type} & \textbf{Name} & \textbf{Value}
 \tabularnewline
 \hline
-byte & method & the block compression method: \linebreak{}
+byte & method & the block compression method (and first CRAM version): \linebreak{}
 0: raw (none)*\linebreak{}
 1: gzip\linebreak{}
-2: bzip2\linebreak{}
-3: lzma\linebreak{}
-4: rans\tabularnewline
+2: bzip2 (v2.0)\linebreak{}
+3: lzma (v3.0)\linebreak{}
+4: rans4x8 (v3.0)\linebreak{}
+5: rans4x16 (v3.1)\linebreak{}
+6: adaptive arithmetic coder (v3.1)\linebreak{}
+7: fqzcomp (v3.1)\linebreak{}
+8: name tokeniser (v3.1)
+\tabularnewline
 \hline
 byte & block content type id & the block content type identifier\tabularnewline
 \hline
@@ -2372,15 +2385,17 @@ The reason for this coding is that the division operations in Golomb coding can 
 
 \section{\textbf{External compression methods}}
 
-External encoding operates on bytes only. Therefore any data series must be translated 
-into bytes before sending data into an external block. The following agreements 
-are defined. 
+External encoding operates on bytes only. Therefore any data series must be translated into bytes before sending data into an external block.
+The following methods are defined.
+Exact definitions of these methods are in their respective internet links or the ancillary \textit{CRAMcodecs} document found along side this specification.
 
 Integer values are written as ITF8, which then can be translated into an array 
 of bytes. 
 
 Strings, like read name, are translated into bytes according to UTF8 rules. In 
-most cases these should coincide with ASCII, making the translation trivial. 
+most cases these should coincide with ASCII, making the translation trivial.
+
+Each method has an associated numeric code which is defined in Section~\ref{sec:block-struct}.
 
 \subsection{\textbf{Gzip}}
 
@@ -2388,6 +2403,8 @@ The Gzip specification is defined in RFC 1952.
 Gzip in turn is an encapsulation on the Deflate algorithm defined in RFC 1951.
 
 \subsection{\textbf{Bzip2}}
+
+First available in CRAM v2.0.
 
 Bzip2 is a compression method utilising the Burrows Wheeler Transform, Move To Front transform, Run Length Encoding and a Huffman entropy encoder. 
 It is often superior to Gzip for textual data.
@@ -2397,565 +2414,59 @@ An informal format specification exists:\\
 
 \subsection{\textbf{LZMA}}
 
+First available in CRAM v3.0.
+
 LZMA is the Lempel-Ziv Markov chain algorithm.
 CRAM uses the xz Stream format to encapsulate this algorithm, as defined in \url{https://tukaani.org/xz/xz-file-format.txt}.
 
-\subsection{\textbf{rANS codec}}
+\subsection{\textbf{rANS4x8 codec}}
+
+First available in CRAM v3.0.
 
 rANS is the range-coder variant of the Asymmetric Numerical
 System\footnote{J. Duda, \textit{Asymmetric numeral systems: entropy
     coding combining speed of Huffman coding with compression rate of
     arithmetic coding}, \url{http://arxiv.org/abs/1311.2540}}.
 
-The structure of the external rANS codec consists of several
-components: meta-data consisting of compression-order, and compressed
-and uncompressed sizes; normalised frequencies of the alphabet systems
-to be encoded, either in Order-0 or Order-1 context; and the rANS
-encoded byte stream itself.
+``4x8'' refers to 4-way interleaving with 8-bit renormalisation.\newline
+This variant of rANS first appeared in CRAM v3.0.
 
-Here "Order" refers to the number of bytes of context used in
-computing the frequencies. It will be 0 or 1.  Ignoring punctuation
-and space, an Order-0 analysis of English text may observe that `e' is
-the most common letter (12-13\%), and that `u' occurs only around 2.5\%
-of the time.  If instead we consider the frequency of a letter in the
-context of one previous letter (Order-1) then these statistics change
-considerably;  we know that if the previous letter was `q' then `e'
-becomes a rare letter while `u' is the most likely.
+Details of this algorithm have been moved to the \textit{CRAMcodecs} document.
 
-These observed frequencies are directly related to the amount of
-storage required to encode a symbol (e.g. an alphabet
-letter)\footnote{ C.E. Shannon, \textit{A Mathematical Theory of
-    Communication}, Bell System Technical Journal, vol. 27,
-    pp. 379-423, 623-656, July, October, 1948}.
+\subsection{\textbf{rANS4x16 codec}}
 
+First available in CRAM v3.1.
 
-\subsubsection{\textbf{rANS compressed data structure}}
-A compressed data block consists of the following logical parts: 
+``4x16'' refers to 4-way interleaving with 16-bit renormalisation.\newline
+This variant of rANS first appeared in CRAM v3.1.
 
+Details of this algorithm are listed in the \textit{CRAMcodecs} document.
 
-\begin{tabular}{|l|l|>{\raggedright}p{100pt}|>{\raggedright}p{220pt}|}
-\hline
-\textbf{Value data type} & \textbf{Name} & \textbf{Description}\tabularnewline
-\hline
-byte & order & the order of the codec, either 0 or 1\tabularnewline
-\hline
-int & compressed size & the size in bytes of frequency table and compressed blob\tabularnewline
-\hline
-int & data size & raw or uncompressed data size in bytes\tabularnewline
-\hline
-byte[ ] & frequency table & byte frequencies of input data written using RLE\tabularnewline
-\hline
-byte[ ] & compressed blob & compressed data\tabularnewline
-\hline
-\end{tabular}
+\subsection{\textbf{adaptive arithemtic coding}}
 
-\subsubsection{\textbf{Frequency table}}
+First available in CRAM v3.1.
 
-The alphabet used here is simply byte values, so a maximum of 256
-symbols as some values may not be present.
+An entropy encoder that is slower but slightly more concise than
+rANS.  It achieves this by adapting the probabilities as it compresses
+and decompresses instead of using a fixed table.
 
-The symbol frequency table indicates which symbols are present and
-what their relative frequencies are.  The total sum of symbol
-frequencies are normalised to add up to 4095.
+Details of this algorithm are listed in the \textit{CRAMcodecs} document.
 
-Formally, this is an ordered alphabet $\mathbb{A}$ containing symbols $s$ where
-$s_{i}$ with the $i$-th symbol in $\mathbb{A}$, occurring with the frequency $freq_{i}$.
+\subsection{\textbf{fqzcomp codec}}
 
-\textbf{Order-0 encoding}
+First available in CRAM v3.1.
 
-The normalised symbol frequencies are then written out as \{symbol,
-frequency\} pairs in ascending order of symbol (0 to 255 inclusive).
-If a symbol has a frequency of 0 then it is omitted.
+This is a method dedicated to compression of quality values.
 
-To avoid storing long consecutive runs of symbols if all are present
-(eg a-z in a long piece of English text) we use run-length-encoding on
-the alphabet symbols.  If two consecutive symbols have non-zero
-frequencies then a counter of how many other non-zero frequency
-consecutive symbols is output directly after the second consecutive
-symbol, with that many symbols being subsequently omitted. 
+Details of this algorithm are listed in the \textit{CRAMcodecs} document.
 
-For example for non-zero frequency symbols `a', `b', `c', `d' and `e'
-we would write out symbol `a', `b' and the value 3 (to indicate `c',
-`d' and `e' are also present).
+\subsection{\textbf{name tokeniser}}
 
-The frequency is output after every symbol (whether explicit or
-implicit) using ITF8 encoding. This means that frequencies 0-127 are
-encoded in 1 byte while frequencies 128-4095 are encoded in 2 bytes.
+First available in CRAM v3.1.
 
-Finally the symbol 0 is written out to indicate the end of the
-symbol-frequency table.
+This is a method dedicated to compression of read names.
 
-As an example, take the string \texttt{abracadabra}.
-
-\begin{minipage}[t]{0.5\textwidth}
-Symbol frequency:
-\\[8pt]
-\begin{tabular}{ |r|r| }
-\hline
-Symbol & Frequency\\
-\hline
-a & 5 \\
-b & 2 \\
-c & 1 \\
-d & 1 \\
-r & 2 \\
-\hline
-\end{tabular}
-\end{minipage}
-\begin{minipage}[t]{0.5\textwidth}
-Normalised to sum to 4095:
-\\[8pt]
-\begin{tabular}{ |r|r|}
-\hline
-Symbol & Frequency\\
-\hline
-a & 1863 \\
-b &  744 \\
-c &  372 \\
-d &  372 \\
-r &  744 \\
-\hline
-\end{tabular}
-\end{minipage}
-
-Encoded as:
-\begin{verbatim}
-0x61      0x87 0x47      # `a'           <1863>
-0x62 0x02 0x82 0xe8      # `b' <+2: c,d>  <744>
-          0x81 0x74      # `c' (implicit) <372> 
-          0x81 0x74      # `d' (implicit) <372> 
-0x72      0x82 0xe8      # `r'            <744> 
-0x00                     # <0>          
-\end{verbatim}
-
-
-\textbf{Order-1 encoding}
-
-To encode Order-1 statistics typically requires a larger table as for
-an $N$ sized alphabet we need to potentially store an $N$x$N$ matrix.
-We store these as a series of Order-0 tables.
-
-We start with the outer context byte, emitting the symbol if it is
-non-zero frequency.  We perform the same run-length-encoding as we
-use for the Order-0 table and end the contexts with a nul byte.  After
-each context byte we emit the Order-0 table relating to that context.
-
-One last caveat is that we have no context for the first byte in the
-data stream (in fact for 4 equally spaced starting points, see
-``interleaving" below).  We use the ASCII value (`\textbackslash0') as
-the starting context and so need to consider this in our frequency
-table.
-
-Consider \texttt{abracadabraabracadabraabracadabraabracadabra} as
-example input.
-
-\begin{minipage}[t]{0.5\textwidth}
-Observed Order-1 frequencies:
-\\[8pt]
-\begin{tabular}{ |r|r|r| }
-\hline
-Context & Symbol & Frequency\\
-\hline
-\textbackslash0 & a & 4 \\
-\hline
-a & a & 3 \\
-  & b & 8 \\
-  & c & 4 \\
-  & d & 4 \\
-\hline
-b & r & 8 \\
-\hline
-c & a & 4 \\
-\hline
-d & a & 4 \\
-\hline
-r & a & 8 \\
-\hline
-\end{tabular}
-\end{minipage}
-\begin{minipage}[t]{0.5\textwidth}
-Normalised (per Order-0 statistics):
-\\[8pt]
-\begin{tabular}{ |r|r|r|}
-\hline
-Context & Symbol & Frequency\\
-\hline
-\textbackslash0 & a & 4095 \\
-\hline
-a & a &  646 \\
-  & b & 1725 \\
-  & c &  862 \\
-  & d &  862 \\
-\hline
-b & r & 4095 \\
-\hline
-c & a & 4095 \\
-\hline
-d & a & 4095 \\
-\hline
-r & a & 4095 \\
-\hline
-\end{tabular}
-\end{minipage}
-
-
-Encoded as:
-\begin{verbatim}
-0x00                 # `\0' context
-0x61      0x8f 0xff  # a  <4095>
-0x00                 # end of Order-0 table
-
-0x61                 # `a' context
-0x61      0x82 0x86  # a            <646>
-0x62 0x02 0x86 0xbd  # b <+2: c,d> <1725>
-          0x83 0x5e  # c (implicit) <862>
-          0x83 0x5e  # d (implicit) <862>
-0x00                 # end of Order-0 table
-
-0x62 0x02            # `b' context, <+2: c, d>
-0x72      0x8f 0xff  # r <4095>
-0x00                 # end of Order-0 table
-
-                     # `c' context (implicit)
-0x61      0x8f 0xff  # a <4095>
-0x00                 # end of Order-0 table
-
-                     # `d' context (implicit)
-0x61      0x8f 0xff  # a <4095>
-0x00                 # end of Order-0 table
-
-0x72                 # `r' context
-0x61      0x8f 0xff  # a <4095>
-0x00                 # end of Order-0 table
-
-0x00                 # end of contexts
-\end{verbatim}
-
-
-\subsubsection{rANS entropy encoding}
-
-The encoder takes a symbol $s$ and a current state $x$ (initially zero) to
-produce a new state $x'$ with function $C$.
-
-{
-\setlength{\parindent}{1cm}
-\indent $x' = C(s,x)$
-}
-
-The decoding function $D$ is the inverse of $C$ such that $C(D(x)) = x$.
-
-{
-\setlength{\parindent}{1cm}
-\indent $D(x') = (s,x)$
-}
-
-The entire encoded message can be viewed as a series of nested $C$
-operations, with decoding yielding the symbols in reverse order, much
-like popping items off a stack.  This is where the asymmetric part of
-ANS comes from.
-
-As we encode into $x$ the value will grow, so for efficiency we ensure
-that it always fits within known bounds. This is governed by
-
-{
-\setlength{\parindent}{1cm}
-\indent $L \leq x < bL-1$
-}
-
-
-where $b$ is the base and $L$ is the lower-bound.
-
-We ensure this property is true before every use of $C$ and after every
-use of $D$.  Finally to end the stream we flush any remaining data out
-by storing the end state of $x$.
-
-
-\textbf{Implementation specifics}
-
-We use an unsigned 32-bit integer to hold $x$. In encoding it is
-initialised to zero. For decoding it is read little-endian from the
-input stream.
-
-Recall $freq_{i}$ is the frequency of the $i$-th symbol $s_{i}$ in alphabet
-$\mathbb{A}$.  We define $cfreq_i$ to be cumulative frequency of all symbols
-up to but not including $s_{i}$:
-
-{
-\setlength{\parindent}{1cm}
-$ cfreq_{i} = \left\{
-\begin{array}{l l}
-0 & \quad \textrm{if $i < 1$} \\
-cfreq_{i-1} + freq_{i-1} & \quad \textrm{if $i \geq 1$}
-\end{array}
-\right. $
-% \\*[8pt]
-% \indent $cfreq_{i} = \displaystyle \sum_{j=0}^{i-1} freq_j$
-}
-
-
-We have a reverse lookup table $cfreq\_to\_sym_c$ from 0 to 4095
-(0xfff) that maps a cumulative frequency $c$ to a symbol $s$.
-
-{
-\setlength{\parindent}{1cm}
-\indent   $cfreq\_to\_sym_c = s_{i} \quad where \quad c: \enskip cfreq_i \leq c <
-cfreq_i + freq_i$
-% \\*[8pt]
-% \indent   $cfreq\_to\_sym_c = s_{i} ,
-% \quad \forall c \in [cfreq_i, cfreq_i + freq_i)$
-}
-
-
-The $x' = C(s,x)$ function used for the ${i}-th symbol ${s} is:
-
-{
-\setlength{\parindent}{1cm}
-\indent    $x' = (x/freq_i) \times \mathtt{0x1000} + cfreq_i + (x \bmod freq_i)$
-}
-
-The $D(x') = (s,x)$ function used to produce the $i$-th symbol $s$ and
-a new state $x$ is:
-
-{
-\setlength{\parindent}{1cm}
-\indent    $c = x' \& \mathtt{0xfff}$\\*
-\indent    $s_{i} = cfreq\_to\_sym_{c}$\\*
-\indent    $x = freq_{i} (x' / \mathtt{0x1000}) + c - cfreq_{i}$
-}
-
-Most of these operations can be implemented as bit-shifts and bit-AND,
-with the encoder modulus being implemented as a multiplication by the
-reciprocal, computed once only per alphabet symbol.
-
-We use $L = \mathtt{0x800000}$ and $b = 256$, permitting us to flush out one byte
-at a time (encoded and decoded in reverse order).
-
-Before every encode $C(s,x)$ we renormalise $x$, shifting out the bottom 8
-bits of $x$ until $x < \mathtt{0x80000} \times freq_i$.  After finishing encoding we
-flush 4 more bytes (lowest 8-bits first) from $x$.
-
-After every decoded $D(x')$ we renormalise $x'$, shifting in the bottom 8
-bits until $x \geq \mathtt{0x800000}$.
-
-
-\textbf{Interleaving}
-
-For efficiency, we interleave 4 separate rANS codecs at the same
-time\footnote{F. Giesen, \textit{Interleaved entropy coders},
-  \url{http://arxiv.org/abs/1402.3392}}.  For the Order-0 codecs these
-simply encode or decode the 4 neighbouring bytes in cyclic fashion
-using interleaved codec 1, 2, 3 and 4, sharing the same output buffer
-(so the output bytes get interleaved).
-
-For the Order-1 codec we cannot do this as we need to know the
-previous byte value as the context for the next byte.  Therefore split
-the input data into 4 approximately equal sized
-fragments\footnote{This was why the `\textbackslash0' $\to$ `a'
-  context in the example above had a frequency of 4 instead of 1.}
-starting at $0$, $\lfloor{}len/4\rfloor{}$,
-$\lfloor{}len/4\rfloor{}\times2$ and $\lfloor{}len/4\rfloor{}\times 3$.  Each
-Order-1 codec operates in a cyclic fashion as with Order-0, all
-starting with 0 as their state and sharing the same output buffer. Any
-remainder, when the input buffer is not divisible by 4, is processed at
-the end by the 4th rANS state.
-
-We do not permit Order-1 encoding of data streams smaller than 4
-bytes.
-
-\newpage
-\subsubsection*{rANS decode pseudocode}
-
-A na\"ive implementation of a rANS decoder, follows.
-This pseudocode is for clarity only and is not expected to be performant and we would normally rewrite this to use lookup tables for maximum efficiency.
-The function \textsc{ReadByte} below is undefined, but is expected to fetch the next single unsigned byte from an unspecified input source.  Similarly for \textsc{ReadITF8} (variable size inetger) and \textsc{ReadUint32} (32-bit unsigned integer in little endian format).
-
-For brevity, we have also omitted error checking and array bounds checks.
-
-The interpretation of some pseudocode syntax is listed below.
-
-\begin{tabular}{ll}
-\textbf{String} & \textbf{Meaning} \\
-\hline
-$x << y$ & logical shift left of $x$ by $y$ bits. \\
-$x >> y$ & logical shift right of $x$ by $y$ bits.\\
-$x\ \ \&\ \ y$ & bit-wise AND of $x$ and $y$.\\
-$V_i$ & Element $i$ of vector $V$.\\
-      & The entire vector $V$ may be passed into a function.\\
-$W_{i,j}$ & Element $i,j$ of two-dimensional vector $W$.\\
-          & The entire vector $W$ or a one dimensional slice $W_i$ (of size $j$) may be passed into a function.\\
-\end{tabular}
-
-\vskip 0.5cm
-
-\begin{algorithmic}[1]
-\Procedure{RansDecode}{$input,\ output$}
-\settowidth{\maxwidth}{$n\_out$}
-\State \algalign{order}{\gets} \Call{ReadByte}{}\Comment{Implicit read from $input$}
-\State \algalign{n\_in}{\gets} \Call{ReadUint32}{}
-\State \algalign{n\_out}{\gets} \Call{ReadUint32}{}
-\State \If{$order = 0$}
-  \State \Call{RansDecode0}{$output,\ n\_out$}
-\Else
-  \State \Call{RansDecode1}{$output,\ n\_out$}
-\EndIf
-\EndProcedure
-\end{algorithmic}
-
-
-\subsubsection*{rANS order-0}
-
-The Order-0 code is the simplest variant.
-Here we also define some of the functions for manipulating the rANS state, which are shared between Order-0 and Order-1 decoders.
-
-\vskip 0.5cm
-
-\begin{algorithmic}[1]
-\Statex (Reads a table of Order-0 symbol frequencies $F_i$
-\Statex (and sets the cumulative frequency table $C_{i+1} = C_i+F_i$)
-\Procedure{ReadFrequencies0}{$F, C$}
-\State $sym \gets$ \Call{ReadByte}{}\Comment{Next alphabet symbol}
-\State $last\_sym \gets sym$
-\State $rle \gets 0$
-\Repeat
-  \State $f \gets$ \Call{ReadITF8}{}
-  \State $F_{sym} \gets f$
-  \If{$rle > 0$}
-    \settowidth{\maxwidth}{sym\ }
-    \State \algalign{rle}{\gets} $rle-1$
-    \State \algalign{sym}{\gets} $sym+1$
-  \Else
-    \State $sym \gets$ \Call{ReadByte}{}
-    \If{$sym = last\_sym+1$}
-      \State $rle \gets$ \Call{ReadByte}{}
-    \EndIf
-  \EndIf
-  \State $last\_sym \gets sym$
-\Until {$sym = 0$}
-\Statex \quad\ (Compute cumulative frequencies $C_i$ from $F_i$)
-\State $C_0 \gets 0$
-\For{$i\gets 0 \algorithmicto 255$}
-  \State $C_{i+1} \gets C_i + F_i$
-\EndFor
-\EndProcedure
-
-\Statex
-\Statex (Bottom 12 bits of our rANS state $R$ are our frequency)
-\Function{RansGetCumulativeFreq}{$R$}
-  \State \Return $R$ \& 0xfff
-\EndFunction
-\Statex
-\Statex (Convert frequency to a symbol. Find $s$ such that $C_s \le f < C_{s+1}$)
-\Statex (We would normally implement this via a lookup table)
-\Function{RansGetSymbolFromFreq}{$C, f$}
-  \State $s \gets 0$
-  \While{$f >= C_{s+1}$}
-    \State $s \gets s+1$
-  \EndWhile
-  \State \Return $s$
-\EndFunction
-\Statex
-\Statex (Compute the next rANS state $R$ given frequency $f$ and cumulative freq $c$)
-\Function{RansAdvanceStep}{$R, c, f$}
-  \State \Return $f \times (R >> 12) + (R$ \& 0xfff$) - c$
-\EndFunction
-\Statex
-\Statex (If too small, feed in more bytes to the rANS state $R$)
-\Function{RansRenorm}{$R$}
-  \While{$R < (1 << 23)$}
-    \State $R \gets (R << 8) +$\ \Call{ReadByte}{}
-  \EndWhile
-  \State \Return $R$
-\EndFunction
-\Statex
-\Procedure{RansDecode0}{$output$, $nbytes$}
-  \State \Call{ReadFrequencies0}{$F,\ C$} \Comment{Creates F and C vectors}
-  \For{$j\gets 0 \algorithmicto 3$}
-    \State $R_j \gets$ \Call{ReadUint32}{}\Comment{Unsigned 32-bit little endian}
-  \EndFor
-  \State $i \gets 0$
-  \While{$i < nbytes$}
-    \For{$j\gets 0 \algorithmicto 3$}
-      \If{$i+j \ge nbytes$} \Return
-      \EndIf
-      \State $f \gets$ \Call{RansGetCumulativeFreq}{$R_j$}
-      \State $s \gets$ \Call{RansGetSymbolFromFreq}{$C,\ f$}
-      \State $output_{i+j} \gets s$
-      \State $R_j \gets$\ \Call{RansAdvanceStep}{$R_j,\ C_s,\ F_s$}
-      \State $R_j \gets$\ \Call{RansRenorm}{$R_j$}
-    \EndFor
-    \State $i \gets i+4$
-  \EndWhile
-\EndProcedure
-\end{algorithmic}
-
-\subsubsection*{rANS order-1}
-
-As described above, the decode logic is very similar to rANS Order-0 except we have a two dimensional array of frequencies to read and the decode uses the last character as the context for decoding the next one.
-In the pseudocode we demonstrate this by using two dimensional vectors $C_{i,j}$ and $F_{i,j}$.
-For simplicity, we reuse the Order-0 code by referring to $C_i$ and $F_i$ of the 2D vectors to get a single dimensional vector that operates in the same manner as the Order-0 code.
-This is not necessarily the most efficient implementation.
-
-Note the code for dealing with the remaining bytes when an output buffer is not an exact multiple of 4 is less elegant in the Order-1 code.
-This is correct, but it is unfortunately a design oversight.
-
-\vskip 0.5cm
-
-\begin{algorithmic}[1]
-\Statex (Reads a table of Order-1 symbol frequencies $F_{i,j}$
-\Statex (and sets the cumulative frequency table $C_{i,j+1} = C_{i,j}+F_{i,j}$)
-\Procedure{ReadFrequencies1}{$F, C$}
-\State $sym \gets$ \Call{ReadByte}{}\Comment{Next alphabet symbol}
-\State $last\_sym \gets sym$
-\State $rle \gets 0$
-\Repeat
-  \State \Call{ReadFrequencies0}{$F_{sym}, C_{sym}$}
-  \If{$rle > 0$}
-    \settowidth{\maxwidth}{sym}
-    \State \algalign{rle}{\gets} $rle-1$
-    \State \algalign{sym}{\gets} $sym+1$
-  \Else
-    \State $sym \gets$ \Call{ReadByte}{}
-    \If{$sym = last\_sym+1$}
-      \State $rle \gets$ \Call{ReadByte}{}
-    \EndIf
-  \EndIf
-  \State $last\_sym \gets sym$
-\Until {$sym = 0$}
-\EndProcedure
-
-\Statex
-\Procedure{RansDecode1}{$output$, $nbytes$}
-  \State \Call{ReadFrequencies1}{$F,\ C$} \Comment{Creates 2D F and C vectors}
-  \For{$j\gets 0 \algorithmicto 3$}
-    \State $R_j \gets$ \Call{ReadUint32}{}\Comment{Unsigned 32-bit little endian}
-    \State $L_j \gets 0$
-  \EndFor
-  \State $i \gets 0$
-  \While{$i < \lfloor nbytes/4 \rfloor$}
-    \For{$j\gets 0 \algorithmicto 3$}
-      \State $f \gets$ \Call{RansGetCumulativeFreq}{$R_j$}
-      \State $s \gets$ \Call{RansGetSymbolFromFreq}{$C_{L_j},\ f$}
-      \State $output_{i + j \times \lfloor nbytes/4 \rfloor} \gets s$
-      \State $R_j \gets$\ \Call{RansAdvanceStep}{$R_j,\ C_{L_j,s},\ F_{L_j,s}$}
-      \State $R_j \gets$\ \Call{RansRenorm}{$R_j$}
-      \State $L_j \gets s$
-    \EndFor
-    \State $i \gets i+1$
-  \EndWhile
-  \Statex \ \ \ \ (Now deal with the remainder if buffer size is not a multiple of 4,)
-  \Statex \ \ \ \ (using rANS state 3 exclusively.)
-  \State $i \gets 4 \times i$
-  \While{$i < nbytes$}
-    \State $f \gets$ \Call{RansGetCumulativeFreq}{$R_3$}
-    \State $s \gets$ \Call{RansGetSymbolFromFreq}{$C_{L_3},\ f$}
-    \State $output_{i + 3 \times \lfloor nbytes/4 \rfloor} \gets s$
-    \State $R_3 \gets$\ \Call{RansAdvanceStep}{$R_3,\ C_{L_3,s},\ F_{L_3,s}$}
-    \State $R_3 \gets$\ \Call{RansRenorm}{$R_3$}
-    \State $L_3 \gets s$
-    \State $i \gets i+1$
-\EndWhile
-\EndProcedure
-\end{algorithmic}
+Details of this algorithm are listed in the \textit{CRAMcodecs} document.
 
 \section{\textbf{Appendix}}
 \subsection{\textbf{Choosing the container size}}
@@ -3080,6 +2591,21 @@ Primarily this is an optimisation of size and speed.
 \item Inclusion of the custom rANS Order-0 and Order-1 entropy encoders.
 \item Checksums added to all file format structures to ensure data integrity.
 \end{itemize}
+
+\subsubsection*{CRAM 3.1: 2023}
+
+Note: the formal draft appeared in 2019, and was initially
+demonstrated in 2016.
+
+This adds new EXTERNAL compression methods, described in the separate
+CRAMcodecs document, and expands the list of permitted ``methods'' in
+the CRAM Block structure.
+
+The aim of the new compression methods is improved compression, both
+performance with the newer SIMD rANS implementation and file size with
+custom name tokeniser and quality codec.
+
+The format is otherwise identical to 3.0.
 
 \newpage
 
