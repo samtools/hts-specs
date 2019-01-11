@@ -521,6 +521,7 @@ byte[4] & CRC32 & CRC32 hash value for all preceding bytes in the block\tabularn
 
 CRAM has the following block content types:
 
+\begin{threeparttable}[t]
 \begin{tabular}{|>{\raggedright}p{143pt}|>{\raggedright}p{45pt}|>{\raggedright}p{116pt}|>{\raggedright}p{114pt}|}
 \hline
 \textbf{Block content type} & \textbf{Block content type id} & \textbf{Name} & \textbf{Contents}\tabularnewline
@@ -529,7 +530,7 @@ FILE\_HEADER & 0 & BAM header block & BAM header\tabularnewline
 \hline
 COMPRESSION\_HEADER & 1 & Compression header block & See specific section\tabularnewline
 \hline
-MAPPED\_SLICE\_HEADER & 2 & Slice header block & See specific section\tabularnewline
+SLICE\_HEADER\tnote{a} & 2 & Slice header block & See specific section\tabularnewline
 \hline
  & 3 &  & reserved\tabularnewline
 \hline
@@ -538,7 +539,10 @@ EXTERNAL\_DATA & 4 & external data block & data produced by external encodings\t
 CORE\_DATA & 5 & core data block & bit stream of all encodings except for external\tabularnewline
 \hline
 \end{tabular}
-
+\begin{tablenotes}
+\item[a] Formerly MAPPED\_SLICE\_HEADER.  Now used by all slice headers regardless of mapping status.
+\end{tablenotes}
+\end{threeparttable}
 
 \subsection{\textbf{Block content id}}
 
@@ -737,15 +741,27 @@ Hence consuming 1 byte for types `C' and `c', 2 bytes for types `S' and `s', 4 b
 
 The slice header block is never compressed (block method=raw). For reference mapped 
 reads the slice header also defines the reference sequence context of the data 
-blocks associated with the slice. Mapped and unmapped reads can be stored within 
-the same slice similarly to BAM file. Slices with unsorted reads must not contain 
-any other types of reads.
+blocks associated with the slice. Mapped reads can be stored along with
+\textbf{placed unmapped}\footnote{Unmapped reads can be \textit{placed} or \textit{unplaced}.
+By placed unmapped read we mean a read that is unmapped according to bit 0x4 of the
+BF (BAM bit flags) data series, but has position fields filled in, thus "placing"  it on a reference sequence. In contrast,
+unplaced unmapped reads have have a reference sequence ID of -1 and alignment position of 0.}
+reads on the same reference within the same slice.
+
+Slices with the Multiple Reference flag (-2) set as the sequence ID in the header may contain reads
+mapped to multiple external references, including unmapped\footnotemark[\value{footnote}] reads (placed on these references or unplaced),
+but multiple embedded references cannot be combined in this way.  When multiple references are
+used, the RI data series will be used to determine the reference sequence ID for each record.  This
+data series is not present when only a single reference is used within a slice.
+
+The Unmapped (-1) sequence ID in the header is for slices containing only unplaced
+unmapped\footnotemark[\value{footnote}] reads.
 
 A slice containing data that does not use the external reference in
 any sequence may set the reference MD5 sum to zero.  This can happen
 because the data is unmapped or the sequence has been stored verbatim
 instead of via reference-differencing.  This latter scenario is
-recommended for unsorted or non-coordinate sorted data.
+recommended for unsorted or non-coordinate-sorted data.
 
 The slice header block contains the following fields.
 
@@ -753,14 +769,17 @@ The slice header block contains the following fields.
 \hline
 \textbf{Data type} & \textbf{Name} & \textbf{Value}\tabularnewline
 \hline
-itf8 & reference sequence id & reference sequence identifier or -1 for unmapped 
-or unsorted reads\tabularnewline
+itf8 & reference sequence id & reference sequence identifier or\linebreak{}
+-1 for unmapped reads\linebreak{}
+-2 for multiple reference sequences\tabularnewline
 \hline
-itf8 & alignment start & the alignment start position or -1 for unmapped or unsorted 
-reads\tabularnewline
+itf8 & alignment start & the alignment start position.\linebreak{}
+Ignored on read and set to 0 on write if the slice is multiple-reference
+or contains unmapped unplaced reads\tabularnewline
 \hline
-itf8 & alignment span & the length of the alignment or 0 for unmapped or unsorted 
-reads\tabularnewline
+itf8 & alignment span & the length of the alignment.\linebreak{}
+Ignored on read and set to 0 on write if the slice is multiple-reference
+or contains unmapped unplaced reads\tabularnewline
 \hline
 itf8 & number of records & the number of records in the slice\tabularnewline
 \hline
@@ -774,7 +793,9 @@ itf8 & embedded reference bases block content id & block content id for the embe
 reference sequence bases or -1 for none\tabularnewline
 \hline
 byte[16] & reference md5 & MD5 checksum of the reference bases within the slice 
-boundaries or 16 \textbackslash{}0 bytes when unused\tabularnewline
+boundaries.  If this slice has reference sequence id of -1 (unmapped) or -2 (multi-ref)
+the MD5 should be 16 bytes of \textbackslash{}0. For embedded references, the MD5
+can either be all-zeros or the MD5 of the embedded sequence.\tabularnewline
 \hline
 byte[] & optional tags & a series of tag,type,value tuples encoded as
 per BAM auxiliary fields.\tabularnewline
@@ -1506,7 +1527,7 @@ slices.
 
 Please note that CRAM indexing is external to the file format itself and may change 
 independently of the file format specification in the future. For example, a new 
-type of index files may appear. 
+type of index file may appear.
 
 Individual records are not indexed in CRAM files, slices should be used instead 
 as a unit of random access. Another important difference between CRAM and BAM indexing 
@@ -1526,9 +1547,9 @@ A CRAM index is a gzipped tab delimited file containing the following columns:
 \begin{enumerate}
 \item Sequence id
 
-\item Alignment start
+\item Alignment start (ignored on read for unmapped slices, set to 0 on write)
 
-\item Alignment span
+\item Alignment span (ignored on read for unmapped slices, set to 0 on write)
 
 \item Container start byte offset in the file
 
@@ -1538,7 +1559,7 @@ A CRAM index is a gzipped tab delimited file containing the following columns:
 \end{enumerate}
 
 Each line represents a slice in the CRAM file. Please note that all slices must 
-be listed in index file.
+be listed in the index file.
 
 \subsubsection*{BAM index}
 
