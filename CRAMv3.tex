@@ -13,7 +13,6 @@
 
 \usepackage{graphicx}
 \usepackage{array}
-\usepackage{ulem}
 \usepackage{fixltx2e}
 \usepackage{amssymb}
 \usepackage{fancyhdr}
@@ -76,9 +75,13 @@ enabling users to choose which data should be preserved.
 
 Data in CRAM is stored either as CRAM records or using one of the general purpose 
 compressors (gzip, bzip2). CRAM records are compressed using a number of different 
-encoding strategies. For example, bases are reference compressed (\emph{Hsi-Yang 
-Fritz, et al. (2011) Genome Res. 21:734-740}) by encoding base differences rather 
-than storing the bases themselves.
+encoding strategies. For example, bases are reference compressed by encoding base
+differences rather than storing the bases themselves.\footnote{Markus Hsi-Yang Fritz,
+Rasko Leinonen, Guy Cochrane, and Ewan Birney,
+\textbf{Efficient storage of high throughput DNA sequencing data using reference-based compression},
+{\sl Genome Res.}~2011~21: 734--740;
+\href{http://dx.doi.org/doi:10.1101/gr.114819.110}{doi:10.1101/gr.114819.110};
+{\sc pmid:}21245279.}
 
 \section{\textbf{Data types}}
 
@@ -175,7 +178,7 @@ of bits to read.
 \subsection{\textbf{Writing bytes to a byte stream}}
 \label{subsec:writing-bytes}
 
-The interpretation of byte stream is straightforward. CRAM uses little \emph{endianness} 
+The interpretation of byte stream is straightforward. CRAM uses \emph{little endianness}
 for bytes when applicable and defines the following storage data types:
 
 \begin{description}
@@ -310,8 +313,7 @@ GAMMA & 9 & int offset & Elias gamma coding\tabularnewline
 \hline
 \end{tabular}
 
-A more detailed description of all the above coding algorithms and their parameters 
-can be found in the \emph{Codings }section. 
+See section~\ref{sec:encodings} for more detailed descriptions of all the above coding algorithms and their parameters.
 
 \section{\textbf{Checksums}}
 The checksumming is used to ensure data integrity. The following checksumming algorithms are used in CRAM.
@@ -1551,6 +1553,7 @@ in seeking specific alignment start because all preceding records in the slice
 must be read and discarded.
 
 \section{\textbf{Encodings}}
+\label{sec:encodings}
 
 % FIXME: we have a mishash of coding, encoding and codec.  We should
 % go through the entire document and be consistent.
