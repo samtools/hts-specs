@@ -162,11 +162,26 @@ The server SHOULD reply with an `UnsupportedFormat` error if the requested forma
 [^a]
 </td></tr>
 <tr markdown="block"><td>
+
 `class`  
 _optional string_
 </td><td>
-Allows clients to request the data header only, using `class=header`. It is not possible to return the data body only, because that would not constitute a valid response in any of the supported formats.
-Default: all
+
+Request different classes of data.
+By default, i.e., when `class` is not specified, the response will represent a complete read or variant data stream, encompassing SAM/CRAM/VCF headers, body data records, and EOF marker.
+
+If `class` is specified, its value MUST be one of the following:
+<table>
+<tr><td>
+
+`header`
+</td><td>
+
+Request the SAM/CRAM/VCF headers only.
+
+The server SHOULD respond with an `InvalidInput` error if any other htsget query parameters other than `format` are specified at the same time as `class=header`.
+</td></tr>
+</table>
 </td></tr>
 <tr markdown="block"><td>
 `referenceName` 
@@ -288,12 +303,15 @@ _optional object_
 For HTTPS URLs, the server may supply a JSON object containing one or more string key-value pairs which the client MUST supply as headers with any request to the URL. For example, if headers is `{"Range": "bytes=0-1023", "Authorization": "Bearer xxxx"}`, then the client must supply the headers `Range: bytes=0-1023` and `Authorization: Bearer xxxx` with the HTTPS request to the URL.
 </td></tr>
 <tr markdown="block"><td>
+
 `class`
-_string_
+_optional string_
 </td><td>
+
 For file formats whose specification describes a header and a body, the class indicates which of the two will be retrieved when querying this URL. The allowed values are `header` and `body`.
 
-Either all or none of the URLs in the response MUST have a class attribute. If it is absent, clients should assume data blocks include both header and body, possibly mixed in one of the blocks.
+Either all or none of the URLs in the response MUST have a class attribute.
+If `class` fields are not supplied, no assumptions can be made about which data blocks contain headers, body records, or parts of both.
 </td></tr>
 </table>
 
@@ -354,7 +372,10 @@ An example of a JSON response is:
 3. Client fetches the data blocks using the URLs and headers.
 4. Client concatenates data blocks to produce local blob.
 
-While the blocks must be finally concatenated in the given order, the client may fetch them in parallel.
+While the blocks must be finally concatenated in the given order, the client may fetch them in parallel and/or reuse cached data from URLs that have previously been downloaded.
+
+When making a series of requests to fetch reads or variants within different regions of the same `<id>` resource, clients may wish to avoid re-fetching the SAM/CRAM/VCF headers each time, especially if they are large.
+If the ticket contains `class` fields, the client may reuse previously downloaded and parsed headers rather than re-fetching the `header`-class URLs.
 
 ### HTTPS data block URLs
 
