@@ -51,18 +51,21 @@ For errors that are specific to the `htsget` protocol, the response body SHOULD 
 
 <table>
 <tr markdown="block"><td>
+
 `htsget`
 _object_
 </td><td>
 Container for response object.
 <table>
 <tr markdown="block"><td>
+
 `error`  
 _string_
 </td><td>
 The type of error. This SHOULD be chosen from the list below.
 </td></tr>
 <tr markdown="block"><td>
+
 `message`  
 _string_
 </td><td>
@@ -131,9 +134,11 @@ The client can request only records overlapping a given genomic range. The respo
 
 <table>
 <tr markdown="block"><td>
+
 `id`  
 _required_
 </td><td>
+
 A string identifying which records to return.
 
 The format of this identifier is left to the discretion of the API provider, including allowing embedded "/" characters. The following would be valid identifiers:
@@ -150,9 +155,11 @@ The format of this identifier is left to the discretion of the API provider, inc
 
 <table>
 <tr markdown="block"><td>
+
 `format`  
 _optional string_
 </td><td>
+
 Request data in this format. The allowed values for each type of record are:
 
 * Reads: BAM (default), CRAM.
@@ -162,9 +169,11 @@ The server SHOULD reply with an `UnsupportedFormat` error if the requested forma
 [^a]
 </td></tr>
 <tr markdown="block"><td>
+
 `referenceName` 
 _optional_
 </td><td>
+
 The reference sequence name, for example "chr1", "1", or "chrX". If unspecified, all records are returned regardless of position.
 
 For the reads endpoint: if "\*", unplaced unmapped reads are returned. If unspecified, all reads (mapped and unmapped) are returned. (*Unplaced unmapped* reads are the subset of unmapped reads completely without location information, i.e., with RNAME and POS field values of "\*" and 0 respectively. See the [SAM specification](http://samtools.github.io/hts-specs/SAMv1.pdf) for details of placed and unplaced unmapped reads.)
@@ -172,9 +181,11 @@ For the reads endpoint: if "\*", unplaced unmapped reads are returned. If unspec
 The server SHOULD reply with a `NotFound` error if the requested reference does not exist.
 </td></tr>
 <tr markdown="block"><td>
+
 `start`  
 _optional 32-bit unsigned integer_
 </td><td>
+
 The start position of the range on the reference, 0-based, inclusive. 
 
 The server SHOULD respond with an `InvalidInput` error if `start` is specified and either no reference is specified or `referenceName` is "\*".
@@ -182,9 +193,11 @@ The server SHOULD respond with an `InvalidInput` error if `start` is specified a
 The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater than `end`.
 </td></tr>
 <tr markdown="block"><td>
+
 `end`  
 _optional 32-bit unsigned integer_
 </td><td>
+
 The end position of the range on the reference, 0-based exclusive.
 
 The server SHOULD respond with an `InvalidInput` error if `end` is specified and either no reference is specified or `referenceName` is "\*".
@@ -192,6 +205,7 @@ The server SHOULD respond with an `InvalidInput` error if `end` is specified and
 The server SHOULD respond with an `InvalidRange` error if `start` and `end` are specified and `start` is greater than `end`.
 </td></tr>
 <tr markdown="block"><td>
+
 `fields`  
 _optional_
 </td><td>
@@ -199,17 +213,21 @@ A list of fields to include, see below.
 Default: all
 </td></tr>
 <tr markdown="block"><td>
+
 `tags`  
 _optional_
 </td><td>
+
 A comma separated list of tags to include, default: all. If the empty string is specified (tags=) no tags are included. 
 
 The server SHOULD respond with an `InvalidInput` error if `tags` and `notags` intersect.
 </td></tr>
 <tr markdown="block"><td>
+
 `notags`  
 _optional_
 </td><td>
+
 A comma separated list of tags to exclude, default: none. 
 
 The server SHOULD respond with an `InvalidInput` error if `tags` and `notags` intersect.
@@ -242,12 +260,14 @@ Example: `fields=QNAME,FLAG,POS`.
 
 <table>
 <tr markdown="block"><td>
+
 `htsget`
 _object_
 </td><td>
 Container for response object.
 <table>
 <tr markdown="block"><td>
+
 `format`  
 _string_
 </td><td>
@@ -255,21 +275,24 @@ Response data in this format. The allowed values for each type of record are:
 
 * Reads: BAM (default), CRAM.
 * Variants: VCF (default), BCF.
-
 </td></tr>
 <tr markdown="block"><td>
+
 `urls`  
 _array of objects_
 </td><td>
+
 An array providing URLs from which raw data can be retrieved. The client must retrieve binary data blocks from each of these URLs and concatenate them to obtain the complete response in the requested format.
 
 Each element of the array is a JSON object with the following fields:
 
 <table>
 <tr markdown="block"><td>
+
 `url`  
 _string_
 </td><td>
+
 One URL.
 
 May be either a `https:` URL or an inline `data:` URI. HTTPS URLs require the client to make a follow-up request (possibly to a different endpoint) to retrieve a data block. Data URIs provide a data block inline, without necessitating a separate request.
@@ -277,18 +300,22 @@ May be either a `https:` URL or an inline `data:` URI. HTTPS URLs require the cl
 Further details below.
 </td></tr>
 <tr markdown="block"><td>
+
 `headers`  
 _optional object_
 </td><td>
+
 For HTTPS URLs, the server may supply a JSON object containing one or more string key-value pairs which the client MUST supply as headers with any request to the URL. For example, if headers is `{"Range": "bytes=0-1023", "Authorization": "Bearer xxxx"}`, then the client must supply the headers `Range: bytes=0-1023` and `Authorization: Bearer xxxx` with the HTTPS request to the URL.
 </td></tr>
 </table>
 
 </td></tr>
 <tr markdown="block"><td>
+
 `md5`  
 _optional hex string_
 </td><td>
+
 MD5 digest of the blob resulting from concatenating all of the "payload" data --- the url data blocks.
 </td></tr>
 </table>
