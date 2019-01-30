@@ -367,12 +367,10 @@ AGCATGTTAGATAA**GATAGCTGTGCTAGTAGGCAGTCAGCGCCAT
 and the corresponding tag is {\tt M5:caad65b937c4bc0b33c08f62a9fb5411}.
 
 \subsection{The alignment section: mandatory fields}\label{sec:alnrecord}
-In the SAM format, each alignment line typically represents the linear
-alignment of a segment. Each line has 11
-mandatory fields. These fields always appear in the same order and must be
-present, but their values can be `0' or `*' (depending on the field) if the
-corresponding information is unavailable. The following table gives an overview
-of the mandatory fields in the SAM format:
+In the SAM format, each alignment line typically represents the linear alignment of a segment.
+Each line consists of 11~or more TAB-separated fields.
+The first eleven fields are always present and in the order shown below; if the information represented by any of these fields is unavailable, that field's value will be a placeholder, either~`{\tt 0}' or~`{\tt *}' as determined by the field's type.
+The following table gives an overview of these mandatory fields in the SAM format:
 \begin{center}
 \small
 \begin{tabular}{rllll}
