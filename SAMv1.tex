@@ -237,6 +237,9 @@ meanings can be avoided.}
   \cline{1-3}
   \multicolumn{2}{|l|}{\bf Tag} & {\bf Description} \\
   \cline{1-3}
+  \endfirsthead
+  \cline{1-3}
+  \endhead
   \multicolumn{2}{|l}{\tt @HD} & The header line. The first line if present. \\\cline{2-3}
   & {\tt VN}* & Format version. \emph{Accepted format}: {\tt /\char94[0-9]+\char92.[0-9]+\$/}.\\\cline{2-3}
   & {\tt SO} & Sorting order of alignments. \emph{Valid values}: {\tt unknown} (default), {\tt
@@ -307,6 +310,7 @@ where \emph{name} is {\tt\rnameRegexp}\\\cline{2-3}
   platform/technology used.\\\cline{2-3}
   & {\tt PU} & Platform unit (e.g. flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
   & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\cline{1-3}
+\pagebreak[4]
   \multicolumn{2}{|l}{\tt @PG} & Program. \\\cline{2-3}
   & {\tt ID}* & Program record identifier. Each {\tt @PG} line must have a unique {\tt ID}.
   	The value of {\tt ID} is used in the alignment {\tt PG} tag and {\tt PP} tags of other {\tt @PG} lines.
