@@ -226,7 +226,7 @@ For example:
 \end{verbatim}
 
 \noindent
-Valid contig names must follow the reference sequence names allowed by the SAM format ("{\tt [!-)+-\char60\char62-\char126][!-\char126]*}") excluding the characters "\texttt{\textless\textgreater[]:*}" to avoid clashes with symbolic alleles and breakend notation.
+Valid contig names must follow the reference sequence names allowed by the SAM format ("{\tt [!-)+-\char60\char62-\char126][!-\char126]*}") excluding the characters "\texttt{\textless\textgreater[]*}" to avoid clashes with symbolic alleles.
 The contig names must not use a reserved symbolic allele name.
 
 
@@ -288,7 +288,6 @@ Fixed fields are:
 \begin{enumerate}
   \item CHROM --- chromosome: An identifier from the reference genome or an angle-bracketed ID String (``$<$ID$>$'') pointing to a contig in the assembly file (cf.\ the \#\#assembly line in the header).
   All entries for a specific CHROM must form a contiguous block within the VCF file.
-  The colon symbol (:) must be absent from all chromosome names to avoid parsing errors when dealing with breakends.
   (String, no white-space permitted, Required).
   \item POS --- position: The reference position, with the 1st base having position 1.
   Positions are sorted numerically, in increasing order, within each reference sequence CHROM.
@@ -2046,6 +2045,10 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \begin{itemize}
 \item More strict language: ``should'' replaced with ``must'' where appropriate
 \item Tables with Type and Number definitions for INFO and FORMAT reserved keys
+
+\item
+The VCF specification previously disallowed colons (`{\tt :}') in contig names to avoid confusion when parsing breakends, but this was unnecessary.
+Even with contig names containing colons, the breakend mate position notation can be unambiguously parsed because the ``{\tt :}\emph{pos}'' part is \textbf{always} present.
 \end{itemize}
 
 \subsection{Changes between VCFv4.2 and VCFv4.3}
