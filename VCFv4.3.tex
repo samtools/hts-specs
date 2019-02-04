@@ -226,7 +226,14 @@ For example:
 \end{verbatim}
 
 \noindent
-Valid contig names must follow the reference sequence names allowed by the SAM format ("{\tt [!-)+-\char60\char62-\char126][!-\char126]*}") excluding the characters "\texttt{\textless\textgreater[]*}" to avoid clashes with symbolic alleles.
+Contig names follow the same rules as the SAM format's reference sequence names:
+they may contain any printable ASCII characters in the range \verb|[!-~]| apart from `{\tt\verb|\|\,,\,"`'\,()\,[]\,\verb|{}|\,<>}' and may not start with `{\tt *}' or `{\tt =}'.
+Thus they match the following regular expression:
+\begin{verbatim}
+    [0-9A-Za-z!#$%&+./:;?@^_|~-][0-9A-Za-z!#$%&*+./:;=?@^_|~-]*
+\end{verbatim}
+\noindent
+In particular, excluding commas facilitates parsing \verb|##contig| lines, and excluding the characters `\verb|<>[]|' and initial~`{\tt *}' avoids clashes with symbolic alleles.
 The contig names must not use a reserved symbolic allele name.
 
 
@@ -2047,6 +2054,10 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \item Tables with Type and Number definitions for INFO and FORMAT reserved keys
 
 \item
+The set of characters allowed in VCF contig names is now the same as that allowed in SAM reference sequence names, which was restricted in January 2019.
+The characters `{\tt\verb|\|\,,\,"`'\,()\,\verb|{}|}' are now invalid in VCF contig names, while `{\tt *}' is now valid when not the first character.
+(The characters `{\tt []\,<>}' and initial~`{\tt *}'/`{\tt =}' were already invalid and remain so.)
+
 The VCF specification previously disallowed colons (`{\tt :}') in contig names to avoid confusion when parsing breakends, but this was unnecessary.
 Even with contig names containing colons, the breakend mate position notation can be unambiguously parsed because the ``{\tt :}\emph{pos}'' part is \textbf{always} present.
 \end{itemize}
