@@ -1362,19 +1362,20 @@ Haplotype quality & 30 & 40 & 40 \\
 In order to report sequencing data evidence for both variant and non-variant positions in the genome, the VCF specification allows to represent blocks of reference-only calls in a single record using the END INFO tag, an idea originally introduced by the gVCF file format\footnote{\url{https://help.basespace.illumina.com/articles/descriptive/gvcf-files/}}.
 The convention adopted here is to represent reference evidence as likelihoods against an unknown alternate allele.
 Think of this as the likelihood for reference as compared to any other possible alternate allele (both SNP, indel, or otherwise).
-A symbolic alternate allele $<$*$>$ is used to represent this unspecified alternate allele.
+A symbolic alternate allele is used to represent this unspecified alternate allele.
+Either $<$*$>$ or $<$NON\_REF$>$ may be used to represent the unspecified alternate allele, but $<$NON\_REF$>$ is preferred due to the ease of confusion between $<$*$>$ and the unrelated `*' allele.
 
 Example records are given below:
 \scriptsize
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Sample \\
-1 & 4370 & . & G & $<$*$>$ & . & . & END=4383 & GT:DP:GQ:MIN\_DP:PL & 0/0:25:60:23:0,60,900 \\
+1 & 4370 & . & G & $<$NON\_REF$>$ & . & . & END=4383 & GT:DP:GQ:MIN\_DP:PL & 0/0:25:60:23:0,60,900 \\
 1 & 4384 & . & C & $<$*$>$ & . & . & END=4388 & GT:DP:GQ:MIN\_DP:PL & 0/0:25:45:25:0,42,630 \\
-1 & 4389 & . & T & TC,$<$*$>$ & 213.73 & . & . & GT:DP:GQ:PL & 0/1:23:99:51,0,36,93,92,86 \\
-1 & 4390 & . & C & $<$*$>$ & . & . & END=4390 & GT:DP:GQ:MIN\_DP:PL & 0/0:26:0:26:0,0,315 \\
-1 & 4391 & . & C & $<$*$>$ & . & . & END=4395 & GT:DP:GQ:MIN\_DP:PL & 0/0:27:63:27:0,63,945 \\
-1 & 4396 & . & G & C,$<$*$>$ & 0 & . & . & GT:DP:GQ:P & 0/0:24:52:0,52,95,66,95,97 \\
+1 & 4389 & . & T & TC,$<$NON\_REF$>$ & 213.73 & . & . & GT:DP:GQ:PL & 0/1:23:99:51,0,36,93,92,86 \\
+1 & 4390 & . & C & $<$NON\_REF$>$ & . & . & END=4390 & GT:DP:GQ:MIN\_DP:PL & 0/0:26:0:26:0,0,315 \\
+1 & 4391 & . & C & $<$NON\_REF$>$ & . & . & END=4395 & GT:DP:GQ:MIN\_DP:PL & 0/0:27:63:27:0,63,945 \\
+1 & 4396 & . & G & C,$<$NON\_REF$>$ & 0 & . & . & GT:DP:GQ:P & 0/0:24:52:0,52,95,66,95,97 \\
 1 & 4397 & . & T & $<$*$>$ & . & . & END=4416 & GT:DP:GQ:MIN\_DP:PL & 0/0:22:14:22:0,15,593 \\
 \end{tabular}
 \end{flushleft}
