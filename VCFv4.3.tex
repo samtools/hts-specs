@@ -1362,7 +1362,7 @@ Haplotype quality & 30 & 40 & 40 \\
 In order to report sequencing data evidence for both variant and non-variant positions in the genome, the VCF specification allows to represent blocks of reference-only calls in a single record using the END INFO tag, an idea originally introduced by the gVCF file format\footnote{\url{https://help.basespace.illumina.com/articles/descriptive/gvcf-files/}}.
 The convention adopted here is to represent reference evidence as likelihoods against an unknown alternate allele.
 Think of this as the likelihood for reference as compared to any other possible alternate allele (both SNP, indel, or otherwise).
-Either of the two symbolic alleles $<$*$>$ or $<$NON\_REF$>$ may be used to represent this unspecified alternate allele.
+Either of the two symbolic alleles $<$NON\_REF$>$ or $<$*$>$ may be used to represent this unspecified alternate allele.
 It is recommended to use $<$NON\_REF$>$ because $<$*$>$ is easily confused with the unrelated `*' allele.
 
 Example records are given below:
