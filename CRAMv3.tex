@@ -2535,29 +2535,28 @@ Here we also define some of the functions for manipulating the rANS state, which
 \Statex (Reads a table of Order-0 symbol frequencies $F_i$
 \Statex (and sets the cumulative frequency table $C_{i+1} = C_i+F_i$)
 \Procedure{ReadFrequencies0}{$F, C$}
-\State $s \gets$ \Call{ReadByte}{}\Comment{Next alphabet symbol}
-\State $last\_sym \gets s$
+\State $sym \gets$ \Call{ReadByte}{}\Comment{Next alphabet symbol}
+\State $last\_sym \gets sym$
 \State $rle \gets 0$
 \Repeat
   \State $f \gets$ \Call{ReadITF8}{}
-  \settowidth{\maxwidth}{$C_s$}
-  \State \algalign{F_s}{\gets} $f$
+  \State $F_{sym} \gets f$
   \If{$rle > 0$}
-    \settowidth{\maxwidth}{rle\ }
+    \settowidth{\maxwidth}{sym\ }
     \State \algalign{rle}{\gets} $rle-1$
-    \State \algalign{s}{\gets} $s+1$
+    \State \algalign{sym}{\gets} $sym+1$
   \Else
-    \State $s \gets$ \Call{ReadByte}{}
-    \If{$s = last\_sym+1$}
+    \State $sym \gets$ \Call{ReadByte}{}
+    \If{$sym = last\_sym+1$}
       \State $rle \gets$ \Call{ReadByte}{}
     \EndIf
   \EndIf
-  \State $last\_sym \gets s$
-\Until {$s = 0$}
+  \State $last\_sym \gets sym$
+\Until {$sym = 0$}
 \Statex \quad\ (Compute cumulative frequencies $C_i$ from $F_i$)
 \State $C_0 \gets 0$
-\For{$s\gets 0 \algorithmicto 255$}
-  \State $C_{s+1} \gets C_s + F_s$
+\For{$i\gets 0 \algorithmicto 255$}
+  \State $C_{i+1} \gets C_i + F_i$
 \EndFor
 \EndProcedure
 
@@ -2591,6 +2590,7 @@ Here we also define some of the functions for manipulating the rANS state, which
 \EndFunction
 \Statex
 \Procedure{RansDecode0}{$output$, $nbytes$}
+  \State \Call{ReadFrequencies0}{$F,\ C$} \Comment{Creates F and C vectors}
   \For{$j\gets 0 \algorithmicto 3$}
     \State $R_j \gets$ \Call{ReadUint32}{}\Comment{Unsigned 32-bit little endian}
   \EndFor
@@ -2630,7 +2630,7 @@ This is correct, but it is unfortunately a design oversight.
 \State $last\_sym \gets sym$
 \State $rle \gets 0$
 \Repeat
-  \State \Call{ReadFrequencies0}{$F_i, C_i$}
+  \State \Call{ReadFrequencies0}{$F_{sym}, C_{sym}$}
   \If{$rle > 0$}
     \settowidth{\maxwidth}{sym}
     \State \algalign{rle}{\gets} $rle-1$
@@ -2647,6 +2647,7 @@ This is correct, but it is unfortunately a design oversight.
 
 \Statex
 \Procedure{RansDecode1}{$output$, $nbytes$}
+  \State \Call{ReadFrequencies1}{$F,\ C$} \Comment{Creates 2D F and C vectors}
   \For{$j\gets 0 \algorithmicto 3$}
     \State $R_j \gets$ \Call{ReadUint32}{}\Comment{Unsigned 32-bit little endian}
     \State $L_j \gets 0$
@@ -2673,6 +2674,7 @@ This is correct, but it is unfortunately a design oversight.
     \State $R_3 \gets$\ \Call{RansAdvanceStep}{$R_3,\ C_{L_3,s},\ F_{L_3,s}$}
     \State $R_3 \gets$\ \Call{RansRenorm}{$R_3$}
     \State $L_3 \gets s$
+    \State $i \gets i+1$
 \EndWhile
 \EndProcedure
 \end{algorithmic}
