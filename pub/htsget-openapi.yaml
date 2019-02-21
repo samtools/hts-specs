@@ -1,0 +1,263 @@
+openapi: 3.0.0
+servers:
+  - description: htsget genomics api
+    url: https://virtserver.swaggerhub.com/brainkod/htsget/1.1.1
+info:
+  description: "This data retrieval API bridges from existing genomics bulk data transfers to a client/server model"
+  version: "1.1.1"
+  title: htsget
+  contact:
+    name: Roman Valls Guimera
+    email: brainstorm+htsget@nopcode.org
+  license:
+    name: GPLv3
+paths:
+  /reads:
+    get:
+      summary: Gets the reads from a pre-indexed id
+      operationId: searchReadId
+      description: |
+        Searches a pre-indexed object id.
+      parameters:
+        - in: "path"
+          name: identifier of the read object
+          description: id
+          required: true
+          schema:
+            type: string
+        - in: "query"
+          name: format
+          description: File format, BAM (default), CRAM.
+          example: "BAM"
+          required: false
+          schema:
+            type: string
+        - in: "query"
+          name: referenceName
+          description: VReference sequence name
+          example: "chr1"
+          required: false
+          schema:
+            type: string
+        - in: "query"
+          name: start
+          description: The start position of the range on the reference, 0-based, inclusive.
+          example: "12312"
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - in: "query"
+          name: end
+          description: The end position of the range on the reference, 0-based exclusive.
+          example: "99999"
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - in: "query"
+          name: fields
+          description: A list of fields to include, such as QNAME, FLAG, RNAME, etc...
+          example: "fields=QNAME,RNAME"
+          required: false
+          schema:
+            enum:
+              - "QNAME"
+              - "FLAG"
+              - "RNAME"
+              - "POS"
+              - "MAPQ"
+              - "CIGAR"
+              - "RNEXT"
+              - "PNEXT"
+              - "TLEN"
+              - "SEQ"
+              - "QUAL"
+            type: string
+        - in: "query"
+          name: tags
+          description: A comma separated list of tags to include, by default all.
+          example: "cancer,melanoma"
+          required: false
+          schema:
+            type: string
+        - in: "query"
+          name: notags
+          description: A comma separated list of tags to exclude, default none.
+          example: "normal,healthy"
+          required: false
+          schema:
+            type: string
+
+            
+      responses:
+        '200':
+          description: results matching criteria
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/readIdResponse'
+
+        '400':
+          description: something went wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponses'
+
+        '500':
+          description: Unexpected error
+
+
+  /variants:
+    get:
+      summary: Gets the variants from a pre-indexed id
+      operationId: searchVariantId
+      description: |
+        Searches a pre-indexed object id.
+      parameters:
+        - in: "path"
+          name: id
+          description: identifier of the variant object
+          required: true
+          schema:
+            type: string
+        - in: "query"
+          name: format
+          description: File format, VCF (default), BCF.
+          example: "VCF"
+          required: false
+          schema:
+            type: string
+        - in: "query"
+          name: referenceName
+          description: VReference sequence name
+          example: "chr1"
+          required: false
+          schema:
+            type: string
+        - in: "query"
+          name: start
+          description: The start position of the range on the reference, 0-based, inclusive.
+          example: "12312"
+          required: false
+          schema:
+            type: integer
+            format: int32 #XXX: htsget spec says unsigned, swagger is signed
+        - in: "query"
+          name: end
+          description: The end position of the range on the reference, 0-based exclusive.
+          example: "99999"
+          required: false
+          schema:
+            type: integer
+            format: int32 #XXX: htsget spec says unsigned, swagger is signed
+        - in: "query"
+          name: fields
+          description: A list of variant fields to include, such as INFO, SAMPLE, FORMAT, etc.
+          example: "fields=INFO,SAMPLE"
+          required: false
+          schema:
+            enum:
+              - "INFO"
+              - "SAMPLE"
+              - "FILTER"
+              - "FORMAT"
+              - "ALT"
+            type: string
+        - in: "query"
+          name: tags
+          description: A comma separated list of tags to include, by default all.
+          example: "cancer,melanoma"
+          required: false
+          schema:
+            type: string
+        - in: "query"
+          name: notags
+          description: A comma separated list of tags to exclude, default none.
+          example: "normal,skin"
+          required: false
+          schema:
+            type: string
+
+      responses:
+        '200':
+          description: results matching criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/variantIdResponse'
+        
+        '400':
+          description: something went wrong
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponses'
+        
+        '500':
+          description: Unexpected error
+
+components:
+  schemas:
+    readIdResponse:
+      $ref: '#/components/schemas/htsgetResponse'
+  
+    variantIdResponse:
+      $ref: '#/components/schemas/htsgetResponse'
+
+    htsgetResponse:
+      type: object
+      properties:
+        htsget:
+          type: object
+          required:
+            - format
+            - urls
+          properties:
+            format:
+              type: string
+              example:
+                "BAM"
+            urls:
+              $ref: '#/components/schemas/htsgetUrlsHeaders'
+
+            md5:
+              type: string
+              example: "8a6049fad4943ff4c6de5c22df97d001"
+
+
+    htsgetUrlsHeaders:
+      type: array
+      example: 
+        - url: "data:application/vnd.ga4gh.bam;base64,QkFNAQ=="
+        - url: "data:application/vnd.ga4gh.vcf;base64,QkFNAQ=="
+          headers:
+            "Authorization": "Bearer xxxxx"
+            "Range": "bytes=65536-1003750"
+      items:
+        $ref: '#/components/schemas/urlsItems'
+        
+    urlsItems:
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+        headers:
+          type: object
+
+    # HTTP 400 errors
+    errorResponses:
+      oneOf:
+        - $ref: '#/components/schemas/UnsupportedFormat'
+        - $ref: '#/components/schemas/InvalidInput'
+        - $ref: '#/components/schemas/InvalidRange'
+
+    UnsupportedFormat:
+      description: The requested file format is not supported by the server
+    InvalidInput:
+      description: The request parameters do not adhere to the specification
+    InvalidRange:
+      description: The requested range cannot be satisfied
