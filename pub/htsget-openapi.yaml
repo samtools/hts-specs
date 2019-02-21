@@ -7,8 +7,8 @@ info:
   version: "1.1.1"
   title: htsget
   contact:
-    name: Roman Valls Guimera
-    email: brainstorm+htsget@nopcode.org
+    name: GA4GH
+    email: security-notification@ga4gh.org
   license:
     name: GPLv3
 paths:
@@ -46,7 +46,8 @@ paths:
           required: false
           schema:
             type: integer
-            format: int32
+            format: int64
+            minimum: 0
         - in: "query"
           name: end
           description: The end position of the range on the reference, 0-based exclusive.
@@ -54,7 +55,8 @@ paths:
           required: false
           schema:
             type: integer
-            format: int32
+            format: int64
+            minimum: 0
         - in: "query"
           name: fields
           description: A list of fields to include, such as QNAME, FLAG, RNAME, etc...
@@ -147,7 +149,8 @@ paths:
           required: false
           schema:
             type: integer
-            format: int32 #XXX: htsget spec says unsigned, swagger is signed
+            format: int64
+            minimum: 0
         - in: "query"
           name: end
           description: The end position of the range on the reference, 0-based exclusive.
@@ -155,7 +158,8 @@ paths:
           required: false
           schema:
             type: integer
-            format: int32 #XXX: htsget spec says unsigned, swagger is signed
+            format: int64
+            minimum: 0
         - in: "query"
           name: fields
           description: A list of variant fields to include, such as INFO, SAMPLE, FORMAT, etc.
