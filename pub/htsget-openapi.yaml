@@ -108,6 +108,10 @@ paths:
         '500':
           description: Unexpected error
 
+      security:
+        - htsget_auth:
+          - read:genomic_reads
+
 
   /variants:
     get:
@@ -198,6 +202,10 @@ paths:
         '500':
           description: Unexpected error
 
+      security:
+        - htsget_auth:
+          - read:genomic_variants
+
 components:
   schemas:
     readIdResponse:
@@ -261,3 +269,14 @@ components:
       description: The request parameters do not adhere to the specification
     InvalidRange:
       description: The requested range cannot be satisfied
+
+  securitySchemes:
+    htsget_auth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/api/oauth/dialog
+          tokenUrl: https://example.com/api/oauth/token
+          scopes:
+            read:genomic_reads: read access to genomic reads
+            read:genomic_variants: read access to genomic variants
