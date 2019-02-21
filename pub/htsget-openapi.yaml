@@ -12,7 +12,7 @@ info:
   license:
     name: GPLv3
 paths:
-  /reads:
+  /reads/{id}:
     get:
       summary: Gets the reads from a pre-indexed id
       operationId: searchReadId
@@ -20,8 +20,8 @@ paths:
         Searches a pre-indexed object id.
       parameters:
         - in: "path"
-          name: identifier of the read object
-          description: id
+          name: id
+          description: identifier of the read object
           required: true
           schema:
             type: string
@@ -113,7 +113,7 @@ paths:
           - read:genomic_reads
 
 
-  /variants:
+  /variants/{id}:
     get:
       summary: Gets the variants from a pre-indexed id
       operationId: searchVariantId
