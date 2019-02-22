@@ -623,7 +623,7 @@ the BAM file header\tabularnewline
 RL & encoding\texttt{<}int\texttt{>} & read lengths & read lengths\tabularnewline
 \hline
 AP & encoding\texttt{<}int\texttt{>} & in-seq positions & 0-based alignment start
-delta from previous record *\tabularnewline
+delta from previous record, or 0 if the first record in the slice\tabularnewline
 \hline
 RG & encoding\texttt{<}int\texttt{>} & read groups & read groups. Special value 
 `-1' stands for no group.\tabularnewline
@@ -1094,7 +1094,7 @@ int & RG & read group & the read group identifier expressed as the N\textsupersc
 \EndIf
 \State $read\_length \gets$ \Call{ReadItem}{RL, Integer}
 \If{$container\_pmap.AP\_delta \ne 0$}
-    \State Initialise $last\_position$ to 0 if first record in slice
+    \State Initialise $last\_position$ to $slice\_header.alignment\_start$ if first record in slice
     \State $alignment\_position \gets$ \Call{ReadItem}{AP, Integer} + $last\_position$
     \State $last\_position \gets alignment\_position$
 \Else
