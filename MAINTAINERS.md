@@ -16,7 +16,9 @@ Past SAM/BAM maintainers include Jay Carey, Tim Fennell, and Nils Homer.
 ### CRAM
 
 * James Bonfield (@jkbonfield)
-* Vadim Zalunin (@vadimzalunin)
+* Chris Norman (@cmnbroad)
+
+Past CRAM maintainers include Vadim Zalunin.
 
 ### VCF/BCF
 
