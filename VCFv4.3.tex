@@ -1493,7 +1493,8 @@ rlen      &	int32\_t  &	Length of the record as projected onto the reference seq
 n\_allele\_info	& int32\_t	& n\_info, where n\_allele is the number of REF+ALT alleles in this record, and n\_info is the number of VCF INFO fields present in this record \\ \hline
 n\_fmt\_sample	& uint32\_t	& n\_sample, where n\_fmt is the number of format fields for genotypes in this record, and n\_samples is the number of samples present in this sample.  Note that the number of samples must be equal to the number of samples in the header \\ \hline
 QUAL	  & float	  & Variant quality; 0x7F800001 for a missing value \\ \hline
-ID	      & typed string & REF+ALT	list of n\_allele typed strings	the first allele is REF (mandatory) followed by n\_alleles - 1 ALT alleles, all encoded as typed strings \\ \hline
+ID	      & typed string & Identifier; 0x07 for a missing value \\ \hline
+REF+ALT   & list of n\_allele typed strings & the first allele is REF (mandatory) followed by n\_alleles - 1 ALT alleles, all encoded as typed strings \\ \hline
 FILTER	  & Typed vector of integers	& a vector of integer offsets into dictionary, one for each FILTER field value.  ``.'' is encoded as MISSING \\ \hline
 INFO      & field key/value pairs	    & n\_info pairs of typed vectors	The first value must be a typed atomic integer giving the offset of the INFO field key into the dictionary.  The second value is a typed vector giving the value of the field \\ \hline
 Genotype values &	see below	& see below \\ \hline
@@ -1824,12 +1825,12 @@ The QUAL field value is 30.1, which we encode as an untyped single precision 32-
 
 \subsubsection{Encoding ID}
 
-For ID type byte would is a 5-element string (type descriptor 0x59), which would then be followed by the five bytes for the string of {\tt 0x72 0x73 0x31 0x32 0x33}.
+This ID value is a 5-element string, so is encoded as type descriptor 0x57 followed by the five bytes for the string of {\tt 0x72 0x73 0x31 0x32 0x33}.
 The full encoding is:
 
 \vspace{0.3cm}
 \begin{tabular}{|l| l|} \hline
-0x59 0x72 0x73 0x31 0x32 0x33 & ID \\ \hline
+0x57 0x72 0x73 0x31 0x32 0x33 & ID = rs123 \\ \hline
 \end{tabular}
 
 \subsubsection{Encoding REF/ALT fields}
@@ -1892,7 +1893,7 @@ So the entire key/value pair is:
 
 \vspace{0.3cm}
 \begin{tabular}{|l |l|} \hline
-0x11 0x51 & AA key \\ \hline
+0x11 0x53 & AA key \\ \hline
 0x17 0x43 & with value of C \\ \hline
 \end{tabular}
 
@@ -1961,7 +1962,7 @@ So the genotype block contains:
 
 We need to determine a few values before writing out the final block:
 
-l\_shared = 54 (Data length from CHROM to the end of INFO)
+l\_shared = 52 (Data length from CHROM to the end of INFO)
 
 l\_indiv = 42 (Data length of FORMAT and individual genotype fields)
 
@@ -1972,7 +1973,7 @@ n\_fmt\_samples = n\_fmt$<<24\mid$n\_sample = $5 << 24 \mid 3$ = 0x05000003
 
 \vspace{0.3cm}
 \begin{tabular}{|l| l|} \hline
-0x36000000 & l\_shared as little endian hex \\ \hline
+0x34000000 & l\_shared as little endian hex \\ \hline
 0x2A000000 & l\_indiv as little endian hex \\ \hline
 0x01000000 & CHROM offset is at 1 in 32 bit little endian \\ \hline
 0x64000000 & POS in 0 base 32 bit little endian \\ \hline
@@ -1980,7 +1981,7 @@ n\_fmt\_samples = n\_fmt$<<24\mid$n\_sample = $5 << 24 \mid 3$ = 0x05000003
 0x41 0xF0 0xCC 0xCD & QUAL = 30.1 as 32-bit float \\ \hline
 0x00020004 & n\_allele\_info \\ \hline
 0x05000003 & n\_fmt\_samples \\ \hline
-0x59 0x72 0x73 0x31 0x32 0x33 & ID \\ \hline
+0x57 0x72 0x73 0x31 0x32 0x33 & ID = rs123 \\ \hline
 0x17 0x41 & REF A \\ \hline
 0x17 0x43 & ALT C \\ \hline
 0x11 0x00 & FILTER field PASS \\ \hline
@@ -1989,7 +1990,7 @@ n\_fmt\_samples = n\_fmt$<<24\mid$n\_sample = $5 << 24 \mid 3$ = 0x05000003
 0x11 0x03 & with value of 3 \\ \hline
 0x11 0x52 & AN key \\ \hline
 0x11 0x06 & with value of 6 \\ \hline
-0x11 0x51 & AA key \\ \hline
+0x11 0x53 & AA key \\ \hline
 0x17 0x43 & with value of C \\ \hline
 0x1101 0x21 0x020202040404 & GT \\ \hline
 0x1102 0x11 0x0A0A0A & GQ \\ \hline
