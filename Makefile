@@ -39,6 +39,10 @@ new/%.ver: %.tex
 	scripts/genversion.sh $^ > $@
 
 
+show-styles:
+	@sed -n '/\\usepackage/s/.*{\(.*\)}$$/\1/p' *.tex | sort | uniq -c
+
+
 mostlyclean:
 	-rm -f new/*.aux new/*.log new/*.out new/*.toc new/*.ver
 
@@ -47,4 +51,4 @@ clean: mostlyclean
 	-rm -rf _site
 
 
-.PHONY: all pdf mostlyclean clean
+.PHONY: all pdf show-styles mostlyclean clean

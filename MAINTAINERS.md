@@ -53,6 +53,10 @@ This way when the main repository is forked again, the new fork is created with 
 Use the _Makefile_ to generate PDFs from the TeX source documents.
 Both TeX source and generated PDFs are checked into the **master** branch, so the make rules are set up to stage PDFs into a _new/_ subdirectory, from where they can be copied when you are ready to check them in.
 
+These documents use a variety of LaTeX styles (`make show-styles` lists them), so compiling them requires a fairly complete TeX installation.
+In particular, you should install _texlive-collection-latexextra_ on Fedora, or _texlive-latex-extra_ and _texlive-science_ on Debian and Ubuntu.
+Alternatively, missing style files can be copied into _~/texmf/tex/latex_ or similar (`kpsepath tex` shows the search path on your machine).
+
 Most of the specifications use a _.ver_ file and associated rules to display a commit hash and datestamp on their title page.
 (See _SAMv1.tex_ and _new/SAMv1.pdf_'s _Makefile_ dependencies for how to add this to other specifications.)
 So the usual workflow when editing these documents is (for example, when working on the SAM specification):
