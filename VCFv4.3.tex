@@ -3,6 +3,7 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{lscape}
+\usepackage{makecell}
 \usepackage[margin=0.75in]{geometry}
 \usepackage[pdfborder={0 0 0}]{hyperref}
 
@@ -794,7 +795,16 @@ $2$ & \verb|a t c G C G C G a| & following the G base is an insertion of 2 bases
 \end{tabular}
 
 \subsection{Encoding Structural Variants}
-The following page contains examples of structural variants encoded in VCF:
+The following page contains examples of structural variants encoded in VCF, showing in order:
+\begin{enumerate}
+  \item A precise deletion with known breakpoint, a one base micro-homology, and a sample that is homozygous for the deletion.
+  \item An imprecise deletion of approximately 205 bp.
+  \item An imprecise deletion of an ALU element relative to the reference.
+  \item An imprecise insertion of an L1 element relative to the reference.
+  \item An imprecise duplication of approximately 21Kb. The sample genotype is copy number 3 (one extra copy of the duplicated sequence).
+  \item An imprecise tandem duplication of 76bp. The sample genotype is copy number 5 (but the two haplotypes are not known).
+\end{enumerate}
+
 \pagebreak
 \footnotesize
 \begin{landscape}
@@ -838,16 +848,6 @@ VCF STRUCTURAL VARIANT EXAMPLE
 \end{landscape}
 \pagebreak
 \normalsize
-
-The example shows in order:
-\begin{enumerate}
-  \item A precise deletion with known breakpoint, a one base micro-homology, and a sample that is homozygous for the deletion.
-  \item An imprecise deletion of approximately 205 bp.
-  \item An imprecise deletion of an ALU element relative to the reference.
-  \item An imprecise insertion of an L1 element relative to the reference.
-  \item An imprecise duplication of approximately 21Kb. The sample genotype is copy number 3 (one extra copy of the duplicated sequence).
-  \item An imprecise tandem duplication of 76bp. The sample genotype is copy number 5 (but the two haplotypes are not known).
-\end{enumerate}
 
 \subsection{Specifying complex rearrangements with breakends}
 
@@ -952,7 +952,7 @@ $13$ & $321682$ & INS0 & T & C$<$ctg$1>$ & $6$ & PASS & SVTYPE=INS \\
 \vspace{0.3cm}
 
 If only a portion of $<$ctg$1>$, say from position $7$ to position $214$, is inserted, the VCF would be:
-
+\par\nobreak
 \vspace{0.3cm}
 \small
 \begin{tabular}{ l l l l l l l l }
@@ -1006,6 +1006,7 @@ A breakend's partner may be explicitly named as in Figure 5:
 \caption{Partner breakends}
 \end{figure}
 
+\vspace{0.3cm}
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
@@ -1044,12 +1045,13 @@ the records would look like:
 As mentioned previously, a single rearrangement event can be described as a set of novel adjacencies.
 For example, a reciprocal rearrangement such as in Figure 7:
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=4in,height=1.92in]{img/reciprocal_rearrangement-400x192.png}
 \caption{Rearrangements}
 \end{figure}
 
+\noindent
 would be described as:
 
 \vspace{0.3cm}
@@ -1064,6 +1066,7 @@ would be described as:
 \normalsize
 
 \subsubsection{Inversions}
+\begin{samepage}
 Similarly an inversion such as in Figure 8:
 
 \begin{figure}[ht]
@@ -1072,8 +1075,10 @@ Similarly an inversion such as in Figure 8:
 \caption{Inversion}
 \end{figure}
 
+\noindent
 can be described equivalently in two ways.
 Either one uses the short hand notation described previously (recommended for simple cases):
+\end{samepage}
 
 \vspace{0.3cm}
 \small
@@ -1102,7 +1107,7 @@ It sometimes is difficult to determine the exact position of a break, generally 
 The breakend is then placed arbitrarily at the left most position, and the uncertainty is represented with the CIPOS tag.
 The ALT string is then constructed assuming this arbitrary breakend choice.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=4in,height=2.48in]{img/microhomology-400x248.png}
 \caption{Homology}
@@ -1532,7 +1537,7 @@ Field & Type & Notes \\ \hline
 fmt\_key & typed int & Format key as an offset into the dictionary \\ \hline
 fmt\_type & uint8\_t+ & Typing byte of each individual value, possibly followed by a typed int for the vector length.  
 In effect this is the same as the typing value for a single vector, but for genotype values it appears only once before the array of genotype field values \\ \hline
-fmt\_values	(by fmt type) & Array of values & The information of each individual is concatenated in the vector.  Every value is of the same fmt type.  
+\makecell[tl]{fmt\_values \\ (by fmt type)} & Array of values & The information of each individual is concatenated in the vector.  Every value is of the same fmt type.
 Variable-length vectors are padded with END\_OF\_VECTOR values; a string is stored as a vector of char \\  \hline
 \end{tabular}
 \normalsize
