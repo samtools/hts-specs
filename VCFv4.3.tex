@@ -66,7 +66,7 @@ In order to ensure interoperability across platforms, VCF compliant implementati
 20     1234567 microsat1 GTC    G,GTCT  50   PASS   NS=3;DP=9;AA=G                    GT:GQ:DP    0/1:35:4       0/2:17:2       1/1:40:3
 \end{verbatim}
 \normalsize
-This example shows (in order): a good simple SNP, a possible SNP that has been filtered out because its quality is below 10, a site at which two alternate alleles are called, with one of them (T) being ancestral (possibly a reference sequencing error), a site that is called monomorphic reference (i.e. with no alternate alleles), and a microsatellite with two alternative alleles, one a deletion of 2 bases (TC), and the other an insertion of one base (T).
+This example shows (in order): a good simple SNP, a possible SNP that has been filtered out because its quality is below 10, a site at which two alternate alleles are called, with one of them (T) being ancestral (possibly a reference sequencing error), a site that is called monomorphic reference (i.e.\ with no alternate alleles), and a microsatellite with two alternative alleles, one a deletion of 2 bases (TC), and the other an insertion of one base (T).
 Genotype data are given for three samples, two of which are phased and the third unphased, with per sample genotype quality, depth and haplotype qualities (the latter only for the phased samples) given as well as the genotypes.
 The microsatellite calls are unphased.
 
@@ -152,7 +152,7 @@ There are also certain special characters used to define special cases:
 The `Flag' type indicates that the INFO field does not contain a Value entry, and hence the Number must be $0$ in this case.
 The Description value must be surrounded by double-quotes.
 Double-quote character must be escaped with backslash $\backslash$ and backslash as $\backslash\backslash$.
-Source and Version values likewise must be surrounded by double-quotes and specify the annotation source (case-insensitive, e.g. ``dbsnp'') and exact version (e.g. ``138''), respectively for computational use.
+Source and Version values likewise must be surrounded by double-quotes and specify the annotation source (case-insensitive, e.g.\ \verb|"dbsnp"|) and exact version (e.g.\ \verb|"138"|), respectively for computational use.
 
 \subsubsection{Filter field format}
 FILTERs that have been applied to the data are described as follows:
@@ -302,7 +302,7 @@ Fixed fields are:
   \item REF --- reference base(s): Each base must be one of A,C,G,T,N (case insensitive).
   Multiple bases are permitted.
   The value in the POS field refers to the position of the first base in the String.
-  For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the event (which must be reflected in the POS field), unless the event occurs at position 1 on the contig in which case it must include the base after the event; this padding base is not required (although it is permitted) for e.g. complex substitutions or other events where all alleles have at least one base represented in their Strings. 
+  For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the event (which must be reflected in the POS field), unless the event occurs at position 1 on the contig in which case it must include the base after the event; this padding base is not required (although it is permitted) for e.g.\ complex substitutions or other events where all alleles have at least one base represented in their Strings.
   If any of the ALT alleles is a symbolic allele (an angle-bracketed ID String ``$<$ID$>$'') then the padding base is required and POS denotes the coordinate of the base preceding the polymorphism.
   Tools processing VCF files are not required to preserve case in the allele Strings. (String, Required).
 
@@ -315,11 +315,11 @@ Fixed fields are:
   If there are no alternative alleles, then the MISSING value must be used.
   Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.
   (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
-  \item QUAL --- quality: Phred-scaled quality score for the assertion made in ALT. i.e. $-10log_{10}$ prob(call in ALT is wrong).
+  \item QUAL --- quality: Phred-scaled quality score for the assertion made in ALT. i.e.\ $-10log_{10}$ prob(call in ALT is wrong).
   If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant).
   If unknown, the MISSING value must be specified. (Float)
-  \item FILTER --- filter status: PASS if this position has passed all filters, i.e. a call is made at this position.
-  Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g. ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples.
+  \item FILTER --- filter status: PASS if this position has passed all filters, i.e.\ a call is made at this position.
+  Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g.\ ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples.
   `0' is reserved and must not be used as a filter String.
   If filters have not been applied, then this field must be set to the MISSING value.
   (String, no white-space or semi-colons permitted, duplicate values not allowed.)
@@ -362,7 +362,7 @@ Fixed fields are:
 
   The exact format of each INFO key should be specified in the meta-information (as described above).
   Example for an INFO field: DP=154;MQ=52;H2.
-  Keys without corresponding values may be used to indicate group membership (e.g. H2 indicates the SNP is found in HapMap 2).
+  Keys without corresponding values may be used to indicate group membership (e.g.\ H2 indicates the SNP is found in HapMap 2).
   See Section~\ref{sv-info-keys} for additional reserved INFO keys used to encode structural variants.
 \end{enumerate}
 
@@ -422,7 +422,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item GT (String): Genotype, encoded as allele values separated by either of $/$ or $\mid$.
   The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on.
   For diploid calls examples could be $0/1$, $1\mid0$, or $1/2$, etc.
-  Haploid calls, e.g. on Y, male non-pseudoautosomal X, or mitochondrion, are indicated by having only one allele value.
+  Haploid calls, e.g.\ on Y, male non-pseudoautosomal X, or mitochondrion, are indicated by having only one allele value.
   A triploid call might look like $0/0/1$.
   If a call cannot be made for a sample at a given locus, `.' must be specified for each missing allele in the GT field (for example `$./.$' for a diploid genotype and `.' for haploid genotype).
   The meanings of the separators are as follows (see the PS field below for more details on incorporating phasing information into the genotypes):
@@ -516,8 +516,8 @@ In essence, the VCF record specifies a-REF-t and the alternative haplotypes are 
 Several tag names follow conventions indicating how their values are represented numerically:
 \begin{itemize}
     \item The `L' suffix means \emph{likelihood} as log-likelihood in the sampling distribution, $\log_{10} \Pr(\mathrm{Data}|\mathrm{Model})$.
-    Likelihoods are represented as $\log_{10}$ scale, thus they are negative numbers (e.g.~GL, CNL).
-    The likelihood can be also represented in some cases as phred-scale in a separate tag (e.g.~PL).
+    Likelihoods are represented as $\log_{10}$ scale, thus they are negative numbers (e.g.\ GL, CNL).
+    The likelihood can be also represented in some cases as phred-scale in a separate tag (e.g.\ PL).
 
     \item The `P' suffix means \emph{probability} as linear-scale probability in the posterior distribution, which is $\Pr(\mathrm{Model}|\mathrm{Data})$. Examples are GP, CNP.
 
@@ -531,7 +531,7 @@ Several tag names follow conventions indicating how their values are represented
 \label{sv-info-keys}
 The following INFO keys are reserved for encoding structural variants.
 In general, when these keys are used by imprecise variants, the values should be best estimates.
-When a key reflects a property of a single alt allele (e.g. SVLEN), then when there are multiple alt alleles there will be multiple values for the key corresponding to each alelle (e.g. SVLEN=-100,-110 for a deletion with two distinct alt alleles).
+When a key reflects a property of a single alt allele (e.g.\ SVLEN), then when there are multiple alt alleles there will be multiple values for the key corresponding to each alelle (e.g.\ SVLEN=-100,-110 for a deletion with two distinct alt alleles).
 \footnotesize
 \begin{verbatim}
 ##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
@@ -562,7 +562,7 @@ The reserved values must be used for the types listed below:
 ##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
 \end{verbatim}
 \normalsize
-One value for each ALT allele. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values.
+One value for each ALT allele. Longer ALT alleles (e.g.\ insertions) have positive values, shorter ALT alleles (e.g.\ deletions) have negative values.
 
 \footnotesize
 \begin{verbatim}
@@ -854,7 +854,7 @@ VCF STRUCTURAL VARIANT EXAMPLE
 An arbitrary rearrangement event can be summarized as a set of novel \textbf{adjacencies}. Each adjacency ties together $2$ \textbf{breakends}.
 The two breakends at either end of a novel adjacency are called \textbf{mates}.
 
-There is one line of VCF (i.e. one record) for each of the two breakends in a novel adjacency.
+There is one line of VCF (i.e.\ one record) for each of the two breakends in a novel adjacency.
 A breakend record is identified with the tag ``SVTYPE=BND'' in the INFO field.
 The REF field of a breakend record indicates a base or sequence s of bases beginning at position POS, as in all VCF records.
 The ALT field of a breakend record indicates a replacement for s.
@@ -963,7 +963,7 @@ $13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:214]$A & $6$ & PASS & SVTYPE=BND \\
 \normalsize
 \vspace{0.3cm}
 
-If $<$ctg$1>$ is circular and a segment from position 229 to position 45 is inserted, i.e. continuing from position 329 on to position 1, this is represented by adding a circular adjacency:
+If $<$ctg$1>$ is circular and a segment from position 229 to position 45 is inserted, i.e.\ continuing from position 329 on to position 1, this is represented by adding a circular adjacency:
 
 \vspace{0.3cm}
 \small
@@ -1251,7 +1251,7 @@ PEDIGREE=<ID=DerivedID,Original=OriginalID>
 \end{verbatim}
 
 This line asserts that the DNA in genome is asexually or clonally derived with mutations from the DNA in genome.
-This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e. there is one entry per of the form:
+This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e.\ there is one entry per of the form:
 
 \begin{verbatim}
 PEDIGREE=<ID=ChildID,Mother=MotherID,Father=FatherID>
@@ -1328,9 +1328,9 @@ For each haplotype of a breakend, say the haplotype (2) of breakend U above, con
 These include:
 
 \begin{enumerate}
-  \item The depth of reads on the segment where the breakend occurs that support the haplotype, e.g. the depth of reads supporting haplotype 1 in the segment containing breakend U
+  \item The depth of reads on the segment where the breakend occurs that support the haplotype, e.g.\ the depth of reads supporting haplotype 1 in the segment containing breakend U
   \item The estimated copy number of the haplotype on the segment where the breakend occurs
-  \item The depth of paired-end or split reads that support the haplotype-specific adjacencies, e.g. that support the adjacency between haplotype 1 on Chr 13 to haplotype 11 on Chr 2
+  \item The depth of paired-end or split reads that support the haplotype-specific adjacencies, e.g.\ that support the adjacency between haplotype 1 on Chr 13 to haplotype 11 on Chr 2
   \item The estimated copy number of the haplotype-specific adjacencies
   \item An overall quality score indicating how confident we are in this asserted haplotype
 \end{enumerate}
@@ -1382,7 +1382,7 @@ Because the file is text, it is extremely slow to parse.
 Overall, the idea behind is BCF2 is simple.
 BCF2 is a binary, compressed equivalent of VCF that can be indexed with tabix and can be efficiently decoded from disk or streams.
 For efficiency reasons BCF2 only supports a subset of VCF, in that all info and genotype fields must have their full types specified.
-That is, BCF2 requires that if e.g. an info field {\tt AC} is present then it must contain an equivalent VCF header line noting that {\tt AC} is an allele indexed array of type integer.
+That is, BCF2 requires that if e.g.\ an info field {\tt AC} is present then it must contain an equivalent VCF header line noting that {\tt AC} is an allele indexed array of type integer.
 
 \subsection{Overall file organization}
 
