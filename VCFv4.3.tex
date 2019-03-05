@@ -1286,11 +1286,13 @@ Alternately, if data on the genomes is compiled in a database, a simple pointer 
 ##pedigreeDB=<url>
 \end{verbatim}
 
+\begin{samepage}
 The most general form of a pedigree line is:
 
 \begin{verbatim}
 ##PEDIGREE=<ID=SampleID,Name_1=Ancestor1,...,Name_N=AncestorN>
 \end{verbatim}
+\end{samepage}
 
 This means that the genome SampleID is derived from the N $\ge$ 1 genomes Ancestor1, ..., AncestorN.
 Based on these derivation relationships two new pieces of information can be specified.
@@ -1355,6 +1357,7 @@ Bundle Copy Number & 1 & 3 & 1 \\
 Haplotype quality & 30 & 40 & 40 \\
 \end{tabular}
 
+\pagebreak
 \subsection{Representing unspecified alleles and REF-only blocks (gVCF)}
 In order to report sequencing data evidence for both variant and non-variant positions in the genome, the VCF specification allows to represent blocks of reference-only calls in a single record using the END INFO tag, an idea originally introduced by the gVCF file format\footnote{\url{https://help.basespace.illumina.com/articles/descriptive/gvcf-files/}}.
 The convention adopted here is to represent reference evidence as likelihoods against an unknown alternate allele.
