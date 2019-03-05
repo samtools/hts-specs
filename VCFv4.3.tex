@@ -1,7 +1,7 @@
 \documentclass[8pt]{article}
 \usepackage{enumerate}
 \usepackage{graphicx}
-\usepackage{tabularx}
+\usepackage{longtable}
 \usepackage{lscape}
 \usepackage{makecell}
 \usepackage[margin=0.75in]{geometry}
@@ -258,18 +258,17 @@ It is possible to record relationships between genomes using the following synta
 
 \subsection{Header line syntax}
 The header line names the 8 fixed, mandatory columns. These columns are as follows:
-
-\begin{enumerate}
-  \item \#CHROM
-  \item POS
-  \item ID
-  \item REF
-  \item ALT
-  \item QUAL
-  \item FILTER
-  \item INFO
-\end{enumerate}
-
+\begin{center}
+       \#CHROM
+\qquad POS
+\qquad ID
+\qquad REF
+\qquad ALT
+\qquad QUAL
+\qquad FILTER
+\qquad INFO
+\end{center}
+\noindent
 If genotype data is present in the file, these are followed by a FORMAT column header, then an arbitrary number of sample IDs.
 Duplicate sample IDs are not allowed.
 The header line is tab-delimited and there must be no tab characters at the end of the line.
@@ -302,7 +301,7 @@ Fixed fields are:
   \item REF --- reference base(s): Each base must be one of A,C,G,T,N (case insensitive).
   Multiple bases are permitted.
   The value in the POS field refers to the position of the first base in the String.
-  For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the event (which must be reflected in the POS field), unless the event occurs at position 1 on the contig in which case it must include the base after the event; this padding base is not required (although it is permitted) for e.g.\ complex substitutions or other events where all alleles have at least one base represented in their Strings.
+  For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the event (which must be reflected in the POS field), unless the event occurs at position 1 on the contig in which case it must include the base after the event; \pagebreak[1] this padding base is not required (although it is permitted) for e.g.\ complex substitutions or other events where all alleles have at least one base represented in their Strings.
   If any of the ALT alleles is a symbolic allele (an angle-bracketed ID String ``$<$ID$>$'') then the padding base is required and POS denotes the coordinate of the base preceding the polymorphism.
   Tools processing VCF files are not required to preserve case in the allele Strings. (String, Required).
 
@@ -330,10 +329,24 @@ Fixed fields are:
   Duplicate keys are not allowed.
   Arbitrary keys are permitted, although those listed in Table~\ref{table:reserved-info} are reserved (albeit optional).
 
-  \begin{table}[htbp]
-    \centering
-    \begin{tabularx}{\textwidth}{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | X | }
+  The exact format of each INFO key should be specified in the meta-information (as described above).
+  Example for an INFO field: DP=154;MQ=52;H2.
+  Keys without corresponding values may be used to indicate group membership (e.g.\ H2 indicates the SNP is found in HapMap 2).
+  See Section~\ref{sv-info-keys} for additional reserved INFO keys used to encode structural variants.
+\end{enumerate}
+
+\begin{longtable}[c]{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | p{10.3cm} | }
+	\hline
 	Key		& Number	& Type		& Description \\ \hline
+  \endhead
+    \hline
+    \multicolumn{4}{l}{} \\
+    \caption{\label{table:reserved-info}Reserved INFO keys (continued on next page)}
+  \endfoot
+    \hline
+    \multicolumn{4}{l}{} \\
+    \caption{Reserved INFO keys (continued from previous page)}
+  \endlastfoot
 	AA		& 1		& String	& Ancestral allele \\
 	AC		& A		& Integer	& Allele count in genotypes, for each ALT allele, in the same order as listed  \\
 	AD		& R		& Integer	& Total read depth for each allele \\
@@ -355,16 +368,7 @@ Fixed fields are:
 	SOMATIC		& 0		& Flag		& Somatic mutation (for cancer genomics) \\
 	VALIDATED	& 0		& Flag		& Validated by follow-up experiment \\
 	1000G		& 0		& Flag		& 1000 Genomes membership \\
-    \end{tabularx}
-    \caption{Reserved INFO keys}
-    \label{table:reserved-info}
-  \end{table}
-
-  The exact format of each INFO key should be specified in the meta-information (as described above).
-  Example for an INFO field: DP=154;MQ=52;H2.
-  Keys without corresponding values may be used to indicate group membership (e.g.\ H2 indicates the SNP is found in HapMap 2).
-  See Section~\ref{sv-info-keys} for additional reserved INFO keys used to encode structural variants.
-\end{enumerate}
+\end{longtable}
 
 \subsubsection{Genotype fields}
 If genotype information is present, then the same types of data must be present for all samples.
@@ -380,13 +384,17 @@ Trailing fields can be dropped, with the exception of the GT field, which should
 
 
 As with the INFO field, there are several common, reserved keywords that are standards across the community.
-See their detailed definitions below, as well as table~\ref{table:reserved-genotypes} for their reference Number, Type and Description.
+See their detailed definitions below, as well as Table~\ref{table:reserved-genotypes} for their reference Number, Type and Description.
 See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for structural variants.
 
-\begin{table}[htbp]
-  \centering
-    \begin{tabularx}{\textwidth}{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | X | }
+\begin{longtable}[c]{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | p{10.3cm} | }
+      \hline
       Field		& Number	& Type		& Description \\ \hline
+  \endhead
+      \hline
+      \multicolumn{4}{l}{} \\
+      \caption{\label{table:reserved-genotypes}Reserved genotype keys}
+  \endfoot
       AD		& R		& Integer	& Read depth for each allele \\
       ADF		& R		& Integer	& Read depth for each allele on the forward strand \\
       ADR		& R		& Integer	& Read depth for each allele on the reverse strand \\
@@ -402,10 +410,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
       PQ		& 1		& Integer	& Phasing quality \\
       PS		& 1		& Integer	& Phase set \\
-  \end{tabularx}
-  \caption{Reserved genotype keys}
-  \label{table:reserved-genotypes}
-\end{table}
+\end{longtable}
 
 \begin{itemize}
 \renewcommand{\labelitemii}{$\circ$}
@@ -529,6 +534,7 @@ Several tag names follow conventions indicating how their values are represented
 
 \section{INFO keys used for structural variants}
 \label{sv-info-keys}
+\begin{samepage}
 The following INFO keys are reserved for encoding structural variants.
 In general, when these keys are used by imprecise variants, the values should be best estimates.
 When a key reflects a property of a single alt allele (e.g.\ SVLEN), then when there are multiple alt alleles there will be multiple values for the key corresponding to each alelle (e.g.\ SVLEN=-100,-110 for a deletion with two distinct alt alleles).
@@ -546,6 +552,7 @@ For precise variants, END is $\mbox{POS} + \mbox{length of REF allele} - 1$, and
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
 \end{verbatim}
 \normalsize
+\end{samepage}
 This key can be derived from the REF/ALT fields but is useful for filtering.
 The reserved values must be used for the types listed below:
 \begin{itemize}
