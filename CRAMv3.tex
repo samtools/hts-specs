@@ -1094,7 +1094,9 @@ int & RG & read group & the read group identifier expressed as the N\textsupersc
 \EndIf
 \State $read\_length \gets$ \Call{ReadItem}{RL, Integer}
 \If{$container\_pmap.AP\_delta \ne 0$ \textbf{and} $slice\_header.reference\_sequence\_id \geq 0$}
-    \State Initialise $last\_position$ to $slice\_header.alignment\_start$ if first record in slice
+    \If{$first\_record\_in\_slice$}
+        \State $last\_position\gets$ $slice\_header.alignment\_start$
+    \EndIf
     \State $alignment\_position \gets$ \Call{ReadItem}{AP, Integer} + $last\_position$
     \State $last\_position \gets alignment\_position$
 \Else
