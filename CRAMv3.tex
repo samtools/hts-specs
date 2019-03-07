@@ -623,8 +623,9 @@ the BAM file header\tabularnewline
 RL & encoding\texttt{<}int\texttt{>} & read lengths & read lengths\tabularnewline
 \hline
 AP & encoding\texttt{<}int\texttt{>} & in-seq positions & if \textbf{APDelta} = true: 0-based alignment start
-delta from previous record, resetting to 0 for the first record in the slice\linebreak{}
-alignment start position if \textbf{APDelta} = false\tabularnewline
+delta from the previous record.  When the record is the first in the slice,
+its alignment start will be equal to that of the slice, so its alignment delta is 0.\linebreak{}
+if \textbf{APDelta} = false: encodes the alignment start position directly\tabularnewline
 \hline
 RG & encoding\texttt{<}int\texttt{>} & read groups & read groups. Special value 
 `-1' stands for no group.\tabularnewline
