@@ -622,8 +622,9 @@ the BAM file header\tabularnewline
 \hline
 RL & encoding\texttt{<}int\texttt{>} & read lengths & read lengths\tabularnewline
 \hline
-AP & encoding\texttt{<}int\texttt{>} & in-seq positions & 0-based alignment start
-delta from previous record, or 0 if the first record in the slice\tabularnewline
+AP & encoding\texttt{<}int\texttt{>} & in-seq positions & if \textbf{APDelta} = true: 0-based alignment start
+delta from previous record, resetting to 0 for the first record in the slice\linebreak{}
+alignment start position if \textbf{APDelta} = false\tabularnewline
 \hline
 RG & encoding\texttt{<}int\texttt{>} & read groups & read groups. Special value 
 `-1' stands for no group.\tabularnewline
