@@ -626,8 +626,10 @@ the BAM file header\tabularnewline
 \hline
 RL & encoding\texttt{<}int\texttt{>} & read lengths & read lengths\tabularnewline
 \hline
-AP & encoding\texttt{<}int\texttt{>} & in-seq positions & 0-based alignment start
-delta from previous record *\tabularnewline
+AP & encoding\texttt{<}int\texttt{>} & in-seq positions & if \textbf{APDelta} = true: 0-based alignment start
+delta from the previous record.  When the record is the first in the slice,
+its alignment start will be equal to that of the slice, so its alignment delta is 0.\linebreak{}
+if \textbf{APDelta} = false: encodes the alignment start position directly\tabularnewline
 \hline
 RG & encoding\texttt{<}int\texttt{>} & read groups & read groups. Special value 
 `-1' stands for no group.\tabularnewline
@@ -1114,8 +1116,10 @@ int & RG & read group & the read group identifier expressed as the N\textsupersc
   \State $reference\_id\gets slice\_header.reference\_sequence\_id$
 \EndIf
 \State $read\_length \gets$ \Call{ReadItem}{RL, Integer}
-\If{$container\_pmap.AP\_delta \ne 0$}
-    \State Initialise $last\_position$ to 0 if first record in slice
+\If{$container\_pmap.AP\_delta \ne 0$ \textbf{and} $slice\_header.reference\_sequence\_id \geq 0$}
+    \If{$first\_record\_in\_slice$}
+        \State $last\_position\gets$ $slice\_header.alignment\_start$
+    \EndIf
     \State $alignment\_position \gets$ \Call{ReadItem}{AP, Integer} + $last\_position$
     \State $last\_position \gets alignment\_position$
 \Else
