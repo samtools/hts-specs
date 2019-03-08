@@ -848,10 +848,10 @@ Because of this distinction between sample and genome, it is possible to express
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Blood & TissueSample\\
-2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U & GT:DPADJ & 0:32 & $0\mid1:9\mid21$ \\
-2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X & GT:DPADJ & 0:29 & $0\mid1:11\mid25$ \\
-13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_W & GT:DPADJ & 0:34 & $0\mid1:10\mid23$ \\
-13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V & GT:DPADJ & 0:31 & $0\mid1:8\mid20$ \\
+2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U & GT:DPADJ & 0:32 & $0|1:9,21$ \\
+2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X & GT:DPADJ & 0:29 & $0|1:11,25$ \\
+13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_W & GT:DPADJ & 0:34 & $0|1:10,23$ \\
+13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V & GT:DPADJ & 0:31 & $0|1:8,20$ \\
 \end{tabular}
 \end{flushleft}
 \normalsize
@@ -1203,7 +1203,7 @@ MISSING &	0b0111 1111 1000 0000 0000 0000 0000 0001 & 0x7F800001 \\ \hline
 \vspace{0.3cm}
 \textbf{String} values have two basic encodings.  For INFO, FORMAT, and FILTER keys these are encoded by integer offsets into the header dictionary.  For string values, such as found in the ID, REF, ALT, INFO, and FORMAT fields, strings are encoded as typed array of ASCII encoded bytes.  The array isn't terminated by a null byte.  The length of the string is given by the length of the type descriptor.
 
-Suppose you want to encode the string ACAC.  First, we need the type descriptor byte, which is the string type 0x07 or'd with inline size (4) yielding the type byte of 0x40 | 0x07 = 0x47.  Immediately following the type byte is the four byte ASCII encoding of ``ACAC'' 0x41 0x43 0x41 0x43.  So the final encoding is:
+Suppose you want to encode the string ``{\tt ACAC}''.  First, we need the type descriptor byte, which is the string type 0x07 or'd with inline size (4) yielding the type byte of 0x40 $|$ 0x07 = 0x47.  Immediately following the type byte is the four byte ASCII encoding of ``{\tt ACAC}'': 0x41 0x43 0x41 0x43.  So the final encoding is:
 
 \vspace{0.1cm}
 \begin{tabular}{| l | l |} \hline
@@ -1211,13 +1211,13 @@ Suppose you want to encode the string ACAC.  First, we need the type descriptor 
 \end{tabular}
 \vspace{0.3cm}
 
-Suppose you want to encode the string MarkDePristoWorksAtTheBroad, a string of size 27.  First, we need the type descriptor byte, which is the string type 0x07.  Because the size exceeds the inline size ($27 > 15$) we set the size to overflow, yielding the type byte of 0xF0 | 0x07 = 0xF7.  Immediately following the type byte is the typed size of 27, which we encode by the atomic INT8 value: 0x11 followed by the actual size 0x1B.  Finally comes the actual bytes of the string: 0x4D 0x61 0x72 0x6B 0x44 0x65 0x50 0x72 0x69 0x73 0x74 0x6F 0x57 0x6F 0x72 0x6B 0x73 0x41 0x74 0x54 0x68 0x65 0x42 0x72 0x6F 0x61 0x64.  So the final encoding is:
+Suppose you want to encode the string ``{\tt VariantCallFormatSampleText}'', a string of size 27.  First, we need the type descriptor byte, which is the string type 0x07.  Because the size exceeds the inline size limit ($27 \geq 15$) we set the size to overflow, yielding the type byte of 0xF0 $|$ 0x07 = 0xF7.  Immediately following the type byte is the typed size of 27, which we encode by the atomic INT8 value: 0x11 followed by the actual size 0x1B.  Finally comes the actual bytes of the string: 0x56 0x61 0x72 0x69 0x61 0x6E 0x74 0x43 0x61 0x6C 0x6C 0x46 0x6F 0x72 0x6D 0x61 0x74 0x53 0x61 0x6D 0x70 0x6C 0x65 0x54 0x65 0x78 0x74.  So the final encoding is:
 
 \vspace{0.3cm}
 \begin{tabular}{ | p{9cm} | p{6cm} | } \hline
 0xF7 & string with overflow size \\ \hline
 0x11 0x1B & overflow size encoded as INT8 with value 27 \\ \hline
-0x4D 0x61 0x72 0x6B 0x44 0x65 0x50 0x72 0x69 0x73 0x74 0x6F 0x57 0x6F 0x72 0x6B 0x73 0x41 0x74 0x54 0x68 0x65 0x42 0x72 0x6F 0x61 0x64 & message in ASCII \\ \hline
+0x56 0x61 0x72 0x69 0x61 0x6E 0x74 0x43 0x61 0x6C 0x6C 0x46 0x6F 0x72 0x6D 0x61 0x74 0x53 0x61 0x6D 0x70 0x6C 0x65 0x54 0x65 0x78 0x74 & message in ASCII \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
@@ -1337,13 +1337,13 @@ The QUAL field value is 30.1, which we encode as an untyped single precision
 
 \subsubsection{Encoding ID}
 
-For ID type byte would is a 5-element string (type descriptor 0x59),
+For ID type byte would is a 5-element string (type descriptor 0x57),
 which would then be followed by the five bytes for the string of
 {\tt 0x72 0x73 0x31 0x32 0x33}.  The full encoding is:
 
 \vspace{0.3cm}
 \begin{tabular}{|l| l|} \hline
-0x59 0x72 0x73 0x31 0x32 0x33 & ID \\ \hline
+0x57 0x72 0x73 0x31 0x32 0x33 & ID \\ \hline
 \end{tabular}
 
 \subsubsection{Encoding REF/ALT fields}
@@ -1398,7 +1398,7 @@ The ancestral allele (AA) tell us that among other primates the original allele 
 
 \vspace{0.3cm}
 \begin{tabular}{|l |l|} \hline
-0x11 0x51 & AA key \\ \hline
+0x11 0x53 & AA key \\ \hline
 0x17 0x43 & with value of C \\ \hline
 \end{tabular}
 
@@ -1442,7 +1442,7 @@ So the genotype block contains:
 
 We need to determine a few values before writing out the final block:
 
-l\_shared = 54 (Data length from CHROM to the end of INFO)
+l\_shared = 52 (Data length from CHROM to the end of INFO)
 
 l\_indiv = 42 (Data length of FORMAT and individual genotype fields)
 
@@ -1453,7 +1453,7 @@ n\_fmt\_samples = n\_fmt$<<24\mid$n\_sample = $5 << 24 \mid 3$ = 0x05000003
 
 \vspace{0.3cm}
 \begin{tabular}{|l| l|} \hline
-0x36000000 & l\_shared as little endian hex \\ \hline
+0x34000000 & l\_shared as little endian hex \\ \hline
 0x2A000000 & l\_indiv as little endian hex \\ \hline
 0x01000000 & CHROM offset is at 1 in 32 bit little endian \\ \hline
 0x64000000 & POS in 0 base 32 bit little endian \\ \hline
@@ -1461,7 +1461,7 @@ n\_fmt\_samples = n\_fmt$<<24\mid$n\_sample = $5 << 24 \mid 3$ = 0x05000003
 0x41 0xF0 0xCC 0xCD & QUAL = 30.1 as 32-bit float \\ \hline
 0x00020004 & n\_allele\_info \\ \hline
 0x05000003 & n\_fmt\_samples \\ \hline
-0x59 0x72 0x73 0x31 0x32 0x33 & ID \\ \hline
+0x57 0x72 0x73 0x31 0x32 0x33 & ID \\ \hline
 0x17 0x41 & REF A \\ \hline
 0x17 0x43 & ALT C \\ \hline
 0x11 0x00 & FILTER field PASS \\ \hline
@@ -1470,7 +1470,7 @@ n\_fmt\_samples = n\_fmt$<<24\mid$n\_sample = $5 << 24 \mid 3$ = 0x05000003
 0x11 0x03 & with value of 3 \\ \hline
 0x11 0x52 & AN key \\ \hline
 0x11 0x06 & with value of 6 \\ \hline
-0x11 0x51 & AA key \\ \hline
+0x11 0x53 & AA key \\ \hline
 0x17 0x43 & with value of C \\ \hline
 0x1101 0x21 0x020202040404 & GT \\ \hline
 0x1102 0x11 0x0A0A0A & GQ \\ \hline
