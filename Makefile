@@ -45,7 +45,7 @@ OLD = HEAD
 NEW =
 
 diff/%.pdf: %.tex
-	TEXINPUTS=:..:../new latexdiff-vc --pdf --dir diff --force --git --subtype ONLYCHANGEDPAGE --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
+	BIBINPUTS=:.. TEXINPUTS=:..:../new latexdiff-vc --pdf --dir diff --force --git --subtype ONLYCHANGEDPAGE --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
 
 
 show-styles:

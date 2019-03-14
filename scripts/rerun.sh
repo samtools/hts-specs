@@ -2,6 +2,7 @@
 # Usage: rerun.sh FILEBASE LATEXCOMMAND ARGUMENT...
 # Runs the LaTeX command as many times as necessary, as measured by
 # the state files FILEBASE.aux etc having arrived at a steady state.
+# On the first run, also runs BibTeX (via $BIBTEX if set) if needed.
 
 base=$1
 shift
@@ -17,7 +18,7 @@ checksum_state_files() {
     for file in $base.*
     do
         case $file in
-        *.log|*.pdf|*.ver) ;;
+        *.blg|*.log|*.pdf|*.ver) ;;
         *) cksum $file ;;
         esac
     done
@@ -26,6 +27,13 @@ checksum_state_files() {
 prev=$(checksum_state_files)
 
 "$@" || exit
+
+if grep -q '\\bibdata' $base.aux
+then
+    : ${BIBTEX:=bibtex --terse}
+    echo '*' Running $BIBTEX $base.aux
+    $BIBTEX $base.aux || exit
+fi
 
 checksum=$(checksum_state_files)
 
