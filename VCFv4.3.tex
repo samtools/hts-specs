@@ -32,8 +32,8 @@ This printing is version~\commitdesc\ from that repository, last modified on the
 \newpage
 
 \section{The VCF specification}
-VCF is a text file format (most likely stored in a compressed manner).
-It contains meta-information lines (prefixed with ``\verb|##|''), a header line (prefixed with ``\verb|#|''), and data lines each containing information about a position in the genome and genotype information on samples for each position (text fields separated by tabs).
+VCF is a text file format.
+It contains headery meta-information lines (prefixed with ``\verb|##|''), a header line (prefixed with ``\verb|#|''), and data lines each containing information about a position in the genome and genotype information on samples for each position (text fields separated by tabs).
 Zero length fields are not allowed, a dot (``.'') must be used instead.
 In order to ensure interoperability across platforms, VCF compliant implementations must support both LF (``\verb|\n|'') and CR+LF (``\verb|\r\n|'') newline conventions.
 
