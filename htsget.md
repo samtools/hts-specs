@@ -21,6 +21,7 @@ This data retrieval API bridges from existing genomics bulk data transfers to a 
 Explicitly this API does NOT:
 
 * Provide a way to discover the identifiers for valid ReadGroupSets --- clients obtain these via some out of band mechanism
+* Get made into a PDF
 
 
 # Protocol essentials
