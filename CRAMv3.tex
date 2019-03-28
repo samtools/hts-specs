@@ -19,6 +19,7 @@
 \usepackage{amsmath}
 \usepackage{algpseudocode}
 \usepackage{threeparttable}
+\usepackage{tikz}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
@@ -1533,6 +1534,8 @@ slices.
 
 \subsubsection*{General notes}
 
+Indexing is only valid on coordinate (reference ID and then leftmost position) sorted files.
+
 Please note that CRAM indexing is external to the file format itself and may change 
 independently of the file format specification in the future. For example, a new 
 type of index file may appear.
@@ -1543,31 +1546,69 @@ is that CRAM container header and compression header block (first block in conta
 must always be read before decoding a slice. Therefore two read operations are 
 required for random access in CRAM.
 
-Indexing a CRAM file is deemed to be a lightweight operation because it does not 
-require any CRAM records to be read. All indexing information can be obtained from 
-container headers, namely sequence id, alignment start and span, container start 
-byte offset and slice byte offset inside the container. 
+Indexing a CRAM file is deemed to be a lightweight operation because it usually does not require any CRAM records to be read.
+Indexing information can be obtained from container headers, namely sequence id, alignment start and span, container start byte offset and slice byte offset inside the container (landmarks).
+The exception to this is with multi-reference containers, where the ``RI'' data series must be read.
 
 \subsubsection*{CRAM index}
 
 A CRAM index is a gzipped tab delimited file containing the following columns:
 
 \begin{enumerate}
-\item Sequence id
+\item Reference sequence id
 
 \item Alignment start (ignored on read for unmapped slices, set to 0 on write)
 
 \item Alignment span (ignored on read for unmapped slices, set to 0 on write)
 
-\item Container start byte offset in the file
+\item Absolute byte offset of Container header in the file.
 
-\item Slice start byte offset in the container data (`blocks')
+\item Relative byte offset of the Slice header block, from the end of
+the container header.  This is the same as the ``landmark'' field
+in the container header.
 
-\item Slice bytes
+\item Slice size in bytes (including slice header and all blocks).
 \end{enumerate}
 
-Each line represents a slice in the CRAM file. Please note that all slices must 
-be listed in the index file.
+Each line represents a slice in the CRAM file.
+Please note that all slices must be listed in the index file.
+
+Multi-reference slices may need to have multiple lines for the same slice; one for each reference contained within that slice.
+In this case the index reference sequence ID will be the actual reference ID (from the ``RI'' data series) and not -2.
+
+Slices containing solely unmapped unplaced data (reference ID -1) still require values for all columns, although the alignment start and span will be ignored.
+It is recommended that they are both set to zero.
+
+To illustrate this the absolute and relative offsets used in a three slice container are shown in the diagram below.
+
+\begin{center}
+\begin{tikzpicture}[
+  boxed/.style={rectangle, draw=black, fill=black!10, minimum height=1.3cm, text width=1.8cm},
+]
+\node(A) [boxed]{Container Header};
+\node(B) [boxed,right,text width=2.2cm] at (A.east){Compression Header Block};
+\node(C) [boxed,right] at (B.east){\quad Slice 1};
+\node(D) [boxed,right] at (C.east){\quad Slice 2};
+\node(E) [boxed,right] at (D.east){\quad Slice 3};
+
+\draw[<-] (A.south west)+(1pt,-0.1cm) -- +(1pt,-1cm)
+     node[below, text width=1.5cm]{Container absolute offset};
+
+
+\draw[|<->|] ([yshift=-0.2cm]B.south west) node[below,xshift=1.2cm]{Slice offset 1}
+    -- ([yshift=-0.2cm]B.south east);
+\draw[|<->|] ([yshift=-1.2cm]B.south west) node[below,xshift=1.2cm]{Slice offset 2}
+    -- ([yshift=-1.2cm]C.south east);
+\draw[|<->|] ([yshift=-2.2cm]B.south west) node[below,xshift=1.2cm]{Slice offset 3}
+    -- ([yshift=-2.2cm]D.south east);
+
+\draw[|<->|] ([yshift=+0.2cm]C.north west) node[above,xshift=1cm]{Size 1} -- ([yshift=+0.2cm]C.north east);
+\draw[|<->|] ([yshift=+0.2cm]D.north west) node[above,xshift=1cm]{Size 2} -- ([yshift=+0.2cm]D.north east);
+\draw[|<->|] ([yshift=+0.2cm]E.north west) node[above,xshift=1cm]{Size 3} -- ([yshift=+0.2cm]E.north east);
+
+
+\end{tikzpicture}
+\end{center}
 
 \subsubsection*{BAM index}
 
