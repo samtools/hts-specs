@@ -440,7 +440,8 @@ structure where the container content is stored in the `blocks' field:
 \textbf{Data type} & \textbf{Name} & \textbf{Value}
 \tabularnewline
 \hline
-int32 & length & byte size of the container data (blocks)\tabularnewline
+int32 & length & the sum of the byte lengths of all blocks in this container; 
+equal to the total byte length of the container minus this header structure\tabularnewline
 \hline
 itf8 & reference sequence id & reference sequence identifier  or\linebreak{}
 -1 for unmapped reads\linebreak{}
@@ -458,10 +459,11 @@ ltf8 & record counter & 1-based sequential index of records in the file/stream.\
 \hline
 ltf8 & bases & number of read bases\tabularnewline
 \hline
-itf8 & number of blocks & the number of blocks\tabularnewline
+itf8 & number of blocks & the total number of blocks in this container\tabularnewline
 \hline
-itf8[ ] & landmarks & Each integer value of this array is a byte offset into the 
-blocks byte array. Landmarks are used for random access indexing.\tabularnewline
+itf8[ ] & landmarks & the locations of slices in this container as byte offsets from the end of 
+this container header, used for random access indexing.
+The landmark count must equal the slice count.\tabularnewline
 \hline
 int & crc32 & CRC32 hash of the all the preceding bytes in the container.\tabularnewline
 \hline
