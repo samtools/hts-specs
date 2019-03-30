@@ -3,7 +3,7 @@ FROM blang/latex:ubuntu
 MAINTAINER Louis Bergelson <louisb@broadinstitute.org>
 
 RUN apt-get update -q && \
-   apt-get install -qy nodejs npm curl && \
+   apt-get install -qy nodejs npm curl ghostscript && \
    rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/ftilmann/latexdiff.git && \

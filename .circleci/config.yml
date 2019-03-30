@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: htsspecs/circle-ci-image:0.6
+      - image: htsspecs/circle-ci-image:0.7
     steps:
       - checkout
       - run:
