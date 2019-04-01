@@ -463,7 +463,9 @@ itf8 & number of blocks & the total number of blocks in this container\tabularne
 \hline
 itf8[ ] & landmarks & the locations of slices in this container as byte offsets from the end of 
 this container header, used for random access indexing.
-The landmark count must equal the slice count.\tabularnewline
+The landmark count must equal the slice count.\linebreak{}
+Since the block before the first slice is the compression header,
+landmarks[0] is equal to the byte length of the compression header.\tabularnewline
 \hline
 int & crc32 & CRC32 hash of the all the preceding bytes in the container.\tabularnewline
 \hline
