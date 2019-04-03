@@ -441,7 +441,7 @@ structure where the container content is stored in the `blocks' field:
 \tabularnewline
 \hline
 int32 & length & the sum of the lengths of all blocks in this container (headers and data); 
-equal to the total byte length of the container minus this header structure\tabularnewline
+equal to the total byte length of the container minus the byte length of this header structure\tabularnewline
 \hline
 itf8 & reference sequence id & reference sequence identifier  or\linebreak{}
 -1 for unmapped reads\linebreak{}
