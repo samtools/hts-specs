@@ -445,7 +445,8 @@ equal to the total byte length of the container minus the byte length of this he
 \hline
 itf8 & reference sequence id & reference sequence identifier  or\linebreak{}
 -1 for unmapped reads\linebreak{}
--2 for multiple reference sequences\tabularnewline
+-2 for multiple reference sequences.\linebreak{}
+All slices in this container must have a reference sequence id matching this value.\tabularnewline
 \hline
 itf8 & starting position on the reference & the alignment start position or\linebreak{}
 0 for unmapped reads\tabularnewline
@@ -777,7 +778,8 @@ The slice header block contains the following fields.
 \hline
 itf8 & reference sequence id & reference sequence identifier or\linebreak{}
 -1 for unmapped reads\linebreak{}
--2 for multiple reference sequences\tabularnewline
+-2 for multiple reference sequences.\linebreak{}
+This value must match that of its enclosing container.\tabularnewline
 \hline
 itf8 & alignment start & the alignment start position.\linebreak{}
 Ignored on read and set to 0 on write if the slice is multiple-reference
