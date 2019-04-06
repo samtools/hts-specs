@@ -23,14 +23,18 @@ checksum_state_files() {
     done
 }
 
-prev=
+prev=$(checksum_state_files)
+
+"$@" || exit
+
 checksum=$(checksum_state_files)
 
 while test "$checksum" != "$prev"
 do
-    test -n "$prev" && echo '*' Rerunning $@
+    prev=$checksum
+
+    echo '*' Rerunning $@
     "$@" || exit
 
-    prev=$checksum
     checksum=$(checksum_state_files)
 done
