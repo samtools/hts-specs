@@ -884,13 +884,13 @@ Analogously, there might also be several normal genomes from the same patient in
 The general format of a PEDIGREE line describing asexual, clonal derivation is:
 
 \begin{verbatim}
-PEDIGREE=<Derived=ID2,Original=ID1>
+##PEDIGREE=<Derived=ID2,Original=ID1>
 \end{verbatim}
 
-This line asserts that the DNA in genome ID2 is asexually or clonally derived with mutations from the DNA in genome ID1. This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e., there is one entry per of the form:
+This line asserts that the DNA in genome ID2 is asexually or clonally derived with mutations from the DNA in genome ID1. This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e., there is one entry per trio of the form:
 
 \begin{verbatim}
-PEDIGREE=<Child=CHILD-GENOME-ID,Mother=MOTHER-GENOME-ID,Father=FATHER-GENOME-ID>
+##PEDIGREE=<Child=CHILD-GENOME-ID,Mother=MOTHER-GENOME-ID,Father=FATHER-GENOME-ID>
 \end{verbatim}
 
 Let's consider a cancer patient VCF file with 4 genomes: germline, primary\_tumor, secondary\_tumor1, and secondary\_tumor2 as illustrated in Figure 10. The primary\_tumor is derived from the germline and the secondary tumors are each derived independently from the primary tumor, in all cases by clonal derivation with mutations. The PEDIGREE lines would look like:
