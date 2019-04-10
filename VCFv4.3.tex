@@ -262,7 +262,7 @@ It is possible to record relationships between genomes using the following synta
 ##pedigreeDB=URL
 \end{verbatim}
 
-\noindent See \ref{PedigreeInDetail} for details.
+\noindent See \ref{ClonalPedigree} (clonal relationships) and \ref{FamilialPedigree} (trios and families) for details.
 
 
 \subsection{Header line syntax}
@@ -1261,7 +1261,7 @@ However, a more evolved algorithm could attempt actually deconvolving the two ge
 \normalsize
 
 \subsubsection{Clonal derivation relationships}
-\label{PedigreeInDetail}
+\label{ClonalPedigree}
 In cancer, each VCF file represents several genomes from a patient, but one genome is special in that it represents the germline genome of the patient.
 This genome is contrasted to a second genome, the cancer tumor genome.
 In the simplest case the VCF file for a single patient contains only these two genomes.
@@ -1281,7 +1281,7 @@ The general format of a PEDIGREE line describing asexual, clonal derivation is:
 \end{verbatim}
 
 This line asserts that the DNA in genome DerivedID is asexually or clonally derived with mutations from the DNA in genome OriginalID.
-This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e., there is one entry per trio of the form:
+This is the asexual analog of the VCF format that has been proposed for family relationships between genomes (see~\ref{FamilialPedigree}), in which there is one entry per trio of the form:
 
 \begin{verbatim}
 ##PEDIGREE=<ID=ChildID,Mother=MotherID,Father=FatherID>
@@ -1403,6 +1403,19 @@ Example records are given below:
 \end{tabular}
 \end{flushleft}
 \normalsize
+
+\subsection{Describing family relationships}
+\label{FamilialPedigree}
+
+This is the VCF format that has been proposed for family relationships between genomes, in which there is one entry per trio of the form:
+
+\begin{verbatim}
+##PEDIGREE=<ID=ChildID,Mother=MotherID,Father=FatherID>
+\end{verbatim}
+
+TODO: Text describing meaning of Mother and Father well-known ancestor tags
+and explaining how to represent a PED file as in-line \#\#PEDIGREE trios.
+Noting alternatively to use \#\#pedigreeDB=URL to point to an external PED file.
 
 \pagebreak
 \section{BCF specification}
