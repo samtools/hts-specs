@@ -188,6 +188,8 @@ Request the SAM/CRAM/VCF headers only.
 
 The server SHOULD respond with an `InvalidInput` error if any other htsget query parameters other than `format` are specified at the same time as `class=header`.
 </td></tr>
+</table>
+</td></tr>
 <tr markdown="block"><td>
 `referenceName` 
 _optional_
