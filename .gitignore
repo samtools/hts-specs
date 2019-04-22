@@ -1,5 +1,6 @@
 *.aux
-*.idx
+*.bbl
+*.blg
 *.log
 *.out
 *.toc
@@ -8,4 +9,10 @@
 *.dvi
 *.ps
 
+GNUmakefile
+
+/diff/*.idx
+/diff/*.pdf
+/diff/*.tex
+/new/*.pdf
 /_site

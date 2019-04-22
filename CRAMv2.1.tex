@@ -13,7 +13,6 @@
 
 \usepackage{graphicx}
 \usepackage{array}
-\usepackage{ulem}
 \usepackage{fixltx2e}
 \usepackage{amssymb}
 \usepackage{fancyhdr}
@@ -72,9 +71,13 @@ enabling users to choose which data should be preserved.
 
 Data in CRAM is stored either as CRAM records or using one of the general purpose 
 compressors (gzip, bzip2). CRAM records are compressed using a number of different 
-encoding strategies. For example, bases are reference compressed (\emph{Hsi-Yang 
-Fritz, et al. (2011) Genome Res. 21:734-740}) by encoding base differences rather 
-than storing the bases themselves.
+encoding strategies. For example, bases are reference compressed by encoding base
+differences rather than storing the bases themselves.\footnote{Markus Hsi-Yang Fritz,
+Rasko Leinonen, Guy Cochrane, and Ewan Birney,
+\textbf{Efficient storage of high throughput DNA sequencing data using reference-based compression},
+{\sl Genome Res.}~2011~21: 734--740;
+\href{http://dx.doi.org/doi:10.1101/gr.114819.110}{doi:10.1101/gr.114819.110};
+{\sc pmid:}21245279.}
 
 \section{\textbf{Data types}}
 
@@ -170,7 +173,7 @@ of bits to read.
 
 \subsection{\textbf{Writing bytes to a byte stream}}
 
-The interpretation of byte stream is straightforward. CRAM uses little \emph{endiannes} 
+The interpretation of byte stream is straightforward. CRAM uses \emph{little endianness}
 for bytes when applicable and defines the following storage data types:
 
 \begin{description}
@@ -308,8 +311,8 @@ GAMMA & 9 & int offset & Elias gamma coding\tabularnewline
 \hline
 \end{tabular}
 
-A more detailed description of all the above coding algorithms and their parameters 
-can be found in the \emph{Codings }section. 
+See the later \textbf{Encodings} sections for more detailed descriptions of all
+the above coding algorithms and their parameters.
 
 \section{\textbf{File structure}}
 
@@ -907,9 +910,9 @@ of the `mapped QS included' field\tabularnewline
 *1 The AP data series is delta encoded for reads mapped to a single reference slice 
 and normal integer value in all other cases. 
 
-*2 See \emph{mate record} section.
+*2 See \textbf{mate record} section.
 
-*3 See\emph{ tag encoding} section.
+*3 See \textbf{tag encoding} section.
 
 The CRAM record structure for mapped reads has the following additional fields:
 
@@ -999,7 +1002,7 @@ records start with the number of read features followed by the read features the
 
 *1 Repeated for each read feature.
 
-*2 See \emph{read feature codes} below.
+*2 See \textbf{read feature codes} below.
 
 \subsubsection*{Read feature codes}
 

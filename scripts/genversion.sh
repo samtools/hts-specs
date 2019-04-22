@@ -16,4 +16,4 @@ do
         echo "@newcommand*@headdate{$value}"
         ;;
     esac
-done | tr @ \\
+done | tr '@' '\\'
