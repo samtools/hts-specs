@@ -191,7 +191,8 @@ The server SHOULD respond with an `InvalidInput` error if any other htsget query
 </table>
 </td></tr>
 <tr markdown="block"><td>
-`referenceName` 
+
+`referenceName`  
 _optional_
 </td><td>
 
