@@ -179,7 +179,7 @@ By default, i.e., when `class` is not specified, the response will represent a c
 
 If `class` is specified, its value MUST be one of the following:
 <table>
-<tr><td>
+<tr markdown="block"><td>
 
 `header`
 </td><td>
