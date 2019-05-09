@@ -40,6 +40,11 @@ These formats are discussed on the [vcftools-spec mailing list][vcfspec-ml].
 
 **[BCFv2_qref.tex]** is a quick reference describing just the layout of data within BCF2 files.
 
+File encryption
+---------------
+
+**[crypt4gh.tex]** is the canonical specification of the crypt4gh format which can be used to wrap existing file formats in an encryption layer.
+
 Transfer protocols
 ------------------
 
@@ -58,6 +63,7 @@ Transfer protocols
 [VCFv4.3.tex]:  http://samtools.github.io/hts-specs/VCFv4.3.pdf
 [BCFv1_qref.tex]: http://samtools.github.io/hts-specs/BCFv1_qref.pdf
 [BCFv2_qref.tex]: http://samtools.github.io/hts-specs/BCFv2_qref.pdf
+[crypt4gh.tex]: http://samtools.github.io/hts-specs/crypt4gh.pdf
 [Htsget.md]:    http://samtools.github.io/hts-specs/htsget.html
 [Refget.md]:    https://samtools.github.io/hts-specs/refget.html
 
