@@ -9,8 +9,6 @@ info:
   contact:
     name: GA4GH
     email: security-notification@ga4gh.org
-  license:
-    name: GPLv3
 paths:
   /reads/{id}:
     get:
@@ -34,7 +32,7 @@ paths:
             type: string
         - in: "query"
           name: referenceName
-          description: VReference sequence name
+          description: Reference sequence name
           example: "chr1"
           required: false
           schema:
@@ -137,7 +135,7 @@ paths:
             type: string
         - in: "query"
           name: referenceName
-          description: VReference sequence name
+          description: Reference sequence name
           example: "chr1"
           required: false
           schema:
@@ -160,19 +158,6 @@ paths:
             type: integer
             format: int64
             minimum: 0
-        - in: "query"
-          name: fields
-          description: A list of variant fields to include, such as INFO, SAMPLE, FORMAT, etc.
-          example: "fields=INFO,SAMPLE"
-          required: false
-          schema:
-            enum:
-              - "INFO"
-              - "SAMPLE"
-              - "FILTER"
-              - "FORMAT"
-              - "ALT"
-            type: string
         - in: "query"
           name: tags
           description: A comma separated list of tags to include, by default all.
