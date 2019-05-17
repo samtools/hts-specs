@@ -34,7 +34,7 @@ paths:
             type: string
         - in: "query"
           name: referenceName
-          description: VReference sequence name
+          description: Reference sequence name
           example: "chr1"
           required: false
           schema:
