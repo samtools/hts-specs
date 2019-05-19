@@ -1,7 +1,6 @@
 openapi: 3.0.0
 servers:
-  - url: 'https://seqapi.herokuapp.com'
-  - url: 'http://seqapi.herokuapp.com'
+  - url: '/refget/1'
 info:
   description: >-
     System for retrieving sequence and metadata concerning a reference sequence
@@ -20,7 +19,7 @@ tags:
   - name: Services
     description: Housekeeping services
 paths:
-  '/sequence/service-info/:
+  /sequence/service-info/:
     get:
       summary: Retrieve a summary of features this API deployment supports
       operationId: serviceInfo
@@ -177,11 +176,11 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/Alias'
-      required:
-        - id
-        - length
-        - md5
-        - aliases
+          required:
+            - id
+            - length
+            - md5
+            - aliases
     Alias:
       type: object
       description: Allows the assignment of an identifier or alias to a naming authority
@@ -206,7 +205,7 @@ components:
             type: string
             description: Supported versions by this API
             example: 0.2.0
-        circular_locations:
+        circular_supported:
           type: boolean
           description: Indicates if the service supports circular location queries
         subsequence_limit:
@@ -224,5 +223,5 @@ components:
               - trunc512
       required:
         - supported_api_versions
-        - circular_locations
+        - circular_supported
         - algorithms
