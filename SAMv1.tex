@@ -28,7 +28,7 @@
     \multiput(\bytewidth,0)(\bytewidth,0){\nticks}{\line(0,1){3pt}}
   \end{picture}\strut}}
 
-% Use as e.g. \firstbytebox{2}{Tag}\bytebox{1}{\tt s}\bytebox{2}{int16\_t}
+% Use as, e.g., \firstbytebox{2}{Tag}\bytebox{1}{\tt s}\bytebox{2}{int16\_t}
 \newcommand*{\firstbytebox}[2]{\byteboxAux{#1}{#2}{\put(0,0){\line(0,1){\bytetotalheight}}}}
 \newcommand*{\bytebox}[2]{\byteboxAux{#1}{#2}{}}
 
@@ -122,12 +122,12 @@ r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
 \item[Linear alignment]
   An alignment of a read to a single reference sequence that may include
   insertions, deletions, skips and clipping, but may not include direction
-  changes (i.e. one portion of the alignment on forward strand and another
+  changes (i.e., one portion of the alignment on forward strand and another
   portion of alignment on reverse strand). A linear alignment can be
   represented in a single SAM record.
 %  A alignment of a read to a single locus on the reference, where the
 %  alignment may have short insertions/deletions but does not have long gaps
-%  (e.g. due to introns or structural variation).
+%  (e.g., due to introns or structural variation).
 
 \item[Chimeric alignment]
   An alignment of a read that cannot be represented as a linear alignment. A
@@ -144,7 +144,7 @@ r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
   representation of the alignment of the read.
 
 \item[Multiple mapping]
-  The correct placement of a read may be ambiguous, e.g. due to repeats.  In
+  The correct placement of a read may be ambiguous, e.g., due to repeats.  In
   this case, there may be multiple read alignments for the same read.  One of
   these alignments is considered primary.  All the other alignments have the
   secondary alignment flag set in the SAM records that represent them.  All the
@@ -291,7 +291,7 @@ where \emph{name} is {\tt\rnameRegexp}\\\cline{2-3}
 \footnote{The previous footnote's example identifies MT as a circular chromosome.
 The {\tt TP} field is often omitted, which implies linear.}\\\cline{2-3}
   & {\tt UR} & URI of the sequence.  This value may start with one of the standard
-  protocols, e.g http: or ftp:.  If it does not start with one of these protocols, it is assumed to be a file-system path.\\\cline{1-3}
+  protocols, e.g., `{\tt http:}' or `{\tt ftp:}'.  If it does not start with one of these protocols, it is assumed to be a file-system path.\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @RG} & Read group. Unordered multiple {\tt @RG} lines are allowed.\\\cline{2-3}
   & {\tt ID}* & Read group identifier. Each {\tt @RG} line must have a unique {\tt ID}. The value of {\tt ID}
   is used in the RG tags of alignment records. Must be unique among all read groups in header section.  Read group IDs may be modified when merging SAM files in order to handle collisions.\\\cline{2-3}
@@ -311,7 +311,7 @@ The {\tt TP} field is often omitted, which implies linear.}\\\cline{2-3}
   {\tt CAPILLARY}, {\tt LS454}, {\tt ILLUMINA}, {\tt SOLID}, {\tt HELICOS}, {\tt IONTORRENT}, {\tt ONT}, and {\tt PACBIO}.\\\cline{2-3}
   & {\tt PM} & Platform model. Free-form text providing further details of the
   platform/technology used.\\\cline{2-3}
-  & {\tt PU} & Platform unit (e.g. flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
+  & {\tt PU} & Platform unit (e.g., flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
   & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @PG} & Program. \\\cline{2-3}
   & {\tt ID}* & Program record identifier. Each {\tt @PG} line must have a unique {\tt ID}.
@@ -323,7 +323,7 @@ The {\tt TP} field is often omitted, which implies linear.}\\\cline{2-3}
   	{\tt @PG} records may be chained using {\tt PP} tag, with the last record in the chain
 	having no {\tt PP} tag. This chain defines the order of programs that have been applied to the alignment.
 	{\tt PP} values may be modified when merging SAM files in order to handle collisions of {\tt PG} {\tt ID}s.
-	The first {\tt PG} record in a chain (i.e. the one referred to by the {\tt PG} tag in a SAM record)
+	The first {\tt PG} record in a chain (i.e., the one referred to by the {\tt PG} tag in a SAM record)
 	describes the most recent program that operated on the SAM record.
 	The next {\tt PG} record in the chain describes the next most recent program that
         operated on the SAM record. The {\tt PG} {\tt ID} on a SAM record is not required
@@ -666,10 +666,10 @@ specific software package for it to function properly.
 %  (reverse complemented) should be set, and otherwise not set.
   \item If you wish to store free text in a {\tt CT} tag, use the
   \emph{key} value {\tt Note} (uppercase N) to match GFF3.
-  \item Multi-segment annotation (e.g. a gene with introns) should be
+  \item Multi-segment annotation (e.g., a gene with introns) should be
   described with multiple lines in SAM (like a multi-segment read).
-  Where there is a clear biological direction (e.g. a gene), the first
-  segment ({\sf FLAG} bit 0x40) is used for the first section (e.g. the
+  Where there is a clear biological direction (e.g., a gene), the first
+  segment ({\sf FLAG} bit 0x40) is used for the first section (e.g., the
   $5'$ end of the gene). Thus a GenBank entry location like
   {\tt complement(join(85052..85354, 85441..85621, 86097..86284))}
   would have three lines in SAM with a common {\sf QNAME}: %And three lines in GFF3 too.
@@ -987,7 +987,7 @@ stores the real {\sf CIGAR}, encoded the same way as the {\sf cigar} field in
 BAM, in the {\tt CG} optional tag of type `{\tt B,I}', and sets {\sf CIGAR} to
 `\textit{k}{\tt S}\textit{m}{\tt N}' as a placeholder, where `\textit{k}' equals {\sf l\_seq}, `\textit{m}'
 is the reference sequence length in the alignment, and `{\tt S}' and `{\tt N}'
-are the soft-clipping and reference-clip CIGAR operators, respectively -- i.e.
+are the soft-clipping and reference-clip CIGAR operators, respectively---i.e.,
 in the binary form, {\sf n\_cigar\_op}=2 and {\sf cigar}={\tt [\textit{k}\char60\char60
 4\char124{4},\textit{m}\char60\char60 4\char124{3}]}. If tag {\tt CG} is present and
 the first CIGAR operation clips the entire read, a BAM parsing library is
