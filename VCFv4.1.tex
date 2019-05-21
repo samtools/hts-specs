@@ -50,7 +50,7 @@ The format also has the ability to contain genotype information on samples for e
 20     1234567 microsat1 GTC    G,GTCT  50   PASS   NS=3;DP=9;AA=G                    GT:GQ:DP    0/1:35:4       0/2:17:2       1/1:40:3
 \end{verbatim}
 \normalsize
-This example shows (in order): a good simple SNP, a possible SNP that has been filtered out because its quality is below 10, a site at which two alternate alleles are called, with one of them (T) being ancestral (possibly a reference sequencing error), a site that is called monomorphic reference (i.e. with no alternate alleles), and a microsatellite with two alternative alleles, one a deletion of 2 bases (TC), and the other an insertion of one base (T). Genotype data are given for three samples, two of which are phased and the third unphased, with per sample genotype quality, depth and haplotype qualities (the latter only for the phased samples) given as well as the genotypes. The microsatellite calls are unphased.
+This example shows (in order): a good simple SNP, a possible SNP that has been filtered out because its quality is below 10, a site at which two alternate alleles are called, with one of them (T) being ancestral (possibly a reference sequencing error), a site that is called monomorphic reference (i.e.\ with no alternate alleles), and a microsatellite with two alternative alleles, one a deletion of 2 bases (TC), and the other an insertion of one base (T). Genotype data are given for three samples, two of which are phased and the third unphased, with per sample genotype quality, depth and haplotype qualities (the latter only for the phased samples) given as well as the genotypes. The microsatellite calls are unphased.
 \subsection{Meta-information lines}
 File meta-information is included after the \#\# string and must be key=value pairs. It is strongly encouraged that information lines describing the INFO, FILTER and FORMAT entries used in the body of the VCF file be included in the meta-information section. Although they are optional, if these lines are present then they must be completely well-formed.
 \subsubsection{File format}
@@ -157,13 +157,13 @@ If genotype data is present in the file, these are followed by a FORMAT column h
 There are 8 fixed fields per record. All data lines are tab-delimited. In all cases, missing values are specified with a dot (`.'). Fixed fields are:
 
 \begin{enumerate}
-  \item CHROM - chromosome: An identifier from the reference genome or an angle-bracketed ID String (``$<$ID$>$'') pointing to a contig in the assembly file (cf. the \#\#assembly line in the header). All entries for a specific CHROM should form a contiguous block within the VCF file. The colon symbol (:) must be absent from all chromosome names to avoid parsing errors when dealing with breakends. (String, no white-space permitted, Required).
+  \item CHROM - chromosome: An identifier from the reference genome or an angle-bracketed ID String (``$<$ID$>$'') pointing to a contig in the assembly file (cf.\ the \#\#assembly line in the header). All entries for a specific CHROM should form a contiguous block within the VCF file. The colon symbol (:) must be absent from all chromosome names to avoid parsing errors when dealing with breakends. (String, no white-space permitted, Required).
   \item POS - position: The reference position, with the 1st base having position 1. Positions are sorted numerically, in increasing order, within each reference sequence CHROM.   It is permitted to have multiple records with the same POS. Telomeres are indicated by using positions 0 or N+1, where N is the length of the corresponding chromosome or contig.   (Integer, Required)
   \item ID - identifier: Semi-colon separated list of unique identifiers where available. If this is a dbSNP variant it is encouraged to use the rs number(s). No identifier should be present in more than one data record. If there is no identifier available, then the missing value should be used. (String, no white-space or semi-colons permitted)
-  \item REF - reference base(s): Each base must be one of A,C,G,T,N (case insensitive). Multiple bases are permitted. The value in the POS field refers to the position of the first base in the String. For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the event (which must be reflected in the POS field), unless the event occurs at position 1 on the contig in which case it must include the base after the event; this padding base is not required (although it is permitted) for e.g. complex substitutions or other events where all alleles have at least one base represented in their Strings.  If any of the ALT alleles is a symbolic allele (an angle-bracketed ID String ``$<$ID$>$'') then the padding base is required and POS denotes the coordinate of the base preceding the polymorphism. Tools processing VCF files are not required to preserve case in the allele Strings. (String, Required).
+  \item REF - reference base(s): Each base must be one of A,C,G,T,N (case insensitive). Multiple bases are permitted. The value in the POS field refers to the position of the first base in the String. For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the event (which must be reflected in the POS field), unless the event occurs at position 1 on the contig in which case it must include the base after the event; this padding base is not required (although it is permitted) for e.g.\ complex substitutions or other events where all alleles have at least one base represented in their Strings.  If any of the ALT alleles is a symbolic allele (an angle-bracketed ID String ``$<$ID$>$'') then the padding base is required and POS denotes the coordinate of the base preceding the polymorphism. Tools processing VCF files are not required to preserve case in the allele Strings. (String, Required).
   \item ALT - alternate base(s): Comma separated list of alternate non-reference alleles.  These alleles do not have to be called in any of the samples.  Options are base Strings made up of the bases A,C,G,T,N, (case insensitive) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends. If there are no alternative alleles, then the missing value should be used.  Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.  (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
-  \item QUAL - quality: Phred-scaled quality score for the assertion made in ALT. i.e. $-10log_{10}$ prob(call in ALT is wrong). If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant). High QUAL scores indicate high confidence calls. Although traditionally people use integer phred scores, this field is permitted to be a floating point to enable higher resolution for low confidence calls if desired.  If unknown, the missing value should be specified. (Numeric)
-  \item FILTER - filter status: PASS if this position has passed all filters, i.e. a call is made at this position. Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g. ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples. `0' is reserved and should not be used as a filter String. If filters have not been applied, then this field should be set to the missing value. (String, no white-space or semi-colons permitted)
+  \item QUAL - quality: Phred-scaled quality score for the assertion made in ALT. i.e.\ $-10log_{10}$ prob(call in ALT is wrong). If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant). High QUAL scores indicate high confidence calls. Although traditionally people use integer phred scores, this field is permitted to be a floating point to enable higher resolution for low confidence calls if desired.  If unknown, the missing value should be specified. (Numeric)
+  \item FILTER - filter status: PASS if this position has passed all filters, i.e., a call is made at this position. Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g.\ ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples. `0' is reserved and should not be used as a filter String. If filters have not been applied, then this field should be set to the missing value. (String, no white-space or semi-colons permitted)
   \item INFO - additional information: (String, no white-space, semi-colons, or equals-signs permitted; commas are permitted only as delimiters for lists of values) INFO fields are encoded as a semicolon-separated series of short keys with optional values in the format: $<$key$>$=$<$data$>$[,data]. Arbitrary keys are permitted, although the following sub-fields are reserved (albeit optional):
 \begin{itemize}
   \item AA : ancestral allele
@@ -173,11 +173,11 @@ There are 8 fixed fields per record. All data lines are tab-delimited. In all ca
   \item BQ : RMS base quality at this position
   \item CIGAR : cigar string describing how to align an alternate allele to the reference allele
   \item DB : dbSNP membership
-  \item DP : combined depth across samples, e.g. DP=154
+  \item DP : combined depth across samples, e.g.\ DP=154
   \item END : end position of the variant described in this record (for use with symbolic alleles)
   \item H2 : membership in hapmap2
   \item H3 : membership in hapmap3
-  \item MQ : RMS mapping quality, e.g. MQ=52
+  \item MQ : RMS mapping quality, e.g.\ MQ=52
   \item MQ0 : Number of MAPQ == 0 reads covering this record
   \item NS : Number of samples with data
   \item SB : strand bias at this position
@@ -187,7 +187,7 @@ There are 8 fixed fields per record. All data lines are tab-delimited. In all ca
 \end{itemize}
 \end{enumerate}
 The exact format of each INFO sub-field should be specified in the meta-information (as described above).
-Example for an INFO field: DP=154;MQ=52;H2. Keys without corresponding values are allowed in order to indicate group membership (e.g. H2 indicates the SNP is found in HapMap 2). It is not necessary to list all the properties that a site does NOT have, by e.g. H2=0. See below for additional reserved INFO sub-fields used to encode structural variants.
+Example for an INFO field: DP=154;MQ=52;H2. Keys without corresponding values are allowed in order to indicate group membership (e.g.\ H2 indicates the SNP is found in HapMap 2). It is not necessary to list all the properties that a site does NOT have, by e.g.\ H2=0. See below for additional reserved INFO sub-fields used to encode structural variants.
 \subsubsection{Genotype fields}
 If genotype information is present, then the same types of data must be present for all samples. First a FORMAT field is given specifying the data types and order (colon-separated alphanumeric String). This is followed by one field per sample, with the colon-separated data in this field corresponding to the types specified in the format. The first sub-field must always be the genotype (GT) if it is present.  There are no required sub-fields.
 
@@ -195,7 +195,7 @@ As with the INFO field, there are several common, reserved keywords that are sta
 
 \begin{itemize}
 \renewcommand{\labelitemii}{$\circ$}
-  \item GT : genotype, encoded as allele values separated by either of $/$ or $\mid$. The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on. For diploid calls examples could be $0/1$, $1\mid0$, or $1/2$, etc. For haploid calls, e.g. on Y, male non-pseudoautosomal X, or mitochondrion, only one allele value should be given; a triploid call might look like $0/0/1$. If a call cannot be made for a sample at a given locus, `.' should be specified for each missing allele in the GT field (for example `$./.$' for a diploid genotype and `.' for haploid genotype). The meanings of the separators are as follows (see the PS field below for more details on incorporating phasing information into the genotypes):
+  \item GT : genotype, encoded as allele values separated by either of $/$ or $\mid$. The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on. For diploid calls examples could be $0/1$, $1\mid0$, or $1/2$, etc. For haploid calls, e.g.\ on Y, male non-pseudoautosomal X, or mitochondrion, only one allele value should be given; a triploid call might look like $0/0/1$. If a call cannot be made for a sample at a given locus, `.' should be specified for each missing allele in the GT field (for example `$./.$' for a diploid genotype and `.' for haploid genotype). The meanings of the separators are as follows (see the PS field below for more details on incorporating phasing information into the genotypes):
 	\begin{itemize}
 	  \item $/$ : genotype unphased
 	  \item $\mid$ : genotype phased
@@ -229,7 +229,7 @@ VCF records use a simple haplotype representation for REF and ALT alleles to des
 
 
 \section{INFO keys used for structural variants}
-When the INFO keys reserved for encoding structural variants are used for imprecise variants, the values should be best estimates. When a key reflects a property of a single alt allele (e.g. SVLEN), then when there are multiple alt alleles there will be multiple values for the key corresponding to each alelle (e.g. SVLEN=-100,-110 for a deletion with two distinct alt alleles).
+When the INFO keys reserved for encoding structural variants are used for imprecise variants, the values should be best estimates. When a key reflects a property of a single alt allele (e.g.\ SVLEN), then when there are multiple alt alleles there will be multiple values for the key corresponding to each alelle (e.g.\ SVLEN=-100,-110 for a deletion with two distinct alt alleles).
 
 The following INFO keys are reserved for encoding structural variants.
 \footnotesize
@@ -251,7 +251,7 @@ Value should be one of DEL, INS, DUP, INV, CNV, BND. This key can be derived fro
 ##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
 \end{verbatim}
 \normalsize
-One value for each ALT allele. Longer ALT alleles (e.g. insertions) have positive values, shorter ALT alleles (e.g. deletions) have negative values.
+One value for each ALT allele. Longer ALT alleles (e.g.\ insertions) have positive values, shorter ALT alleles (e.g.\ deletions) have negative values.
 \footnotesize
 \begin{verbatim}
 ##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
@@ -523,7 +523,7 @@ The example shows in order:
 
 An arbitrary rearrangement event can be summarized as a set of novel \textbf{adjacencies}. Each adjacency ties together $2$ \textbf{breakends}. The two breakends at either end of a novel adjacency are called \textbf{mates}.
 
-There is one line of VCF (i.e. one record) for each of the two breakends in a novel adjacency. A breakend record is identified with the tag ``SYTYPE=BND'' in the INFO field. The REF field of a breakend record indicates a base or sequence s of bases beginning at position POS, as in all VCF records. The ALT field of a breakend record indicates a replacement for s. This ``breakend replacement'' has three parts:
+There is one line of VCF (i.e.\ one record) for each of the two breakends in a novel adjacency. A breakend record is identified with the tag ``SYTYPE=BND'' in the INFO field. The REF field of a breakend record indicates a base or sequence s of bases beginning at position POS, as in all VCF records. The ALT field of a breakend record indicates a replacement for s. This ``breakend replacement'' has three parts:
 \begin{enumerate}
   \item The string t that replaces places s. The string t may be an extended version of s if some novel bases are inserted during the formation of the novel adjacency.
   \item The position p of the mate breakend, indicated by a string of the form ``chr:pos''. This is the location of the first mapped base in the piece being joined at this novel adjacency.
@@ -621,7 +621,7 @@ $13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:214]$A & $6$ & PASS & SVTYPE=BND \\
 \normalsize
 \vspace{0.3cm}
 
-If $<$ctg$1>$ is circular and a segment from position 229 to position 45 is inserted, i.e. continuing from position 329 on to position 1, this is represented by adding a circular adjacency:
+If $<$ctg$1>$ is circular and a segment from position 229 to position 45 is inserted, i.e., continuing from position 329 on to position 1, this is represented by adding a circular adjacency:
 
 \vspace{0.3cm}
 \small
@@ -868,7 +868,7 @@ The general format of a PEDIGREE line describing asexual, clonal derivation is:
 PEDIGREE=<Derived=ID2,Original=ID1>
 \end{verbatim}
 
-This line asserts that the DNA in genome is asexually or clonally derived with mutations from the DNA in genome . This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e. there is one entry per of the form:
+This line asserts that the DNA in genome is asexually or clonally derived with mutations from the DNA in genome . This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e., there is one entry per of the form:
 
 \begin{verbatim}
 PEDIGREE=<Child=CHILD-GENOME-ID,Mother=MOTHER-GENOME-ID,Father=FATHER-GENOME-ID>
@@ -930,9 +930,9 @@ These three are the bundles for breakend U. Each such bundle is referred to as a
 For each haplotype of a breakend, say the haplotype (2) of breakend U above, connecting the end of haplotype 1 on a segment of Chr 13 to a mate on Chr 2 with haplotype 11, in addition to the list of haplotype-specific adjacencies that define it, we can also specify in VCF several other quantities. These include:
 
 \begin{enumerate}
-  \item The depth of reads on the segment where the breakend occurs that support the haplotype, e.g. the depth of reads supporting haplotype 1 in the segment containing breakend U
+  \item The depth of reads on the segment where the breakend occurs that support the haplotype, e.g., the depth of reads supporting haplotype 1 in the segment containing breakend U
   \item The estimated copy number of the haplotype on the segment where the breakend occurs
-  \item The depth of paired-end or split reads that support the haplotype-specific adjacencies, e.g. that support the adjacency between haplotype 1 on Chr 13 to haplotype 11 on Chr 2
+  \item The depth of paired-end or split reads that support the haplotype-specific adjacencies, e.g., that support the adjacency between haplotype 1 on Chr 13 to haplotype 11 on Chr 2
   \item The estimated copy number of the haplotype-specific adjacencies
   \item An overall quality score indicating how confident we are in this asserted haplotype
 \end{enumerate}
@@ -963,7 +963,7 @@ Overall, the idea behind is BCF2 is simple.  BCF2 is a binary, compressed
 equivalent of VCF that can be indexed with tabix and can be efficiently decoded
 from disk or streams.  For efficiency reasons BCF2 only supports a subset
 of~VCF, in that all info and genotype fields must have their full types
-specified.  That is, BCF2 requires that if e.g. an info field {\tt AC} is
+specified.  That is, BCF2 requires that if e.g.\ an info field {\tt AC} is
 present then it must contain an equivalent VCF header line noting that {\tt AC}
 is an allele indexed array of type integer.
 

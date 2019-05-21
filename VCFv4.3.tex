@@ -284,7 +284,7 @@ There are 8 fixed fields per record.
 Fixed fields are:
 
 \begin{enumerate}
-  \item CHROM --- chromosome: An identifier from the reference genome or an angle-bracketed ID String (``$<$ID$>$'') pointing to a contig in the assembly file (cf. the \#\#assembly line in the header).
+  \item CHROM --- chromosome: An identifier from the reference genome or an angle-bracketed ID String (``$<$ID$>$'') pointing to a contig in the assembly file (cf.\ the \#\#assembly line in the header).
   All entries for a specific CHROM must form a contiguous block within the VCF file.
   The colon symbol (:) must be absent from all chromosome names to avoid parsing errors when dealing with breakends.
   (String, no white-space permitted, Required).
@@ -317,7 +317,7 @@ Fixed fields are:
   \item QUAL --- quality: Phred-scaled quality score for the assertion made in ALT. i.e.\ $-10log_{10}$ prob(call in ALT is wrong).
   If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant).
   If unknown, the MISSING value must be specified. (Float)
-  \item FILTER --- filter status: PASS if this position has passed all filters, i.e.\ a call is made at this position.
+  \item FILTER --- filter status: PASS if this position has passed all filters, i.e., a call is made at this position.
   Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g.\ ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples.
   `0' is reserved and must not be used as a filter String.
   If filters have not been applied, then this field must be set to the MISSING value.
@@ -970,7 +970,7 @@ $13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:214]$A & $6$ & PASS & SVTYPE=BND \\
 \normalsize
 \vspace{0.3cm}
 
-If $<$ctg$1>$ is circular and a segment from position 229 to position 45 is inserted, i.e.\ continuing from position 329 on to position 1, this is represented by adding a circular adjacency:
+If $<$ctg$1>$ is circular and a segment from position 229 to position 45 is inserted, i.e., continuing from position 329 on to position 1, this is represented by adding a circular adjacency:
 
 \vspace{0.3cm}
 \small
@@ -1258,7 +1258,7 @@ PEDIGREE=<ID=DerivedID,Original=OriginalID>
 \end{verbatim}
 
 This line asserts that the DNA in genome is asexually or clonally derived with mutations from the DNA in genome.
-This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e.\ there is one entry per of the form:
+This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e., there is one entry per of the form:
 
 \begin{verbatim}
 PEDIGREE=<ID=ChildID,Mother=MotherID,Father=FatherID>
@@ -1337,9 +1337,9 @@ For each haplotype of a breakend, say the haplotype (2) of breakend U above, con
 These include:
 
 \begin{enumerate}
-  \item The depth of reads on the segment where the breakend occurs that support the haplotype, e.g.\ the depth of reads supporting haplotype 1 in the segment containing breakend U
+  \item The depth of reads on the segment where the breakend occurs that support the haplotype, e.g., the depth of reads supporting haplotype 1 in the segment containing breakend U
   \item The estimated copy number of the haplotype on the segment where the breakend occurs
-  \item The depth of paired-end or split reads that support the haplotype-specific adjacencies, e.g.\ that support the adjacency between haplotype 1 on Chr 13 to haplotype 11 on Chr 2
+  \item The depth of paired-end or split reads that support the haplotype-specific adjacencies, e.g., that support the adjacency between haplotype 1 on Chr 13 to haplotype 11 on Chr 2
   \item The estimated copy number of the haplotype-specific adjacencies
   \item An overall quality score indicating how confident we are in this asserted haplotype
 \end{enumerate}
