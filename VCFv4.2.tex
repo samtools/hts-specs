@@ -141,9 +141,12 @@ As with chromosomal sequences it is highly recommended (but not required) that t
 It is possible to define sample to genome mappings as shown below:
 \small
 \begin{verbatim}
-##SAMPLE=<ID=S_ID,Genomes=G1_ID;G2_ID; ...;GK_ID,Mixture=N1;N2; ...;NK,Description=S1;S2; ...;SK>
+##SAMPLE=<ID=S_ID,FILTER=PASS,Genomes=G1_ID;G2_ID; ...;GK_ID,Mixture=N1;N2; ...;NK,Description=S1;S2; ...;SK>
 \end{verbatim}
 \normalsize
+ID is a string that identifies the sample. It comprises of non-whitespace characters and doesn't include the comma (',') character.
+FILTER is a string that has been defined in a ##FILTER line, except for PASS or '.' which mean that the sample passes or that the filter is missing (respectively). 
+
 \subsubsection{Pedigree field format}
 It is possible to record relationships between genomes using the following syntax:
 \begin{verbatim}
