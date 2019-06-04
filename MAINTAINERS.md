@@ -30,7 +30,9 @@ Past VCF/BCF maintainers include Ryan Poplin and David Roazen.
 
 ### Htsget
 
+* Jerome Kelleher (@jeromekelleher)
 * Mike Lin (@mlin)
+* John Marshall (@jmarshall)
 
 ### Refget
 
