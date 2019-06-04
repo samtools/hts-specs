@@ -15,7 +15,6 @@ function addLink(file){
   console.log(fullFile)
 
   text += ` ${bot.artifactLink(fullFile, file)}`;
-  text += ` (${bot.artifactLink(diffFile, "diff")})`;
   return text;
 }
 
@@ -26,7 +25,6 @@ const diffPDFs = fs.readdirSync("diff")
 
 if (diffPDFs.length==0) {
   console.log("No diffs.")
-  return;
 }
 
 diffPDFs.map(s=>s.replace(".pdf",""))
@@ -38,6 +36,8 @@ text += fs.readdirSync("diff")
 	.filter(s=>s.match(".pdf$"))
 	.map(s=>s.replace(".pdf",""))
 	.map(file => addLink(file)).join(",")+".";
+
+text += addLink("crypt4gh");
 
 console.log(text)
 bot.comment(process.env.GH_AUTH_TOKEN, text)
