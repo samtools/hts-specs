@@ -1437,9 +1437,24 @@ A BCF2 header follows exactly the specification as VCF, with a few extensions/re
 
 \subsection{Header}
 
-The BCF2 header begins with the ``BCF2 magic'' 5 bytes that encode {\tt BCF\em XY} where {\em X} and {\em Y} are bytes indicating the major number (currently 2) and the minor number (currently 2).
-This magic can be used to quickly examine the file to determine that it's a BCF2 file.
-Immediately following the BCF2 magic is the standard VCF header lines in text format, beginning with \verb|##fileformat=VCFvX.Y|.
+The BCF2 header contains the following items:
+
+\vspace{0.3cm}
+{\small
+\begin{tabular}{|l | l | p{30em} | } \hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\ \hline
+magic          & char[3]     & The characters ``{\tt BCF}'' \\ \hline
+major\_version & uint8\_t    & 2 \\ \hline
+minor\_version & uint8\_t    & 2 \\ \hline
+l\_text        & uint32\_t   & Length of the ``text'' section, including the terminating NUL character \\ \hline
+text           & char[l\_text] & VCF format header text, NUL-terminated. \\ \hline
+\end{tabular}}
+\vspace{0.3cm}
+
+The ``magic'' field and version numbers can be used to quickly examine the file to determine that it's a BCF2.2 file.
+The ``text'' field contains the standard VCF header lines in text format, from \verb|##fileformat=VCFv4.3|
+to \verb|#CHROM ...| inclusive, terminated by a NUL character.
+
 Because the type is encoded directly in the header, the recommended extension for BCF2 formatted files is {\sl .bcf}.
 BCF2 supports encoding values in a dictionary of strings.
 The string map is provided by the keyword \verb|##dictionary=S0,S1,...,SN| as a comma-separate ordered list of strings.
