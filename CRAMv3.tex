@@ -1389,8 +1389,9 @@ in the substitution matrix.
 
 Each of the 4 possible substitutions for a given reference base is assigned a 2-bit integer
 code (see below) with a value ranging from 0 to 3 inclusive. The 4 2-bit codes are packed
-into a single byte,  in the fixed order ACGTN, and the entire substitution matrix is
-written as 5 such bytes, one for each reference base, also in the order ACGTN.
+into a single byte, high 2-bits first, for each base ACGTN (minus the reference base itself).
+The entire substitution matrix is written as 5 such bytes, one for each reference base, also
+in the order ACGTN.
 
 \subsubsection*{Substitution Code Assignment}
 
