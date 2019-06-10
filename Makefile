@@ -66,4 +66,14 @@ clean: mostlyclean
 	-rm -rf .jekyll-cache .jekyll-metadata _site
 
 
+# Checking of MM tag perl script
+check test:
+	cd test/SAMtags; \
+	for i in `echo *.sam | sed 's/\.sam//g'`; \
+	do \
+	    ./parse_mm.pl $$i.sam > _; \
+	    cmp _ $$i.txt; \
+	done; \
+	rm _
+
 .PHONY: all pdf diff diffs show-styles mostlyclean clean
