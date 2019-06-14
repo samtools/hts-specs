@@ -253,6 +253,17 @@ It is possible to record relationships between genomes using the following synta
 ##pedigreeDB=URL
 \end{verbatim}
 
+
+\subsubsection{Reference block checkpoint}
+Given the ability to interpret missing genotypes as either truly missing or as part of a reference block (see RBS in Genotype tags below), it can be useful to limit the genomic distance required to scan in order to find the "top" of the reference block. 
+To enable this, one may specify a Reference Block Checkpoint scheme:
+\begin{verbatim}
+##REFERENCE_BLOCK=<CHECKPOINT=1000>
+\end{verbatim}
+To indicate that a reference block will not span a POS that is divisible by 1000 so that a user can check less than 1000 genomics positions to find out whether the `.` in the genotype field means "missing" or is part of a reference block. 
+Values other than 1000 can be used.
+Non-positive values or a missing meta line indicate that there is no checkpointing.
+
 \noindent See \ref{PedigreeInDetail} for details.
 
 
@@ -406,12 +417,15 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GQ		& 1		& Integer	& Conditional genotype quality \\
       GT		& 1		& String	& Genotype \\
       HQ		& 2		& Integer	& Haplotype quality \\
+      LAA		& . 		& Integer	& Local Alternate Alleles\footnotemark[1]\\ 
+      LPL		& . 		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer for genotypes that involve the Reference and the LAA alleles only.\footnotemark[1]\\ 
+      LAD		& . 		& Integer	& Local Allele Depth for the reference and each of the local alleles\footnotemark[1]\\ 
       MQ		& 1		& Integer	& RMS mapping quality \\
       PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
       PQ		& 1		& Integer	& Phasing quality \\
       PS		& 1		& Integer	& Phase set \\
+      RBS		& 1		& Integer	& Reference Block Size\\ 
 \end{longtable}
-
 \begin{itemize}
 \renewcommand{\labelitemii}{$\circ$}
   \item AD, ADF, ADR (Integer): Per-sample read depths for each allele; total (AD), on the forward (ADF) and the reverse (ADR) strand.
@@ -503,6 +517,18 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.
   If the genotype in the GT field is unphased, the corresponding PS field is ignored.
   The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required).
+  \item Local Alleles (*): 
+  For callsets with a large number of samples, it is often the case that the majority of sites are not called and sites end up involving many alleles for which all the samples need to provide PL and AD. 
+  This can cause the file-sizes to grow super-linearly with the number of samples. 
+  To prevent this, one can choose to specify the allele depth and the genotype likelihood against a subset of ``Local Alleles".
+  LAA is the (1-based) index into the list of alleles that are ALT for that variant. 
+  For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LAA=[2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
+  It is implicit that REF is part of any ``local" context, and it always has index 0, even if the genotype is compound HET. 
+  LAA is required in order to interpret LAD and LPL.
+  \item RBS(Integer): An integer describing the size of this genotype's reference block. 
+  The size is the difference between the last position (inclusive) of the reference block and POS. 
+  Downstream positions that are covered by the reference block should be missing (`.'), and will be interpreted as having the same non-reference likelihood as given in this genotype.
+  Missing genotypes (`.') that are not covered by a reference block are to be interpreted as truly missing.
 \end{itemize}
 
 
