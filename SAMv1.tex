@@ -171,7 +171,7 @@ r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
 
 \footnotetext{A chimeric alignment is primarily caused by structural
 variations, gene fusions, misassemblies, RNA-seq or experimental protocols. It is more frequent given longer
-reads. For a chimeric alignment, the linear alignments consisting of the aligment are largely
+reads. For a chimeric alignment, the linear alignments consisting of the alignment are largely
 non-overlapping; each linear alignment may have high mapping quality and is
 informative in SNP/INDEL calling. In contrast, multiple mappings are caused primarily by repeats.  They are less frequent
 given longer reads. If a read has multiple mappings, all these mappings are
@@ -879,7 +879,7 @@ disallowed.
 An end-of-file (EOF) trailer or marker block should be written at the end
 of BGZF files, so that unintended file truncation can be easily detected.
 The EOF marker block is a particular empty\footnotemark\ BGZF block
-encoded with the default {\sf zlib} compression level setttings,
+encoded with the default {\sf zlib} compression level settings,
 and consists of the following 28~hexadecimal bytes:
 \begin{center}
 \texttt{1f 8b 08 04 00 00 00 00 00 ff 06 00 42 43 02 00 1b 00 03 00 00 00 00 00 00 00 00 00}
@@ -908,7 +908,7 @@ When reading a BGZF file in sequential streaming fashion, ideally this
 EOF check should be performed when the end of the stream is reached.
 Checking that the final BGZF block in the file decompresses to empty
 or checking that the last 28 bytes of the file are exactly the bytes
-above are both sufficent tests; each is likely more convenient in
+above are both sufficient tests; each is likely more convenient in
 different circumstances.
 
 \footnotetext{It is useful to produce a diagnostic at the beginning of
