@@ -28,11 +28,12 @@
     \multiput(\bytewidth,0)(\bytewidth,0){\nticks}{\line(0,1){3pt}}
   \end{picture}\strut}}
 
-% Use as e.g. \firstbytebox{2}{Tag}\bytebox{1}{\tt s}\bytebox{2}{int16\_t}
+% Use as, e.g., \firstbytebox{2}{Tag}\bytebox{1}{\tt s}\bytebox{2}{int16\_t}
 \newcommand*{\firstbytebox}[2]{\byteboxAux{#1}{#2}{\put(0,0){\line(0,1){\bytetotalheight}}}}
 \newcommand*{\bytebox}[2]{\byteboxAux{#1}{#2}{}}
 
-\makeindex
+\newcommand*{\cclass}[1]{{\rm\sf :#1:}}
+\newcommand*{\caret}{\textsuperscript{$\wedge$}}
 
 \begin{document}
 
@@ -121,12 +122,12 @@ r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
 \item[Linear alignment]
   An alignment of a read to a single reference sequence that may include
   insertions, deletions, skips and clipping, but may not include direction
-  changes (i.e. one portion of the alignment on forward strand and another
+  changes (i.e., one portion of the alignment on forward strand and another
   portion of alignment on reverse strand). A linear alignment can be
   represented in a single SAM record.
 %  A alignment of a read to a single locus on the reference, where the
 %  alignment may have short insertions/deletions but does not have long gaps
-%  (e.g. due to introns or structural variation).
+%  (e.g., due to introns or structural variation).
 
 \item[Chimeric alignment]
   An alignment of a read that cannot be represented as a linear alignment. A
@@ -143,7 +144,7 @@ r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
   representation of the alignment of the read.
 
 \item[Multiple mapping]
-  The correct placement of a read may be ambiguous, e.g. due to repeats.  In
+  The correct placement of a read may be ambiguous, e.g., due to repeats.  In
   this case, there may be multiple read alignments for the same read.  One of
   these alignments is considered primary.  All the other alignments have the
   secondary alignment flag set in the SAM records that represent them.  All the
@@ -168,15 +169,41 @@ r001  147 ref 37 30 9M         =  7 -39 CAGCGGCAT         * NM:i:1
 
 \end{description}
 
-\footnotetext{A chimeric alignment is primarily caused by structural
-variations, gene fusions, misassemblies, RNA-seq or experimental protocols. It is more frequent given longer
-reads. For a chimeric alignment, the linear alignments consisting of the aligment are largely
+\footnotetext{Chimeric alignments are primarily caused by structural
+variations, gene fusions, misassemblies, RNA-seq or experimental protocols.
+They are more frequent given longer reads.
+For a chimeric alignment, the linear alignments constituting the alignment are largely
 non-overlapping; each linear alignment may have high mapping quality and is
 informative in SNP/INDEL calling. In contrast, multiple mappings are caused primarily by repeats.  They are less frequent
 given longer reads. If a read has multiple mappings, all these mappings are
 almost entirely overlapping with each other; except the single-best optimal
 mapping, all the other mappings get mapping quality $<$Q3
 and are ignored by most SNP/INDEL callers.}
+
+\subsubsection{Character set restrictions}\label{sec:charset}
+
+Reference sequence names, CIGAR strings, and several other field types are used as values or parts of values of other fields in SAM and related formats such as VCF.
+To ensure that these other fields' representations are unambiguous, these field types disallow particular delimiter characters.
+
+Query or read names may contain any printable ASCII characters in the range \verb"[!-~]" apart from `\verb"@"', so that SAM alignment lines can be easily distinguished from header lines.
+(They are also limited in length.)
+
+Reference sequence names may contain any printable ASCII characters in the range {\tt [!-\verb:~:]} apart from backslashes, commas, quotation marks, and brackets---i.e., apart from `{\tt \verb:\:\,,\,"`'\,()\,[]\,\verb:{}:\,<>}'---and may not start with `{\tt *}' or `{\tt =}'.%
+\footnote{Characters that are \emph{not} disallowed include `{\tt |}', which historically appeared in reference names derived from NCBI FASTA files, and `{\tt :}', which appears in HLA allele names.
+Appendix~\ref{sec:parse-region} describes approaches for parsing \emph{name}{\tt [:}\emph{begin}{\tt -}\emph{end}{\tt ]} region notation unambiguously even though \emph{name} may itself contain colons.}
+
+Thus they match the following regular expression:
+\begin{center}
+{\tt [\verb"0-9A-Za-z!#$%&+./:;?@^_|~-"][\verb"0-9A-Za-z!#$%&*+./:;=?@^_|~-"]*}
+\end{center}
+
+% Pedantically this should be [[:rname:]^*=][[:rname:]]*, but we take advantage
+% of POSIX (Issue 7) section 9.3.5/8 to elide the excess brackets for clarity.
+\newcommand*{\rnameRegexp}{[\cclass{rname}\caret*=][\cclass{rname}]*}
+
+\noindent
+For clarity, elsewhere in this specification we write this set of allowed characters as a character class~{\tt [\cclass{rname}]} and extend the POSIX regular expression notation to use {\tt\caret *=} to indicate the omission of `{\tt *}' and `{\tt =}' from the character class.
+Thus this regular expression can be written more clearly as {\tt\rnameRegexp}.
 
 \subsection{The header section}
 Each header line begins with the character `{\tt @}' followed by
@@ -211,6 +238,9 @@ meanings can be avoided.}
   \cline{1-3}
   \multicolumn{2}{|l|}{\bf Tag} & {\bf Description} \\
   \cline{1-3}
+  \endfirsthead
+  \cline{1-3}
+  \endhead
   \multicolumn{2}{|l}{\tt @HD} & The header line. The first line if present. \\\cline{2-3}
   & {\tt VN}* & Format version. \emph{Accepted format}: {\tt /\char94[0-9]+\char92.[0-9]+\$/}.\\\cline{2-3}
   & {\tt SO} & Sorting order of alignments. \emph{Valid values}: {\tt unknown} (default), {\tt
@@ -224,12 +254,20 @@ meanings can be avoided.}
     \emph{Valid values}: {\tt none} (default), {\tt query} (alignments are
     grouped by {\sf QNAME}), and {\tt reference} (alignments are grouped by
     {\sf RNAME}/{\sf POS}).\\\cline{1-3}
+  & {\tt SS} & Sub-sorting order of alignments. Valid values are of the form \emph{sort-order}{\tt :}\emph{sub-sort}, where \emph{sort-order} is the same value stored in the {\tt SO} tag and \emph{sub-sort} is an implementation-dependent colon-separated string further describing the sort order.%
+\footnote{The repetition of \emph{sort-order} enables a limited form of validation.
+For example, {\tt @HD SO:queryname SS:coordinate:TLEN} would indicate that the data has been re-sorted (by query name) by a non-{\tt SS}-aware tool and the {\tt SS} field should be ignored.}
+    For example, if an algorithm relies on a {\tt coordinate} sort that, at each coordinate, is further sorted by query name the header could contain {\tt @HD SO:coordinate SS:coordinate:queryname}.
+    If the primary sort is not one of the predefined primary sort orders, then {\tt unsorted} should be used and the subsort is effectively the major sort.
+    For example, if sorted by an auxillary tag {\tt MI} then by coordinate then the header could contain {\tt @HD SO:unsorted SS:unsorted:MI:coordinate}.
+    \newline
+    \emph{Regular expression}: {\tt (coordinate|queryname|unsorted)(:[\verb"A-Za-z0-9_-"]+)+}\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. The order of {\tt @SQ} lines defines the alignment sorting order.\\\cline{2-3}
   & {\tt SN}* & Reference sequence name.
 The {\tt SN} tags and all individual {\tt AN} names in all {\tt @SQ} lines
 must be distinct.
   The value of this field is used in the
-  alignment records in {\sf RNAME} and {\sf RNEXT} fields. Regular expression: {\tt [!-)+-\char60\char62-\char126][!-\char126]*}\\\cline{2-3}
+  alignment records in {\sf RNAME} and {\sf RNEXT} fields. Regular expression: {\tt\rnameRegexp}\\\cline{2-3}
   & {\tt LN}* & Reference sequence length. \emph{Range}: $[1,\,2^{31}-1]$\\\cline{2-3}
   & {\tt AH} & Indicates that this sequence is an alternate locus.%
 \footnote{See \url{https://www.ncbi.nlm.nih.gov/grc/help/definitions} for descriptions of \emph{alternate locus} and \emph{primary assembly}.}
@@ -238,21 +276,23 @@ must be distinct.
   & {\tt AN} & Alternative reference sequence names.
 A comma-separated list of alternative names that tools may use when referring
 to this reference sequence.%
-\footnote{For example, given `{\tt @SQ SN:MT AN:chrMT,M,chrM LN:16569}',
+\footnote{For example, given `{\tt @SQ SN:MT AN:chrMT,M,chrM LN:16569 TP:circular}',
 tools can ensure that a user's request for any of `MT', `chrMT', `M',
-or~`chrM' succeeds and refers to the same sequence.
-Note the restricted set of characters allowed in an alternative name.}
+or~`chrM' succeeds and refers to the same sequence.}
 These alternative names are not used elsewhere within the SAM file;
 in particular, they must not appear in alignment records' {\sf RNAME}
 or~{\sf RNEXT} fields.
 \emph{Regular expression}: \emph{name}{\tt (,}\emph{name}{\tt )*}
-where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
+where \emph{name} is {\tt\rnameRegexp}\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
   & {\tt DS} & Description.  UTF-8 encoding may be used.\\\cline{2-3}
   & {\tt M5} & MD5 checksum of the sequence.  See Section~\ref{sec:ref-md5}\\\cline{2-3}
   & {\tt SP} & Species.\\\cline{2-3}
+  & {\tt TP} & Molecule topology. \emph{Valid values}: {\tt linear} (default) and {\tt circular}.%
+\footnote{The previous footnote's example identifies MT as a circular chromosome.
+The {\tt TP} field is often omitted, which implies linear.}\\\cline{2-3}
   & {\tt UR} & URI of the sequence.  This value may start with one of the standard
-  protocols, e.g http: or ftp:.  If it does not start with one of these protocols, it is assumed to be a file-system path.\\\cline{1-3}
+  protocols, e.g., `{\tt http:}' or `{\tt ftp:}'.  If it does not start with one of these protocols, it is assumed to be a file-system path.\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @RG} & Read group. Unordered multiple {\tt @RG} lines are allowed.\\\cline{2-3}
   & {\tt ID}* & Read group identifier. Each {\tt @RG} line must have a unique {\tt ID}. The value of {\tt ID}
   is used in the RG tags of alignment records. Must be unique among all read groups in header section.  Read group IDs may be modified when merging SAM files in order to handle collisions.\\\cline{2-3}
@@ -272,7 +312,7 @@ where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
   {\tt CAPILLARY}, {\tt LS454}, {\tt ILLUMINA}, {\tt SOLID}, {\tt HELICOS}, {\tt IONTORRENT}, {\tt ONT}, and {\tt PACBIO}.\\\cline{2-3}
   & {\tt PM} & Platform model. Free-form text providing further details of the
   platform/technology used.\\\cline{2-3}
-  & {\tt PU} & Platform unit (e.g. flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
+  & {\tt PU} & Platform unit (e.g., flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
   & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @PG} & Program. \\\cline{2-3}
   & {\tt ID}* & Program record identifier. Each {\tt @PG} line must have a unique {\tt ID}.
@@ -284,7 +324,7 @@ where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
   	{\tt @PG} records may be chained using {\tt PP} tag, with the last record in the chain
 	having no {\tt PP} tag. This chain defines the order of programs that have been applied to the alignment.
 	{\tt PP} values may be modified when merging SAM files in order to handle collisions of {\tt PG} {\tt ID}s.
-	The first {\tt PG} record in a chain (i.e. the one referred to by the {\tt PG} tag in a SAM record)
+	The first {\tt PG} record in a chain (i.e., the one referred to by the {\tt PG} tag in a SAM record)
 	describes the most recent program that operated on the SAM record.
 	The next {\tt PG} record in the chain describes the next most recent program that
         operated on the SAM record. The {\tt PG} {\tt ID} on a SAM record is not required
@@ -334,12 +374,10 @@ AGCATGTTAGATAA**GATAGCTGTGCTAGTAGGCAGTCAGCGCCAT
 and the corresponding tag is {\tt M5:caad65b937c4bc0b33c08f62a9fb5411}.
 
 \subsection{The alignment section: mandatory fields}\label{sec:alnrecord}
-In the SAM format, each alignment line typically represents the linear
-alignment of a segment. Each line has 11
-mandatory fields. These fields always appear in the same order and must be
-present, but their values can be `0' or `*' (depending on the field) if the
-corresponding information is unavailable. The following table gives an overview
-of the mandatory fields in the SAM format:
+In the SAM format, each alignment line typically represents the linear alignment of a segment.
+Each line consists of 11~or more TAB-separated fields.
+The first eleven fields are always present and in the order shown below; if the information represented by any of these fields is unavailable, that field's value will be a placeholder, either~`{\tt 0}' or~`{\tt *}' as determined by the field's type.
+The following table gives an overview of these mandatory fields in the SAM format:
 \begin{center}
 \small
 \begin{tabular}{rllll}
@@ -348,11 +386,11 @@ of the mandatory fields in the SAM format:
   \hline
   1 & {\sf QNAME} & String & \verb:[!-?A-~]{1,254}: & Query template NAME\\
   2 & {\sf FLAG} & Int & $[0,\,2^{16}-1]$ & bitwise FLAG \\
-  3 & {\sf RNAME} & String & {\tt \char92*|[!-()+-\char60\char62-\char126][!-\char126]*} & Reference sequence NAME\\
+  3 & {\sf RNAME} & String & {\tt \verb"\*"|\rnameRegexp} & Reference sequence NAME\footnotemark \\
   4 & {\sf POS} & Int & $[0,\,2^{31}-1]$ & 1-based leftmost mapping POSition \\
   5 & {\sf MAPQ} & Int & $[0,\,2^8-1]$ & MAPping Quality \\
   6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
-  7 & {\sf RNEXT} & String & {\tt \char92*|=|[!-()+-\char60\char62-\char126][!-\char126]*} & Ref. name of the mate/next read\\
+  7 & {\sf RNEXT} & String & {\tt \verb"\*"|=|\rnameRegexp} & Reference name of the mate/next read \\
   8 & {\sf PNEXT} & Int & $[0,\,2^{31}-1]$ & Position of the mate/next read \\
   9 & {\sf TLEN} & Int & $[-2^{31}+1,\,2^{31}-1]$ & observed Template LENgth \\
   10 & {\sf SEQ} & String & {\tt \char92*|[A-Za-z=.]+} & segment SEQuence\\
@@ -360,6 +398,13 @@ of the mandatory fields in the SAM format:
   \hline
 \end{tabular}
 \end{center}
+
+\footnotetext{Reference sequence names may contain any printable ASCII characters with the exception of certain punctuation characters, and may not start with `{\tt *}' or `{\tt =}'.
+See Section~\ref{sec:charset} for details and an explanation of the {\tt [\cclass{rname}]} notation.}
+
+\noindent
+All mapped segments in alignment lines are represented on the forward genomic strand.
+For segments that have been mapped to the reverse strand, the recorded {\sf SEQ} is reverse complemented from the original unmapped sequence and {\sf CIGAR}, {\sf QUAL}, and strand-sensitive optional fields are reversed and thus recorded consistently with the sequence bases as represented.
 
 \begin{enumerate}
 \item {\sf QNAME}: Query template NAME. Reads/segments having identical {\sf QNAME}
@@ -407,7 +452,8 @@ Each bit is explained in the following table:
   \item Bit 0x10 indicates whether {\sf SEQ} has been reverse complemented
     and {\sf QUAL} reversed.
     When bit~0x4 is unset, this corresponds to the strand to which the
-    segment has been mapped.
+    segment has been mapped: bit~0x10 unset indicates the forward strand,
+    while set indicates the reverse strand.
     When 0x4 is set, this indicates whether the unmapped read is stored
     in its original orientation as it came off the sequencing machine.
   \item Bits 0x40 and 0x80 reflect the read ordering within each template
@@ -621,10 +667,10 @@ specific software package for it to function properly.
 %  (reverse complemented) should be set, and otherwise not set.
   \item If you wish to store free text in a {\tt CT} tag, use the
   \emph{key} value {\tt Note} (uppercase N) to match GFF3.
-  \item Multi-segment annotation (e.g. a gene with introns) should be
+  \item Multi-segment annotation (e.g., a gene with introns) should be
   described with multiple lines in SAM (like a multi-segment read).
-  Where there is a clear biological direction (e.g. a gene), the first
-  segment ({\sf FLAG} bit 0x40) is used for the first section (e.g. the
+  Where there is a clear biological direction (e.g., a gene), the first
+  segment ({\sf FLAG} bit 0x40) is used for the first section (e.g., the
   $5'$ end of the gene). Thus a GenBank entry location like
   {\tt complement(join(85052..85354, 85441..85621, 86097..86284))}
   would have three lines in SAM with a common {\sf QNAME}: %And three lines in GFF3 too.
@@ -834,7 +880,7 @@ disallowed.
 An end-of-file (EOF) trailer or marker block should be written at the end
 of BGZF files, so that unintended file truncation can be easily detected.
 The EOF marker block is a particular empty\footnotemark\ BGZF block
-encoded with the default {\sf zlib} compression level setttings,
+encoded with the default {\sf zlib} compression level settings,
 and consists of the following 28~hexadecimal bytes:
 \begin{center}
 \texttt{1f 8b 08 04 00 00 00 00 00 ff 06 00 42 43 02 00 1b 00 03 00 00 00 00 00 00 00 00 00}
@@ -863,7 +909,7 @@ When reading a BGZF file in sequential streaming fashion, ideally this
 EOF check should be performed when the end of the stream is reached.
 Checking that the final BGZF block in the file decompresses to empty
 or checking that the last 28 bytes of the file are exactly the bytes
-above are both sufficent tests; each is likely more convenient in
+above are both sufficient tests; each is likely more convenient in
 different circumstances.
 
 \footnotetext{It is useful to produce a diagnostic at the beginning of
@@ -907,10 +953,10 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf next\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf read\_name} & Read name,\footnotemark\ {\tt NUL}-terminated (\underline{\sf QNAME} plus a trailing `{\tt \char92 0}') & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf read\_name} & Read name, {\tt NUL}-terminated (\underline{\sf QNAME} with trailing `{\tt\verb"\0"}')\footnotemark & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$. See Section~\ref{sec:seq} & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf qual} & Phred base quality (a sequence of {\tt 0xFF} if absent) & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf qual} & Phred-scaled base qualities. See Section~\ref{sec:seq} & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
   & \multicolumn{5}{c|}{\textcolor{gray}{\it List of auxiliary data (until the end of the alignment block)}} \\\cline{3-6}
   & & {\sf tag} & Two-character tag & {\tt char[2]} & \\\cline{3-6}
   & & {\sf val\_type} & Value type: {\tt AcCsSiIfZHB}, see Section~\ref{sec:aux-type-codes} & {\tt char} & \\\cline{3-6}
@@ -942,19 +988,22 @@ stores the real {\sf CIGAR}, encoded the same way as the {\sf cigar} field in
 BAM, in the {\tt CG} optional tag of type `{\tt B,I}', and sets {\sf CIGAR} to
 `\textit{k}{\tt S}\textit{m}{\tt N}' as a placeholder, where `\textit{k}' equals {\sf l\_seq}, `\textit{m}'
 is the reference sequence length in the alignment, and `{\tt S}' and `{\tt N}'
-are the soft-clipping and reference-clip CIGAR operators, respectively -- i.e.
+are the soft-clipping and reference-clip CIGAR operators, respectively---i.e.,
 in the binary form, {\sf n\_cigar\_op}=2 and {\sf cigar}={\tt [\textit{k}\char60\char60
 4\char124{4},\textit{m}\char60\char60 4\char124{3}]}. If tag {\tt CG} is present and
 the first CIGAR operation clips the entire read, a BAM parsing library is
 expected to update {\sf n\_cigar\_op} and {\sf cigar} with the real CIGAR
 stored in the {\tt CG} tag and remove the now-redundant {\tt CG} tag.
 
-\subsubsection{SEQ encoding}\label{sec:seq}
+\subsubsection{SEQ and QUAL encoding}\label{sec:seq}
 Sequence is encoded in 4-bit values, with adjacent bases packed into the same byte starting with the highest 4 bits first.
 When {\sf l\_seq} is odd the bottom 4 bits of the last byte are undefined, but we recommend writing these as zero.
 The case-insensitive base codes `{\tt =ACMGRSVTWYHKDBN}' are mapped to $[0,15]$ respectively with all other characters mapping to `{\tt N}' (value 15).
 
 Omitted sequence, represented in SAM as `{\tt *}', is represented by {\sf l\_seq} being 0 and {\sf seq} and {\sf qual} zero-length.
+
+Base qualities are stored as bytes in the range $[0,93]$, without any +33 conversion to printable ASCII.
+When base qualities are omitted but the sequence is not, {\sf qual} is filled with {\tt 0xFF} bytes (to length {\sf l\_seq}).
 
 \subsubsection{Auxiliary data encoding}\label{sec:aux-type-codes}
 Optional alignment fields are stored immediately after each other immediately
@@ -1218,6 +1267,41 @@ int reg2bins(int beg, int end, uint16_t list[MAX_BIN])
 
 \begin{appendices}
 \appendix
+\section{Parsing region notation}\label{sec:parse-region}
+
+Parsing region notation such as \emph{name}{\tt [:}\emph{begin}{\tt [-}\emph{end}{\tt ]]} (in which omission of the outer bracketed portion indicates a request for the entire reference sequence) would be simple if \emph{name} could not itself contain `{\tt :}' characters, but this is not the case.
+(No such notation containing an optional `{\tt :}' appears in the SAM format itself, but various tools use this notation as a convenient way for their users to specify regions of interest.)
+
+The set of valid reference sequence names is usually already known when parsing this notation---for example, because the associated {\tt @SQ} headers have already been encountered.
+Tools can use this set to determine unambiguously which colons could delimit a known-valid reference sequence name.
+
+In pseudocode form, a string~\emph{str} can be parsed as follows:
+
+\begin{tabbing}
+\qquad\quad
+\= consider the rightmost `{\tt :}' character, if any, of \emph{str} \+\\
+if \emph{str} is of the form `\emph{prefix}{\tt :NUM}' \= or `\emph{prefix}{\tt :NUM-NUM}' \\
+\> or generally `\emph{prefix}{\tt :}\emph{suffix}' for some plausible interval suffix \\
+then \\
+\qquad \= if both \emph{prefix} and \emph{str} are in the known set then\quad{\sf\ldots error: ambiguous representation} \\
+\> else if \emph{prefix} is in the known set then return (\emph{prefix}, {\tt NUM}\ldots{\tt NUM}) \\
+\> else if \emph{str} is in the known set then return (\emph{str}, entire sequence) \\
+\> else\quad{\sf\ldots error: unknown reference sequence name} \\
+\\
+else\qquad{\sf\ldots either {\sl str} does not contain a colon or the suffix is not plausibly numeric}
+\\
+\> if \emph{str} is in the known set then return (\emph{str}, entire sequence) \\
+\> else\quad{\sf\ldots error: unknown reference sequence name or invalid interval syntax}
+\end{tabbing}
+
+\noindent
+The check leading to ``{\sf error: ambiguous representation}'' is important as it prevents confusing interpretations of actually ambiguous input.
+Typically the set of valid reference sequence names will not contain names that are prefixes of other names in the set, so in practice this error will not usually be encountered in non-malicious data.
+
+Either in addition to this algorithm or as an alternative to it, tools can use additional delimiter characters to make an unambigiously parsable notation.
+We recommend a convention using curly brackets around the reference sequence name--- \verb"{"\emph{name}\verb"}"{\tt [:}\emph{begin}{\tt [-}\emph{end}{\tt ]]} ---as being memorable, easily typed, unambiguous, and not expanded by most shells.
+% (RNAME cannot contain commas, so Bash's {a,b} brace expansion won't occur.)
+
 \section{SAM Version History}\label{sec:history}
 
 This lists the date of each tagged SAM version along with changes that
@@ -1233,6 +1317,13 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item Add {\tt @SQ TP} circular/linear topology header tag. (May 2019)
+\item\textbf{Restricted the allowable punctuation characters in reference sequence names} (in {\tt @SQ SN}, {\sf RNAME}, etc).
+The sets of characters allowed in {\tt @SQ SN} and {\tt @SQ AN} are now identical, which enlarges the previous {\tt AN} set. (Jan 2019)
+
+We recommend that implementations validating reference sequence names do so using the rules in Section~\ref{sec:charset}; are more lenient for files declaring $\mbox{\tt @HD VN} \leq 1.5$; and validate {\tt AN} only against these rules, not the previous more restrictive {\tt AN} rules.
+
+\item Add {\tt @HD SS} sorting details header tag. (Oct 2018)
 \item B array optional fields may have no entries---this was already representable in BAM, clarified that empty arrays are permitted in SAM too. (Jul 2018)
 \item Add {\tt @SQ DS} header tag. (Jul 2018)
 \item Add {\tt @RG BC} header tag. (Apr 2018)
@@ -1243,6 +1334,7 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.5: 23 May 2013 to November 2017}
 
 \begin{itemize}
+\item Add {\tt @SQ AN} header tag, allowing only alphanumeric and `\verb"*+.@_|-"' characters in its names. (Jul 2017)
 \item Add {\tt @SQ AH} header tag. (Mar 2017)
 \item Auxiliary tags migrated to SAMtags document. (Sep 2016)
 \item Z and H auxiliary tags are permitted to be zero length. (Jun 2016)

@@ -16,7 +16,9 @@ Past SAM/BAM maintainers include Jay Carey, Tim Fennell, and Nils Homer.
 ### CRAM
 
 * James Bonfield (@jkbonfield)
-* Vadim Zalunin (@vadimzalunin)
+* Chris Norman (@cmnbroad)
+
+Past CRAM maintainers include Vadim Zalunin.
 
 ### VCF/BCF
 
@@ -28,7 +30,9 @@ Past VCF/BCF maintainers include Ryan Poplin and David Roazen.
 
 ### Htsget
 
+* Jerome Kelleher (@jeromekelleher)
 * Mike Lin (@mlin)
+* John Marshall (@jmarshall)
 
 ### Refget
 
@@ -51,6 +55,10 @@ This way when the main repository is forked again, the new fork is created with 
 Use the _Makefile_ to generate PDFs from the TeX source documents.
 Both TeX source and generated PDFs are checked into the **master** branch, so the make rules are set up to stage PDFs into a _new/_ subdirectory, from where they can be copied when you are ready to check them in.
 
+These documents use a variety of LaTeX styles (`make show-styles` lists them), so compiling them requires a fairly complete TeX installation.
+In particular, you should install _texlive-collection-latexextra_ on Fedora, or _texlive-latex-extra_ and _texlive-science_ on Debian and Ubuntu.
+Alternatively, missing style files can be copied into _~/texmf/tex/latex_ or similar (`kpsepath tex` shows the search path on your machine).
+
 Most of the specifications use a _.ver_ file and associated rules to display a commit hash and datestamp on their title page.
 (See _SAMv1.tex_ and _new/SAMv1.pdf_'s _Makefile_ dependencies for how to add this to other specifications.)
 So the usual workflow when editing these documents is (for example, when working on the SAM specification):
@@ -62,6 +70,10 @@ So the usual workflow when editing these documents is (for example, when working
 3. Type `make clean SAMv1.pdf` to regenerate the PDF and copy it to the main directory.
 (Optionally, verify that it contains the correct commit hash for your source changes.)
 Now commit your _.pdf_ changes, separately from any source changes.
+
+The _Makefile_ can also generate PDFs highlighting the typeset differences between TeX source versions, invoked by typing `make [OLD=commit [NEW=commit]] diff/SPEC.pdf`.
+By default, this compares the working _SPEC.tex_ file to the checked-out **HEAD**.
+Specify `OLD` to compare the working file to a different commit, or specify both `OLD` and `NEW` to show changes in _SPEC_ between two commits.
 
 ### Customising the build
 
@@ -91,6 +103,8 @@ Therefore:
 * The PDF should not be updated in a merge commit (as commits from one or the other of the merge's parents will not be recorded), and there's not much point updating it in a pull request.
 * So pull requests need to be merged, and then their PDFs updated separately as a non-merge commit on **master**.
 * If a series of changes are being made or several pull requests are being merged at once, the PDF updates can be batched up and just made once at the end.
+(Sometimes anticipated changes become delayed.
+When PDF updates have been pending awaiting other changes for **one week**, they should be committed without waiting further.)
 * Conversely, if there are changes pending to several (even unrelated) PDFs, there is no reason not to commit them all at once.
 
 <!-- vim:set linebreak: -->
