@@ -1395,11 +1395,11 @@ in the order ACGTN.
 
 \subsubsection*{Substitution Code Assignment}
 
-To assign the susbtitution code for a given reference base/read base, the subsitutions for
+To assign the susbtitution code for a given reference base/read base, the substitutions for
 each reference base may optionally be sorted by their frequencies, in descending order, with
 same-frequency ties broken using the fixed order ACGTN. Although sorting by substitution
 frequency is not required by the CRAM format, assigning substitution codes based on frequency
-maximizes compression by ensuring that the most frequent subsitutions use the shortest possible
+maximizes compression by ensuring that the most frequent substitutions use the shortest possible
 codes.
 
 For example, let us assume the following substitution frequencies for base A: 
@@ -1422,11 +1422,9 @@ AT: 0
 
 AN: 3
 
-The substitution matrix entry for this reference base then is written as a single byte, with the
-codes in the order CGTN: 10 01 00 11 = 147 decimal, or 0x93 in this case.
-
-Note that the last two bits of the substitution matrix entry are redundant, since the remaining
-code could be derived from the rest of the entry, but are retained for simplicity.
+The first byte of the substitution matrix entry for reference base A is written as a single byte,
+with the codes in the order CGTN: 10 01 00 11 = 147 decimal, or 0x93 in this case. This will then
+be followed by 4 more bytes representing substitutions for reference bases C, G, T and N.
 
 \subsubsection*{Decode mapped read pseudocode}
 
