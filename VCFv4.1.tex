@@ -1069,9 +1069,9 @@ l\_indiv	uint32\_t	Data length of FORMAT and individual genotype fields
 CHROM	int32\_t	Given as an offset into the mandatory contig dictionary
 POS	int32\_t	0-based leftmost coordinate
 rlen	int32\_t	Length of the record as projected onto the reference sequence.  May be the actual length of the REF allele but for symbolic alleles should be the declared length respecting the END attribute
+QUAL	float	Variant quality; 0x7F800001 for a missing value
 n\_allele\_info	int32\_t	n\_info, where n\_allele is the number of REF+ALT alleles in this record, and n\_info is the number of VCF INFO fields present in this record
 n\_fmt\_sample	uint32\_t	n\_sample, where n\_fmt is the number of format fields for genotypes in this record, and n\_samples is the number of samples present in this sample.  Note that the number of samples must be equal to the number of samples in the header
-QUAL	float	Variant quality; 0x7F800001 for a missing value
 ID	typed string
 REF+ALT	list of n\_allele typed strings	the first allele is REF (mandatory) followed by n\_alleles - 1 ALT
 alleles, all encoded as typed strings
