@@ -254,6 +254,16 @@ A comma separated list of tags to exclude, default: none.
 
 The server SHOULD respond with an `InvalidInput` error if `tags` and `notags` intersect.
 </td></tr>
+<tr markdown="block"><td>
+
+`samples`  
+_optional_
+</td><td>
+A comma separated list of samples to include, default: all. For VCF responses, this selects a subset of columns from a multi-sample VCF dataset.
+
+The server SHOULD respond with an `InvalidInput` error if a nonexistent `sample` is listed.
+</td></tr>
+<tr markdown="block"><td>
 </table>
 
 ### Field filtering
