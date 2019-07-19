@@ -262,7 +262,7 @@ meanings can be avoided.}
 \footnote{The repetition of \emph{sort-order} enables a limited form of validation.
 For example, {\tt @HD SO:queryname SS:coordinate:TLEN} would indicate that the data has been re-sorted (by query name) by a non-{\tt SS}-aware tool and the {\tt SS} field should be ignored.}
     If the primary sort is not one of the predefined primary sort orders, then {\tt unsorted} should be used and the subsort is effectively the major sort.
-    For example, if sorted by an auxillary tag {\tt MI} then by coordinate then the header could contain {\tt @HD SO:unsorted SS:unsorted:MI:coordinate}.
+    For example, if sorted by an auxiliary tag {\tt MI} then by coordinate then the header could contain {\tt @HD SO:unsorted SS:unsorted:MI:coordinate}.
     \newline
     \emph{Regular expression}: {\tt (coordinate|queryname|unsorted)(:[\verb"A-Za-z0-9_-"]+)+}\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. The order of {\tt @SQ} lines defines the alignment sorting order.\\\cline{2-3}
@@ -1319,7 +1319,7 @@ else\qquad{\sf\ldots either {\sl str} does not contain a colon or the suffix is 
 The check leading to ``{\sf error: ambiguous representation}'' is important as it prevents confusing interpretations of actually ambiguous input.
 Typically the set of valid reference sequence names will not contain names that are prefixes of other names in the set, so in practice this error will not usually be encountered in non-malicious data.
 
-Either in addition to this algorithm or as an alternative to it, tools can use additional delimiter characters to make an unambigiously parsable notation.
+Either in addition to this algorithm or as an alternative to it, tools can use additional delimiter characters to make an unambiguously parsable notation.
 We recommend a convention using curly brackets around the reference sequence name--- \verb"{"\emph{name}\verb"}"{\tt [:}\emph{begin}{\tt [-}\emph{end}{\tt ]]} ---as being memorable, easily typed, unambiguous, and not expanded by most shells.
 % (RNAME cannot contain commas, so Bash's {a,b} brace expansion won't occur.)
 

@@ -47,8 +47,7 @@ OLD = HEAD
 NEW =
 
 diff/%.pdf: %.tex
-	BIBINPUTS=:.. TEXINPUTS=:..:../new latexdiff-vc --pdf --dir diff --force --git --subtype ONLYCHANGEDPAGE --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
-
+	BIBINPUTS=:.. TEXINPUTS=:..:../new latexdiff-vc --pdf --dir diff --force --git --only-changes --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
 
 show-styles:
 	@sed -n '/\\usepackage/s/.*{\(.*\)}$$/\1/p' *.tex | sort | uniq -c
@@ -56,7 +55,7 @@ show-styles:
 
 mostlyclean:
 	-rm -f new/*.aux new/*.bbl new/*.blg new/*.log new/*.out new/*.toc new/*.ver
-	-rm -f diff/*.blg diff/*.idx diff/*.out diff/*.tex diff/*.toc
+	-rm -f diff/**.aux diff/*.blg diff/*.idx diff/*.log diff/*.out diff/*.tex diff/*.toc
 
 clean: mostlyclean
 	-rm -f $(PDFS:%=new/%)$(if $(wildcard new),; rmdir new)
