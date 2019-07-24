@@ -517,7 +517,10 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item RBS(Integer): An integer describing the size of this genotype's reference block.
   The size is the difference between the last position (inclusive) of the reference block and POS.
   Downstream positions that are covered by the reference block should be missing (`.'), and will be interpreted as having the same non-reference likelihood as given in this genotype.
-  Missing genotypes (`.') that are not covered by a reference block are to be interpreted as truly missing.
+  Missing genotypes (`.') that are not covered by a reference block are to be interpreted as truly missing. 
+  To disambiguate a '.'  between being truly missing and part of a reference block, one would therefore need to "look up" and find the previous RBS FORMAT value in that sample. 
+  When reading the file from top to bottom, an implementation can simply remember what the RBS is for each sample, however when using the index to "seek" to a particular point of the reference, one may need to seek to an unknown location in the file. 
+  To assist in seeking, the \verb!##REFERENCE_BLOCK! header line may define the \verb!CHECKPOINT! multiple at which a reference block will be included for all samples. In the presence of a checkpoint value, an implementation can read back from the last checkpoint and on and be assured that it will find a reference block that overlaps the current position, if it exists. 
 \end{itemize}
 
 
