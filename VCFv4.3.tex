@@ -257,12 +257,23 @@ It is possible to record relationships between genomes using the following synta
 ##PEDIGREE=<ID=ChildID,Father=FatherID,Mother=MotherID>
 ##PEDIGREE=<ID=SampleID,Name_1=Ancestor_1,...,Name_N=Ancestor_N>
 \end{verbatim}
-\noindent or a link to a database:
+
+The first two lines assert that the DNA in genomes TumourSample and SomaticNonTumour is asexually or clonally derived with mutations from the DNA in genome OriginalID. 
+The third line describes a family relationship between genomes.
+A VCF will therefore contain one entry per trio.
+The fourth line is an example of the most general form of a pedigree line.
+It means that the genome SampleID is derived from the N $\ge$ 1 genomes Ancestor1, ..., AncestorN.
+
+TODO: Text describing meaning of Mother and Father well-known ancestor tags
+and explaining how to represent a PED file as in-line \#\#PEDIGREE trios.
+Noting alternatively to use \#\#pedigreeDB=URL to point to an external PED file.
+
+\noindent If samples and the relationships between them are described in an external resource such as a database or PED file, is it also possible to provide a link:
 \begin{verbatim}
 ##pedigreeDB=URL
 \end{verbatim}
 
-\noindent See \ref{ClonalPedigree} (clonal relationships) and \ref{FamilialPedigree} (trios and families) for details.
+\noindent See \ref{ClonalPedigree} for more details about clonal relationships.
 
 
 \subsection{Header line syntax}
@@ -1281,11 +1292,6 @@ The general format of a PEDIGREE line describing asexual, clonal derivation is:
 \end{verbatim}
 
 This line asserts that the DNA in genome DerivedID is asexually or clonally derived with mutations from the DNA in genome OriginalID.
-This is the asexual analog of the VCF format that has been proposed for family relationships between genomes (see~\ref{FamilialPedigree}), in which there is one entry per trio of the form:
-
-\begin{verbatim}
-##PEDIGREE=<ID=ChildID,Mother=MotherID,Father=FatherID>
-\end{verbatim}
 
 Let's consider a cancer patient VCF file with 4 genomes: germline, primary\_tumor, secondary\_tumor1, and secondary\_tumor2 as illustrated in Figure 10.
 The primary\_tumor is derived from the germline and the secondary tumors are each derived independently from the primary tumor, in all cases by clonal derivation with mutations.
@@ -1403,19 +1409,6 @@ Example records are given below:
 \end{tabular}
 \end{flushleft}
 \normalsize
-
-\subsection{Describing family relationships}
-\label{FamilialPedigree}
-
-This is the VCF format that has been proposed for family relationships between genomes, in which there is one entry per trio of the form:
-
-\begin{verbatim}
-##PEDIGREE=<ID=ChildID,Mother=MotherID,Father=FatherID>
-\end{verbatim}
-
-TODO: Text describing meaning of Mother and Father well-known ancestor tags
-and explaining how to represent a PED file as in-line \#\#PEDIGREE trios.
-Noting alternatively to use \#\#pedigreeDB=URL to point to an external PED file.
 
 \pagebreak
 \section{BCF specification}
