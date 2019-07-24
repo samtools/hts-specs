@@ -528,7 +528,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required).
   \item PQL (List of integers): The list of PQs one for each phase set in PSL (encoded like PQ)
   \item PSL (List of non-negative 32-bit Integer): The list of PSs one for each pipe ($\mid$) in the GT field, specifying the phase set for the allele prior to the pipe.
-  A given sample-genotype should not have values for both PS and PSL. 
+  A given sample-genotype must not have values for both PS and PSL. 
   However, they are interoperable, in that a PS mentioned in one variant can be references in a PSL in another.
 \end{itemize}
 
