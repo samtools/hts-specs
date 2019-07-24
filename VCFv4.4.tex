@@ -482,9 +482,9 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GQ		& 1		& Integer	& Conditional genotype quality \\
       GT		& 1		& String	& Genotype \\
       HQ		& 2		& Integer	& Haplotype quality \\
-      LAA		& .		& Integer	& Local Alternate Alleles\footnotemark[1]\\
-      LPL		& .		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer for genotypes that involve the Reference and the LAA alleles only.\footnotemark[1]\\
-      LAD		& .		& Integer	& Local Allele Depth for the reference and each of the local alleles\footnotemark[1]\\
+      LAA		& .		& Integer	& Local Alternate Alleles the 1-based index into the alternate alleles indicating which are relevant for the current sample \\
+      LAD		& .		& Integer	& Local Allele Depth for the reference and each of the local alternate alleles (see: LAA) \\
+      LPL		& .		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer for genotypes that involve the Reference and the LAA alleles only (see LAA) \\
       MQ		& 1		& Integer	& RMS mapping quality \\
       PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
       PP		& G		& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
@@ -581,7 +581,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
     \end{itemize}
 
   \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
-  \item Local Alleles (*):
+  \item LAA (and LAD and LPL (*):
   For callsets with a large number of samples, it is often the case that the majority of sites are not called and sites end up involving many alleles for which all the samples need to provide PL and AD.
   This can cause the file-sizes to grow super-linearly with the number of samples.
   To prevent this, one can choose to specify the allele depth and the genotype likelihood against a subset of ``Local Alleles''.
