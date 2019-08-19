@@ -657,7 +657,8 @@ specific software package for it to function properly.
   \item If {\sf POS} plus the sum of lengths of {\tt M/=/X/D/N}
     operations in {\sf CIGAR} exceeds the length specified in the {\tt
       LN} field of the {\tt @SQ} header line (if exists) with an SN
-    equal to {\sf RNAME}, the alignment should be unmapped.
+    equal to {\sf RNAME}, the alignment should be unmapped, unless the
+    reference sequence is circular (see below).
   \item Unmapped reads should be stored in the orientation in which they came
     off the sequencing machine and have their {\sf reverse} flag bit~(0x10)
     correspondingly unset.
@@ -679,6 +680,21 @@ specific software package for it to function properly.
     should be present.
   \item The {\tt NM} tag should be present.
   \end{enumerate}
+
+\item Circular reference sequences
+
+Mappings that cross the coordinate `join' in circular reference sequences (i.e., those whose {\tt @SQ} headers specify {\tt TP:circular}) may be represented as follows:
+  \begin{enumerate}[label=\arabic*]
+  \item (Preferred)
+As usual {\sf POS} should be between 1 and the {\tt @SQ} header's {\tt LN} value, but {\sf POS} plus the sum of the lengths of {\tt M/=/X/D/N} {\sf CIGAR} operations may exceed {\tt LN}.
+Coordinates greater than~{\tt LN} are interpreted by subtracting {\tt LN} so that bases at $\texttt{LN}+1, \texttt{LN}+2, \texttt{LN}+3, \ldots$ are considered to be mapped at positions $1,2,3,\ldots$; thus each (1-based) position $p$ is interpreted as $((p-1)\bmod\texttt{LN})+1$.%
+\footnote{The impact of this representation on indexing and random access is yet to be explored by implementations.}
+
+  \item
+Alternatively, such alignments may be split across several records: one record representing the initial portion of the segment ending at~{\tt LN}, one representing the final portion starting from~1, and any other records representing additional portions in between spanning the entire reference sequence.
+One record (chosen arbitrarily) is considered primary and the remainder have their {\sf supplementary} flag bit (0x800) set.
+  \end{enumerate}
+
 \item Annotation dummy reads:
   These have {\sf SEQ} set to {\tt *}, {\sf FLAG} bits 0x100 and 0x200
   set (secondary and filtered), and a {\tt CT} tag.
