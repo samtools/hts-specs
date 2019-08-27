@@ -315,7 +315,7 @@ Fixed fields are:
 
   If the reference sequence contains IUPAC ambiguity codes not allowed by this specification (such as R = A/G), the ambiguous reference base must be reduced to a concrete base by using the one that is first alphabetically (thus R as a reference base is converted to A in VCF.)
 
-  \item ALT --- alternate base(s): Comma separated list of alternate non-reference alleles.
+  \item ALT --- alternate base(s): Comma-separated list of alternate non-reference alleles.
   These alleles do not have to be called in any of the samples.
   Options are base Strings made up of the bases A,C,G,T,N,*, (case insensitive) or a MISSING value `.' (no variant) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends.
   The `*' allele is reserved to indicate that the allele is missing due to an overlapping deletion.
@@ -330,15 +330,17 @@ Fixed fields are:
   `0' is reserved and must not be used as a filter String.
   If filters have not been applied, then this field must be set to the MISSING value.
   (String, no white-space or semi-colons permitted, duplicate values not allowed.)
-  \item INFO --- additional information: (String, no semi-colons or equals-signs permitted; commas are permitted only as delimiters for lists of values; characters with special meaning can be encoded using the percent encoding, see Section~\ref{character-encoding}; space characters are allowed)
+  \item INFO --- additional information: Semicolon-separated series of additional information fields, or the MISSING value `{\tt .}'\ if none are present.
+  Each subfield consists of a short \emph{key} with optional \emph{values} in the format: key[=value[,\,\ldots,value]].
+  Literal semicolon (`{\tt ;}') and equals sign (`{\tt =}') characters are not permitted in these values, and literal commas (`{\tt ,}') are permitted only as delimiters for lists of values; characters with special meaning can be encoded using percent encoding, see Section~\ref{character-encoding}.
+  Space characters are allowed in values.
 
-  INFO fields are encoded as a semicolon-separated series of short keys with optional values in the format: key[=data[,data]].
   INFO keys must match the regular expression \texttt{\^{}([A-Za-z\_][0-9A-Za-z\_.]*|1000G)\$}, please note that ``1000G'' is allowed as a special legacy value.
   Duplicate keys are not allowed.
   Arbitrary keys are permitted, although those listed in Table~\ref{table:reserved-info} and described below are reserved (albeit optional).
 
   The exact format of each INFO key should be specified in the meta-information (as described above).
-  Example for an INFO field: DP=154;MQ=52;H2.
+  Example of a complete INFO field: {\tt DP=154;MQ=52;H2}.
   Keys without corresponding values may be used to indicate group membership (e.g.\ H2 indicates the SNP is found in HapMap 2).
   See Section~\ref{sv-info-keys} for additional reserved INFO keys used to encode structural variants.
 \end{enumerate}
