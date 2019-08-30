@@ -170,7 +170,12 @@ Genotype fields specified in the FORMAT field are described as follows:
 ##FORMAT=<ID=ID,Number=number,Type=type,Description="description">
 \end{verbatim}
 
-Possible Types for FORMAT fields are: Integer, Float, Character, and String (this field is otherwise defined precisely as the INFO field).
+Possible Types for FORMAT fields are: Integer, Float, Character, and String. This field is otherwise defined as the INFO field, with the addition of special characters used to define the Number entry:
+
+\begin{itemize}
+  \item P: The field has one value per GT entry (i.e. ploidy), or zero if GT is missing.
+  The values must be in the same order as listed in the GT field.
+\end{itemize}
 
 \subsubsection{Alternative allele field format}
 Symbolic alternate alleles are described as follows:
