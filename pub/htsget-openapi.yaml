@@ -226,10 +226,10 @@ paths:
               example:
                 {
                    "htsget" : {
-                      "format" : "BAM",
+                      "format" : "VCF",
                       "urls" : [
                          {
-                            "url" : "https://htsget.blocksrv.example/sample1234/run1.bam",
+                            "url" : "https://htsget.blocksrv.example/sample1234/variants1.vcf",
                             "headers" : {
                                "Authorization" : "Bearer xxxx",
                                "Range" : "bytes=2744831-9375732"
