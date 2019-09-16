@@ -482,9 +482,9 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GQ		& 1		& Integer	& Conditional genotype quality \\
       GT		& 1		& String	& Genotype \\
       HQ		& 2		& Integer	& Haplotype quality \\
-      LAA		& .		& Integer	& Local Alternate Alleles the 1-based index into the alternate alleles indicating which are relevant for the current sample \\
-      LAD		& .		& Integer	& Local Allele Depth for the reference and each of the local alternate alleles (see: LAA) \\
-      LPL		& .		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer for genotypes that involve the Reference and the LAA alleles only (see LAA) \\
+      LAA		& .		& Integer	& Strictly increasing, 1-based indices into ALT, indicating which alternate alleles are relevant (local) for the current sample \\
+      LAD		& .		& Integer	& Local allele read depth for the reference and each of the local alternate alleles listed in LAA \\
+      LPL		& .		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer for genotypes that involve the reference and the local alternative alleles listed in LAA \\
       MQ		& 1		& Integer	& RMS mapping quality \\
       PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
       PP		& G		& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
@@ -581,14 +581,18 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
     \end{itemize}
 
   \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
-  \item LAA (and LAD and LPL (*):
-  For callsets with a large number of samples, it is often the case that the majority of sites are not called and sites end up involving many alleles for which all the samples need to provide PL and AD.
-  This can cause the file-sizes to grow super-linearly with the number of samples.
+  \item LAA
+  In callsets with many samples, sites may grow to include numerous alternate alleles at the same POS.
+  Usually, few of these alleles are actually observed in any one sample, but each genotype must supply fields like PL and AD for all of the alleles---a very inefficient representation as PL's size is quadratic in the allele count.
+  Similarly, in rare sites, which can be the bulk of the sites, the vast majority of the samples are reference.
   To prevent this, one can choose to specify the allele depth and the genotype likelihood against a subset of ``Local Alleles''.
-  LAA is the (1-based) index into the list of alleles that are ALT for that variant.
+  LAA is the strictly increasing, 1-based index into ALT, pointing out the alternative alleles that are actually in-play for that sample.
   For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LAA=[2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
   It is implicit that REF is part of any ``local'' context, and it always has index 0, even if the genotype is compound HET.
+  Note that reordering might be required and care need to be taken to reorder LAD and LPL appropriately.
   LAA is required in order to interpret LAD and LPL.
+  \item LAD: See LAA
+  \item LPL: See LAA
   \item MQ (Integer): RMS mapping quality, similar to the version in the INFO field.
   \item PL (Integer): The phred-scaled genotype likelihoods rounded to the closest integer, and otherwise defined in the same way as the GL field.
   \item PP (Integer): The phred-scaled genotype posterior probabilities rounded to the closest integer, and otherwise defined in the same way as the GP field.
