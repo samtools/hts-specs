@@ -1,7 +1,7 @@
 openapi: 3.0.2
 servers:
   - description: htsget genomics api
-    url: https://virtserver.swaggerhub.com/brainkod/htsget/1.2.0
+    url: "htsget/1"
 info:
   description: "This data retrieval API bridges from existing genomics bulk data transfers to a client/server model"
   version: "1.2.0"
