@@ -50,6 +50,10 @@ Larger changes should be proposed as pull requests so that they can be discussed
 (Even those with write access to the **samtools/hts-specs** repository should in general create their pull request branches within their own **hts-specs** forks.
 This way when the main repository is forked again, the new fork is created with a minimum of extraneous volatile branches.)
 
+In general, pull requests should be squashed and rebased before merging: _squashed_ to avoid immortalising trivial editorial commits that occurred during refinement of the PR, and _rebased_ (where practical) to avoid unnecessary merge commits.
+Cases where this shouldn't be done include pull requests with multiple non-trivial commits (e.g., separate changes, or a series of commits that tells a story), which should be rebased and/or, if the branch point is reasonably recent, simply merged with a merge commit.
+
+Ensure that the pull request number is present in the resulting commit history, either in the merge commit message or by adding `(PR #NNN)` to the first line of the squashed commit or one that is representative of the PR.
 
 ## Generating PDF specification documents
 
