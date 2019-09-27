@@ -450,10 +450,12 @@ itf8 & reference sequence id & reference sequence identifier  or\linebreak{}
 All slices in this container must have a reference sequence id matching this value.\tabularnewline
 \hline
 itf8 & starting position on the reference & the alignment start position or\linebreak{}
-0 for unmapped reads\tabularnewline
+0 if the container is multiple-reference
+or contains unmapped unplaced reads\tabularnewline
 \hline
 itf8 & alignment span & the length of the alignment or\linebreak{}
-0 for unmapped reads\tabularnewline
+0 if the container is multiple-reference
+or contains unmapped unplaced reads\tabularnewline
 \hline
 itf8 & number of records & number of records in the container\tabularnewline
 \hline
@@ -632,10 +634,11 @@ the BAM file header\tabularnewline
 \hline
 RL & encoding\texttt{<}int\texttt{>} & read lengths & read lengths\tabularnewline
 \hline
-AP & encoding\texttt{<}int\texttt{>} & in-seq positions & if \textbf{APDelta} = true: 0-based alignment start
-delta from the previous record.  When the record is the first in the slice,
-its alignment start will be equal to that of the slice, so its alignment delta is 0.\linebreak{}
-if \textbf{APDelta} = false: encodes the alignment start position directly\tabularnewline
+AP & encoding\texttt{<}int\texttt{>} & in-seq positions & if \textbf{AP-Delta} = true: 0-based alignment start
+delta from the AP value in the previous record.
+Note this delta may be negative, for example when switching references in a multi-reference slice.
+When the record is the first in the slice, the previous position used is the slice alignment-start field (hence the first delta should be zero for single-reference slices, or the AP value itself for multi-reference slices).  \linebreak{}
+if \textbf{AP-Delta} = false: encodes the alignment start position directly\tabularnewline
 \hline
 RG & encoding\texttt{<}int\texttt{>} & read groups & read groups. Special value 
 `-1' stands for no group.\tabularnewline
@@ -783,11 +786,11 @@ itf8 & reference sequence id & reference sequence identifier or\linebreak{}
 This value must match that of its enclosing container.\tabularnewline
 \hline
 itf8 & alignment start & the alignment start position.\linebreak{}
-Ignored on read and set to 0 on write if the slice is multiple-reference
+0 if the slice is multiple-reference
 or contains unmapped unplaced reads\tabularnewline
 \hline
 itf8 & alignment span & the length of the alignment.\linebreak{}
-Ignored on read and set to 0 on write if the slice is multiple-reference
+0 if the slice is multiple-reference
 or contains unmapped unplaced reads\tabularnewline
 \hline
 itf8 & number of records & the number of records in the slice\tabularnewline
@@ -1098,7 +1101,8 @@ Following the bit-wise BAM and CRAM flags, CRAM encodes positional related data 
 Positional data is stored for both mapped and unmapped sequences, as unmapped data may still be ``placed'' at a specific location in the genome (without being aligned).
 Typically this is done to keep a sequence pair (paired-end or mate-pair sequencing libraries) together when one of the pair aligns and the other does not.
 
-The AP data series is delta encoded for reads mapped to a position-sorted slice containing data from a single reference, and as a normal integer value in all other cases.
+For reads stored in a position-sorted slice, the AP-delta flag in the compression header preservation map should be set and the AP data series will be delta encoded, using the slice alignment-start value as the first position to delta against.
+Note for multi-reference slices this may mean that the AP series includes negative values, such as when moving from an alignment to the end of one reference sequence to the start of the next or to unmapped unplaced data.  When the AP-delta flag is not set the AP data series is stored as a normal integer value.
 
 \begin{tabular}{|>{\raggedright}p{70pt}|>{\raggedright}p{75pt}|>{\raggedright}p{90pt}|>{\raggedright}p{171pt}|}
 \hline
@@ -1123,7 +1127,7 @@ int & RG & read group & the read group identifier expressed as the N\textsupersc
   \State $reference\_id\gets slice\_header.reference\_sequence\_id$
 \EndIf
 \State $read\_length \gets$ \Call{ReadItem}{RL, Integer}
-\If{$container\_pmap.AP\_delta \ne 0$ \textbf{and} $slice\_header.reference\_sequence\_id \geq 0$}
+\If{$container\_pmap.AP\_delta \ne 0$}
     \If{$first\_record\_in\_slice$}
         \State $last\_position\gets$ $slice\_header.alignment\_start$
     \EndIf
