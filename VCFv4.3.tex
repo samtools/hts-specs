@@ -514,13 +514,32 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.
   If the genotype in the GT field is unphased, the corresponding PS field is ignored.
   The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required).
-  \item RBS(Integer): An integer describing the size of this genotype's reference block.
-  The size is the difference between the last position (inclusive) of the reference block and POS.
-  Downstream positions that are covered by the reference block should be missing (`.'), and will be interpreted as having the same non-reference likelihood as given in this genotype.
-  Missing genotypes (`.') that are not covered by a reference block are to be interpreted as truly missing. 
-  To disambiguate a '.'  between being truly missing and part of a reference block, one would therefore need to "look up" and find the previous RBS FORMAT value in that sample. 
-  When reading the file from top to bottom, an implementation can simply remember what the RBS is for each sample, however when using the index to "seek" to a particular point of the reference, one may need to seek to an unknown location in the file. 
+  \item RBS(Integer): An integer describing the size of this genotype's reference block, or missing ``.'' if unknown.
+   A ``reference block" is a set of adjacent loci that are determined to be reference with a particular confidence. 
+  The RBS notation enables an implementation to avoid writing any information in subsequent genotypes and place the missing value (`.') with the implication that 
+  the confidence other attributes of the missing genotypes are the same as that in the anchor genotype (the one with the RBS value). 
+  Clearly, this can only be used when the genotype in the anchor variant is reference.
+  The numerical value of RBS is the difference between the last position (inclusive) of the reference block and POS. 
+  Missing genotypes (`.') that are not covered by a reference block are to be interpreted as missing, i.e. no information is known about the site. 
+  To disambiguate a `.'  between being truly missing and part of a reference block, one would therefore need to "look up" and find the previous RBS FORMAT value in that sample.
+  In addition, any non-missing value (including `.:.' or `./.') would effectively break a reference block, and should be treated as a violation of the specification if RBS is specified, or an implicit end of the block if RBS is unknown.
+  When reading the file from top to bottom, an implementation can simply remember what the RBS is for each sample, however when using the index to ``seek" to a particular point of the reference, one may need to seek to an unknown location in the file. 
   To assist in seeking, the \verb!##REFERENCE_BLOCK! header line may define the \verb!CHECKPOINT! multiple at which a reference block will be included for all samples. In the presence of a checkpoint value, an implementation can read back from the last checkpoint and on and be assured that it will find a reference block that overlaps the current position, if it exists. 
+  
+  For example (with CHROM, ID, REF, ALT, QUAL, FILTER, INFO fields/columns removed for brevity \& clarity):
+
+ \#\#REFERENCE\_BLOCK=\textless CHECKPOINT=1000\textgreater\\
+  
+\begin{tabular}[c]{llll|l}
+POS&FORMAT&Alice&Bob&comment\\
+400 &GT:DP:RBS&  0/0:30:250&	0/1:20:.\\
+500 & GT:DP:RBS& .&	0/1:30:150\\
+649  &GT:DP:RBS&  .&	. &still in the reference block\\
+650  &GT:DP:RBS&  .&	. &no information about this location\\
+900  &GT:DP:RBS& 0/1:30&	0/0:20:100&block goes to 999	\\
+1000 &GT:DP:RBS&  0/0:20:200&	0/1:20&there's a checkpoint here.  \\
+1001 &GT:DP:RBS&  .&	0/0:20:200 & \\
+\end{tabular}  
 \end{itemize}
 
 
