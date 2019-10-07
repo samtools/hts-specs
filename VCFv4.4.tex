@@ -586,9 +586,11 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   In callsets with many samples, sites may grow to include numerous alternate alleles at the same POS.
   Usually, few of these alleles are actually observed in any one sample, but each genotype must supply fields like PL and AD for all of the alleles---a very inefficient representation as PL's size is quadratic in the allele count.
   Similarly, in rare sites, which can be the bulk of the sites, the vast majority of the samples are reference.
-  To prevent this, one can choose to specify the allele depth and the genotype likelihood against a subset of ``Local Alleles''.
+  To prevent this growth in VCF size, one can choose to specify the genotype, allele depth and the genotype likelihood against a subset of ``Local Alleles''.
   LAA is the strictly increasing, 1-based index into ALT, pointing out the alternative alleles that are actually in-play for that sample.
-  LAD is the depth of the local alleles, LPL is subset of the PL array that pertains to the alleles that are REF or referred to by LAA, LGT is the genotype but referencing the local alleles rather than the global ones.
+  LAD is the depth of the local alleles,
+  LPL is subset of the PL array that pertains to the alleles that are REF or referred to by LAA,
+  LGT is the genotype but referencing the local alleles rather than the global ones.
   It is implicit that REF is part of any ``local'' context, and it always has index 0, even if the genotype is compound HET.
   For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LAA=[2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
   In this case LGT=0/1 means that the sample is G/C.
@@ -596,12 +598,18 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   Note that reordering might be required and care need to be taken to reorder LAD and LPL appropriately.
   LAA is required in order to interpret LAD, LPL, and LGT.
 
-  For example, these two lines are encoding the same information (some columns removed for clarity):
+  In the following example, the records with the same POS encode the same information (some columns removed for clarity):
 
-  \begin{tabular}[l]{lllll}
-REF&  ALT&FORMAT&Alice&Bob\\
-G&A,C,T,\textless*\textgreater& LAA:LGT:LAD:LPL&  2,4:1/1:20,30,10:90,80,0,100,110,120 &3:0/1:15,25:40,0,80\\
-G&A,C,T,\textless*\textgreater& GT:AD:PL&  2/2:20,.,30,.,10:90,.,.,80,.,0,.,.,.,.,100,.,110,.,120&0/3:15,.,.,25,.:40,.,.,.,.,.,0,.,.,80,.,.,.,.\\
+  \begin{tabular}[l]{llllll}
+POS &REF&  ALT&FORMAT&sample\\
+1&G&A,C,T,\textless*\textgreater& LAA:LGT:LAD:LPL&  2,4:1/1:20,30,10:90,80,0,100,110,120\\
+1&G&A,C,T,\textless*\textgreater& GT:AD:PL&  2/2:20,.,30,.,10:90,.,.,80,.,0,.,.,.,.,100,.,110,.,120\\
+2&A&C,G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 3:0/1:15,25:40,0,80\\
+2&A&C,G,T,\textless*\textgreater& GT:AD:PL&0/3:15,.,.,25,.:40,.,.,.,.,.,0,.,.,80,.,.,.,.\\
+3&C&G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 4:0/0:30,1:0,30,80\\
+3&C&G,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.1:0,.,.,.,.,.,.,.,.,.,30,.,.,.,80\\
+4&G&A,T,\textless*\textgreater& LAA:LGT:LAD:LPL& :0/0:30:0\\
+4&G&A,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,..:0,.,.,.,.,.,.,.,.,.,.,.,.,.,.\\
 \end{tabular}
   \item LAD: See LAA
   \item LGT: See LAA
