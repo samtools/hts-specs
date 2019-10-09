@@ -88,7 +88,7 @@ Characters with special meaning (such as field delimiters `\verb|;|' in INFO or 
 \%2C  &  ,  & (comma)                \\
 \%0D  & CR  &                        \\
 \%0A  & LF  &                        \\
-\%09  & TAB & 
+\%09  & TAB &
 \end{tabular}
 \endgroup
 
@@ -173,30 +173,58 @@ Genotype fields specified in the FORMAT field are described as follows:
 Possible Types for FORMAT fields are: Integer, Float, Character, and String (this field is otherwise defined precisely as the INFO field).
 
 \subsubsection{Alternative allele field format}
-Symbolic alternate alleles are described as follows:
+Symbolic alternate alleles specified in the ALT field are described as follows:
 \begin{verbatim}
 ##ALT=<ID=type,Description=description>
 \end{verbatim}
 
-\noindent \textbf{Structural Variants} \newline
-In symbolic alternate alleles for imprecise structural variants, the ID field indicates the type of structural variant, and can be a colon-separated list of types and subtypes.
+\bigskip
+
+\noindent \textbf{Structural variants} \newline
+In symbolic alternate alleles for structural variants, the ID field indicates the type of structural variant, and consists of a type and an optional colon-separated list of subtypes.
 ID values are case sensitive strings and must not contain whitespace or angle brackets.
 The first level type must be one of the following:
 \begin{itemize}
   \item DEL Deletion relative to the reference
-  \item INS Insertion of novel sequence relative to the reference
+  \item INS Insertion relative to the reference
   \item DUP Region of elevated copy number relative to the reference
   \item INV Inversion of reference sequence
   \item CNV Copy number variable region (may be both deletion and duplication)
   \item BND Breakend
 \end{itemize}
 
-The CNV category should not be used when a more specific category can be applied. Reserved subtypes include:
-\begin{itemize}
-  \item DUP:TANDEM Tandem duplication
-  \item DEL:ME Deletion of mobile element relative to the reference
-  \item INS:ME Insertion of a mobile element relative to the reference
-\end{itemize}
+The list of first level symbolic alleles that represent structural variants is a closed set.
+Any symbolic alleles with a first level type other than one of those listed above are considered to be non-structural symbolic alleles.
+
+Variant subtypes should be used to add specificity to the maximum extent supported by the data. Reserved subtypes include:
+\newline
+
+\begin{tabular}{l l}
+DEL:ME  &  Absence of mobile element present in the reference \\
+DEL:ME:ALU  &  Absence of Alu element present in the reference \\
+DEL:ME:LINE1  &  Absence of LINE1 element present in the reference \\
+DEL:ME:SVA  &  Absence of SVA element present in the reference \\
+DEL:ME:HERV  &  Absence of HERV element present in the reference \\
+\\
+INS:ME  &  Insertion of mobile element relative to the reference \\
+INS:ME:ALU  &  Insertion of Alu element relative to the reference \\
+INS:ME:LINE1  &  Insertion of LINE1 element relative to the reference \\
+INS:ME:SVA  &  Insertion of SVA element relative to the reference \\
+INS:ME:HERV  &  Insertion of HERV element relative to the reference \\
+\\
+DUP:TANDEM  &  Tandem duplication, in same orientation as original \\
+DUP:INV-BEFORE  &  Tandem duplication, inserted before original in inverted orientation \\
+DUP:INV-AFTER  &  Tandem duplication, inserted after original in inverted orientation \\
+\end{tabular}
+\newline
+
+Variants should be written using the most precise type that can be determined by the variant caller.
+For example, if the insertion site of a new copy of a LINE1 element cannot be determined, it would be specified as a DUP of the originating LINE1 element.
+However if the new insertion site can be identified, the variant should be specified as INS:ME:LINE1 at the insertion site.
+
+Note that the DUP type is not restricted to tandem duplications and that the DUP subtypes have different breakpoints than their parent type.
+
+Variant subtypes are an open set and is it valid for a variant caller to define a subtype not specified in the above list. Such subtypes are considered to be instances of the first reserved subtype, with breakpoint and copy number semantics matching the reserved type. For example, INS:ME:PELEMENT is a valid caller-defined subtype, but INV:FOLDBACK is not since foldback inversions do not result in the same breakpoint and copy number changes as a simple inversion.
 
 \bigskip
 
@@ -498,7 +526,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
                0   & 0 &   &   &   \\
                1   & 1 & 2 &   &   \\
                2   & 3 & 4 & 5 &   \\
-               3   & 6 & 7 & 8 & 9 
+               3   & 6 & 7 & 8 & 9
             \end{tabular}
             }
     \end{itemize}
@@ -556,31 +584,36 @@ When a key reflects a property of a single alt allele (e.g.\ SVLEN), then when t
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
 \end{verbatim}
 \normalsize
-For precise variants, END is $\mbox{POS} + \mbox{length of REF allele} - 1$, and the for imprecise variants the corresponding best estimate.
+For precise variants, END is $\mbox{POS} + \mbox{length of REF allele} - 1$, and for imprecise variants it is the corresponding best estimate.
 
 \footnotesize
 \begin{verbatim}
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
 \end{verbatim}
 \normalsize
-\end{samepage}
-This key can be derived from the REF/ALT fields but is useful for filtering.
-The reserved values must be used for the types listed below:
+SVTYPE must be specified for all structural variants.
+Its value can usually be deduced from the REF and ALT fields, however despite this redundancy it is quite useful for filtering.
+SVTYPE must be assigned exactly one of the following values:
+
 \begin{itemize}
   \item DEL: Deletion relative to the reference
-  \item INS: Insertion of novel sequence relative to the reference
+  \item INS: Insertion relative to the reference
   \item DUP: Region of elevated copy number relative to the reference
   \item INV: Inversion of reference sequence
   \item CNV: Copy number variable region (may be both deletion and duplication)
   \item BND: Breakend
 \end{itemize}
 
+
 \footnotesize
 \begin{verbatim}
 ##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
 \end{verbatim}
 \normalsize
-One value for each ALT allele. Longer ALT alleles (e.g.\ insertions) have positive values, shorter ALT alleles (e.g.\ deletions) have negative values.
+SVLEN indicates the relative size of the ALT allele compared to the REF allele, with one SVLEN value for each ALT allele.
+If ALT is longer than REF (e.g. insertions), SVLEN must be positive; if ALT is shorter than REF (e.g. deletions), SVLEN must be negative.
+Simple inversions will have SVLEN=0.
+The size of the inversion can be determined by the POS field and the END attribute.
 
 \footnotesize
 \begin{verbatim}
@@ -1705,7 +1738,7 @@ This is simply a string of size 0 = 0x07.
 \vspace{0.3cm}
 In VCF there are sometimes fields of type list of strings, such as a number field of unbounded size encoding the amino acid changes due to a mutation.
 Since BCF2 doesn't directly support vectors of strings (a vector of character is already a string) we collapse the list of strings into a single comma-separated string, encode it as a regular BCF2 vector of characters, and on reading explode it back into the list of strings.
-This works because strings in VCF cannot contain `{\tt ,}' (it's a field separator) and so we can safely use `{\tt ,}' to separate the individual strings.
+This works because strings in VCF cannot contain `{ \tt ,}' (it's a field separator) and so we can safely use `{\tt ,}' to separate the individual strings.
 
 % String vectors in BCF do not need to start with comma, as the number of
 % values is indicated already in the definition of the tag in the header.
@@ -2080,7 +2113,7 @@ Therefore, also \#\#PEDIGREE newly requires a unique ID.
 \begin{itemize}
 \item BCF header lines can include optional IDX field
 \item We introduce END\_OF\_VECTOR byte and reserve 8 values for future use
-\item Clarified that except the END\_OF\_VECTOR byte, no other negative values are allowed in the GT array 
+\item Clarified that except the END\_OF\_VECTOR byte, no other negative values are allowed in the GT array
 \item String vectors in BCF do not need to start with comma, as the number of values is indicated already in the definition of the tag in the header.
 \item The implicit filter PASS was described inconsistently throughout BCFv2.1: It is encoded as the first entry in the dictionary, not the last.
 \end{itemize}
