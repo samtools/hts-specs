@@ -446,13 +446,16 @@ equal to the total byte length of the container minus the byte length of this he
 \hline
 itf8 & reference sequence id & reference sequence identifier  or\linebreak{}
 -1 for unmapped reads\linebreak{}
--2 for multiple reference sequences\tabularnewline
+-2 for multiple reference sequences.\linebreak{}
+All slices in this container must have a reference sequence id matching this value.\tabularnewline
 \hline
 itf8 & starting position on the reference & the alignment start position or\linebreak{}
-0 for unmapped reads\tabularnewline
+0 if the container is multiple-reference
+or contains unmapped unplaced reads\tabularnewline
 \hline
 itf8 & alignment span & the length of the alignment or\linebreak{}
-0 for unmapped reads\tabularnewline
+0 if the container is multiple-reference
+or contains unmapped unplaced reads\tabularnewline
 \hline
 itf8 & number of records & number of records in the container\tabularnewline
 \hline
@@ -631,10 +634,11 @@ the BAM file header\tabularnewline
 \hline
 RL & encoding\texttt{<}int\texttt{>} & read lengths & read lengths\tabularnewline
 \hline
-AP & encoding\texttt{<}int\texttt{>} & in-seq positions & if \textbf{APDelta} = true: 0-based alignment start
-delta from the previous record.  When the record is the first in the slice,
-its alignment start will be equal to that of the slice, so its alignment delta is 0.\linebreak{}
-if \textbf{APDelta} = false: encodes the alignment start position directly\tabularnewline
+AP & encoding\texttt{<}int\texttt{>} & in-seq positions & if \textbf{AP-Delta} = true: 0-based alignment start
+delta from the AP value in the previous record.
+Note this delta may be negative, for example when switching references in a multi-reference slice.
+When the record is the first in the slice, the previous position used is the slice alignment-start field (hence the first delta should be zero for single-reference slices, or the AP value itself for multi-reference slices).  \linebreak{}
+if \textbf{AP-Delta} = false: encodes the alignment start position directly\tabularnewline
 \hline
 RG & encoding\texttt{<}int\texttt{>} & read groups & read groups. Special value 
 `-1' stands for no group.\tabularnewline
@@ -778,14 +782,15 @@ The slice header block contains the following fields.
 \hline
 itf8 & reference sequence id & reference sequence identifier or\linebreak{}
 -1 for unmapped reads\linebreak{}
--2 for multiple reference sequences\tabularnewline
+-2 for multiple reference sequences.\linebreak{}
+This value must match that of its enclosing container.\tabularnewline
 \hline
 itf8 & alignment start & the alignment start position.\linebreak{}
-Ignored on read and set to 0 on write if the slice is multiple-reference
+0 if the slice is multiple-reference
 or contains unmapped unplaced reads\tabularnewline
 \hline
 itf8 & alignment span & the length of the alignment.\linebreak{}
-Ignored on read and set to 0 on write if the slice is multiple-reference
+0 if the slice is multiple-reference
 or contains unmapped unplaced reads\tabularnewline
 \hline
 itf8 & number of records & the number of records in the slice\tabularnewline
@@ -1096,7 +1101,8 @@ Following the bit-wise BAM and CRAM flags, CRAM encodes positional related data 
 Positional data is stored for both mapped and unmapped sequences, as unmapped data may still be ``placed'' at a specific location in the genome (without being aligned).
 Typically this is done to keep a sequence pair (paired-end or mate-pair sequencing libraries) together when one of the pair aligns and the other does not.
 
-The AP data series is delta encoded for reads mapped to a position-sorted slice containing data from a single reference, and as a normal integer value in all other cases.
+For reads stored in a position-sorted slice, the AP-delta flag in the compression header preservation map should be set and the AP data series will be delta encoded, using the slice alignment-start value as the first position to delta against.
+Note for multi-reference slices this may mean that the AP series includes negative values, such as when moving from an alignment to the end of one reference sequence to the start of the next or to unmapped unplaced data.  When the AP-delta flag is not set the AP data series is stored as a normal integer value.
 
 \begin{tabular}{|>{\raggedright}p{70pt}|>{\raggedright}p{75pt}|>{\raggedright}p{90pt}|>{\raggedright}p{171pt}|}
 \hline
@@ -1121,7 +1127,7 @@ int & RG & read group & the read group identifier expressed as the N\textsupersc
   \State $reference\_id\gets slice\_header.reference\_sequence\_id$
 \EndIf
 \State $read\_length \gets$ \Call{ReadItem}{RL, Integer}
-\If{$container\_pmap.AP\_delta \ne 0$ \textbf{and} $slice\_header.reference\_sequence\_id \geq 0$}
+\If{$container\_pmap.AP\_delta \ne 0$}
     \If{$first\_record\_in\_slice$}
         \State $last\_position\gets$ $slice\_header.alignment\_start$
     \EndIf
@@ -1378,19 +1384,31 @@ Hard clip & H (0x48) & int & HC & number of hard clipped bases, SAM operator H\t
 
 \subsubsection*{Base substitution codes (BS data series)}
 
-A base substitution is defined as a change from one nucleotide base (reference 
-base) to another (read base) including N as an unknown or missing base. There are 
-5 possible bases ACGTN, 4 possible substitutions for each base and 20 substitutions 
-in total. Substitutions for the same reference base are assigned integer codes 
-from 0 to 3 inclusive. To restore a base one would need to know its substitution 
-code and the reference base. 
+A base substitution is defined as a change from one nucleotide base (reference base) to
+another (read base), including N as an unknown or missing base. There are 5 possible reference
+bases (ACGTN), with 4 possible substitutions for each base, and 20 substitutions in total.
+The codes for all possible substitutions are stored in a substitution matrix. To restore a
+base, one would use the reference base and the substitution code, resolving the base via lookup
+in the substitution matrix.
 
-A base substitution matrix assigns integer codes to all possible substitutions. 
+\subsubsection*{Substitution Matrix Format}
 
-Substitution matrix is written as follows. Substitutions for a given reference 
-base are sorted by their frequencies in descending order then assigned numbers 
-from 0 to 3. Same-frequency ties are broken using alphabetical order. For example, 
-let us assume the following substitution frequencies for base A: 
+Each of the 4 possible substitutions for a given reference base is assigned a 2-bit integer
+code (see below) with a value ranging from 0 to 3 inclusive. The 4 2-bit codes are packed
+into a single byte, high 2-bits first, for each base ACGTN (minus the reference base itself).
+The entire substitution matrix is written as 5 such bytes, one for each reference base, also
+in the order ACGTN.
+
+\subsubsection*{Substitution Code Assignment}
+
+To assign the susbtitution code for a given reference base/read base, the substitutions for
+each reference base may optionally be sorted by their frequencies, in descending order, with
+same-frequency ties broken using the fixed order ACGTN. Although sorting by substitution
+frequency is not required by the CRAM format, assigning substitution codes based on frequency
+maximizes compression by ensuring that the most frequent substitutions use the shortest possible
+codes.
+
+For example, let us assume the following substitution frequencies for base A: 
 
 AC: 15\%
 
@@ -1410,12 +1428,9 @@ AT: 0
 
 AN: 3
 
-and they are written as a single byte, 10 01 00 11 = 147 decimal or 0x93 in this 
-case. The whole substitution matrix is written as 5 bytes, one for each reference 
-base in the alphabetical order: A, C, G, T and N.
-
-Note: the last two bits of each substitution code are redundant but still required 
-to simplify the reading. 
+The first byte of the substitution matrix entry for reference base A is written as a single byte,
+with the codes in the order CGTN: 10 01 00 11 = 147 decimal, or 0x93 in this case. This will then
+be followed by 4 more bytes representing substitutions for reference bases C, G, T and N.
 
 \subsubsection*{Decode mapped read pseudocode}
 

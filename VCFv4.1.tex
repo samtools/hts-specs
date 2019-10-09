@@ -1214,7 +1214,7 @@ To be concrete, suppose we have a info field around X=[A,B,C,D].  This is encode
 
 \vspace{0.3cm}
 
-\textbf{Vectors} --- The BCF2 type byte may indicate that the upcoming data stream contains not a single value but a fixed length vector of values.  The vector values occur in order (1st, 2nd, 3rd, etc) encoded as expected for the type declared in the vector's type byte.  For example, a vector of 3 16-bit integers would be layed out as first the vector type byte, followed immediately by 3 2-byte values for each integer, including a total of 7 bytes.
+\textbf{Vectors} --- The BCF2 type byte may indicate that the upcoming data stream contains not a single value but a fixed length vector of values.  The vector values occur in order (1st, 2nd, 3rd, etc) encoded as expected for the type declared in the vector's type byte.  For example, a vector of 3 16-bit integers would be laid out as first the vector type byte, followed immediately by 3 2-byte values for each integer, including a total of 7 bytes.
 
 Missing values in vectors are handled slightly differently from atomic values.  There are two possibilities for missing values:
 

@@ -94,7 +94,9 @@ Characters with special meaning (such as field delimiters `\verb|;|' in INFO or 
 
 
 \subsection{Data types}
-Data types supported by VCF are: Integer (32-bit, signed), Float (32-bit, formatted to match the regular expression \verb|^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$|, \texttt{NaN}, or \texttt{+/-Inf}), Flag, Character, and String.
+Data types supported by VCF are: Integer (32-bit, signed), Float (32-bit IEEE-754, formatted to match one of the regular expressions \verb|^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$| or \verb"^[-+]?(INF|INFINITY|NAN)$" case insensitively),%
+\footnote{Note Java's {\tt Double.valueOf} is particular about capitalisation, so additional code is needed to parse all VCF infinite/NaN values.}
+Flag, Character, and String.
 For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in the binary version and therefore are disallowed in both VCF and BCF, see \ref{BcfTypeEncoding}.
 
 \subsection{Meta-information lines}
@@ -355,7 +357,7 @@ Fixed fields are:
   INFO fields are encoded as a semicolon-separated series of short keys with optional values in the format: key[=data[,data]].
   INFO keys must match the regular expression \texttt{\^{}([A-Za-z\_][0-9A-Za-z\_.]*|1000G)\$}, please note that ``1000G'' is allowed as a special legacy value.
   Duplicate keys are not allowed.
-  Arbitrary keys are permitted, although those listed in Table~\ref{table:reserved-info} are reserved (albeit optional).
+  Arbitrary keys are permitted, although those listed in Table~\ref{table:reserved-info} and described below are reserved (albeit optional).
 
   The exact format of each INFO key should be specified in the meta-information (as described above).
   Example for an INFO field: DP=154;MQ=52;H2.
@@ -386,7 +388,7 @@ Fixed fields are:
 	CIGAR		& A		& String	& Cigar string describing how to align an alternate allele to the reference allele \\
 	DB		& 0		& Flag		& dbSNP membership \\
 	DP		& 1		& Integer	& Combined depth across samples \\
-	END		& 1		& Integer	& End position (for use with symbolic alleles) \\
+	END		& 1		& Integer	& End position on CHROM (used with symbolic alleles; see below) \\
 	H2		& 0		& Flag		& HapMap2 membership \\
 	H3		& 0		& Flag		& HapMap3 membership \\
 	MQ		& 1		& Float		& RMS mapping quality \\
@@ -397,6 +399,15 @@ Fixed fields are:
 	VALIDATED	& 0		& Flag		& Validated by follow-up experiment \\
 	1000G		& 0		& Flag		& 1000 Genomes membership \\
 \end{longtable}
+
+\begin{itemize}
+\renewcommand{\labelitemii}{$\circ$}
+\item END: End reference position (1-based), indicating the variant spans positions POS--END on reference/contig CHROM.
+Normally this is the position of the last base in the REF allele, so it can be derived from POS and the length of REF, and no END INFO field is needed.
+However when symbolic alleles are used, e.g.\ in gVCF or structural variants, an explicit END INFO field provides variant span information that is otherwise unknown.
+
+This field is used to compute BCF's {\tt rlen} field (see~\ref{BcfSiteEncoding}) and is important when indexing VCF/BCF files to enable random access and querying by position.
+\end{itemize}
 
 \subsubsection{Genotype fields}
 If genotype information is present, then the same types of data must be present for all samples.
@@ -1393,9 +1404,10 @@ Haplotype quality & 30 & 40 & 40 \\
 \pagebreak
 \subsection{Representing unspecified alleles and REF-only blocks (gVCF)}
 In order to report sequencing data evidence for both variant and non-variant positions in the genome, the VCF specification allows to represent blocks of reference-only calls in a single record using the END INFO tag, an idea originally introduced by the gVCF file format\footnote{\url{https://help.basespace.illumina.com/articles/descriptive/gvcf-files/}}.
-The convention adopted here is to represent reference evidence as likelihoods against an unknown alternate allele.
+
+The convention adopted here is to represent reference evidence as likelihoods against an unknown alternate allele represented as $<$*$>$.
 Think of this as the likelihood for reference as compared to any other possible alternate allele (both SNP, indel, or otherwise).
-A symbolic alternate allele $<$*$>$ is used to represent this unspecified alternate allele.
+The $<$*$>$ representation is preferred over the symbolic allele $<$NON\_REF$>$.
 
 Example records are given below:
 \scriptsize
@@ -1529,6 +1541,7 @@ The genotype data may be omitted entirely from the record if there is no genotyp
 Compression of a BCF file is recommended but not required.
 
 \subsubsection{Site encoding}
+\label{BcfSiteEncoding}
 
 {\small
 \begin{tabular}{|l | l | p{30em} | } \hline
