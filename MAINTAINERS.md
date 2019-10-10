@@ -39,6 +39,8 @@ Past VCF/BCF maintainers include Cristina Yenyxe Gonzalez Garcia, Ryan Poplin, a
 * Andy Yates (@andrewyatz)
 * Rasko Leinonen (@raskoleinonen)
 
+Past refget maintainers include Matt Laird.
+
 [ga4gh-ff]:  https://www.ga4gh.org/howwework/workstreams/#lsg
 
 
