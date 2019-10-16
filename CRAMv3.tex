@@ -284,7 +284,7 @@ Encoding notation is defined as the keyword `encoding' followed by its data type
 in angular brackets, for example `encoding\texttt{<}byte\texttt{>}' stands for 
 an encoding that operates on a data series of data type `byte'. 
 
-Encodings may have parameters of different data types, for example the external 
+Encodings may have parameters of different data types, for example the EXTERNAL 
 encoding has only one parameter, integer id of the external block. The following 
 encodings are defined: 
 
@@ -544,7 +544,7 @@ SLICE\_HEADER\tnote{a} & 2 & Slice header block & See specific section\tabularne
 \hline
 EXTERNAL\_DATA & 4 & external data block & data produced by external encodings\tabularnewline
 \hline
-CORE\_DATA & 5 & core data block & bit stream of all encodings except for external\tabularnewline
+CORE\_DATA & 5 & core data block & bit stream of all encodings except for external encodings\tabularnewline
 \hline
 \end{tabular}
 \begin{tablenotes}
@@ -570,7 +570,7 @@ number of external data blocks are associated with each slice.
 
 Writing to and reading from core and external data blocks is organised through 
 CRAM records. Each data series is associated with an encoding. In case of external 
-encoding the block content id is used to identify the block where the data series 
+encodings the block content id is used to identify the block where the data series 
 is stored. Please note that external blocks can have multiple data series associated 
 with them; in this case the values from these data series will be interleaved. 
 
@@ -882,9 +882,8 @@ Pic.3 Relationship between core data block and external data blocks.
 The picture shows how a CRAM record (on the left) is partially written to core 
 data block while the other fields are stored in two external data blocks. The specific 
 encodings are presented only for demonstration purposes, the main point here is 
-to distinguish between bit encodings whose output is always stored in core data 
-block and the external encoding which simply stored the bytes into external data 
-blocks.
+to distinguish between bit encodings whose output is always stored in a core data 
+block, and external encodings which store bytes in external data blocks.
 
 \section{\textbf{End of file marker}}
 
@@ -1668,16 +1667,16 @@ not equal to zero. For example, given offset is 10 and the value to be encoded
 is 1, the actually encoded value would be offset+value=11. Then when decoding, 
 the offset would be subtracted from the decoded value. 
 
-\subsection{External: codec ID 1}
+\subsection{EXTERNAL: codec ID 1}
 
 Can encode types \textit{Byte}, \textit{Integer}.
 
-External coding is simply storage of data verbatim to an external block with a given ID.
+The EXTERNAL coding is simply storage of data verbatim to an external block with a given ID.
 If the type is \textit{Byte} the data is stored as-is, otherwise for \textit{Integer} type the data is stored in ITF8.
 
 \subsubsection*{Parameters}
 
-CRAM format defines the following parameters of external coding: 
+CRAM format defines the following parameters of EXTERNAL coding: 
 
 \begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
 \hline
