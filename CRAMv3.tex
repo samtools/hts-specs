@@ -339,11 +339,11 @@ containers. The BAM header is stored in the first container.
 %%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig001.png}.}
 %%\end{figure}
 
-Pic.1 CRAM file starts with a file definition followed by the BAM header and other 
+Pic.1 A CRAM file starts with a file definition, followed by a BAM header container, then other 
 containers.
 
 Containers consist of one or more blocks. By convention, the BAM header is stored 
-in the first container within a single block. This is known as the BAM header block.
+in the first container in what is known as the BAM header block.
 
 %%\begin{figure}[htbp]
 \includegraphics[width=354pt, height=103pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig002.png}
@@ -477,15 +477,17 @@ byte[ ] & blocks & The blocks contained within the container.\tabularnewline
 \hline
 \end{tabular}
 
-\subsection{\textbf{CRAM header in the first container}}
+\subsection{\textbf{BAM header in the first container}}
 
-The first container in the CRAM file contains the BAM header in an optionally
-compressed block. Only gzip is allowed as compression method for this block. BAM
-header is terminated with \textbackslash{}0 byte and any extra bytes in the
-block can be used to expand the BAM header. For example when updating @SQ
-records additional space may be required for the BAM header. It is recommended
-to reserve 50\% more space in the CRAM header block than it is required by the
-BAM header.
+The first container in a CRAM file contains the BAM header in an optionally
+compressed block. Only gzip is allowed as compression method for this block.
+The BAM header container does not include a compression header block.
+
+It is recommended to reserve 50\% more space in the BAM header container than
+is required for the BAM header by optionally padding the container with a second
+raw block consisting of all zeroes. This can be used to subsequently expand the header
+container in place, such as when updating @SQ records, while preserving the relative
+offsets of all subsquent containers.
 
 \section{\textbf{Block structure}}
 
