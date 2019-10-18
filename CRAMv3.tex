@@ -331,26 +331,26 @@ CRC32 sum is a combination of CRC32 values by summing up all individual CRC32 va
 The overall CRAM file structure is described in this section. Please refer to other 
 sections of this document for more detailed information. 
 
-A CRAM file starts with a fixed length file definition followed by one or more 
-containers. The BAM header is stored in the first container.
+A CRAM file consists of a fixed length file definition, followed by a CRAM header container,
+then one or more data containers, and finally a special end-of-file container. 
 
 %%\begin{figure}[htbp]
 \includegraphics[width=356pt, height=31pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig001.png}
 %%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig001.png}.}
 %%\end{figure}
 
-Pic.1 A CRAM file starts with a file definition, followed by a BAM header container, then other 
+Pic.1 A CRAM file consists of a file definition, followed by a header container, then other 
 containers.
 
-Containers consist of one or more blocks. By convention, the BAM header is stored 
-in the first container in what is known as the BAM header block.
+Containers consist of one or more blocks. The first container, called the CRAM header container,
+is used to store a textual header as described in the SAM specification (see the section 7.1).
 
 %%\begin{figure}[htbp]
 \includegraphics[width=354pt, height=103pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig002.png}
 %%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig002.png}.}
 %%\end{figure}
 
-Pic.2 The BAM header is stored in the first container.
+Pic.2 The the first container is the CRAM header container.
 
 Each container starts with a container header followed by one or more blocks. Each 
 block starts with a block header. All data in CRAM is stored within blocks after 
@@ -477,16 +477,17 @@ byte[ ] & blocks & The blocks contained within the container.\tabularnewline
 \hline
 \end{tabular}
 
-\subsection{\textbf{BAM header in the first container}}
+\subsection{\textbf{CRAM header container}}
 
-The first container in a CRAM file contains the BAM header in an optionally
-compressed block. Only gzip is allowed as compression method for this block.
-The BAM header container does not include a compression header block.
+The first container in a CRAM file contains a textual header in a single block, optionally
+gzip compressed. This text header currently matches the SAM header specification. Only
+gzip is allowed as compression method for this block. The CRAM header container does not
+include a compression header block.
 
-It is recommended to reserve 50\% more space in the BAM header container than
-is required for the BAM header by optionally padding the container with a second
+It is recommended to reserve 50\% more space in the CRAM header container than
+is required for the SAM header text by optionally padding the container with a second
 raw block consisting of all zeroes. This can be used to subsequently expand the header
-container in place, such as when updating @SQ records, while preserving the relative
+container in place, such as when updating @SQ records, while preserving the absolute
 offsets of all subsquent containers.
 
 \section{\textbf{Block structure}}
@@ -536,7 +537,7 @@ CRAM has the following block content types:
 \hline
 \textbf{Block content type} & \textbf{Block content type id} & \textbf{Name} & \textbf{Contents}\tabularnewline
 \hline
-FILE\_HEADER & 0 & BAM header block & BAM header\tabularnewline
+FILE\_HEADER & 0 & CRAM header block & CRAM header\tabularnewline
 \hline
 COMPRESSION\_HEADER & 1 & Compression header block & See specific section\tabularnewline
 \hline
@@ -577,11 +578,11 @@ is stored. Please note that external blocks can have multiple data series associ
 with them; in this case the values from these data series will be interleaved. 
 
 
-\subsection{\textbf{BAM header block}}
+\subsection{\textbf{CRAM header block}}
 
-The BAM header is stored in a single block within the first container. 
+The SAM header is stored in a single block within the first container. 
 
-The following constraints apply to the BAM header: 
+The following constraints apply to the SAM header: 
 
 \begin{itemize}
 \item The SQ:MD5 checksum is required unless the reference sequence has been embedded 
@@ -634,7 +635,7 @@ BF & encoding\texttt{<}int\texttt{>} & BAM bit flags & see separate section\tabu
 CF & encoding\texttt{<}int\texttt{>} & CRAM bit flags & see specific section\tabularnewline
 \hline
 RI & encoding\texttt{<}int\texttt{>} & reference id & record reference id from
-the BAM file header\tabularnewline
+the SAM file header\tabularnewline
 \hline
 RL & encoding\texttt{<}int\texttt{>} & read lengths & read lengths\tabularnewline
 \hline
@@ -889,7 +890,7 @@ encodings are presented only for demonstration purposes, the main point here is
 to distinguish between bit encodings whose output is always stored in a core data 
 block, and external encodings which store bytes in external data blocks.
 
-\section{\textbf{End of file marker}}
+\section{\textbf{End of file Container}}
 
 A special container is used to mark the end of a file or stream. It is required in version 3 or later. The idea is to provide an easy and a quick way to detect that a CRAM file or stream is complete. The marker is basically an empty container with ref seq id set to -1 (unaligned) and alignment 
 start set to 4542278.
