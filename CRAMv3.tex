@@ -20,6 +20,8 @@
 \usepackage{algpseudocode}
 \usepackage{threeparttable}
 \usepackage{tikz}
+\usetikzlibrary{positioning,shapes.multipart}
+\usetikzlibrary{decorations.pathreplacing}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
@@ -334,65 +336,157 @@ sections of this document for more detailed information.
 A CRAM file consists of a fixed length file definition, followed by a CRAM header container,
 then one or more data containers, and finally a special end-of-file container. 
 
-%%\begin{figure}[htbp]
-\includegraphics[width=356pt, height=31pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig001.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig001.png}.}
-%%\end{figure}
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={scale=1.0},
+  boxes/.style={rectangle split,rectangle split parts=#1,draw,rectangle split horizontal,text width=5em,align=center,minimum height=1cm,fill=black!5,on grid},
+  notes/.style={text width=20em,align=center,minimum height=1cm,on grid},
+]
+\node (file) [boxes=6] {
+\nodepart{one}File definition
+\nodepart[text width=8em]{two}CRAM Header Container
+\nodepart{three}Data Container
+\nodepart{four}...
+\nodepart{five}Data Container
+\nodepart[text width=8em]{six}CRAM EOF Container
+};
+\end{tikzpicture}
 
-Pic.1 A CRAM file consists of a file definition, followed by a header container, then other 
-containers.
+Figure 1: A CRAM file consists of a file definition, followed by a header container, then other containers.
+\end{center}
 
 Containers consist of one or more blocks. The first container, called the CRAM header container,
 is used to store a textual header as described in the SAM specification (see the section 7.1).
 
-%%\begin{figure}[htbp]
-\includegraphics[width=354pt, height=103pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig002.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig002.png}.}
-%%\end{figure}
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={scale=1.0},
+  boxes/.style={rectangle split,rectangle split parts=#1,draw,rectangle split horizontal,text width=5em,align=center,minimum height=1cm,fill=black!5,on grid},
+  notes/.style={text width=20em,align=center,minimum height=1cm,on grid},
+]
+\node (file) [boxes=6] {
+\nodepart{one}File definition
+\nodepart[text width=8em]{two}CRAM Header Container
+\nodepart{three}Data Container
+\nodepart{four}...
+\nodepart{five}Data Container
+\nodepart[text width=8em]{six}CRAM EOF Container
+};
 
-Pic.2 The the first container is the CRAM header container.
+\node (header) [boxes=2,below=1 of file.three south, text width=15em] {
+\nodepart{one}Block 1:\break
+CRAM Header\break
+(optionally compressed)
+\nodepart{two}Optional Block 2:\break
+nul padding bytes\break
+(uncompressed)
+};
+\draw (file.one split south) to (header.north west);
+\draw (file.two split south) to (header.north east);
+\end{tikzpicture}
 
-Each container starts with a container header followed by one or more blocks. Each 
-block starts with a block header. All data in CRAM is stored within blocks after 
-the block header.
+Figure 2: The the first container holds the CRAM header text.
+\end{center}
 
-%%\begin{figure}[htbp]
-\includegraphics[width=356pt, height=154pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig003.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig003.png}.}
-%%\end{figure}
+Each container starts with a container header structure followed by
+one or more blocks.
+The first block in each container is the compression header block
+giving details of how to decode data in subsequent blocks.
+Each block starts with a block header structure followed by the block
+data.
 
-Pic.3 Container and block structure. All data in CRAM files is stored in blocks.
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={scale=1.0},
+  boxes/.style={rectangle split,rectangle split parts=#1,draw,rectangle split horizontal,text width=5em,align=center,minimum height=1cm,fill=black!5,on grid},
+  notes/.style={text width=20em,align=center,minimum height=1cm,on grid},
+]
+\node (file) [boxes=6] {
+\nodepart{one}File definition
+\nodepart[text width=8em]{two}CRAM Header Container
+\nodepart{three}Data Container
+\nodepart{four}...
+\nodepart{five}Data Container
+\nodepart[text width=8em]{six}CRAM EOF Container
+};
 
-The first block in each container is the compression header block:
+\node (container) [boxes=5,below=1 of file.three south,text width=8em] {
+\nodepart{one}Container Header structure
+\nodepart{two}Compression Header Block
+\nodepart[text width=4em]{three}Block 1
+\nodepart[text width=3em]{four}...
+\nodepart[text width=4em]{five}Block M
+};
+\draw (file.two split south) to (container.north west);
+\draw (file.three split south) to (container.north east);
 
-%%\begin{figure}[htbp]
-\includegraphics[width=354pt, height=103pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig004.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig004.png}.}
-%%\end{figure}
+\node (blocks) [boxes=2,below=1 of container.two south,text width=6em] {
+\nodepart{one}Block Header structure
+\nodepart{two}Block data
+};
+\draw (container.one split south) to (blocks.north west);
+\draw (container.two split south) to (blocks.north east);
+\end{tikzpicture}
 
-Pic.4 Compression header is the first block in the container.
+Figure 3: Containers as a series of blocks
+\end{center}
 
 The blocks after the compression header are organised logically into slices. One 
 slice may contain, for example, a contiguous region of alignment data. Slices begin 
-with a slice header block and are followed by one or more data blocks:
+with a slice header block and are followed by one or more data blocks.
+It is these data blocks which hold the primary bulk of CRAM data.
+The data blocks are further subdivided into a core data block and one or more external data blocks.
 
-%%\begin{figure}[htbp]
-\includegraphics[width=374pt, height=137pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig005.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig005.png}.}
-%%\end{figure}
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={scale=1.0},
+  boxes/.style={rectangle split,rectangle split parts=#1,draw,rectangle split horizontal,text width=5em,align=center,minimum height=1cm,fill=black!5,on grid},
+  notes/.style={text width=20em,align=center,minimum height=1cm,on grid},
+]
+\node (file) [boxes=6] {
+\nodepart{one}File definition
+\nodepart[text width=8em]{two}CRAM Header Container
+\nodepart{three}Data Container
+\nodepart{four}...
+\nodepart{five}Data Container
+\nodepart[text width=8em]{six}CRAM EOF Container
+};
 
-Pic.5 Containers are logically organised into slices.
+\node (container) [boxes=9,below=1 of file.three south,text width=8em] {
+\nodepart{one}Container Header structure
+\nodepart{two}Compression Header Block
+\nodepart[text width=3em]{three}Block
+\nodepart[text width=2em]{four}...
+\nodepart[text width=3em]{five}Block
+\nodepart[text width=7em]{six}. . .
+\nodepart[text width=3em]{seven}Block
+\nodepart[text width=2em]{eight}...
+\nodepart[text width=3em]{nine}Block
+};
+\draw (file.two split south) to (container.north west);
+\draw (file.three split south) to (container.north east);
 
-Data blocks are divided into core and external data blocks. Each slice must have 
-at least one core data block immediately after the slice header block. The core 
-data block may be followed by one or more external data blocks.
+\draw[decoration={brace,mirror,amplitude=5pt,raise=2pt},decorate]
+  (container.two split south) to (container.five split south);
+\node [below=0.2 of container.four south] {Slice 1};
 
-%%\begin{figure}[htbp]
-\includegraphics[width=392pt, height=149pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig006.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig006.png}.}
-%%\end{figure}
+\draw[decoration={brace,mirror,amplitude=5pt,raise=2pt},decorate]
+  (container.six split south) to (container.south east);
+\node [below=0.2 of container.eight south] {Slice N};
 
-Pic.5 Data blocks are divided into core and external data blocks. 
+\node (slice) [boxes=5,below=1 of container.four south, text width=6.5em] {
+\nodepart{one}Slice Header Block
+\nodepart{two}Core Data Block
+\nodepart{three}External Data Block 1
+\nodepart{four}...
+\nodepart{five}External Data Block M
+};
+\draw (container.two split south) to (slice.north west);
+\draw (container.five split south) to (slice.north east);
+\end{tikzpicture}
+
+Figure 4: Slices formed from a series of concatenated blocks
+\end{center}
 
 \section{\textbf{File definition}}
 
@@ -882,7 +976,7 @@ picture:
 %%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig007.png}.}
 %%\end{figure}
 
-Pic.3 Relationship between core data block and external data blocks.
+Figure 5: Relationship between core data block and external data blocks.
 
 The picture shows how a CRAM record (on the left) is partially written to core 
 data block while the other fields are stored in two external data blocks. The specific 
