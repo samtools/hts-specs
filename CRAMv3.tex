@@ -948,7 +948,7 @@ At present no tags are defined.
 
 \subsection{\textbf{Core data block}}
 
-A core data block is a bit stream (most significant bit first) consisting of one 
+A core data block is a bit stream (most significant bit first) consisting of data from one 
 or more CRAM records. Please note that one byte could hold more then one CRAM record 
 as a minimal CRAM record could be just a few bits long. The core data block has 
 the following fields:
@@ -966,23 +966,105 @@ bit[ ] & CRAM record N & The Nth CRAM record \tabularnewline
 \hline
 \end{tabular}
 
-\subsection{\textbf{External data block}}
+\subsection{\textbf{External data blocks}}
 
-Relationship between core data block and external data blocks is shown in the following 
+The relationship between the core data block and external data blocks is shown in the following 
 picture: 
 
-%%\begin{figure}[htbp]
-\includegraphics[width=451pt, height=350pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig007.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig007.png}.}
-%%\end{figure}
+\begin{tikzpicture}
 
-Figure 5: Relationship between core data block and external data blocks.
 
-The picture shows how a CRAM record (on the left) is partially written to core 
-data block while the other fields are stored in two external data blocks. The specific 
-encodings are presented only for demonstration purposes, the main point here is 
-to distinguish between bit encodings whose output is always stored in a core data 
-block, and external encodings which store bytes in external data blocks.
+
+\usetikzlibrary{shapes, shadows, positioning, arrows, decorations.markings}
+
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\tikzstyle{dsbox} = [blockbox, text width=6em, minimum width=6em, minimum height=3em, rounded corners, drop shadow]
+\tikzstyle{blockbox}=[draw, fill=white, text width=4.0em, text centered, minimum height=1.0em, drop shadow]
+\tikzstyle{encodedblock} = [blockbox, text width=6em, minimum width=8em, minimum height=3em, drop shadow]
+
+\tikzstyle{texto} = [above, text width=8em, text centered]
+ 
+\tikzstyle{encodingArrow} = [thick, decoration={markings, mark=at position
+   1 with {\arrow[semithick]{open triangle 60}}},
+   double distance=3.0pt, shorten >= 5.0pt,
+   preaction = {decorate},
+   postaction = {draw, line width=1.4pt, white, shorten >= 5.0pt}]
+\tikzstyle{innerWhite} = [semithick, white, line width=1.4pt, shorten >= 4.5pt]
+
+\newcommand{\cramRecord}[6]{%
+\begin{pgfonlayer}{background}
+    \path (#1.west |- #1.north)+(-0.5,0.5) node (a1) {};
+    \path (#1.east |- #6.south)+(+0.5,-0.25) node (a2) {};
+    \path[fill=brown!10,rounded corners, draw=black!50, dashed]
+      (a1) rectangle (a2);
+    \path (a1.east |- a1.south)+(1.0,-0.3) node[texto]
+      {\scriptsize\textit{CRAM Record}};
+\end{pgfonlayer}}
+
+\newcommand{\dsbox}[2]{node (p#1) [dsbox]
+   {\scriptsize\textit{#2}}}
+\newcommand{\encodedblock}[2]{node (p#1) [encodedblock]
+   {\scriptsize\textit{#2}}}
+
+\path +(-2.5,-1.5) \dsbox{1}{Bit Flags};
+\path (p1.south)+(0.0,-1.0) \dsbox{2}{Alignment Start};
+\path (p2.south)+(0.0,-1.0) \dsbox{3}{Read Length};
+\path (p3.south)+(0.0,-1.0) \dsbox{4}{Bases};
+\path (p4.south)+(0.0,-1.0) \dsbox{5}{Quality Scores};
+\path (p5.south)+(0.0,-1.0) \dsbox{6}{Tags...};
+
+\cramRecord{p1}{p2}{p3}{p4}{p5}{p6}
+
+\newcommand{\blocks}[4]{%
+\begin{pgfonlayer}{background}
+    \path (#1.west |- #1.north)+(-0.5,0.5) node (a1) {};
+    \path (#1.east |- #1.south)+(+0.5,-0.25) node (a2) {};
+    \path (#2.west |- #2.north)+(-0.5,0.5) node (a3) {};
+    \path (#4.east |- #4.south)+(+0.5,-0.25) node (a4) {};
+    \path[fill=yellow!10, rounded corners, draw=black!50, dashed]
+      (a1) rectangle (a2);
+   \path[fill=yellow!10, rounded corners, draw=black!50, dashed]
+      (a3) rectangle (a4);
+   \path (a1.east |- a1.south)+(0.8,-0.3) node[texto]
+      {\scriptsize\textit{Bit Stream}};
+   \path (a3.east |- a3.south)+(0.8,-0.3) node[texto]
+      {\scriptsize\textit{Byte Streams}};
+\end{pgfonlayer}}
+
+\path (a1.south)+(10.0,-1.0) \encodedblock{7}{Core Data Block};
+\path (p7.south)+(0.0,-2.5) \encodedblock{8}{External Data Block};
+\path (p8.south)+(0.0,-1.0) \encodedblock{9}{External Data Block};
+\path (p9.south)+(0.0,-1.0) \encodedblock{10}{External Data Block...};
+
+\blocks{p7}{p8}{p9}{p10}
+
+\draw[encodingArrow] (p1) + (1.7, -0.0) to (p7);
+\draw[encodingArrow] (p3) + (1.7, 0.0) to (p8);
+\draw[encodingArrow] (p4) + (1.7, 0.0) to (p9);
+\draw[encodingArrow] (p5) + (1.7, 0.0) to (p10);
+
+\filldraw[draw=black, fill=white!10, drop shadow] (1.5, -1.5) ellipse (2.0 and 0.5);
+\filldraw[draw=black, fill=white!10, drop shadow] (1.5, -4.55) ellipse (1.8 and 0.5);
+\filldraw[draw=black, fill=white!10, drop shadow] (1.5, -6.1) ellipse (1.8 and 0.5);
+\filldraw[draw=black, fill=white!10, drop shadow] (1.5, -7.6) ellipse (1.8 and 0.5);
+
+\node [right=of p1, scale=0.7, text centered, text width=14em] {Core (Bit) Encodings (Huffman, RANS, etc.)};
+\node [right=of p3, scale=0.7, text centered, text width=14em] {External (Byte) Encodings};
+\node [right=of p4, scale=0.7, text centered, text width=14em] {External (Byte)  Encodings};
+\node [right=of p5, scale=0.7, text centered, text width=14em] {External (Byte)  Encodings};
+
+\end{tikzpicture}
+
+Figure 5: The relationship between core and external encodings, and core and external data blocks.
+
+The picture shows how a CRAM record (on the left) is distributed between the core 
+data block and one or more external data blocks, via core or external encodings. The specific 
+encodings presented are only examples for purposes of illustration. The main point is 
+to distinguish between core bit encodings whose output is always stored in a core data 
+block, and external byte encodings whose output is always stored in external data 
+blocks.
 
 \section{\textbf{End of file container}}
 
