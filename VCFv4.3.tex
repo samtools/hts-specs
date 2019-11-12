@@ -1428,7 +1428,8 @@ A BCF2 header follows exactly the specification as VCF, with a few extensions/re
 The BCF2 header begins with the ``BCF2 magic'' 5 bytes that encode {\tt BCF\em XY} where {\em X} and {\em Y} are bytes indicating the major number (currently 2) and the minor number (currently 2).
 This magic can be used to quickly examine the file to determine that it's a BCF2 file.
 Immediately following the BCF2 magic is an unsigned 4-byte integer containing the length of the header text which includes the NUL terminator character.
-Follow the standard NUL-terminated VCF header lines in text format, beginning with \verb|##fileformat=VCFvX.Y|.
+The next portion of the file is a standard VCF header in text format with a NUL terminator.
+The header must begin with a VCF version number in the format \verb|##fileformat=VCFvX.Y|.
 Because the type is encoded directly in the header, the recommended extension for BCF2 formatted files is {\sl .bcf}.
 BCF2 supports encoding values in a dictionary of strings.
 The string map is provided by the keyword \verb|##dictionary=S0,S1,...,SN| as a comma-separate ordered list of strings.
@@ -1607,7 +1608,7 @@ The final four bits encodes an unsigned integer that indicates the type of the u
 \vspace{0.3cm}
 \begin{tabular}{|l | l | l|} \hline
 Lowest 4 bits & Hexadecimal encoding & Corresponding atomic type \\ \hline
-0 & 0x00 & A missing value without an explicit type provided \\ \hline
+0 & 0x00 & A MISSING value without an explicit type provided \\ \hline
 1 & 0x?1 & Integer [8 bit] \\ \hline
 2 & 0x?2 & Integer [16 bit] \\ \hline
 3 & 0x?3 & Integer [32 bit] \\ \hline
@@ -1616,8 +1617,9 @@ Lowest 4 bits & Hexadecimal encoding & Corresponding atomic type \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
-Note this is not used in BCF2, but its type is reserved in case this becomes necessary.
-In BCF2 characters are simply represented by strings with a single element 4,6,8--15 reserved for future use.
+In BCF2 strings are type=7 with an appropriate length.  
+Single characters are represented as strings with length=1.
+Type codes 4,6,8--15 are reserved for future use.
 
 \vspace{0.3cm}
 
@@ -1893,7 +1895,7 @@ All of these can be encoded by 1-element INT8 values (0x11), with associated hex
 
 First is HM3.
 The entry begins with the key: 0x11 0x50.
-The HM3 key is a flag with no associated value and therefore is represented as the special case of a missing value without an explicit type provided.
+The HM3 field is a flag with no associated value and therefore is represented as the special case of a missing value without an explicit type provided.
 Altogether we have:
 
 \vspace{0.3cm}
