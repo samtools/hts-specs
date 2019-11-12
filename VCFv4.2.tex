@@ -1090,26 +1090,38 @@ the actual CHROM field values in the encoded BCF2 records would be 0, 1, and 2 c
 In BCF2, the original VCF records are converted to binary and encoded as BGZF blocks.  Each record is conceptually two parts.  First is the site information (chr, pos, INFO field).  Immediately after the sites data is the genotype data for every sample in the BCF2 file.  The genotype data may be omitted entirely from the record if there is no genotype data in the VCF file.  Note that it's acceptable to not BGZF compress a BCF2 file, but not all readers may handle this uncompressed encoding.
 
 \subsubsection{Site encoding}
+\label{BcfSiteEncoding}
 
-BCF2 site information encoding
-Field	Type	Notes
-l\_shared	uint32\_t	Data length from CHROM to the end of INFO
-l\_indiv	uint32\_t	Data length of FORMAT and individual genotype fields
-CHROM	int32\_t	Given as an offset into the mandatory contig dictionary
-POS	int32\_t	0-based leftmost coordinate
-rlen	int32\_t	Length of the record as projected onto the reference sequence.  May be the actual length of the REF allele but for symbolic alleles should be the declared length respecting the END attribute
-n\_allele\_info	int32\_t	n\_info, where n\_allele is the number of REF+ALT alleles in this record, and n\_info is the number of VCF INFO fields present in this record
-n\_fmt\_sample	uint32\_t	n\_sample, where n\_fmt is the number of format fields for genotypes in this record, and n\_samples is the number of samples present in this sample.  Note that the number of samples must be equal to the number of samples in the header
-QUAL	float	Variant quality; 0x7F800001 for a missing value
-ID	typed string
-REF+ALT	list of n\_allele typed strings	the first allele is REF (mandatory) followed by n\_alleles - 1 ALT
-alleles, all encoded as typed strings
-FILTER	Typed vector of integers	a vector of integer offsets into dictionary, one for each FILTER field value.  ``.'' is encoded as MISSING
-INFO field key/value pairs	n\_info pairs of typed vectors	The first value must be a typed atomic integer giving the offset of the INFO field key into the dictionary.  The second value is a typed vector giving the value of the field
-Genotype value block	see below	see below
-
+{\small
+\begin{tabular}{|l | l | p{30em} | } \hline
+\textbf{Field} &	\textbf{Type} &	\textbf{Notes} \\ \hline
+l\_shared & uint32\_t & Data length from CHROM to the end of INFO \\ \hline
+l\_indiv  & uint32\_t & Data length of FORMAT and individual genotype fields \\ \hline
+CHROM     & int32\_t  & Given as an offset into the mandatory contig dictionary \\ \hline
+POS       & int32\_t  & 0-based leftmost coordinate \\ \hline
+rlen      & int32\_t  & Length of the record as projected onto the reference sequence.
+                        Must be the length of the REF allele or the declared length of a symbolic allele
+                        respecting the END attribute \\ \hline
+QUAL      & float     & Variant quality; 0x7F800001 for a missing value \\ \hline
+n\_info   & uint16\_t & The number of INFO fields in this record \\ \hline
+n\_allele & uint16\_t & The number of REF+ALT alleles in this record \\ \hline
+n\_sample & uint24\_t & The number of samples in this record, stored as a \textbf{three} byte little-endian value.
+                        Note that n\_sample must be equal to the number of samples in the header \\ \hline
+n\_fmt    & uint8\_t  & The number of FORMAT keys.  See \ref{GenotypeEncoding} \\ \hline
+ID       & typed string & Variant identifier; 0x07 for a missing value \\ \hline
+REF+ALT  & list of n\_allele typed strings & the first allele is REF (mandatory) followed by n\_alleles - 1 ALT
+                                             alleles, all encoded as typed strings \\ \hline
+FILTER   & Typed vector of integers & a vector of integer offsets into dictionary, one for each FILTER field value.
+                                      ``.'' is encoded as MISSING \\ \hline
+INFO     & field key/value pairs & n\_info pairs of typed vectors.
+                                   The first value must be a typed atomic integer giving the offset of the INFO field
+                                   key into the dictionary.
+                                   The second value is a typed vector giving the value of the field \\ \hline
+Genotype values & see below & see below \\ \hline
+\end{tabular}}
 
 \subsubsection{Genotype encoding}
+\label{GenotypeEncoding}
 
 Genotype fields are encoded not by sample as in VCF but rather by field, with a vector of values for each sample following each field.  In BCF2, the following VCF line:
 
