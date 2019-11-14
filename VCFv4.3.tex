@@ -264,11 +264,18 @@ A VCF will therefore contain one entry per trio.
 The fourth line is an example of the most general form of a pedigree line.
 It means that the genome SampleID is derived from the N $\ge$ 1 genomes Ancestor1, ..., AncestorN.
 
-TODO: Text describing meaning of Mother and Father well-known ancestor tags
-and explaining how to represent a PED file as in-line \#\#PEDIGREE trios.
-Noting alternatively to use \#\#pedigreeDB=URL to point to an external PED file.
+Mother and Father have the same meaning as in PED files. Consider the following example PED line (the columns are Family ID, Individual ID, Paternal ID, Maternal ID, Sex, Phenotype, Genotypes):
+\begin{verbatim}
+FAM001  9  7 8  1  2  A A
+\end{verbatim}
 
-\noindent If samples and the relationships between them are described in an external resource such as a database or PED file, is it also possible to provide a link:
+The family described in that line can be expressed in VCF as:
+
+\begin{verbatim}
+##PEDIGREE=<ID=9,Father=7,Mother=8>
+\end{verbatim}
+
+If samples and the relationships between them are described in an external resource such as a database or PED file, is it also possible to provide a link:
 \begin{verbatim}
 ##pedigreeDB=URL
 \end{verbatim}
