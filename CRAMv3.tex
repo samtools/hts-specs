@@ -20,6 +20,8 @@
 \usepackage{algpseudocode}
 \usepackage{threeparttable}
 \usepackage{tikz}
+\usetikzlibrary{positioning,shapes.multipart}
+\usetikzlibrary{decorations.pathreplacing}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
 
@@ -331,68 +333,160 @@ CRC32 sum is a combination of CRC32 values by summing up all individual CRC32 va
 The overall CRAM file structure is described in this section. Please refer to other 
 sections of this document for more detailed information. 
 
-A CRAM file starts with a fixed length file definition followed by one or more 
-containers. The BAM header is stored in the first container.
+A CRAM file consists of a fixed length file definition, followed by a CRAM header container,
+then one or more data containers, and finally a special end-of-file container. 
 
-%%\begin{figure}[htbp]
-\includegraphics[width=356pt, height=31pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig001.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig001.png}.}
-%%\end{figure}
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={scale=1.0},
+  boxes/.style={rectangle split,rectangle split parts=#1,draw,rectangle split horizontal,text width=5em,align=center,minimum height=1cm,fill=black!5,on grid},
+  notes/.style={text width=20em,align=center,minimum height=1cm,on grid},
+]
+\node (file) [boxes=6] {
+\nodepart{one}File definition
+\nodepart[text width=8em]{two}CRAM Header Container
+\nodepart{three}Data Container
+\nodepart{four}...
+\nodepart{five}Data Container
+\nodepart[text width=8em]{six}CRAM EOF Container
+};
+\end{tikzpicture}
 
-Pic.1 CRAM file starts with a file definition followed by the BAM header and other 
-containers.
+Figure 1: A CRAM file consists of a file definition, followed by a header container, then other containers.
+\end{center}
 
-Containers consist of one or more blocks. By convention, the BAM header is stored 
-in the first container within a single block. This is known as the BAM header block.
+Containers consist of one or more blocks. The first container, called the CRAM header container,
+is used to store a textual header as described in the SAM specification (see the section 7.1).
 
-%%\begin{figure}[htbp]
-\includegraphics[width=354pt, height=103pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig002.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig002.png}.}
-%%\end{figure}
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={scale=1.0},
+  boxes/.style={rectangle split,rectangle split parts=#1,draw,rectangle split horizontal,text width=5em,align=center,minimum height=1cm,fill=black!5,on grid},
+  notes/.style={text width=20em,align=center,minimum height=1cm,on grid},
+]
+\node (file) [boxes=6] {
+\nodepart{one}File definition
+\nodepart[text width=8em]{two}CRAM Header Container
+\nodepart{three}Data Container
+\nodepart{four}...
+\nodepart{five}Data Container
+\nodepart[text width=8em]{six}CRAM EOF Container
+};
 
-Pic.2 The BAM header is stored in the first container.
+\node (header) [boxes=2,below=1 of file.three south, text width=15em] {
+\nodepart{one}Block 1:\break
+CRAM Header\break
+(optionally compressed)
+\nodepart{two}Optional Block 2:\break
+nul padding bytes\break
+(uncompressed)
+};
+\draw (file.one split south) to (header.north west);
+\draw (file.two split south) to (header.north east);
+\end{tikzpicture}
 
-Each container starts with a container header followed by one or more blocks. Each 
-block starts with a block header. All data in CRAM is stored within blocks after 
-the block header.
+Figure 2: The the first container holds the CRAM header text.
+\end{center}
 
-%%\begin{figure}[htbp]
-\includegraphics[width=356pt, height=154pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig003.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig003.png}.}
-%%\end{figure}
+Each container starts with a container header structure followed by
+one or more blocks.
+The first block in each container is the compression header block
+giving details of how to decode data in subsequent blocks.
+Each block starts with a block header structure followed by the block
+data.
 
-Pic.3 Container and block structure. All data in CRAM files is stored in blocks.
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={scale=1.0},
+  boxes/.style={rectangle split,rectangle split parts=#1,draw,rectangle split horizontal,text width=5em,align=center,minimum height=1cm,fill=black!5,on grid},
+  notes/.style={text width=20em,align=center,minimum height=1cm,on grid},
+]
+\node (file) [boxes=6] {
+\nodepart{one}File definition
+\nodepart[text width=8em]{two}CRAM Header Container
+\nodepart{three}Data Container
+\nodepart{four}...
+\nodepart{five}Data Container
+\nodepart[text width=8em]{six}CRAM EOF Container
+};
 
-The first block in each container is the compression header block:
+\node (container) [boxes=5,below=1 of file.three south,text width=8em] {
+\nodepart{one}Container Header structure
+\nodepart{two}Compression Header Block
+\nodepart[text width=4em]{three}Block 1
+\nodepart[text width=3em]{four}...
+\nodepart[text width=4em]{five}Block M
+};
+\draw (file.two split south) to (container.north west);
+\draw (file.three split south) to (container.north east);
 
-%%\begin{figure}[htbp]
-\includegraphics[width=354pt, height=103pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig004.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig004.png}.}
-%%\end{figure}
+\node (blocks) [boxes=2,below=1 of container.two south,text width=6em] {
+\nodepart{one}Block Header structure
+\nodepart{two}Block data
+};
+\draw (container.one split south) to (blocks.north west);
+\draw (container.two split south) to (blocks.north east);
+\end{tikzpicture}
 
-Pic.4 Compression header is the first block in the container.
+Figure 3: Containers as a series of blocks
+\end{center}
 
 The blocks after the compression header are organised logically into slices. One 
 slice may contain, for example, a contiguous region of alignment data. Slices begin 
-with a slice header block and are followed by one or more data blocks:
+with a slice header block and are followed by one or more data blocks.
+It is these data blocks which hold the primary bulk of CRAM data.
+The data blocks are further subdivided into a core data block and one or more external data blocks.
 
-%%\begin{figure}[htbp]
-\includegraphics[width=374pt, height=137pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig005.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig005.png}.}
-%%\end{figure}
+\begin{center}
+\begin{tikzpicture}[
+  every node/.style={scale=1.0},
+  boxes/.style={rectangle split,rectangle split parts=#1,draw,rectangle split horizontal,text width=5em,align=center,minimum height=1cm,fill=black!5,on grid},
+  notes/.style={text width=20em,align=center,minimum height=1cm,on grid},
+]
+\node (file) [boxes=6] {
+\nodepart{one}File definition
+\nodepart[text width=8em]{two}CRAM Header Container
+\nodepart{three}Data Container
+\nodepart{four}...
+\nodepart{five}Data Container
+\nodepart[text width=8em]{six}CRAM EOF Container
+};
 
-Pic.5 Containers are logically organised into slices.
+\node (container) [boxes=9,below=1 of file.three south,text width=8em] {
+\nodepart{one}Container Header structure
+\nodepart{two}Compression Header Block
+\nodepart[text width=3em]{three}Block
+\nodepart[text width=2em]{four}...
+\nodepart[text width=3em]{five}Block
+\nodepart[text width=7em]{six}. . .
+\nodepart[text width=3em]{seven}Block
+\nodepart[text width=2em]{eight}...
+\nodepart[text width=3em]{nine}Block
+};
+\draw (file.two split south) to (container.north west);
+\draw (file.three split south) to (container.north east);
 
-Data blocks are divided into core and external data blocks. Each slice must have 
-at least one core data block immediately after the slice header block. The core 
-data block may be followed by one or more external data blocks.
+\draw[decoration={brace,mirror,amplitude=5pt,raise=2pt},decorate]
+  (container.two split south) to (container.five split south);
+\node [below=0.2 of container.four south] {Slice 1};
 
-%%\begin{figure}[htbp]
-\includegraphics[width=392pt, height=149pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig006.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig006.png}.}
-%%\end{figure}
+\draw[decoration={brace,mirror,amplitude=5pt,raise=2pt},decorate]
+  (container.six split south) to (container.south east);
+\node [below=0.2 of container.eight south] {Slice N};
 
-Pic.5 Data blocks are divided into core and external data blocks. 
+\node (slice) [boxes=5,below=1 of container.four south, text width=6.5em] {
+\nodepart{one}Slice Header Block
+\nodepart{two}Core Data Block
+\nodepart{three}External Data Block 1
+\nodepart{four}...
+\nodepart{five}External Data Block M
+};
+\draw (container.two split south) to (slice.north west);
+\draw (container.five split south) to (slice.north east);
+\end{tikzpicture}
+
+Figure 4: Slices formed from a series of concatenated blocks
+\end{center}
 
 \section{\textbf{File definition}}
 
@@ -477,15 +571,18 @@ byte[ ] & blocks & The blocks contained within the container.\tabularnewline
 \hline
 \end{tabular}
 
-\subsection{\textbf{CRAM header in the first container}}
+\subsection{\textbf{CRAM header container}}
 
-The first container in the CRAM file contains the BAM header in an optionally
-compressed block. Only gzip is allowed as compression method for this block. BAM
-header is terminated with \textbackslash{}0 byte and any extra bytes in the
-block can be used to expand the BAM header. For example when updating @SQ
-records additional space may be required for the BAM header. It is recommended
-to reserve 50\% more space in the CRAM header block than it is required by the
-BAM header.
+The first container in a CRAM file contains a textual header in a single block, optionally
+gzip compressed. This text header currently matches the SAM header specification. Only
+gzip is allowed as compression method for this block. The CRAM header container does not
+include a compression header block.
+
+It is recommended to reserve 50\% more space in the CRAM header container than
+is required for the SAM header text by optionally padding the container with a second
+raw block consisting of all zeroes. This can be used to subsequently expand the header
+container in place, such as when updating @SQ records, while preserving the absolute
+offsets of all subsequent containers.
 
 \section{\textbf{Block structure}}
 
@@ -534,7 +631,7 @@ CRAM has the following block content types:
 \hline
 \textbf{Block content type} & \textbf{Block content type id} & \textbf{Name} & \textbf{Contents}\tabularnewline
 \hline
-FILE\_HEADER & 0 & BAM header block & BAM header\tabularnewline
+FILE\_HEADER & 0 & CRAM header block & CRAM header\tabularnewline
 \hline
 COMPRESSION\_HEADER & 1 & Compression header block & See specific section\tabularnewline
 \hline
@@ -575,11 +672,11 @@ is stored. Please note that external blocks can have multiple data series associ
 with them; in this case the values from these data series will be interleaved. 
 
 
-\subsection{\textbf{BAM header block}}
+\subsection{\textbf{CRAM header block}}
 
-The BAM header is stored in a single block within the first container. 
+The SAM header is stored in a single block within the first container. 
 
-The following constraints apply to the BAM header: 
+The following constraints apply to the SAM header: 
 
 \begin{itemize}
 \item The SQ:MD5 checksum is required unless the reference sequence has been embedded 
@@ -632,7 +729,7 @@ BF & encoding\texttt{<}int\texttt{>} & BAM bit flags & see separate section\tabu
 CF & encoding\texttt{<}int\texttt{>} & CRAM bit flags & see specific section\tabularnewline
 \hline
 RI & encoding\texttt{<}int\texttt{>} & reference id & record reference id from
-the BAM file header\tabularnewline
+the SAM file header\tabularnewline
 \hline
 RL & encoding\texttt{<}int\texttt{>} & read lengths & read lengths\tabularnewline
 \hline
@@ -851,7 +948,7 @@ At present no tags are defined.
 
 \subsection{\textbf{Core data block}}
 
-A core data block is a bit stream (most significant bit first) consisting of one 
+A core data block is a bit stream (most significant bit first) consisting of data from one 
 or more CRAM records. Please note that one byte could hold more then one CRAM record 
 as a minimal CRAM record could be just a few bits long. The core data block has 
 the following fields:
@@ -869,25 +966,92 @@ bit[ ] & CRAM record N & The Nth CRAM record \tabularnewline
 \hline
 \end{tabular}
 
-\subsection{\textbf{External data block}}
+\subsection{\textbf{External data blocks}}
 
-Relationship between core data block and external data blocks is shown in the following 
+The relationship between the core data block and external data blocks is shown in the following 
 picture: 
 
-%%\begin{figure}[htbp]
-\includegraphics[width=451pt, height=350pt, keepaspectratio=true]{img/CRAMFileFormat2-1-fig007.png}
-%%\caption{This should be the caption for \texttt{img/CRAMFileFormat2-1-fig007.png}.}
-%%\end{figure}
+\begin{center}
+\begin{tikzpicture}
 
-Pic.3 Relationship between core data block and external data blocks.
+\usetikzlibrary{shapes, shadows, positioning, arrows,  decorations.markings}
 
-The picture shows how a CRAM record (on the left) is partially written to core 
-data block while the other fields are stored in two external data blocks. The specific 
-encodings are presented only for demonstration purposes, the main point here is 
-to distinguish between bit encodings whose output is always stored in a core data 
-block, and external encodings which store bytes in external data blocks.
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
 
-\section{\textbf{End of file marker}}
+\tikzstyle{dsbox} = [blockbox, text width=6em, minimum width=6em, minimum height=3em, rounded corners, drop shadow]
+\tikzstyle{blockbox}=[draw, fill=white, text width=4.0em, text centered, minimum height=1.0em, drop shadow]
+\tikzstyle{encodedblocklarge} = [blockbox, text width=6em, minimum width=8em, minimum height=4em, drop shadow]
+\tikzstyle{encodedblock} = [blockbox, text width=6em, minimum width=8em, minimum height=3em, drop shadow]
+
+\tikzstyle{texto} = [above, text width=8em, text centered]
+
+\newcommand{\cramRecord}[6]{%
+\begin{pgfonlayer}{background}
+    \path (#1.west |- #1.north) + (-0.5, 0.5) node (a1) {};
+    \path (#1.east |- #6.south) + (+0.5,-0.25) node (a2) {};
+    \path[fill=brown!10,rounded corners, draw=black!50, dashed]
+      (a1) rectangle (a2);
+    \path (a1.east |- a1.south) + (1.0,-0.3) node[texto]
+      {\scriptsize\textbf{CRAM Record}};
+\end{pgfonlayer}}
+
+\newcommand{\dsbox}[2]{node (p#1) [dsbox]
+{\scriptsize{#2}}}
+\newcommand{\encodedblock}[2]{node (p#1) [encodedblock]
+	{\scriptsize{#2}}}
+\newcommand{\encodedblocklarge}[2]{node (p#1) [encodedblocklarge]
+   {\scriptsize{#2}}}
+
+\path +(-2.5,-1.5) \dsbox{1}{Bit Flags};
+\path (p1.south)+(0.0,-1.0) \dsbox{2}{Alignment Start};
+\path (p2.south)+(0.0,-1.0) \dsbox{3}{Read Length};
+\path (p3.south)+(0.0,-1.0) \dsbox{4}{Bases};
+\path (p4.south)+(0.0,-1.0) \dsbox{5}{Quality Scores};
+\path (p5.south)+(0.0,-1.0) \dsbox{6}{Tags...};
+
+\cramRecord{p1}{p2}{p3}{p4}{p5}{p6}
+
+\newcommand{\blockStreams}[4]{%
+\begin{pgfonlayer}{background}
+    \path (#1.west |- #1.north)+(-0.5, .7) node (a1) {};
+    \path (#1.east |- #1.south)+(+0.5, -0.25) node (a2) {};
+    \path (#2.west |- #2.north)+(-0.5, 0.5) node (a3) {};
+    \path (#4.east |- #4.south)+(+0.5, -0.25) node (a4) {};
+    \path[fill=yellow!10, rounded corners, draw=black!50, dashed]
+      (a1) rectangle (a2);
+    \path (a1.east |- a1.south)+(0.8,-0.3) node[texto]
+      {\scriptsize\textbf{Bit Stream}};
+    \path[fill=yellow!10, rounded corners, draw=black!50, dashed]
+      (a3) rectangle (a4);
+    \path (a3.east |- a3.south)+(1.0,-0.3) node[texto]{\scriptsize\textbf{Byte Streams}};
+\end{pgfonlayer}}
+
+\path (a1.south) + (12.0, -2.3) \encodedblocklarge {7} {Core Data Block};
+\path (p7.south) + (0.0, -2.0) \encodedblock {8} {External Data Block};
+\path (p8.south) + (0.0, -1.0) \encodedblock {9} {External Data Block}; 
+\path (p9.south) + (0.0, -1.0) \encodedblock {10}{External Data Block...};
+
+\blockStreams {p7} {p8} {p9} {p10}
+
+\node[minimum size=4cm, right = of p2, single arrow, draw, single arrow head indent=0ex, black] {Bit encodings (Huffman, ...) };
+
+\node[minimum size=4cm, right = of p5, single arrow, draw, single arrow head indent=0ex, black] {Byte encodings (external, ...) };
+
+\end{tikzpicture}
+
+Figure 5: The relationship between core and external encodings, and core and external data blocks.
+
+\end{center}
+
+The picture shows how a CRAM record (on the left) is distributed between the core 
+data block and one or more external data blocks, via core or external encodings. The specific 
+encodings presented are only examples for purposes of illustration. The main point is 
+to distinguish between core bit encodings whose output is always stored in a core data 
+block, and external byte encodings whose output is always stored in external data 
+blocks.
+
+\section{\textbf{End of file container}}
 
 A special container is used to mark the end of a file or stream. It is required in version 3 or later. The idea is to provide an easy and a quick way to detect that a CRAM file or stream is complete. The marker is basically an empty container with ref seq id set to -1 (unaligned) and alignment 
 start set to 4542278.
