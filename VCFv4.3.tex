@@ -238,6 +238,7 @@ The contig names must not use a reserved symbolic allele name.
 
 
 \subsubsection{Sample field format}
+\label{meta-sample}
 It is possible to define sample to genome mappings as shown below:
 {\scriptsize
 \begin{verbatim}
@@ -275,12 +276,14 @@ The family described in that line can be expressed in VCF as:
 ##PEDIGREE=<ID=9,Father=7,Mother=8>
 \end{verbatim}
 
+Phenotypes can be expressed as explained in Section \ref{meta-sample}, and genotypes as in Section \ref{genotype-fields}.
+
 If samples and the relationships between them are described in an external resource such as a database or PED file, is it also possible to provide a link:
 \begin{verbatim}
 ##pedigreeDB=URL
 \end{verbatim}
 
-\noindent See \ref{ClonalPedigree} for more details about clonal relationships.
+\noindent See Section \ref{ClonalPedigree} for more details about clonal relationships.
 
 
 \subsection{Header line syntax}
@@ -408,6 +411,7 @@ This field is used to compute BCF's {\tt rlen} field (see~\ref{BcfSiteEncoding})
 \end{itemize}
 
 \subsubsection{Genotype fields}
+\label{genotype-fields}
 If genotype information is present, then the same types of data must be present for all samples.
 First a FORMAT field is given specifying the data types and order (colon-separated FORMAT keys matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate keys are not allowed).
 This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format.
