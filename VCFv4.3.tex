@@ -257,6 +257,9 @@ It is possible to record relationships between genomes using the following synta
 ##PEDIGREE=<ID=SomaticNonTumour,Original=GermlineID>
 ##PEDIGREE=<ID=ChildID,Father=FatherID,Mother=MotherID>
 ##PEDIGREE=<ID=SampleID,Name_1=Ancestor_1,...,Name_N=Ancestor_N>
+##PEDIGREE=<ID=ChildID,MonozygoticTwin=OtherChildID>
+##PEDIGREE=<ID=ChildID,DizygoticTwin=AnotherChildID>
+##PEDIGREE=<ID=ChildID,Sibling=SiblingChildID>
 \end{verbatim}
 
 The first two lines assert that the DNA in genomes TumourSample and SomaticNonTumour is asexually or clonally derived with mutations from the DNA in genome OriginalID. 
@@ -264,8 +267,10 @@ The third line describes a family relationship between genomes.
 A VCF will therefore contain one entry per trio.
 The fourth line is an example of the most general form of a pedigree line.
 It means that the genome SampleID is derived from the N $\ge$ 1 genomes Ancestor1, ..., AncestorN.
+The fifth and sixth lines describe relationships between twins.
+Regular siblings can be inferred implicitly from trios like the third line, but if the parents are unknown, the seventh line describes a sibling relationship explicitly.
 
-Mother and Father have the same meaning as in PED files. Consider the following example PED line (the columns are Family ID, Individual ID, Paternal ID, Maternal ID, Sex, Phenotype, Genotypes):
+Mother and Father are optional (e.g.\ if unknown) and have the same meaning as in PED files. Consider the following example PED line (the columns are Family ID, Individual ID, Paternal ID, Maternal ID, Sex, Phenotype, Genotypes):
 \begin{verbatim}
 FAM001  9  7 8  1  2  A A
 \end{verbatim}
