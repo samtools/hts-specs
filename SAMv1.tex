@@ -36,6 +36,8 @@
 \newcommand*{\cclass}[1]{{\rm\sf :#1:}}
 \newcommand*{\caret}{\textsuperscript{$\wedge$}}
 
+\newcommand*{\memlimited}{\textcolor{gray}{\footnotesize\it limited}}
+
 \begin{document}
 
 \input{SAMv1.ver}
@@ -1027,15 +1029,16 @@ underlined word in uppercase denotes a field in the SAM format.
   \cline{1-6}
   \multicolumn{3}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf magic} & BAM magic string & {\tt char[4]} & {\tt BAM\char92 1}\\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf l\_text} & Length of the header text, including any {\tt NUL} padding & {\tt int32\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf l\_text} & Length of the header text, including any {\tt NUL} padding & {\tt uint32\_t} & $< 2^{31}$ \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf text} & Plain header text in SAM; not necessarily {\tt NUL}-terminated & {\tt char[{\sf l\_text}]} & \\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf n\_ref} & \# reference sequences & {\tt int32\_t} & \\\cline{1-6}
+  % Pedantically this should be <= but we restrict |refs| by one so n_ref fits in a signed 32-bit int.
+  \multicolumn{3}{|l|}{\sf n\_ref} & \# reference sequences & {\tt uint32\_t} & $< 2^{31}$ \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of reference information (n=n\_ref)}} \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf l\_name} & Length of the reference name plus 1 (including {\tt NUL}) & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_name} & Length of the reference name plus 1 (including {\tt NUL}) & {\tt uint32\_t} & \memlimited \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf name} & Reference sequence name; {\tt NUL}-terminated & {\tt char[{\sf l\_name}]} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt int32\_t} & \\\cline{1-6}
+  & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt uint32\_t} & $< 2^{31}$ \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of alignments (until the end of the file)}} \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf block\_size} & Total length of the alignment record, excluding this field & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf block\_size} & Total length of the alignment record, excluding this field & {\tt uint32\_t} & \memlimited \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_read\_name} & Length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$) & {\tt uint8\_t} & \\\cline{2-6}
@@ -1043,7 +1046,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf bin} & BAI index bin, see Section~\ref{sec:bin-field}  & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf n\_cigar\_op} & Number of operations in \underline{\sf CIGAR}, see Section~\ref{sec:ncigar} & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf flag} & Bitwise flags (= \underline{\sf FLAG})\footnotemark\ & {\tt uint16\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt uint32\_t} & \memlimited \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf next\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
@@ -1063,6 +1066,13 @@ underlined word in uppercase denotes a field in the SAM format.
 should be written as zero and ignored on reading by current software.}
 \stepcounter{footnote}
 \footnotetext{For backward compatibility, an absent {\sf QNAME} (represented as `{\tt *}' in SAM) is stored as a C string {\tt "*\char92 0"}.}
+
+\noindent
+Most length and count fields described as {\tt uint32\_t} have additional constraints on their range:
+$\mbox{\sf l\_text} < 2^{31}$ due to implementation limits;
+$\mbox{\sf n\_ref} < 2^{31}$ because {\sf refID} and {\sf next\_refID} are signed;
+$\mbox{\sf l\_ref} < 2^{31}$ because {\sf tlen} is signed;
+those marked ``\textit{limited}'' are limited by available memory and the practical size of the data represented well before they are limited by, e.g., Java's signed 32-bit integer maximum array size.
 
 \subsubsection{BIN field calculation}\label{sec:bin-field}
 {\sf BIN} is calculated using the {\sf reg2bin()} function in
@@ -1147,9 +1157,10 @@ than `{\tt H}' fields.}
 
 \newcommand*{\arraytagfield}[3]{\tagfield{B}{\bytebox{1}{\tt #1}\bytebox{4}{\em count}\byteboxvector{#2}{#3}}}
 
+\begin{samepage}
 The representation of a `{\tt B}' array field starts with a sub-type character
-similar to the numeric field types above and an {\tt int32\_t} \emph{count}
-giving the number of elements in the array.
+similar to the numeric field types above and a \emph{count} ({\tt uint32\_t}, but
+limited by memory and {\sf block\_size}) giving the number of elements in the array.
 The array elements follow, encoded as binary integers or IEEE floats sized
 according to the sub-type:
 \begin{center}\small\byteboxsetup\begin{tabular}{l}
@@ -1161,6 +1172,7 @@ according to the sub-type:
 \arraytagfield{I}{4}{uint32\_t} \\
 \arraytagfield{f}{4}{float}
 \end{tabular}\end{center}
+\end{samepage}
 
 \pagebreak
 
@@ -1271,26 +1283,28 @@ saved.
 
 \subsection{The BAI index format for BAM files}
 \begin{table}[ht]
-{\small
+\centering\small
 \begin{tabular}{|l|l|l|l|l|l|r|}
   \cline{1-7}
   \multicolumn{4}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-7}
   \multicolumn{4}{|l|}{\sf magic} & Magic string & {\tt char[4]} & {\tt BAI\char92 1}\\\cline{1-7}
-  \multicolumn{4}{|l|}{\sf n\_ref} & \# reference sequences & {\tt int32\_t} & \\\cline{1-7}
+  \multicolumn{4}{|l|}{\sf n\_ref} & \# reference sequences & {\tt uint32\_t} & $< 2^{31}$ \\\cline{1-7}
   \multicolumn{7}{|c|}{\textcolor{gray}{\it List of indices (n=n\_ref)}} \\\cline{2-7}
-  & \multicolumn{3}{l|}{\sf n\_bin} & \# distinct bins (for the binning index) & {\tt int32\_t} & \\\cline{2-7}
+  & \multicolumn{3}{l|}{\sf n\_bin} & \# distinct bins (for the binning index) & {\tt uint32\_t} & $\le 37451$ \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of distinct bins (n=n\_bin)}} \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf bin} & Distinct bin & {\tt uint32\_t} & \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf n\_chunk} & \# chunks & {\tt int32\_t} & \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf bin} & Distinct bin & {\tt uint32\_t} & $\le 37450$ \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf n\_chunk} & \# chunks & {\tt uint32\_t} & \memlimited\footnotemark \\\cline{3-7}
   & & \multicolumn{5}{c|}{\textcolor{gray}{\it List of chunks (n=n\_chunk)}} \\\cline{4-7}
   & & & {\sf chunk\_beg} & (Virtual) file offset of the start of the chunk & {\tt uint64\_t} & \\\cline{4-7}
   & & & {\sf chunk\_end} & (Virtual) file offset of the end of the chunk & {\tt uint64\_t} & \\\cline{2-7}
-  & \multicolumn{3}{l|}{\sf n\_intv} & \# 16kbp intervals (for the linear index) & {\tt int32\_t} & \\\cline{2-7}
+  & \multicolumn{3}{l|}{\sf n\_intv} & \# 16kbp intervals (for the linear index) & {\tt uint32\_t} & $\le 2^{17}$ \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of intervals (n=n\_intv)}} \\\cline{3-7}
   & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\\cline{1-7}
   \multicolumn{4}{|l|}{{\sf n\_no\_coor} (optional)} & Number of unplaced unmapped reads ({\sf RNAME} *) & {\tt uint64\_t} & \\\cline{1-7}
-\end{tabular}}
+\end{tabular}
 \end{table}
+
+\footnotetext{The number of chunks in a single bin is effectively limited by available memory and in any case is typically a maximum of some thousands.}
 
 The index file may optionally contain additional metadata providing a summary
 of the number of mapped and unmapped read-segments per reference sequence,
@@ -1313,7 +1327,7 @@ compatible with real bins and their chunks:
 \begin{tabular}{|l|l|l|r|}
   \hline
   {\sf bin} & Magic bin number & {\tt uint32\_t} & 37450 \\\hline
-  {\sf n\_chunk} & \# chunks & {\tt int32\_t} & 2 \\\hline
+  {\sf n\_chunk} & \# chunks & {\tt uint32\_t} & 2 \\\hline
   {\sf unmapped\_beg} & (Virtual) file offset of the start of placed unmapped reads & {\tt uint64\_t} & \\\hline
   {\sf unmapped\_end} & (Virtual) file offset of the end of placed unmapped reads & {\tt uint64\_t} & \\\hline
   {\sf n\_mapped} & Number of mapped read-segments for this reference & {\tt uint64\_t} & \\\hline
