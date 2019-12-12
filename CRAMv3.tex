@@ -779,7 +779,7 @@ for the next fragment\tabularnewline
 TS & encoding\texttt{<}int\texttt{>} & template size & template sizes\tabularnewline
 \hline
 NF & encoding\texttt{<}int\texttt{>} & distance to next fragment & number of records
-to the next fragment\tnote{b}\tabularnewline
+to skip to the next fragment\tnote{b}\tabularnewline
 \hline
 TL\tnote{c} & encoding\texttt{<}int\texttt{>} & tag ids  & list of tag ids, see tag encoding
 section\tabularnewline
@@ -1367,19 +1367,25 @@ byte[ ] & RN & read names & read names\tabularnewline
 \EndProcedure
 \end{algorithmic}
 
-\subsection{\textbf{Mate record}}
+\subsection{\textbf{Mate records}}
 \label{subsec:mate}
 
-There are two ways in which mate information can be preserved in CRAM: number of records downstream (distance, within this slice) to the next fragment in the template and a special mate record if the next fragment is not in the current slice.
-In the latter case the record is labelled as ``detached'', see the CF data series.
+There are two ways in which mate information can be preserved in CRAM.
+If the next fragment is not in the same slice we store verbatim copies of the insert size, mate reference chromosome and positions, and mate flags (mapped status, orientation) for both records.
+In this case both records are labelled as ``detached'' in the CF data series using bit 2.
 
-For mates within the slice only the distance is captured, and only for the first record.  The mate has neither detached nor downstream flags set in the CF data series.
+If this and the next fragment are within the same slice, we can derive much of this information by comparing the two records.
+The upstream record has CF bit 4 (mate downstream) flag set and stores the number of records to skip (in the NF data series) between this record and the record for the next fragment on this template, with zero meaning the next fragment is also the next record.
+The downstream record has neither CF bits 2 (detached) or 4 (mate downstream) set nor does it use the NF data series (unless it also has an additional ``next fragment'' to refer to).
+
+It is not mandatory to use this deduplication approach and optionally CRAM write implementations may wish to label data as detached even when all records for the template reside in the same slice.
+One reason to do this may be to preserve inconsistent data so that it round-trips through the CRAM format with full fidelity
 
 \begin{tabular}{|>{\raggedright}p{68pt}|>{\raggedright}p{115pt}|>{\raggedright}p{228pt}|}
 \hline
 \textbf{Data series type} & \textbf{Data series name} & \textbf{Description}\tabularnewline
 \hline
-int & NF & the number of records to the next fragment\tabularnewline
+int & NF & the number of records to skip to the next fragment\tabularnewline
 \hline
 \end{tabular}
 
@@ -1453,11 +1459,12 @@ In the following pseudocode we are assuming the current record is $this$ and its
     \State $this.bam\_flags \gets this.bam\_flags$\ OR\ 0x08\Comment{next segment unmapped}
   \EndIf
   \State $next\_frag\gets$ \Call{ReadItem}{NF,Integer}
-  \State Resolve $mate\_ref\_id$ for $this$ record and $this+next\_frag$ once both have been decoded
-  \State Resolve $mate\_position$ for $this$ record and $this+next\_frag$ once both have been decoded
-  \State Find leftmost and rightmost mapped coordinate in records $this$ and $this+next\_frag$.
-  \State For leftmost of $this$ and $this+next\_frag$ record: $template\_size\gets rightmost-leftmost+1$
-  \State For rightmost of $this$ and $this+next\_frag$ record: $template\_size\gets -(rightmost-leftmost+1)$
+  \State $next\_record\gets this\_record + next\_frag + 1$
+  \State Resolve $mate\_ref\_id$ for $this\_record$ and $next\_record$ once both have been decoded
+  \State Resolve $mate\_position$ for $this\_record$ and $next\_record$ once both have been decoded
+  \State Find leftmost and rightmost mapped coordinate in records $this\_record$ and $next\_record$.
+  \State For leftmost of $this\_record$ and $next\_record$: $template\_size\gets rightmost-leftmost+1$
+  \State For rightmost of $this\_record$ and $next\_record$: $template\_size\gets -(rightmost-leftmost+1)$
 \EndIf
 \EndProcedure
 \end{algorithmic}
