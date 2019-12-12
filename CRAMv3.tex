@@ -1469,6 +1469,18 @@ Type is \texttt{c} (signed 8-bit integer), \texttt{C} (unsigned 8-bit integer), 
 
 For example a SAM tag \texttt{MQ:i} has name \texttt{MQ} and type \texttt{i} and will be decoded using one of MQc, MQC, MQs, MQS, MQi and MQI data series depending on size and sign of the integer value.
 
+Note some auxiliary tags can be created automatically during decode so can optionally be removed by the encoder.
+However if the decoder finds a tag stored verbatim it should use this in preference to automatically computing the value.
+
+The RG (read group) auxiliary tag should be created if the read group (RG data series) value is not $-1$.
+
+The MD and NM auxiliary tags store the differences (an edit string) between the sequence and the reference along with the number of mismatches.
+These may optionally be created on-the-fly during reference-based sequence reconstruction and should match the description provided in the SAMtags document.
+An encoder may decide to store these verbatim when no reference is used or where the automatically constructed values differ to the input data.
+
+Note there is no mechanism to describe which records have MD/NM present and which do not.
+If this is deemed important, the only recourse is to store all MD and NM verbatim and to request that the decoding software does not automatically generate its own for records that have no stored MD and NM tags.
+
 \subsection{\textbf{Mapped reads}}
 \label{subsec:mapped}
 
