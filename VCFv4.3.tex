@@ -173,30 +173,53 @@ Genotype fields specified in the FORMAT field are described as follows:
 Possible Types for FORMAT fields are: Integer, Float, Character, and String (this field is otherwise defined precisely as the INFO field).
 
 \subsubsection{Alternative allele field format}
-Symbolic alternate alleles are described as follows:
+Symbolic alternate alleles specified in the ALT field are described as follows:
 \begin{verbatim}
 ##ALT=<ID=type,Description=description>
 \end{verbatim}
 
 \noindent \textbf{Structural Variants} \newline
-In symbolic alternate alleles for imprecise structural variants, the ID field indicates the type of structural variant, and can be a colon-separated list of types and subtypes.
-ID values are case sensitive strings and must not contain whitespace or angle brackets.
-The first level type must be one of the following:
-\begin{itemize}
-  \item DEL Deletion relative to the reference
-  \item INS Insertion of novel sequence relative to the reference
-  \item DUP Region of elevated copy number relative to the reference
-  \item INV Inversion of reference sequence
-  \item CNV Copy number variable region (may be both deletion and duplication)
-  \item BND Breakend
-\end{itemize}
 
-The CNV category should not be used when a more specific category can be applied. Reserved subtypes include:
-\begin{itemize}
-  \item DUP:TANDEM Tandem duplication
-  \item DEL:ME Deletion of mobile element relative to the reference
-  \item INS:ME Insertion of a mobile element relative to the reference
-\end{itemize}
+
+\begin{tabular}{l l}
+DEL  &  Deletion relative to the reference \\
+INS  &  Insertion relative to the reference \\
+DUP  &  Region of elevated copy number relative to the reference \\
+INV  &  Inversion of reference sequence \\
+CNV  &  Copy number variable region (multiallelic) \\
+BND  &  Breakend \\
+\end{tabular}\newline
+
+\noindent The list of first level symbolic alleles that represent structural variants is a closed set. Any symbolic alleles with a first level type other than one of those listed above are considered to be non-structural symbolic alleles.\newline
+
+\noindent Variant subtypes should be used to add specificity to the maximum extent supported by the data. Reserved subtypes include:
+\newline
+
+\begin{tabular}{l l}
+DEL:ME  &  Absence of mobile element present in the reference \\
+DEL:ME:ALU  &  Absence of Alu element present in the reference \\
+DEL:ME:LINE1  &  Absence of LINE1 element present in the reference \\
+DEL:ME:SVA  &  Absence of SVA element present in the reference \\
+DEL:ME:HERV  &  Absence of HERV element present in the reference \\
+\\
+INS:ME  &  Insertion of mobile element relative to the reference \\
+INS:ME:ALU  &  Insertion of Alu element relative to the reference \\
+INS:ME:LINE1  &  Insertion of LINE1 element relative to the reference \\
+INS:ME:SVA  &  Insertion of SVA element relative to the reference \\
+INS:ME:HERV  &  Insertion of HERV element relative to the reference \\
+\\
+DUP:TANDEM  &  Tandem duplication, in same orientation as original \\
+DUP:INV-BEFORE  &  Tandem duplication, inserted before original in inverted orientation \\
+DUP:INV-AFTER  &  Tandem duplication, inserted after original in inverted orientation \\
+\end{tabular}\newline \newline
+
+\noindent Variants should be written using the most precise type that can be determined by the variant caller. For example, if the insertion site of a new copy of a LINE1 element cannot be determined, it would be specified as a DUP of the originating LINE1 element. However if the new insertion site can be identified, the variant should be specified as INS:ME:LINE1 at the insertion site.\newline
+
+\noindent Note that the DUP type is not restricted to tandem duplications and that the DUP subtypes have different breakpoints than their parent type.\newline
+
+\noindent Variant subtypes are an open set and is it valid for a variant caller to define a subtype not specified in the above list. Such subtypes are considered to be instances of the first reserved subtype, with breakpoint and copy number semantics matching the reserved type. For example, INS:ME:PELEMENT is a valid caller-defined subtype, but INV:FOLDBACK is not since foldback inversions do not result in the same breakpoint and copy number changes as a simple inversion.\newline
+
+\noindent See examples below for further guidance.
 
 \bigskip
 
@@ -563,15 +586,14 @@ For precise variants, END is $\mbox{POS} + \mbox{length of REF allele} - 1$, and
 ##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
 \end{verbatim}
 \normalsize
-\end{samepage}
-This key can be derived from the REF/ALT fields but is useful for filtering.
-The reserved values must be used for the types listed below:
+SVTYPE is a primitive basic data type and must be specified for all structural variants. Its value can usually be deduced from the REF and ALT fields, however despite this redundancy it is quite useful for filtering. For each VCF record, SVTYPE must be assigned exactly one of the following values:
 \begin{itemize}
   \item DEL: Deletion relative to the reference
-  \item INS: Insertion of novel sequence relative to the reference
+\item INS:  Insertion relative to the reference
   \item DUP: Region of elevated copy number relative to the reference
   \item INV: Inversion of reference sequence
-  \item CNV: Copy number variable region (may be both deletion and duplication)
+\item CNV:  Copy number variable region (multiallelic)
+\item BND:  Breakend
   \item BND: Breakend
 \end{itemize}
 
@@ -580,7 +602,13 @@ The reserved values must be used for the types listed below:
 ##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
 \end{verbatim}
 \normalsize
-One value for each ALT allele. Longer ALT alleles (e.g.\ insertions) have positive values, shorter ALT alleles (e.g.\ deletions) have negative values.
+SVLEN indicates the relative size of the ALT allele compared to the REF allele.\
+If ALT is longer than REF (e.g. insertions), SVLEN must be positive; if ALT is shorter than REF (e.g. deletions), SVLEN must be negative.
+Simple inversions will have SVLEN=0.
+The size of the inversion can be determined by the POS field and the END attribute.
+One SVLEN value for each ALT allele.
+One value for each ALT allele.
+Longer ALT alleles (e.g.\ insertions) have positive values, shorter ALT alleles (e.g.\ deletions) have negative values.
 
 \footnotesize
 \begin{verbatim}
@@ -830,8 +858,8 @@ The following page contains examples of structural variants encoded in VCF, show
 VCF STRUCTURAL VARIANT EXAMPLE
 
 ##fileformat=VCFv4.3
-##fileDate=20100501
-##reference=1000GenomesPilot-NCBI36
+##fileDate=20180101
+##reference=GRCh38.p11
 ##assembly=ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/sv/breakpoint_assemblies.fasta
 ##INFO=<ID=BKPTID,Number=.,Type=String,Description="ID of the assembled alternate allele in the assembly file">
 ##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
