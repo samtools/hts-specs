@@ -68,7 +68,7 @@ Unless explicitly specified elsewhere, all fields are encoded using 7-bit US-ASC
 Regular expressions listed use the POSIX / IEEE Std 1003.1 extended syntax.
 
 \subsection{An example}\label{sec:example}
-Suppose we have the following alignment with bases in lower cases
+Suppose we have the following alignment with bases in lowercase
 clipped from the alignment. Read {\tt r001/1} and {\tt r001/2}
 constitute a read pair; {\tt r003} is a chimeric read; {\tt r004}
 represents a split alignment.
@@ -371,11 +371,11 @@ Padding characters (See Section~\ref{sec:padded-sam}) must be represented only u
 The digest is calculated as follows:
 \begin{itemize}
 \item All characters outside of the inclusive range 33 (`\char33') to 126 (`\char126') are stripped out.
-This removes all unprintable and white-space characters including spaces and new lines.
+This removes all unprintable and whitespace characters including spaces and new lines.
 Everything else is retained, even if not a legal nucleotide code.
-\item All lower-case characters are converted to upper-case.
+\item All lowercase characters are converted to uppercase.
 This operation is equivalent to calling \href{http://pubs.opengroup.org/onlinepubs/9699919799/functions/toupper.html}{\sl toupper()} on characters in the \href{http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1\_chap07.html\#tag\_07\_02}{\sl POSIX locale}.
-\item The MD5 digest is calculated as described in \href{https://tools.ietf.org/html/rfc1321}{\sl RFC 1321} and presented as a 32 character lower-case hexadecimal number.
+\item The MD5 digest is calculated as described in \href{https://tools.ietf.org/html/rfc1321}{\sl RFC 1321} and presented as a 32 character lowercase hexadecimal number.
 \end{itemize}
 
 As an example, if the reference contains the following characters (including spaces):
