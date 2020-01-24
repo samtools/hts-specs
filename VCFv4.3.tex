@@ -184,9 +184,9 @@ Symbolic alternate alleles specified in the ALT field are described as follows:
 \begin{tabular}{l l}
 DEL  &  Deletion relative to the reference \\
 INS  &  Insertion relative to the reference \\
-DUP  &  Region of elevated copy number relative to the reference \\
+DUP  &  Tandem duplication relative to the reference \\
 INV  &  Inversion of reference sequence \\
-CNV  &  Copy number variable region (multiallelic) \\
+CNV  &  Copy number variable region \\
 BND  &  Breakend \\
 \end{tabular}\newline
 
@@ -207,15 +207,11 @@ INS:ME:ALU  &  Insertion of Alu element relative to the reference \\
 INS:ME:LINE1  &  Insertion of LINE1 element relative to the reference \\
 INS:ME:SVA  &  Insertion of SVA element relative to the reference \\
 INS:ME:HERV  &  Insertion of HERV element relative to the reference \\
-\\
-DUP:TANDEM  &  Tandem duplication, in same orientation as original \\
-DUP:INV-BEFORE  &  Tandem duplication, inserted before original in inverted orientation \\
-DUP:INV-AFTER  &  Tandem duplication, inserted after original in inverted orientation \\
 \end{tabular}\newline \newline
 
 \noindent Variants should be written using the most precise type that can be determined by the variant caller. For example, if the insertion site of a new copy of a LINE1 element cannot be determined, it would be specified as a DUP of the originating LINE1 element. However if the new insertion site can be identified, the variant should be specified as INS:ME:LINE1 at the insertion site.\newline
 
-\noindent Note that the DUP type is not restricted to tandem duplications and that the DUP subtypes have different breakpoints than their parent type.\newline
+\noindent Note that the DUP type is restricted to simple tandem duplications. More complex duplications should be specified using BND notation.\newline
 
 \noindent Variant subtypes are an open set and it is valid for a variant caller to define a subtype not specified in the above list. Such subtypes are considered to be instances of the first reserved subtype, with breakpoint and copy number semantics matching the reserved type. For example, INS:ME:PELEMENT is a valid caller-defined subtype, but INV:FOLDBACK is not since foldback inversions do not result in the same breakpoint and copy number changes as a simple inversion.\newline
 
