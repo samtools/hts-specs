@@ -217,7 +217,7 @@ DUP:INV-AFTER  &  Tandem duplication, inserted after original in inverted orient
 
 \noindent Note that the DUP type is not restricted to tandem duplications and that the DUP subtypes have different breakpoints than their parent type.\newline
 
-\noindent Variant subtypes are an open set and is it valid for a variant caller to define a subtype not specified in the above list. Such subtypes are considered to be instances of the first reserved subtype, with breakpoint and copy number semantics matching the reserved type. For example, INS:ME:PELEMENT is a valid caller-defined subtype, but INV:FOLDBACK is not since foldback inversions do not result in the same breakpoint and copy number changes as a simple inversion.\newline
+\noindent Variant subtypes are an open set and it is valid for a variant caller to define a subtype not specified in the above list. Such subtypes are considered to be instances of the first reserved subtype, with breakpoint and copy number semantics matching the reserved type. For example, INS:ME:PELEMENT is a valid caller-defined subtype, but INV:FOLDBACK is not since foldback inversions do not result in the same breakpoint and copy number changes as a simple inversion.\newline
 
 \noindent See examples below for further guidance.
 
@@ -603,7 +603,7 @@ SVTYPE is a primitive basic data type and must be specified for all structural v
 \end{verbatim}
 \normalsize
 SVLEN indicates the relative size of the ALT allele compared to the REF allele.\
-If ALT is longer than REF (e.g. insertions), SVLEN must be positive; if ALT is shorter than REF (e.g. deletions), SVLEN must be negative.
+If ALT is longer than REF (e.g.\ insertions), SVLEN must be positive; if ALT is shorter than REF (e.g.\ deletions), SVLEN must be negative.
 Simple inversions will have SVLEN=0.
 The size of the inversion can be determined by the POS field and the END attribute.
 One SVLEN value for each ALT allele.
