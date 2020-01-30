@@ -585,14 +585,14 @@ For precise variants, END is $\mbox{POS} + \mbox{length of REF allele} - 1$, and
 \end{samepage}
 SVTYPE is a primitive basic data type and must be specified for all structural variants.
 Its value can usually be deduced from the REF and ALT fields, however despite this redundancy it is quite useful for filtering.
-For each VCF record, SVTYPE must be assigned exactly one of the following values:
+For each VCF record encoding a symbolic structural variant, SVTYPE must be assigned exactly one of the following values:
 \begin{itemize}
 \item DEL: Deletion relative to the reference
 \item INS: Insertion relative to the reference
-\item DUP: Region of elevated copy number relative to the reference
+\item DUP: Tandem duplication relative to the reference
 \item INV: Inversion of reference sequence
 \item CNV: Copy number variable region (multiallelic)
-\item BND: Breakend
+\item BND: Breakpoint or single breakend
 \end{itemize}
 
 \footnotesize
@@ -837,60 +837,6 @@ $2$ & \verb|a t c G C G C G a| & following the G base is an insertion of 2 bases
 \end{tabular}
 
 \subsection{Encoding Structural Variants}
-The following page contains examples of structural variants encoded in VCF, showing in order:
-\begin{enumerate}
-  \item A precise deletion with known breakpoint, a one base micro-homology, and a sample that is homozygous for the deletion.
-  \item An imprecise deletion of approximately 205 bp.
-  \item An imprecise deletion of an ALU element relative to the reference.
-  \item An imprecise insertion of an L1 element relative to the reference.
-  \item An imprecise duplication of approximately 21Kb. The sample genotype is copy number 3 (one extra copy of the duplicated sequence).
-  \item An imprecise tandem duplication of 76bp. The sample genotype is copy number 5 (but the two haplotypes are not known).
-\end{enumerate}
-
-\pagebreak
-\footnotesize
-\begin{landscape}
-\begin{verbatim}
-VCF STRUCTURAL VARIANT EXAMPLE
-
-##fileformat=VCFv4.3
-##fileDate=20180101
-##reference=GRCh38.p11
-##assembly=ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/sv/breakpoint_assemblies.fasta
-##INFO=<ID=BKPTID,Number=.,Type=String,Description="ID of the assembled alternate allele in the assembly file">
-##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
-##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
-##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
-##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
-##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
-##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
-##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
-##ALT=<ID=DEL,Description="Deletion">
-##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">
-##ALT=<ID=DEL:ME:L1,Description="Deletion of L1 element">
-##ALT=<ID=DUP,Description="Duplication">
-##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
-##ALT=<ID=INS,Description="Insertion of novel sequence">
-##ALT=<ID=INS:ME:ALU,Description="Insertion of ALU element">
-##ALT=<ID=INS:ME:L1,Description="Insertion of L1 element">
-##ALT=<ID=INV,Description="Inversion">
-##ALT=<ID=CNV,Description="Copy number variable region">
-##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">
-##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
-##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
-#CHROM POS     ID        REF              ALT          QUAL FILTER INFO                                                               FORMAT       NA00001
-1      2827694 rs2376870 CGTGGATGCGGGGAC  C            .    PASS   SVTYPE=DEL;END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14                 GT:GQ        1/1:14
-2       321682 .         T                <DEL>        6    PASS   SVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62         GT:GQ        0/1:12
-2     14477084 .         C                <DEL:ME:ALU> 12   PASS   SVTYPE=DEL;END=14477381;SVLEN=-297;CIPOS=-22,18;CIEND=-12,32       GT:GQ        0/1:12
-3      9425916 .         C                <INS:ME:L1>  23   PASS   SVTYPE=INS;END=9425916;SVLEN=6027;CIPOS=-16,22                     GT:GQ        1/1:15
-3     12665100 .         A                <DUP>        14   PASS   SVTYPE=DUP;END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500  GT:GQ:CN:CNQ ./.:0:3:16.2
-4     18665128 .         T                <DUP:TANDEM> 11   PASS   SVTYPE=DUP;END=18665204;SVLEN=76;CIPOS=-10,10;CIEND=-10,10         GT:GQ:CN:CNQ ./.:0:5:8.3
-\end{verbatim}
-\end{landscape}
-\pagebreak
-\normalsize
-
 \subsection{Specifying complex rearrangements with breakends}
 
 An arbitrary rearrangement event can be summarized as a set of novel \textbf{adjacencies}. Each adjacency ties together $2$ \textbf{breakends}.
@@ -1415,6 +1361,191 @@ Example records are given below:
 \end{tabular}
 \end{flushleft}
 \normalsize
+\pagebreak
+
+\subsection{Structural Variants Examples}
+
+As with non-structural variants, there are multiple equivalent way to encode a structural variant.
+This section contains examples of the formats for which a structural variant can be encoded in VCF.
+
+\subsubsection{Simple Structural Variants}
+The following page contains examples of structural variants encoded in VCF, showing in order:
+\begin{enumerate}
+  \item A precise deletion with known breakpoint, a one base micro-homology, and a sample that is homozygous for the deletion.
+  \item An imprecise deletion of approximately 205 bp.
+  \item An imprecise deletion of an ALU element relative to the reference.
+  \item An imprecise insertion of an L1 element relative to the reference.
+  \item An imprecise duplication of approximately 21Kb. The sample genotype is copy number 3 (one extra copy of the duplicated sequence).
+  \item An imprecise tandem duplication of 76bp. The sample genotype is copy number 5 (but the two haplotypes are not known).
+\end{enumerate}
+
+\pagebreak
+\footnotesize
+\begin{landscape}
+\begin{verbatim}
+##fileformat=VCFv4.3
+##fileDate=20180101
+##reference=GRCh38.p11
+##assembly=ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/sv/breakpoint_assemblies.fasta
+##INFO=<ID=BKPTID,Number=.,Type=String,Description="ID of the assembled alternate allele in the assembly file">
+##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
+##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
+##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
+##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">
+##ALT=<ID=DEL:ME:L1,Description="Deletion of L1 element">
+##ALT=<ID=DUP,Description="Duplication">
+##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
+##ALT=<ID=INS,Description="Insertion of novel sequence">
+##ALT=<ID=INS:ME:ALU,Description="Insertion of ALU element">
+##ALT=<ID=INS:ME:L1,Description="Insertion of L1 element">
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=CNV,Description="Copy number variable region">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
+##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
+#CHROM POS     ID        REF              ALT          QUAL FILTER INFO                                                               FORMAT       NA00001
+1      2827694 rs2376870 CGTGGATGCGGGGAC  C            .    PASS   SVTYPE=DEL;END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14                 GT:GQ        1/1:14
+2       321682 .         T                <DEL>        6    PASS   SVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62         GT:GQ        0/1:12
+2     14477084 .         C                <DEL:ME:ALU> 12   PASS   SVTYPE=DEL;END=14477381;SVLEN=-297;CIPOS=-22,18;CIEND=-12,32       GT:GQ        0/1:12
+3      9425916 .         C                <INS:ME:L1>  23   PASS   SVTYPE=INS;END=9425916;SVLEN=6027;CIPOS=-16,22                     GT:GQ        1/1:15
+3     12665100 .         A                <DUP>        14   PASS   SVTYPE=DUP;END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500  GT:GQ:CN:CNQ ./.:0:3:16.2
+4     18665128 .         T                <DUP:TANDEM> 11   PASS   SVTYPE=DUP;END=18665204;SVLEN=76;CIPOS=-10,10;CIEND=-10,10         GT:GQ:CN:CNQ ./.:0:5:8.3
+\end{verbatim}
+\end{landscape}
+\pagebreak
+\normalsize
+
+\subsubsection{Equivalent Deletions}
+
+A 5bp deletion of the following form:
+
+\begin{verbatim}
+1234567890 position
+ATAGGTTCGC reference contig
+AT-----CGC variant
+\end{verbatim}
+
+\begin{verbatim}
+#CHROM    POS  ID          REF     ALT         QUAL FILTER INFO
+contig    2    del_indel   TAGGTT  T           .    .
+contig    2    del_indel2  TAGGTTC TC          .    .
+contig    1    del_indel3  ATAGGTT AT          .    .
+contig    3    del_indel4  AGGTTC  C           .    .
+contig    3    del_svtype  A       <DEL>       .    .      SVTYPE=DEL;SVLEN=-5;END=7
+contig    2    del_bnd_1   T       T[contig:8[ .    .      SVTYPE=BND;PARID=del_bnd_2
+contig    8    del_bnd_2   C       ]contig:2]C .    .      SVTYPE=BND;PARID=del_bnd_1
+\end{verbatim}
+
+By convention, only the reference base immediately preceding the deletion is reported.
+This makes $del\_indel$ preferable to $del\_indel2$, $del\_indel3$, or $del\_indel4$.
+
+$del\_bnd1$/$del\_bnd2$ are making a claim only about the presence of the breakpoint, not the copy number of the 'deleted' region.
+It is possible that this breakpoint forms part of a complex rearrangement and the 'deleted' is still present, in another location.
+
+\subsubsection{Equivalent Insertions}
+
+A 5bp insertion (CTCAG) of the following form:
+
+\begin{verbatim}
+123-----4567890 position
+ATA-----GGTTCGC reference contig
+ATACTCAGGGTTCGC variant
+\end{verbatim}
+
+Assuming a file $path\_to\_fasta\_containing\_asm.fasta$ contains the following:
+\begin{verbatim}
+>asm
+ACTCAG
+\end{verbatim}
+
+Then the following records all encode the same insertion:
+
+\begin{verbatim}
+##assembly=path_to_fasta_containing_asm.fasta
+#CHROM    POS  ID                         REF    ALT              QUAL FILTER INFO
+contig    3    ins_indel_representation1  A      ACTCAG           .    .    
+contig    4    ins_indel_representation2  G      CTCAGG           .    .    
+contig    3    ins_svtype_representation1 A      <INS>            .    .      SVTYPE=INS;SVLEN=5;END=3
+contig    4    ins_svtype_representation2 G      <INS>            .    .      SVTYPE=INS;SVLEN=5;END=4
+contig    3    ins_bnd_1                  A      ACTCAG[contig:4[ .    .      SVTYPE=BND;PARID=ins_bnd_2
+contig    4    ins_bnd_2                  G      ]contig:3]CTCAGG .    .      SVTYPE=BND;PARID=ins_bnd_1
+contig    4    ins_asm_full               G      <asm>            .    .      BKPTID=asm
+contig    3    ins_asm_1                  A      A[<asm>:2[       .    .      SVTYPE=BND;PARID=ins_asm_2
+contig    4    ins_asm_2                  G      ]<asm>:6]G       .    .      SVTYPE=BND;PARID=ins_asm_1
+\end{verbatim}
+
+Note the following:
+\begin{itemize}
+	\item The $indel$ and $svtype$ representations 1 and 2 corresponding to using the preceding and succeeding reference base respectively.
+	By convention, the preceding base is used as the anchor.
+	\item $ins\_svtype\_representation1$ and $ins\_svtype\_representation2$ are lossy representation as they do not include the inserted sequence.
+	\item $ins\_asm\_*$ require the external fasta file to reconstruct the variant.
+	\item $ins\_asm\_1$ starts at base 2 of the asm contig as $ins\_asm\_full$ encodes the ALT allele relative to the REF, and the REF includes the anchoring base.
+\end{itemize}
+\subsubsection{Equivalent Tandem Duplications}
+
+A 5bp tandem duplication (AGGTT) of the following form:
+
+\begin{verbatim}
+12-----34567890
+AT-----AGGTTCGC
+ATAGGTTCGGTTCGC
+\end{verbatim}
+
+\begin{verbatim}
+#CHROM    POS  ID                 REF    ALT          QUAL FILTER INFO
+contig    4    dup_indel_verbose  GGTTC  GGTTCGGTTC   .    .    
+contig    8    dup_indel_minimal  C      CGGTTC       .    .    
+contig    9    dup_indel_minimal2 C      GGTTCG       .    .    
+contig    4    dup_svtype         G      <DUP:TANDEM> .    .      SVTYPE=DUP;SVLEN=5;END=8
+contig    4    dup_bnd_1          G      ]contig:8]G  .    .      SVTYPE=BND;PARID=dup_bnd_2
+contig    8    dup_bnd_2          C      C[contig:4[  .    .      SVTYPE=BND;PARID=dup_bnd_1
+\end{verbatim}
+
+$dup\_bnd1$/$dup\_bnd2$ are making a claim only about the presence of the breakpoint, not the copy number of the 'duplication' region.
+It is possible that this breakpoint forms part of a complex rearrangement and the 'duplicated' region does not have elevated copy number.
+
+\subsubsection{Equivalent Inversions}
+
+A 4bp inversion of the following form:
+
+\begin{verbatim}
+1234567890
+ATAGGTTCGC
+ATAAACCCGC
+   ----
+\end{verbatim}
+
+\begin{verbatim}
+#CHROM    POS  ID         REF      ALT         QUAL FILTER INFO
+contig    4    inv_indel  GGTT     AACC        .    .    
+contig    4    inv_indel  AGGTT    AAACC       .    .    
+contig    4    inv_svtype G        <INV>       .    .      SVTYPE=INV;SVLEN=0;END=7
+contig    3    inv_bnd_1  A        A]contig:7] .    .      SVTYPE=BND;PARID=ins_bnd_2;EVENT=example_inv
+contig    7    inv_bnd_2  T        T]contig:3] .    .      SVTYPE=BND;PARID=ins_bnd_1;EVENT=example_inv
+contig    4    inv_bnd_3  G        [contig:8[G .    .      SVTYPE=BND;PARID=ins_bnd_4;EVENT=example_inv
+contig    8    inv_bnd_4  C        [contig:4[C .    .      SVTYPE=BND;PARID=ins_bnd_3;EVENT=example_inv
+\end{verbatim}
+
+\subsubsection{Copy Number Variants}
+
+Some methods identify changes in copy number.
+In such situations, SVTYPE should be specified as CNV as such methods do not make breakpoint claims.
+The deletion and duplication examples outlined above would be represented as follows:
+
+\begin{verbatim}
+#CHROM    POS    ID          REF    ALT    QUAL FILTER INFO
+contig    3      del_cnv     A      <DEL>  .    .      SVTYPE=CNV;SVLEN=-5;END=7
+contig    4      dup_cnv     G      <DUP>  .    .      SVTYPE=CNV;SVLEN=5;END=8
+\end{verbatim}
+
+Note that the ALT is specified as <DUP>, not <DUP:TANDEM>, as the location of the additional copy is not known.
 
 \pagebreak
 \section{BCF specification}
