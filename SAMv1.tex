@@ -947,6 +947,14 @@ formally described in the following table where values in brackets are
 the default when the corresponding information is not available; an
 underlined word in uppercase denotes a field in the SAM format.
 
+Note the field types defined below define whether the value may be
+negative and the number of bytes used on disk, but do not necessarily
+dictate their appropriate maximum value.  Care should be taken with
+{\tt uint32\_t} fields to avoid exceeding 31-bits (approximately 2 billion)
+as this can cause either implementation language issues or other
+related data type constraints (e.g. {\tt tlen} needs to be 1 bit larger
+than the maximum {\tt l\_ref}).
+
 \begin{table}[ht]
 \centering
 {\small
@@ -1076,7 +1084,7 @@ than `{\tt H}' fields.}
 \newcommand*{\arraytagfield}[3]{\tagfield{B}{\bytebox{1}{\tt #1}\bytebox{4}{\em count}\byteboxvector{#2}{#3}}}
 
 The representation of a `{\tt B}' array field starts with a sub-type character
-similar to the numeric field types above and an {\tt uint32\_t} \emph{count}
+similar to the numeric field types above and a {\tt uint32\_t} \emph{count}
 giving the number of elements in the array.
 The array elements follow, encoded as binary integers or IEEE floats sized
 according to the sub-type:
@@ -1219,6 +1227,11 @@ saved.
   \multicolumn{4}{|l|}{{\sf n\_no\_coor} (optional)} & Number of unplaced unmapped reads ({\sf RNAME} *) & {\tt uint64\_t} & \\\cline{1-7}
 \end{tabular}}
 \end{table}
+
+As with the BAM format, the {\tt uint32\_t} fields indicate unsigned
+values consuming 4 bytes and do not imply the full range of values is
+appropriate.  Practical implementations may limit these to 31-bit or
+less.
 
 The index file may optionally contain additional metadata providing a summary
 of the number of mapped and unmapped read-segments per reference sequence,
