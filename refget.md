@@ -34,7 +34,7 @@ Explicitly this API does NOT:
 
 ## OpenAPI Description
 
-An OpenAPI description of this specification is available and [describes the 1.0.0 version](pub/refget-openapi.yaml). OpenAPI is a language independent way of describing REST services and is compatible with a number of [third party tools](http://openapi.tools/).
+An OpenAPI description of this specification is available and [describes the 1.0.0 version](pub/refget-openapi.yaml). OpenAPI is a language independent way of describing REST services and is compatible with a number of [third party tools](http://openapi.tools/). (Note: if there are differences between this text and the OpenAPI description, this specification text is definitive.)
 
 ## Compliance
 
