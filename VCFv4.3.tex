@@ -428,9 +428,8 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       PP		& G		& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
       PQ		& 1		& Integer	& Phasing quality \\
       PS		& 1		& Integer	& Phase set \\
-      PSL  		& .		& Integer	& Phase set list\\
-      PQL		& .		& Integer	& Phasing quality list \\
-      
+      PQL		& P		& Integer	& Phasing quality list \\
+      PSL  		& P		& String	& Phase set list
 \end{longtable}
 
 \begin{itemize}
@@ -445,19 +444,19 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   No white-space or semi-colons permitted.
   \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
   \item GP (Float): Genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities.
-%\item GT (String): Genotype, encoded as allele values followed by either of $/$ or $\mid$. 
-%The last separator may be omitted and will be assumed to be not phased in that case.
-%However, in order to reference the last allele in the PSL and PQL (see below) there needs to be a $\mid$ following it.
-%The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on.
-%For diploid calls examples could be $0/1$, $1\mid0$, or $1/2$, etc.
-%Haploid calls, e.g.\ on Y, male non-pseudoautosomal X, or mitochondrion, are indicated by having only one allele value.
-%A triploid call might look like $0/0/1$, and a partially phased triploid call could be 0/1/2| to indicate that the last allele is phased with another variant in the genome.
-%If a call cannot be made for a sample at a given locus, `.' must be specified for each missing allele in the GT field (for example `$./.$' for a diploid genotype and `.' for haploid genotype).
-%The meanings of the separators are as follows (see the PS field below for more details on incorporating phasing information into the genotypes):
-%	\begin{itemize}
-%	  \item $/$ : previous allele unphased
-%	  \item $\mid$ : previous allele phased (according to the phase-set)
-%	\end{itemize}
+  \item GT (String): Genotype, encoded as allele value followed by either of $/$ or $\mid$. 
+    The last separator may be omitted and will be assumed to be not phased in that case.
+    However, in order to reference the last allele in the PSL and PQL (see below) there needs to be a $\mid$ following it.
+    The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on.
+    For diploid calls examples could be $0/1$, $1\mid0$, or $1/2$, etc.
+    Haploid calls, e.g.\ on Y, male non-pseudoautosomal X, or mitochondrion, are indicated by having only one allele value.
+    A triploid call might look like $0/0/1$, and a partially phased triploid call could be $0/1/2|$ to indicate that the last allele is phased with another variant in the genome.
+    If a call cannot be made for a sample at a given locus, `$.$' must be specified for each missing allele in the {\tt GT} field (for example `$./.$' for a diploid genotype and `$.$' for haploid genotype).
+    The meanings of the separators are as follows (see the {\tt PS} and {\tt PSL} fields below for more details on incorporating phasing information into the genotypes):
+    	\begin{itemize}
+    	  \item $/$ : previous allele unphased
+    	  \item $\mid$ : previous allele phased (according to the phase-set indicated in {\tt PS} or {\tt PSL})
+    	\end{itemize}
 
   \item GL (Float): Genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields.
   In presence of the GT field the same ploidy is expected; without GT field, diploidy is assumed.
@@ -527,11 +526,24 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.
   If the genotype in the GT field is unphased, the corresponding PS field is ignored.
   The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required).
-%  \item PQL (List of integers): The list of PQs one for each phase set in PSL (encoded like PQ)
-%  \item PSL (List of non-negative 32-bit Integer): The list of PSs one for each explicitly phased genotype, (with a $\mid$ after it).
-%  A given sample-genotype must not have values for both PS and PSL.
-%  In addition, PS and PSL are not interoperable, in that a PS mentioned in one variant cannot be referenced in a PSL in another, 
-%  since when used in PS is isn't connected to any specific haplotype (i.e. first or second), but PSL is. 
+  \item PQL (List of integers): The list of PQs, one for each phase set in PSL (encoded like PQ). The missing value 0 should be used when the corresponding PSL value is missing, or when the phasing is of unknown quality.
+  \item PSL (List of Strings): The list of phase sets, one for each allele specified in the {\tt GT}. 
+  Unphased alleles (without a $\mid$ separator after them) must have the value '$.$' in their corresponding position in the list. 
+  The phase-set name must be unique across the genome (unlike {\tt PS}  as this tag can be used to phase across references.
+  Thus, the recommended value for phase-set names is CHR*POS*ALLELE-NUMBER of the "first" allele which is included in this set, with ALLELE-NUMBER being the index of the allele in the {\tt GT} field, since multiple distinct phase-sets could start at the same position. \footnote{The '*' character is used as a separator since ':' is already a separator in VCF.}
+  A given sample-genotype must not have values for both PS and PSL.
+  In addition, PS and PSL are not interoperable, in that a PS mentioned in one variant cannot be referenced in a PSL in another, 
+  since when used in PS is isn't connected to any specific haplotype (i.e. first or second), but PSL is. 
+ 
+  Example: 
+  
+  \vspace{0.5em}
+  \begin{tabular}{ l l l l l l l l l l}
+	\#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & SAMPLE1\\
+	chr19 & $5$ & . & T & G & . & PASS & DP=100 &GT:PSL & \tt{0|1:.,chr9*5*1}\\
+	chr20 & $10$ & . & A & T,G & . & PASS & DP=100 &GT:PSL & \tt{1|2/3|:chr20*10*1,.,chr9*5*1} \\
+	chr20 & $15$ & . & G & C & . & PASS & DP=100 &GT:PSL & \tt{1/2|:.,chr20*10*1}\\
+\end{tabular}
   \end{itemize}
 
 
