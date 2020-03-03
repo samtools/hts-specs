@@ -14,9 +14,13 @@ function addLink(file){
   console.log(diffFile)
   console.log(fullFile)
 
-  text += ` ${bot.artifactLink(fullFile, file)}`;
-  text += ` (${bot.artifactLink(diffFile, "diff")})`;
+  text += ` ${fixBrokenLink(bot.artifactLink(fullFile, file))}`;
+  text += ` (${fixBrokenLink(bot.artifactLink(diffFile, "diff"))})`;
   return text;
+}
+
+function fixBrokenLink(string){
+  return string.replace("root/project/","");
 }
 
 console.log( `git-commit: ${ls.stdout.toString()}` );
