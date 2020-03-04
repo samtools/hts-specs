@@ -114,6 +114,7 @@ or
   {\tt SM} & i & Template-independent mapping quality \\
   {\tt SQ} & ? & Reserved for backwards compatibility reasons \\
   {\tt TC} & i & The number of segments in the template \\
+  {\tt TS} & A & Transcript strand \\
   {\tt U2} & Z & Phred probability of the 2nd call being wrong conditional on the best being wrong \\
   {\tt UQ} & i & Phred likelihood of the segment, conditional on the mapping being correct \\
   {\tt X?} & ? & Reserved for end users \\
@@ -227,6 +228,9 @@ Template-independent mapping quality, i.e., the mapping quality if the read were
 
 \item[TC:i:\tagvalue{}]
 The number of segments in the template.
+
+\item[TS:A:\tagvalue{strand}]
+Strand (`{\tt +}' or `{\tt -}') of the transcript to which the read has been mapped.
 
 \item[U2:Z:\tagvalue{}]
 Phred probability of the 2nd call being wrong conditional on the best being wrong.
@@ -473,6 +477,11 @@ This appendix lists when standard tags were initially defined or significantly c
 
 \setlength{\parindent}{0pt}
 \newcommand*{\gap}{\vspace*{2ex}}
+
+\subsubsection*{March 2020}
+
+Transcript strand tag TS added, equivalent to the locally-defined XS tag
+produced by several RNA aligners.
 
 \subsubsection*{January 2019}
 Added the OA tag for recording original/previous alignment information.

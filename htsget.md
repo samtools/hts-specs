@@ -23,6 +23,7 @@ Explicitly this API does NOT:
 * Provide a way to discover the identifiers for valid ReadGroupSets --- clients obtain these via some out of band mechanism
 
 This protocol specification is accompanied by a [corresponding OpenAPI description](pub/htsget-openapi.yaml). OpenAPI is a language-independent way of describing REST services and is compatible with a number of [third party tools](http://openapi.tools/).
+(Note: if there are differences between this text and the OpenAPI description, this specification text is definitive.)
 
 # Protocol essentials
 
