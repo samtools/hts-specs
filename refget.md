@@ -12,9 +12,9 @@ suppress_footer: true
 
 ## Introduction
 
-Reference sequences are fundamental to genomic analysis and interpretation however naming is a serious issue. For example the reference genomic sequence GRCh38/1 is also known as hg38/chr1, CM000663.2 and NC_000001.11. In addition there is no standardised way to access reference sequence from providers such as INSDC (ENA, Genbank, DDBJ), Ensembl or UCSC. 
+Reference sequences are fundamental to genomic analysis and interpretation however naming is a serious issue. For example the reference genomic sequence GRCh38/1 is also known as hg38/chr1, CM000663.2 and NC_000001.11. In addition there is no standardised way to access reference sequence from providers such as INSDC (ENA, Genbank, DDBJ), Ensembl or UCSC.
 
-Refget enables access to reference sequences using an identifier derived from the sequence itself. 
+Refget enables access to reference sequences using an identifier derived from the sequence itself.
 
 Refget uses a hash algorithm (by default `MD5`) to generate a checksum identifier, which is a digest of the underlying sequence. This removes the need for a single accessioning authority to identify a reference sequence and improves the provenance of sequence used in analysis. In addition refget defines a simple scheme to retrieve reference sequence via this checksum identifier.
 
@@ -248,7 +248,7 @@ md5 checksum.
 <code>ga4gh</code><br/>
 string
 </td><td>
-  ga4gh checksum, if the server does not support ga4gh the value will be <code>null</code>.
+  ga4gh identifier, if the server does not support ga4gh the value will be <code>null</code>.
 </td></tr>
 <tr markdown="block"><td>
 <code>TRUNC512</code><br/>
@@ -463,7 +463,7 @@ Any bytes added for formatting to the returned output should not be taken in to 
 
 ## Alternative Checksum Algorithms
 
-Refget implementations MUST support the `MD5` identifier space and SHOULD support `ga4gh`. Non-standard identifiers are allowed but they MUST conform to the following requirements:
+Refget implementations MUST support the `MD5` identifier space and SHOULD support the `ga4gh` identifier. Non-standard identifiers are allowed but they MUST conform to the following requirements:
 
 1. Non-standard identifiers must be based on an algorithm, which uses normalised sequence content as input
 2. The algorithm used SHOULD be a hash function
@@ -473,121 +473,9 @@ Refget implementations MUST support the `MD5` identifier space and SHOULD suppor
 
 Any alternative identifier scheme MUST be declared in the `/sequence/service-info` endpoint under `algorithms`.
 
-## ga4gh and TRUNC512 Algorithm Details
+## ga4gh identifier and TRUNC512 Algorithm Details
 
-Below details the `ga4gh` and `TRUNC512` algorithm in Python and Perl including how to convert between the two spaces.
-
-### Python Example
-
-```python
-import base64
-import hashlib
-import binascii
-
-def trunc512_digest(seq, offset=24):
-    digest = hashlib.sha512(seq.encode('utf-8')).digest()
-    hex_digest = binascii.hexlify(digest[:offset])
-    return hex_digest.decode("utf-8") 
-
-def ga4gh_digest(seq, digest_size=24):
-    # b64 encoding results in 4/3 size expansion of data and padded if
-    # not multiple of 3, which doesn't make sense for this use
-    assert digest_size % 3 == 0, "digest size must be multiple of 3"
-    digest = hashlib.sha512(seq.encode('utf-8')).digest()
-    return _ga4gh_format(digest, digest_size)
-
-def _ga4gh_format(digest, digest_size=24):
-    tdigest_b64us = base64.urlsafe_b64encode(digest[:digest_size])
-    return "ga4gh:SQ.{}".format(tdigest_b64us.decode("utf-8"))
-
-def ga4gh_to_trunc512(vmc):
-    base64_strip = vmc.replace("ga4gh:SQ.","")
-    digest = base64.urlsafe_b64decode(base64_strip)
-    hex_digest = binascii.hexlify(digest)
-    return hex_digest.decode("utf-8") 
-
-def trunc512_to_ga4gh(trunc512):
-    digest_length = len(trunc512)*2
-    digest = binascii.unhexlify(trunc512)
-    return _ga4gh_format(digest, digest_length)
-```
-
-```python
->>> trunc512_digest('ACGT')
-'68a178f7c740c5c240aa67ba41843b119d3bf9f8b0f0ac36'
->>> trunc512_digest('ACGT', 26)
-'68a178f7c740c5c240aa67ba41843b119d3bf9f8b0f0ac36cf70'
->>> ga4gh_digest('ACGT')
-ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2
->>> ga4gh_to_trunc512(ga4gh_digest('ACGT'))
-'68a178f7c740c5c240aa67ba41843b119d3bf9f8b0f0ac36cf70'
->>> trunc512_to_ga4gh(trunc512_digest('ACGT'))
-ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2
-```
-
-### Perl Example
-
-```perl
-use strict;
-use warnings;
-
-use Digest::SHA qw/sha512_hex sha512/;
-use MIME::Base64 qw/encode_base64url decode_base64url/;
-
-sub trunc512_digest {
-  my ($sequence, $digest_size) = @_;
-  $digest_size //= 24;
-  my $digest = sha512_hex($sequence);
-  my $substring = substr($digest, 0, $digest_size*2);
-  return $substring;
-}
-
-sub ga4gh_digest {
-  my ($sequence, $digest_size) = @_;
-  $digest_size //= 24;
-  if(($digest_size % 3) != 0) {
-    die "Digest size must be a multiple of 3 to avoid padded digests";
-  }
-  my $digest = sha512($sequence);
-  return _ga4gh_bytes($digest, $digest_size);
-}
-
-sub _ga4gh_bytes {
-  my ($bytes, $digest_size) = @_;
-  my $base64 = encode_base64url($bytes);
-  my $substr_offset = int($digest_size/3)*4;
-  my $ga4gh = substr($base64, 0, $substr_offset);
-  return "ga4gh:SQ.${ga4gh}";
-}
-
-sub ga4gh_to_trunc512 {
-  my ($ga4gh) = @_;
-  my ($base64) = $ga4gh =~ /ga4gh:SQ.(.+)/;
-  my $digest = unpack("H*", decode_base64url($base64));
-  warn $digest;
-  return $digest;
-}
-
-sub trunc512_to_ga4gh {
-  my ($trunc_digest) = @_;
-  my $digest_length = length($trunc_digest)/2;
-  my $digest = pack("H*", $trunc_digest);
-  return _ga4gh_bytes($digest, $digest_length);
-}
-```
-
-```perl
->>> print trunc512_digest('ACGT'), "\n";
-68a178f7c740c5c240aa67ba41843b119d3bf9f8b0f0ac36
->>> print trunc512_digest('ACGT', 26), "\n";
-68a178f7c740c5c240aa67ba41843b119d3bf9f8b0f0ac36cf70
->>> print ga4gh_digest('ACGT'), "\n";
-ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2
->>> print ga4gh_to_trunc512(ga4gh_digest('ACGT')), "\n";
-68a178f7c740c5c240aa67ba41843b119d3bf9f8b0f0ac36
->>> print trunc512_to_ga4gh(trunc512_digest('ACGT')), "\n";
-ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2
-```
+Examples on how to implement both algorithm schemes in [Python](pub/ga4gh_and_TRUNC512_identifiers.ipynb) and [Perl](pub/ga4gh_and_TRUNC512_identifiers.pl) are available from this site.
 
 ## Design Rationale
 
@@ -612,21 +500,20 @@ Considering the requirements of the three systems the specification designers fe
 
 MD5 provides adequate protection against hash collisions occurring from sequences. However the consequence of a sequence derived hash collision appearing would be catastrophic as two or more sequences with different content would report to be the same entity.
 
-The VMC, Variant Modelling Collaboration, is a complementary GA4GH effort to model genomic variation based on deviations from a reference sequence. Part of their work was to explore hashing algorithms. We have adopted the [checksum algorithm from VRS v1](https://vr-spec.readthedocs.io/), based around the SHA-512 algorithm.
+The VRS, Variation Representation Specification, is a complementary GA4GH effort to model genomic variation based on deviations from a reference sequence. Part of their work was to explore hashing algorithms. We have adopted the [checksum algorithm from VRS v1](https://vr-spec.readthedocs.io/), based around the SHA-512 algorithm.
 
 The algorithm performs a SHA-512 digest of a sequence and creates a base64url encoding of the first 24 bytes of the digest. Analysis performed by VRS suggests this should be sufficient to avoid message collisions (see the VRS documentation for more details). Should a message collision occur within this scheme then the number of bytes retained from the SHA-512 checksum will be increased.
 
 ### Checksum Identifier Identification
 
-When a checksum identifier is given to an implementation, it is the server's responsibility to compute what kind of identifier (`MD5`, `ga4gh` or `TRUNC512`) has been given. `MD5` and `TRUNC512` can be deduced based on length; 32 and 48 characters long respectively. `ga4gh` can be detected by searching for the string `ga4gh:SQ.`. Should refget officially support alternative checksum based identifiers we will describe the mechanisms to resolve their identification in future versions.
+When a checksum identifier is given to an implementation, it is the server's responsibility to compute what kind of identifier (`MD5`, `ga4gh` or `TRUNC512`) has been given. `MD5` and `TRUNC512` can be deduced based on length; 32 and 48 characters long respectively. `ga4gh` identifiers can be detected by searching for the string `ga4gh:SQ.`. Should refget officially support alternative checksum based identifiers we will describe the mechanisms to resolve their identification in future versions.
 
 ## Possible Future API Enhancements
 
 - Allow POST requests for batch downloads
-- Formally define more sequence formattings (e.g. fasta, protobuf)
+- Formally define more sequence formatting options (e.g. fasta, protobuf)
 - Allow reference sequence checksums to be bundled together e.g. to represent a reference genome
 - Support groups/collections of sequences based on checksums
-- Support other methods of identifying the checksum identifier aside from length
 
 ## Contributors
 
@@ -659,11 +546,12 @@ The specification makes no attempt to enforce a strict naming authority across i
 | `Ensembl` | Ensembl | Used for an identifier assigned by the Ensembl project |
 | `RefSeq` | RefSeq | Used for an identifier assigned by the RefSeq group |
 | `TRUNC512` | Refget | The old checksum algorithm based on SHA-512 used in v1.0.0 of refget |
-| `ga4gh` | Refget | The VRS specification checksum algorithm and default used in |
+| `ga4gh` | Refget | ga4gh identifier, which are prefixed by the term `ga4gh:SQ.`. This is the preferred naming |
 
 ## Appendix 2 - Changes
 
 ### v2.0.0
 
 - Replace refget's v1 service-info implementation with GA4GH discovery's definition of service-info
-- Replace TRUNC512 with ga4gh as the default SHA-512 based hash (support still available for TRUNC512)
+- Move code examples out into a Python notebook and a Perl script
+- Replace TRUNC512 with ga4gh identifier as the default SHA-512 based hash identifier (support still available for TRUNC512)
