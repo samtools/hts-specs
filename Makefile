@@ -4,6 +4,7 @@ PDFS =	BCFv1_qref.pdf \
 	BCFv2_qref.pdf \
 	CRAMv2.1.pdf \
 	CRAMv3.pdf \
+	CRAMv4.pdf \
 	crypt4gh.pdf \
 	CSIv1.pdf \
 	SAMv1.pdf \
@@ -21,6 +22,7 @@ pdf: $(PDFS:%=new/%)
 
 new/CRAMv2.1.pdf diff/CRAMv2.1.pdf: CRAMv2.1.tex new/CRAMv2.1.ver
 new/CRAMv3.pdf   diff/CRAMv3.pdf:   CRAMv3.tex   new/CRAMv3.ver
+new/CRAMv4.pdf   diff/CRAMv4.pdf:   CRAMv4.tex   new/CRAMv4.ver
 new/crypt4gh.pdf diff/crypt4gh.pdf: crypt4gh.tex new/crypt4gh.ver
 new/SAMv1.pdf    diff/SAMv1.pdf:    SAMv1.tex    new/SAMv1.ver
 new/SAMtags.pdf  diff/SAMtags.pdf:  SAMtags.tex  new/SAMtags.ver
