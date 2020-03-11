@@ -91,7 +91,10 @@ last modified on the date shown above.
 \end{center}
 \vspace*{1em}
 
-\section{\textbf{Overview}}
+\tableofcontents
+\newpage
+
+\section{Overview}
 
 This specification describes the CRAM 4.0 format. 
 
@@ -112,115 +115,52 @@ format while offering a smooth transition path from using BAM files. The fourth
 objective supports the exploration of different lossy compression strategies and 
 provides a framework in which to effect these choices. Please note that the CRAM 
 format does not impose any rules about what data should or should not be preserved. 
-Instead, CRAM supports a wide range of lossless and lossy data preservation strategies 
-enabling users to choose which data should be preserved.
 
-Data in CRAM is aggregated by data type (analogous to SAM columns) and
-stored in blocks with each block compressed using a choice of general
-purpose or custom compression codecs.  Sequence is typically encoded
-relative to a reference sequence\footnote{Markus Hsi-Yang Fritz,
-Rasko Leinonen, Guy Cochrane, and Ewan Birney,
-\textbf{Efficient storage of high throughput DNA sequencing data using reference-based compression},
-{\sl Genome Res.}~2011~21: 734--740;
-\href{http://dx.doi.org/doi:10.1101/gr.114819.110}{doi:10.1101/gr.114819.110};
-{\sc pmid:}21245279.}, but this is not a requirement.  Both
-aligned and unaligned sequence is supported.
+Data in CRAM is aggregated by data type (analogous to SAM columns)
+known as Data Series and stored in blocks with each block compressed
+using a choice of general purpose or custom compression codecs.
+Sequence is typically encoded relative to a reference
+sequence\footnote{Markus Hsi-Yang Fritz, Rasko Leinonen, Guy Cochrane,
+  and Ewan Birney, \textbf{Efficient storage of high throughput DNA
+    sequencing data using reference-based compression}, {\sl Genome
+    Res.}~2011~21: 734--740;
+  \href{http://dx.doi.org/doi:10.1101/gr.114819.110}{doi:10.1101/gr.114819.110};
+  {\sc pmid:}21245279.}, but this is not a requirement.  Both aligned
+and unaligned sequence is supported.
 
-\section{\textbf{Data types and formats}}
+\section{Data types and formats}
+\subsection*{Structures}
 
-The CRAM file format uses a combination of fixed sized and variable
-sized integer types, which may be signed or unsigned.  Additionally
-arrays of any types may be used.
+The CRAM format consists of header structures (container, compression, slice and block) and data series stored within the blocks themselves.
+The fields of these structures use a mixture of fundamental types - boolean, byte, integer or array thereof - which are defined below.
 
-We distinguish between abstract types and their on-disk formats, which
-are described in more detail in the next section.
+% Types used in structures.
+% Container:  uint, sint, uint[], byte[4](CRC), byte[]
+% Block:      byte, uint, byte[], byte[4](CRC)
+% CompHdr:    map, bool, byte[5], uint, byte[], encoding<>
+% Slice:      sint, uint, uint[], byte[16], byte[]
 
-\begin{tabular}{llll}
-\textbf{Name}    & \textbf{Type}  & \textbf{Format}& \textbf{Description}\\
-\hline
+\begin{tabular}{lll}
+\textbf{Field type}  & \textbf{Encoding} & \textbf{Description}\\
+\textit{bool}  & BYTE & A boolean, 0 (false) or 1 (true), stored as a byte. \\
+\textit{byte}  & BYTE & An unsigned single byte (8 bits)  \\
+\textit{uint}  & VARINT\_UNSIGNED & A variable length integer $x >= 0$\\
+\textit{sint}  & VARINT\_SIGNED   & A variable length integer (may be negative)\\
+\textit{array\texttt{<}type\texttt{>}} & ARRAY & An array of items of \textit{type} including the dimension\\
 \\
-\textbf{Bool}    & \textit{bool}  & \textit{bool}  & A boolean, 0 or 1 \\
-\\
-\textbf{Byte}    & \textit{byte}  & \textit{byte}  & A single byte (8 bits)  \\
-\\
-\textbf{Integer} & \textit{}      & \textit{int32} & A 32-bit integer \textcolor{gray}{FIXME: cull need for this}\\
-                 & \textit{}      & \textit{int64} & A 64-bit integer \textcolor{gray}{FIXME: cull need for this}\\
-                 & \textit{sint}  & \textit{int7}  & A variable length signed integer \\
-                 & \textit{uint}  & \textit{uint7} & A variable length unsigned integer \\
-\\
-\textbf{Array (explicit)}
-                 & \textit{array} & \textit{array<fmt>}  & An array preceded by an explicit length\\
-\\
-\textbf{Array (implicit)}
-                 & \textit{[ ]} & \textit{fmt[]} & Zero or more items with unspecified length\\
-                 & \textit{[ ]}   & \textit{fmt[4]} & A constant number of items\\
-\\
-\textbf{Encoding}& \textit{encoding} & \textit{encoding<type>} & A description of how and
-                                             where a data series is stored\\
-\\
-\textbf{Map}     & \textit{}      & \textit{map}   & A collection of key-value pairs\\
+\textit{type[]}  & \textit{as appropriate} & Zero or more items with unspecified length\\
+\textit{type[4]} & \textit{as appropriate} & A constant number of items, dimension not stored\\
 \end{tabular}
-
 \vskip 10pt
 
-The \textit{types} are used to describe the contents of the data series.
-These are agnostic of magnitude or implementation, but do define the sign of integer values.
-The \textit{formats} are used in the fixed structures and the \textit{encoding} definitions and do take into account data sizes and/or sign.
-
-For example, the \textbf{BF} data series has a value data type of \textit{encoding<uint>}.
-If the encoding is EXTERNAL then the values will be stored in \textit{uint7} format as specified in the EXTERNAL encoding section.
-
-{
-\color{gray}
-FIXME: is this an overly complex way of defining things?  Maybe we should define EXTERNAL\_SINT, EXTERNAL\_UINT and EXTERNAL\_BYTE?  That makes it explicit and removes one level of indirection.  This is infact how my code already works.  The EXTERNAL decode initialisation specialises the decode function by data type:
-
-\begin{verbatim}
-cram_codec *cram_external_decode_init(cram_block_compression_hdr *hdr,
-                                      char *data, int size,
-                                      enum cram_external_type option,
-                                      int version, varint_vec *vv) {
-    //...
-    if (option == E_INT)
-        c->decode = cram_external_decode_int;
-    else if (option == E_SINT)
-        c->decode = cram_external_decode_sint;
-    else if (option == E_LONG)
-        c->decode = cram_external_decode_long;
-    else if (option == E_SLONG)
-        c->decode = cram_external_decode_slong;
-    else if (option == E_BYTE_ARRAY || option == E_BYTE)
-        c->decode = cram_external_decode_char;
-    else
-        c->decode = cram_external_decode_block;
-    //...
-}
-\end{verbatim}
-}
-
-\label{subsec:writing-bytes}
-
-CRAM uses \emph{little endianness} for bytes unless specified
-otherwise.  A more detailed description of the each type and format follows.
+The on-disk format for each of these encodings is listed below:
 
 \begin{description}
+\item[BYTE]\ \newline
+A single byte
 
-\item[Boolean (bool)]\ \newline
-Boolean is written as 1-byte with 0x0 being `false' and 0x1 being `true'.
-
-\item[Byte (byte)]\ \newline
-A single unsigned byte.
-
-\item[Signed integer (int32)]\ \newline
-Signed 32-bit integer, written as 4 bytes in little-endian byte order.
-
-\item[Signed long integer (int64)]\ \newline
-Signed 64-bit integer, written as 8 bytes in little-endian byte order.
-
-\item[Unsigned variable sized integer (uint7)]\ \newline
-An unsigned integer of unspecified size, stored 7-bits at a time.
-
-The on-disk size being proportional to the magnitude of the integer
-value encode and is known as Variable Length
+\item[VARINT\_UNSIGNED]\ \newline
+Integer values are encoded using Variable Length
 Quantity\footnote{\url{https://en.wikipedia.org/wiki/Variable-length_quantity}}.
 
 If the value is larger than 7-bits then the top-bit of the byte is
@@ -244,18 +184,9 @@ Algorithmically this looks like:
   \EndFunction
 \end{algorithmic}
 
-
-\item[Signed variable sized integer (sint7)]\ \newline
-This is a signed version of uint7 above.  Attempting to store a
-negative value with the uint7 method would lead to the signed value
-being interpreted as a very large unsigned quantity, consuming many
-bytes.  (This effect is seen in ITF8 and LTF8 in CRAM 3.0.)
-
-Instead we map signed values to unsigned ones keeping their
-magnitudes proportional by using zig-zag encoding, and then encode
-that value using uint7. This maps signed values 0, -1, +1, -2, +2 to
-unsigned values 0, 1, 2, 3, 4 respectively, and vice versa during
-decode.
+\item[VARINT\_SIGNED]\ \newline
+Signed integers are initially transformed to unsigned values using a zig-zag transformation, and then encoded as per unsigned values.
+This maps signed values 0, -1, +1, -2, +2 to unsigned values 0, 1, 2, 3, 4 respectively, and vice versa during decode.
 
 The zig-zag encoding method involves shifting the value left 1
 bit and then XORing with all-bits-zero if positive or all-bits-one if
@@ -275,131 +206,54 @@ below.
   \EndFunction
 \end{algorithmic}
 
-\item[{array<fmt>}]\ \newline
-Used for arrays where the size must be specified as part of the array itself.
-The length is written first as an integer (uint7), followed by the elements of the 
-array which are encoded as per their individual type-specific format
-(usually byte or uint7).
-
-{\color{gray}
-FIXME: arrays like this are used so rarely we could just replace \textit{array<uint7>} with \textit{uint7 nlandmarks} followed by \textit{uint7[nlandmarks]}.
-}
-
-\item[{fmt[ ]}]
-\item[{fmt[len]}]\ \newline
-Used for arrays of data where the length is either unspecified or
-known up-front.  In neither case is the length part of the byte stream.
-
-This is used within the specification for fixed sized items such as
-the 4 byte magic number or as a marker for an unspecified block of
-bytes such as \textit{byte[*] blocks}.
-
-\item[{Encoding<fmt>}]\ \newline
-{\color{gray}
-TODO: Move me?
-}
-Encoding is a data type that specifies how data series have been compressed. Encodings 
-are defined as encoding\texttt{<}type\texttt{>} where the type is a logical data 
-type as opposed to a storage data type.
-
-An encoding is written as follows. The first integer (uint7) denotes the codec id 
-and the second integer (uint7) the number of bytes in the following encoding-specific 
-values. 
-
-Subexponential encoding example: 
-
-\begin{tabular}{|l|l|l|}
-\hline
-\textbf{Value} & \textbf{Type} & \textbf{Name}\tabularnewline
-\hline
-0x7 & uint7 & codec id\tabularnewline
-\hline
-0x2 & uint7 & number of bytes to follow\tabularnewline
-\hline
-0x0 & uint7 & offset\tabularnewline
-\hline
-0x1 & uint7 & K parameter\tabularnewline
-\hline
-\end{tabular}
-
-The first byte ``0x7'' is the codec id. 
-
-The next byte ``0x2'' denotes the length of the bytes to follow (2). 
-
-The subexponential encoding has 2 parameters: integer (itf8) offset and integer (itf8) K.
-
-offset = 0x0 = 0
-
-K = 0x1 = 1
-
-
-\item[{Map}]\ \newline
-A map is a collection of keys and associated values. A map with N keys is written 
-as follows: 
-
-\begin{tabular}{|l|l|l|l|l|l|l|l|}
-\hline
-size in bytes & N & key 1 & value 1 & key ... & value ... & key N & value N\tabularnewline
-\hline
-\end{tabular}
-
-Both the size in bytes and the number of keys are written as integer (uint7). Keys 
-and values are written according to their data types and are specific to each map.
+\item[ARRAY]\ \newline
+An array of items with the array dimension explicitly stored.
+The array dimen is first, in VARINT\_UNSIGNED encoding, followed by the array elements stored as per their \textit{type}.
 
 \end{description}
 
+Other custom data types exist, but will be introduced in the relevant sections.
 
-\section{\textbf{Encodings }}
+\subsection*{Data series}
 
-Encoding is a data structure that captures information about compression details 
-of a data series that are required to uncompress it.  This could be
-the definition of a constant, a series of data transformations, or the
-block content id for an external block.  Some encodings may be nested,
-such as \texttt{BYTE\_ARRAY\_LEN} which defines one sub-encoding for the
-length and another for the bytes.
+Each data series in CRAM has a designated type - boolean, byte, integer or array thereof - but unlike the structures which explicitly state sign and encoding, the encoder has choice of how these types are stored.
+This type encoding meta-data is held in the compression header structure, once per data series.
+Hence the decoder has baked-in knowledge of the fundamental type of each data series (e.g. \textit{byte} vs \textit{int}) but the description of how that data is stored, whether it is constant or variable and whether it may be negative, is part of the file itself.
 
-Encoding notation is defined as the keyword `encoding' followed by its data type 
-in angular brackets, for example `encoding\texttt{<}byte\texttt{>}' stands for 
-an encoding that operates on a data series of data type `byte'.
+Integers are stored as a variable length quantity, with two distinct encodings for unsigned and unsigned values (a departure from CRAM 3.0 and earlier).
+The latter may still store positive numbers, but permits a mixture of positives and negatives in the same block.
 
-The encodings themselves are stored in the compression header block
-(\ref{subsec:compression-header}).
+A full description of the encoding methods can be found later.(FIXME add ref)
+Where \textit{N/A} is listed in the Encoding column below this data type only occurs within a structure and so has no encoding associated with it.
 
-Each encoding type has its own set of parameters listed below.
-
-\begin{tabular}{|l|l|>{\raggedright}p{155pt}|>{\raggedright}p{160pt}|}
+\begin{tabular}{lll}
+\textbf{Data Type}  & \textbf{Encoding} & \textbf{Description}\\
 \hline
-\textbf{Codec} & \textbf{ID} & \textbf{Parameters} & \textbf{Comment}\tabularnewline
-\hline
-NULL & 0 & none & series not preserved\tabularnewline
-\hline
-EXTERNAL & 1 & int block content id & the block content identifier used to associate 
-external data blocks with data series\tabularnewline
-\hline
-HUFFMAN & 3 & array\texttt{<}int\texttt{>} values, array\texttt{<}int\texttt{>} lengths & \textcolor{gray}{FIXME: replace with CONSTANT.} coding with int/byte values\tabularnewline
-\hline
-BYTE\_ARRAY\_LEN & 4 & encoding\texttt{<}int\texttt{>} array length, encoding\texttt{<}byte\texttt{>} 
-bytes & coding of byte arrays with array length\tabularnewline
-\hline
-BYTE\_ARRAY\_STOP & 5 & byte stop, int external block\linebreak{}
-content id & coding of byte arrays with a stop value \tabularnewline
-\hline
+\\
+\textit{byte}  & BYTE             & An unsigned single byte (8 bits)  \\
+               & CONST\_BYTE      & A fixed byte value\\
+\\
+\textit{byte[]}& BYTE\_ARRAY\_LEN & Zero or more items with unspecified length\\
+\textit{byte[]}& BYTE\_ARRAY\_STOP& Zero or more items with unspecified length\\
+\\
+\textit{int}   & VARINT\_UNSIGNED & A variable length integer $x >= 0$\\
+               & VARINT\_SIGNED   & A variable length integer (may be negative)\\
+               & CONST\_INT       & A fixed integer value (signed)\\
 \end{tabular}
 
-See section~\ref{sec:encodings} for more detailed descriptions of all the above coding algorithms and their parameters.
+\vskip 10pt
 
-\section{\textbf{Checksums}}
-The checksumming is used to ensure data integrity. The following checksumming algorithms are used in CRAM.
-\subsection{\textbf{CRC32}}
-This is a cyclic redundancy checksum 32-bit long with the polynomial 0x04C11DB7. Please refer to \href{http://www.itu.int/rec/recommendation.asp?type=folders&lang=e&parent=T-REC-V.42}{ITU-T V.42} for more details. The value of the CRC32 hash function is written as an integer.
+For example, the reference ID (\textbf{RI}) data series has a value data type of \textit{encoding<int>}.
+If all alignments in tihs slice are mapped ($RI >= 0$) then the encoding may be VARINT\_UNSIGNED.
+If some data is unmapped ($RI = -1$) then the encoding will be VARINT\_SIGNED.
 
-\section{\textbf{File structure}}
+\section{File Layout}
 
-The overall CRAM file structure is described in this section. Please refer to other 
-sections of this document for more detailed information. 
-
-A CRAM file consists of a fixed length file definition, followed by a CRAM header container,
-then one or more data containers, and finally a special end-of-file container. 
+The basic structure of a CRAM file is a file header (magic number)
+followed by a series of containers.  The first of these containers
+holds textual meta-data (CRAM Header Container) and the last is used
+as an end-of-file marker (CRAM EOF Container) with everyone inbetween
+holding the sequence records themselves (Data Contaners).
 
 \begin{center}
 \begin{tikzpicture}[
@@ -420,8 +274,11 @@ then one or more data containers, and finally a special end-of-file container.
 Figure 1: A CRAM file consists of a file definition, followed by a header container, then other containers.
 \end{center}
 
-Containers consist of one or more blocks. The first container, called the CRAM header container,
-is used to store a textual header as described in the SAM specification (see the section 7.1).
+Containers are just a Container Header Structure followed by one or
+more Blocks.  Blocks have different types (see
+~\ref{subsec:block-content-types}) corresponding to their usage.
+Note the block itself also consists of a defined structure followed by
+the block contents data.
 
 \begin{center}
 \begin{tikzpicture}[
@@ -448,17 +305,26 @@ nul padding bytes\break
 };
 \draw (file.one split south) to (header.north west);
 \draw (file.two split south) to (header.north east);
+
+\node (blocks) [boxes=2,below=1 of header.one south,text width=6em] {
+\nodepart{one}Block Header structure
+\nodepart{two}Block data
+};
+\draw (header.south west) to (blocks.north west);
+\draw (header.two split south) to (blocks.north east);
 \end{tikzpicture}
 
 Figure 2: The the first container holds the CRAM header text.
 \end{center}
 
-Each container starts with a container header structure followed by
-one or more blocks.
-The first block in each container is the compression header block
-giving details of how to decode data in subsequent blocks.
-Each block starts with a block header structure followed by the block
-data.
+The first container, called the CRAM header container, is used to
+store a textual header as described in the SAM specification (see the
+section 7.1).  This is optionally followed by another uncompressed
+block of nul padding bytes.  The purpose of this additional block is
+to permit in-situ modification of the CRAM header without the
+requirement to rewrite the entire file (instead needing just this
+container to be rewritten, provided it can be padded to an identical
+size).
 
 \begin{center}
 \begin{tikzpicture}[
@@ -484,23 +350,15 @@ data.
 };
 \draw (file.two split south) to (container.north west);
 \draw (file.three split south) to (container.north east);
-
-\node (blocks) [boxes=2,below=1 of container.two south,text width=6em] {
-\nodepart{one}Block Header structure
-\nodepart{two}Block data
-};
-\draw (container.one split south) to (blocks.north west);
-\draw (container.two split south) to (blocks.north east);
 \end{tikzpicture}
 
 Figure 3: Containers as a series of blocks
 \end{center}
 
-The blocks after the compression header are organised logically into slices. One 
-slice may contain, for example, a contiguous region of alignment data. Slices begin 
-with a slice header block and are followed by one or more data blocks.
-It is these data blocks which hold the primary bulk of CRAM data.
-The data blocks are further subdivided into a core data block and one or more external data blocks.
+The Data Containers hold the sequence records themselves.
+These start with a Compression Header block which holds meta-data
+describing how and where the Data Series are encoded within this
+container.
 
 \begin{center}
 \begin{tikzpicture}[
@@ -539,12 +397,11 @@ The data blocks are further subdivided into a core data block and one or more ex
   (container.six split south) to (container.south east);
 \node [below=0.2 of container.eight south] {Slice N};
 
-\node (slice) [boxes=5,below=1 of container.four south, text width=6.5em] {
+\node (slice) [boxes=4,below=1 of container.four south, text width=6.5em] {
 \nodepart{one}Slice Header Block
-\nodepart{two}Core Data Block
-\nodepart{three}External Data Block 1
-\nodepart{four}...
-\nodepart{five}External Data Block M
+\nodepart{two}External Data Block
+\nodepart{three}...
+\nodepart{four}External Data Block
 };
 \draw (container.two split south) to (slice.north west);
 \draw (container.five split south) to (slice.north east);
@@ -553,7 +410,16 @@ The data blocks are further subdivided into a core data block and one or more ex
 Figure 4: Slices formed from a series of concatenated blocks
 \end{center}
 
-\section{\textbf{File definition}}
+The blocks after the compression header are organised logically into slices. One 
+slice may contain, for example, a contiguous region of alignment data. Slices begin 
+with a slice header block and are followed by one or more data blocks.
+It is these data blocks which hold the primary bulk of CRAM data, the
+Data Series.
+
+Note many CRAM files will just use one slice per contaner as this is
+the default output format of several major implementations.
+
+\subsection{File definition}
 
 Each CRAM file starts with a fixed length (26 bytes) definition with the following 
 fields:
@@ -590,12 +456,12 @@ Additional compression methods; header and data checksums;
 improvements for unsorted data.
 
 \item[\textit{3.1}]
-Additional EXTERNAL compression codecs only.
+Additional block compression codecs only.
 
 \item[\textit{4.0}]
 This specification.  Revised variable sized integers, MD/NM/RG tag
 locators, and deduplication of read names.  Removed some encodings.
-See end for a more detailed list of changes.
+See \ref{sec:cram4changes} for a more detailed list of changes.
 \end {itemize}
 
 CRAM 3.0 and 3.1 differ only in the list of compression
@@ -603,7 +469,7 @@ methods available, so tools that output CRAM 3 without using any 3.1
 codecs should write the header to indicate 3.0 in order to permit
 maximum compatibility.
 
-\section{\textbf{Container header structure}}
+\subsection{Container header structure}
 
 The file definition is followed by one or more containers with the following header 
 structure where the container content is stored in the `blocks' field:
@@ -613,10 +479,10 @@ structure where the container content is stored in the `blocks' field:
 \textbf{Data type} & \textbf{Name} & \textbf{Value}
 \tabularnewline
 \hline
-uint32 & length & \textcolor{gray}{FIXME: make uint7} the sum of the lengths of all blocks in this container (headers and data); 
+uint7 & length & the sum of the lengths of all blocks in this container (headers and data);
 equal to the total byte length of the container minus the byte length of this header structure\tabularnewline
 \hline
-int7\textcolor{gray}{FIXME} & reference sequence id & reference sequence identifier  or\linebreak{}
+int7 & reference sequence id & reference sequence identifier  or\linebreak{}
 -1 for unmapped reads\linebreak{}
 -2 for multiple reference sequences.\linebreak{}
 All slices in this container must have a reference sequence id matching this value.\tabularnewline
@@ -649,20 +515,11 @@ byte[ ] & blocks & The blocks contained within the container.\tabularnewline
 \hline
 \end{tabular}
 
-\subsection{\textbf{CRAM header container}}
+\subsubsection*{CRC32}
+This is a cyclic redundancy checksum 32-bit long with the polynomial 0x04C11DB7. Please refer to \href{http://www.itu.int/rec/recommendation.asp?type=folders&lang=e&parent=T-REC-V.42}{ITU-T V.42} for more details. The value of the CRC32 hash function is written as an integer.
 
-The first container in a CRAM file contains a textual header in a single block, optionally
-gzip compressed. This text header currently matches the SAM header specification. Only
-gzip is allowed as compression method for this block. The CRAM header container does not
-include a compression header block.
 
-It is recommended to reserve 50\% more space in the CRAM header container than
-is required for the SAM header text by optionally padding the container with a second
-raw block consisting of all zeroes. This can be used to subsequently expand the header
-container in place, such as when updating @SQ records, while preserving the absolute
-offsets of all subsequent containers.
-
-\section{\textbf{Block structure}}
+\subsection{Block structure}
 \label{sec:block-struct}
 
 Containers consist of one or more blocks. Block compression is applied independently 
@@ -688,17 +545,14 @@ byte & method & the block compression method (and first CRAM version): \linebrea
 \hline
 byte & block content type id & the block content type identifier\tabularnewline
 \hline
-uint7 & block content id & the block content identifier used to associate external 
+uint7 & block content id & the block content identifier used to associate
 data blocks with data series\tabularnewline
 \hline
 uint7 & size in bytes* & size of the block data after applying block compression\tabularnewline
 \hline
 uint7 & raw size in bytes* & size of the block data before applying block compression\tabularnewline
 \hline
-byte[ ] & block data & the data stored in the block:\linebreak{}
--- bit stream of CRAM records (core data block)\linebreak{}
--- byte stream (external data block)\linebreak{}
--- additional fields ( header blocks)\tabularnewline
+byte[ ] & block data & the data stored in the block\tabularnewline
 \hline
 uint32 & CRC32 & CRC32 hash value for all preceding bytes in the block\tabularnewline
 \hline
@@ -706,7 +560,8 @@ uint32 & CRC32 & CRC32 hash value for all preceding bytes in the block\tabularne
 
 * Note on raw method: both compressed and raw sizes must be set to the same value.
 
-\subsection{\textbf{Block content types}}
+\subsubsection*{Block content types}
+\label{subsec:block-content-types}
 
 CRAM has the following block content types:
 
@@ -723,39 +578,25 @@ SLICE\_HEADER & 2 & Slice header block & See specific section\tabularnewline
 \hline
  & 3 &  & reserved\tabularnewline
 \hline
-EXTERNAL\_DATA & 4 & external data block & data produced by external encodings\tabularnewline
-\hline
-CORE\_DATA & 5 & core data block & bit stream of all encodings except for external encodings\tabularnewline
+EXTERNAL\_DATA & 4 & data block & data produced by encodings\tabularnewline
 \hline
 \end{tabular}
 \end{threeparttable}
 
-\subsection{\textbf{Block content id}}
+\subsubsection*{Block content id}
 
-Block content id is used to distinguish between external blocks in the same slice. 
-Each external encoding has an id parameter which must be one of the external block 
-content ids. For external blocks the content id is a positive integer. For all 
-other blocks content id should be 0. Consequently, all external encodings must 
+Block content id is used to distinguish between data blocks in the same slice. 
+Each encoding has an id parameter which must be one of the block
+content ids. For data blocks the content id is a positive integer. For all
+other blocks content id should be 0. Consequently, all data encodings must 
 not use content id less than 1. 
 
-\subsubsection*{Data blocks}
+\subsection{CRAM header container}
 
-Data is stored in data blocks. There are two types of data blocks: core data blocks 
-and external data blocks.The difference between core and external data blocks is 
-that core data blocks consist of data series that are compressed using bit encodings 
-while the external data blocks are byte compressed. One core data block and any 
-number of external data blocks are associated with each slice.
-
-Writing to and reading from core and external data blocks is organised through 
-CRAM records. Each data series is associated with an encoding. In case of external 
-encodings the block content id is used to identify the block where the data series 
-is stored. Please note that external blocks can have multiple data series associated 
-with them; in this case the values from these data series will be interleaved. 
-
-
-\subsection{\textbf{CRAM header block}}
-
-The SAM header is stored in a single block within the first container. 
+The first container in a CRAM file contains a textual header in a single block, optionally
+gzip compressed. This text header currently matches the SAM header specification. Only
+gzip is allowed as compression method for this block. The CRAM header container does not
+include a compression header block.
 
 The following constraints apply to the SAM header: 
 
@@ -764,11 +605,17 @@ The following constraints apply to the SAM header:
 into the file.
 \end{itemize}
 
-\subsection{\textbf{Compression header block}}
+It is recommended to reserve 50\% more space in the CRAM header container than
+is required for the SAM header text by optionally padding the container with a second
+raw block consisting of all zeroes. This can be used to subsequently expand the header
+container in place, such as when updating @SQ records, while preserving the absolute
+offsets of all subsequent containers.
+
+\subsection{Compression header block}
 \label{subsec:compression-header}
 
 The compression header block consists of 3 parts: preservation map, data series 
-encoding map and tag encoding map.
+encoding map and tag encoding map.  See below for the data format of a map.
 
 These are meta-data on what is stored in the following slices, how it is encoded, and in which blocks the raw byte streams from these encodings reside.
 
@@ -785,7 +632,41 @@ map & tag encoding map & meta-data for how tags are encoded \tabularnewline
 \hline
 \end{tabular}
 
-\subsubsection*{Preservation map}
+\subsubsection{Map structure}
+
+% FIXME: is this better defined as a sub-structure in the relevant section itself?
+% Possibly...
+A \textit{Map} is a collection of keys and associated values.
+
+Both the size in bytes and the number of keys are written as integer (uint7). Keys 
+and values are written according to their data types and are specific to each map.
+Keys have a fixed size for all items in a map, but this size is not
+the same for all map types.  The order of keys is not defined.  Values
+are stored immediately after their key in a key-defined format.  Some
+keys will have simple boolean values, some are fixed size, while
+others have a more complex sub-structures.
+
+The example below is for a two byte key map.
+
+\begin{tabular}{|l|>{\raggedright}p{120pt}|>{\raggedright}p{260pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Value}
+\tabularnewline
+\hline
+uint7 & size & the remaining size in bytes of this map structure\tabularnewline
+\hline
+uint7 & num\_keys & the number of key-value pairs in this map\tabularnewline
+\hline
+byte[2] & key & first key\tabularnewline
+\hline
+byte[] & value & first value, with a key-specific size (see below).\tabularnewline
+\hline
+... & ... & \textit{repeated num\_keys time}\tabularnewline
+\hline
+\end{tabular}
+
+
+\subsubsection{Preservation map}
 
 The preservation map contains information about which data was preserved in the 
 CRAM file. It is stored as a map with byte[2] keys:
@@ -803,7 +684,7 @@ the data completely\tabularnewline
 \hline
 SM & byte[5] & substitution matrix & substitution matrix\tabularnewline
 \hline
-TD & array<byte> & tag ids dictionary & a list of lists of tag ids, see tag encoding 
+TD & array\texttt{<}byte\texttt{<>} & tag ids dictionary & a list of lists of tag ids, see tag encoding 
 section\tabularnewline
 \hline
 QO & bool & qual orientation & true if quality values are in the same orientation as sequence.  If false quality values are recorded in the orientation as produced by the sequencing instrument, which may also still match sequence orientation.\tabularnewline
@@ -812,9 +693,175 @@ QO & bool & qual orientation & true if quality values are in the same orientatio
 
 The boolean values are optional, defaulting to true when absent, although it is recommended to explicitly set them.  SM and TD are mandatory.
 
-\subsubsection*{Data series encoding map}
+\subsubsection{Encoding structure}
 
-Each data series has an encoding. These encoding are stored in a map with byte[2] 
+The next map utilises another custom data type, \textit{encoding\texttt{<}type\texttt{>}}.
+This is used to describe the data encapsulation format for a specific data series; how and where the values are stored.  This could be
+the definition of a constant, a series of data transformations, or the
+block content id for a data block.  Some encodings may be nested,
+such as \texttt{BYTE\_ARRAY\_LEN} which defines one sub-encoding for the
+length and another for the bytes.
+
+Encoding notation is defined as the keyword `encoding' followed by its data type 
+in angular brackets, for example `encoding\texttt{<}byte\texttt{>}' stands for 
+an encoding that operates on a data series of data type `byte'.
+
+The \textit{encoding} format consists of an encoding type and type specific meta-data stored as an array (dimension followed by the array elements).
+
+\begin{tabular}{|l|>{\raggedright}p{120pt}|>{\raggedright}p{260pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Value}
+\tabularnewline
+\hline
+uint7 & encoding\_type & encoding type\tabularnewline
+\hline
+array\texttt{<}byte\texttt{>} & encoding\_meta & type specific meta-data for this encoding, serialised as a byte stream\tabularnewline
+\hline
+\end{tabular}
+
+The list of recognised encoding\_type values is:
+
+\begin{tabular}{|l|l|>{\raggedright}p{155pt}|>{\raggedright}p{160pt}|}
+\hline
+\textbf{Encoding Type} & \textbf{ID} & \textbf{Parameters} & \textbf{Comment}\tabularnewline
+\hline
+NULL & 0 & none & series not preserved\tabularnewline
+\hline
+BYTE\_ARRAY\_LEN & 4 & encoding\texttt{<}int\texttt{>} array length, encoding\texttt{<}byte\texttt{>} 
+bytes & coding of byte arrays with array length\tabularnewline
+\hline
+BYTE\_ARRAY\_STOP & 5 & byte stop, int block id\linebreak{}
+content id & coding of byte arrays with a stop value \tabularnewline
+\hline
+BYTE & 40 & uint block content id & the block content identifier used to associate 
+data blocks with data series\tabularnewline
+\hline
+VARINT\_UNSIGNED & 41 & sint offset, uint block content id & the block content identifier used to associate data blocks with data series\tabularnewline
+\hline
+VARINT\_SIGNED & 42 & sint offset, uint block content id & the block content identifier used to associate data blocks with data series\tabularnewline
+\hline
+CONST\_BYTE & 43 & byte value & the constant byte value\tabularnewline
+\hline
+CONST\_INT & 44 & sint value & the constant signed integer value\tabularnewline
+\hline
+\end{tabular}
+
+See section~\ref{sec:encodings} for more detailed descriptions of all
+the above coding algorithms and their parameters.  Note the encoding
+ID values here have been chosen to not clash with CRAM 3.0 and earlier
+with the exception of the BYTE\_ARRAY\_LEN and BYTE\_ARRAY\_STOP
+encodings which have not changed.
+
+For example the byte stream for an encoding\texttt{<}int\texttt{>}
+Data Series with values ranging from 1000 to 2000 may be encoded as
+VARINT\_UNSIGNED with offset 1000, as 0x41 (the encoding ID) 0x8f 0x51
+(1000 as sint), 0x20 (block ID 32).
+
+\subsubsection{Data series encoding map}
+
+Writing to and reading from data blocks is organised through CRAM
+records. A CRAM record is analogous to a single line in a SAM file.
+
+The records are organised into slices and then each slice is
+rearranged in a columnar fashion into data series.  For example
+collect 10,000 SAM records and then the first column, query name
+(QNAME), becomes one CRAM data series (RN), the next column (FLAG)
+becomes CRAM data series (BF), and so on.  Note some SAM columns, such
+as CIGAR, may map to many CRAM data series.
+
+Each data series is associated with an encoding. An encoding may have
+a block content id which is used to identify the block where the data
+series is stored. Please note that data blocks can have multiple
+data series associated with them; in this case the values from these
+data series will be interleaved and must be decoded in the correct order.
+
+\begin{center}
+\begin{tikzpicture}[thick]
+
+\usetikzlibrary{shapes, shadows, positioning, arrows,  decorations.markings, arrows.meta}
+
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+
+\tikzstyle{dsbox} = [blockbox, text width=6em, minimum width=9em, minimum height=3em, rounded corners, drop shadow]
+\tikzstyle{blockbox}=[draw, fill=white, text width=4.0em, text centered, minimum height=1.0em, drop shadow]
+\tikzstyle{encodedblock} = [blockbox, text width=6em, minimum width=8em, minimum height=3em, drop shadow]
+\tikzstyle{encodings} = [dsbox, minimum width=6em, thick]
+
+\tikzstyle{texto} = [above, text width=8em, text centered]
+
+\tikzstyle{vecArrow} = [thick, decoration={markings,mark=at position
+   1 with {\arrow[semithick]{Triangle[open, length=3.1mm, width=5mm]}}},
+   double distance=5pt, shorten >= 8.5pt,
+   preaction = {decorate},
+   postaction = {draw,line width=5pt, white,shorten >= 8pt}]
+\tikzstyle{innerWhite} = [semithick, white,line width=5pt, shorten >= 8pt]
+
+\newcommand{\cramRecord}[6]{%
+\begin{pgfonlayer}{background}
+    \path (#1.west |- #1.north) + (-0.5, 0.5) node (a1) {};
+    \path (#1.east |- #6.south) + (+0.5,-0.25) node (a2) {};
+    \path[fill=brown!10,rounded corners, draw=black!50, dashed]
+      (a1) rectangle (a2);
+    \path (a1.east |- a1.south) + (1.0,-0.3) node[texto]
+    {\scriptsize\textbf{Data Series}};
+\end{pgfonlayer}}
+
+\newcommand{\dsbox}[2]{node (p#1) [dsbox]
+{\scriptsize{#2}}}
+\newcommand{\encodedblock}[2]{node (p#1) [encodedblock]
+	{\scriptsize{#2}}}
+\newcommand{\encodedblocklarge}[2]{node (p#1) [encodedblocklarge]
+   {\scriptsize{#2}}}
+
+\path +(-2.5,-1.5) \dsbox{1}{\begin{tabular}{c} Bit Flags \\ BF \end{tabular}};
+\path (p1.south)+(0.0,-1.0) \dsbox{2}{\begin{tabular}{c} Alignment Start\\ AP\quad\quad \end{tabular}};
+\path (p2.south)+(0.0,-1.0) \dsbox{3}{\begin{tabular}{c} Read Length \\ RL \end{tabular}};
+\path (p3.south)+(0.0,-1.0) \dsbox{4}{\begin{tabular}{c} Bases \\ ... \end{tabular}};
+\path (p4.south)+(0.0,-1.0) \dsbox{5}{\begin{tabular}{c} Quality Scores \\ QS \end{tabular}};
+\path (p5.south)+(0.0,-1.0) \dsbox{6}{\begin{tabular}{c} Tags \\ ... \end{tabular}};
+
+\cramRecord{p1}{p2}{p3}{p4}{p5}{p6}
+
+\newcommand{\blockStreams}[4]{%
+\begin{pgfonlayer}{background}
+    \path (#1.west |- #1.north)+(-0.5, 0.5) node (a3) {};
+    \path (#4.east |- #4.south)+(+0.5, -0.25) node (a4) {};
+    \path[fill=yellow!10, rounded corners, draw=black!50, dashed]
+      (a3) rectangle (a4);
+    \path (a3.east |- a3.south)+(1.0,-0.3) node[texto]{\scriptsize\textbf{Byte Streams}};
+\end{pgfonlayer}}
+
+\path (a1.south) + (12.0, -2.3) \encodedblock {7} {DataBlock};
+\path (p7.south) + (0.0, -1.0)  \encodedblock {8} {Data Block};
+\path (p8.south) + (0.0, -1.0)  \encodedblock {9} {Data Block}; 
+\path (p9.south) + (0.0, -1.0)  \encodedblock {10}{Data Block...};
+
+\blockStreams {p7} {p8} {p9} {p10}
+
+\node (encodings) [encodings, right = 2 of p3] {\scriptsize Encodings};
+\node (enc_e1) [right=0.7 of encodings] {};
+\node (enc_e2) [right=1.05 of enc_e1] {};
+\node (enc_n)  [above=1 of encodings.center] {};
+\draw[vecArrow] (p3.east) + (0.55, 0) to (encodings.west);
+\draw[vecArrow] (encodings.east) to (enc_e2.west);
+\draw[vecArrow] (enc_e1.east) |- (enc_n.north) to (encodings.north);
+\draw[innerWhite] (encodings.east) to (enc_e2.west);
+
+\end{tikzpicture}
+
+Figure 5: The relationship between Data Series, Possibly nested Encodings, and Data Blocks.
+
+\end{center}
+
+The picture shows how a CRAM record (on the left) is distributed to
+multiple Data Blocks via a series of encodings.  Note the mapping from
+Data Series to Blocks may be many to many, with the possibility of
+multiple Data Series writing to the same Block and with a single
+encoding such as BYTE\_ARRAY\_LEN potentially writing to two Blocks.
+
+
+Each data series has an encoding. These encodings are stored in a map with byte[2] 
 keys and are decoded in approximately this order\footnote{The precise order is defined in section~\ref{sec:record}.}:
 
 \begin{threeparttable}[t]
@@ -826,7 +873,7 @@ BF & encoding\texttt{<}uint\texttt{>} & BAM bit flags & see separate section\tab
 \hline
 CF & encoding\texttt{<}uint\texttt{>} & CRAM bit flags & see specific section\tabularnewline
 \hline
-RI & encoding\texttt{<}uint\texttt{>} & reference id & record reference id from
+RI & encoding\texttt{<}int\texttt{>} & reference id & record reference id from
 the SAM file header\tabularnewline
 \hline
 RL & encoding\texttt{<}uint\texttt{>} & read lengths & read lengths\tabularnewline
@@ -844,7 +891,7 @@ RN\tnote{a} & encoding\texttt{<}byte[ ]\texttt{>} & read names & read names\tabu
 \hline
 MF & encoding\texttt{<}uint\texttt{>} & next mate bit flags & see specific section\tabularnewline
 \hline
-NS & encoding\texttt{<}uint\texttt{>} & next fragment reference sequence id & reference 
+NS & encoding\texttt{<}int\texttt{>} & next fragment reference sequence id & reference 
 sequence ids for the next fragment \tabularnewline
 \hline
 NP & encoding\texttt{<}uint\texttt{>} & next mate alignment start & alignment positions 
@@ -901,7 +948,7 @@ QS & encoding\texttt{<}byte\texttt{>} & quality scores & quality scores\tabularn
 \end{tablenotes}
 \end{threeparttable}
 
-\subsubsection*{Tag encoding map}
+\subsubsection{Tag encoding map}
 \label{subsubsec:tags}
 
 The tag dictionary (TD) describes the unique combinations of tag id / type that occur on each alignment record.
@@ -948,7 +995,7 @@ values into byte array and back are the same as in BAM with the exception of val
 type being captured in the tag key rather in the value.
 Hence consuming 1 byte for types `C' and `c', 2 bytes for types `S' and `s', 4 bytes for types `I', `i' and `f', and a variable number of bytes for types `H', `Z' and `B'.
 
-\subsection{\textbf{Slice header block}}
+\subsection{Slice header block}
 
 The slice header block is never compressed (block method=raw). For reference mapped 
 reads the slice header also defines the reference sequence context of the data 
@@ -981,7 +1028,7 @@ The slice header block contains the following fields.
 \hline
 \textbf{Data type} & \textbf{Name} & \textbf{Value}\tabularnewline
 \hline
-int7\textcolor{gray}{FIXME} & reference sequence id & reference sequence identifier or\linebreak{}
+int7 & reference sequence id & reference sequence identifier or\linebreak{}
 -1 for unmapped reads\linebreak{}
 -2 for multiple reference sequences.\linebreak{}
 This value must match that of its enclosing container.\tabularnewline
@@ -1002,8 +1049,8 @@ uint7 & number of blocks & the number of blocks in the slice\tabularnewline
 \hline
 uint7[ ] & block content ids & block content ids of the blocks in the slice\tabularnewline
 \hline
-int7\textcolor{gray}{FIXME} & embedded reference bases block content id & block content id for the embedded 
-reference sequence bases or -1 \textcolor{gray}{FIXME: why not 0?} for none\tabularnewline
+uint7 & embedded reference bases block content id & block content id for the embedded 
+reference sequence bases or 0 for none\tabularnewline
 \hline
 byte[16] & reference md5 & MD5 checksum of the reference bases within the slice 
 boundaries.  If this slice has reference sequence id of -1 (unmapped) or -2 (multi-ref)
@@ -1049,121 +1096,7 @@ checksums and statistical information.
 % \end{tabular}
 
 
-\subsection{\textbf{Core data block}}
-
-{\color{gray}
-FIXME: candidate for culling, in order to simplify the format.
-}
-A core data block is a bit stream (most significant bit first) consisting of data from one 
-or more CRAM records. Please note that one byte could hold more then one CRAM record 
-as a minimal CRAM record could be just a few bits long. The core data block has 
-the following fields:
-
-\begin{tabular}{|l|>{\raggedright}p{120pt}|>{\raggedright}p{260pt}|}
-\hline
-\textbf{Data type} & \textbf{Name} & \textbf{Value}
-\tabularnewline
-\hline
-bit[ ] & CRAM record 1 & The first CRAM record\tabularnewline
-\hline
-... & ... & ...\tabularnewline
-\hline
-bit[ ] & CRAM record N & The Nth CRAM record \tabularnewline
-\hline
-\end{tabular}
-
-\subsection{\textbf{External data blocks}}
-
-The relationship between the core data block and external data blocks is shown in the following 
-picture: 
-
-\begin{center}
-\begin{tikzpicture}
-
-\usetikzlibrary{shapes, shadows, positioning, arrows,  decorations.markings}
-
-\pgfdeclarelayer{background}
-\pgfsetlayers{background,main}
-
-\tikzstyle{dsbox} = [blockbox, text width=6em, minimum width=6em, minimum height=3em, rounded corners, drop shadow]
-\tikzstyle{blockbox}=[draw, fill=white, text width=4.0em, text centered, minimum height=1.0em, drop shadow]
-\tikzstyle{encodedblocklarge} = [blockbox, text width=6em, minimum width=8em, minimum height=4em, drop shadow]
-\tikzstyle{encodedblock} = [blockbox, text width=6em, minimum width=8em, minimum height=3em, drop shadow]
-
-\tikzstyle{texto} = [above, text width=8em, text centered]
-
-\newcommand{\cramRecord}[6]{%
-\begin{pgfonlayer}{background}
-    \path (#1.west |- #1.north) + (-0.5, 0.5) node (a1) {};
-    \path (#1.east |- #6.south) + (+0.5,-0.25) node (a2) {};
-    \path[fill=brown!10,rounded corners, draw=black!50, dashed]
-      (a1) rectangle (a2);
-    \path (a1.east |- a1.south) + (1.0,-0.3) node[texto]
-      {\scriptsize\textbf{CRAM Record}};
-\end{pgfonlayer}}
-
-\newcommand{\dsbox}[2]{node (p#1) [dsbox]
-{\scriptsize{#2}}}
-\newcommand{\encodedblock}[2]{node (p#1) [encodedblock]
-	{\scriptsize{#2}}}
-\newcommand{\encodedblocklarge}[2]{node (p#1) [encodedblocklarge]
-   {\scriptsize{#2}}}
-
-\path +(-2.5,-1.5) \dsbox{1}{Bit Flags};
-\path (p1.south)+(0.0,-1.0) \dsbox{2}{Alignment Start};
-\path (p2.south)+(0.0,-1.0) \dsbox{3}{Read Length};
-\path (p3.south)+(0.0,-1.0) \dsbox{4}{Bases};
-\path (p4.south)+(0.0,-1.0) \dsbox{5}{Quality Scores};
-\path (p5.south)+(0.0,-1.0) \dsbox{6}{Tags...};
-
-\cramRecord{p1}{p2}{p3}{p4}{p5}{p6}
-
-\newcommand{\blockStreams}[4]{%
-\begin{pgfonlayer}{background}
-    \path (#1.west |- #1.north)+(-0.5, .7) node (a1) {};
-    \path (#1.east |- #1.south)+(+0.5, -0.25) node (a2) {};
-    \path (#2.west |- #2.north)+(-0.5, 0.5) node (a3) {};
-    \path (#4.east |- #4.south)+(+0.5, -0.25) node (a4) {};
-    \path[fill=yellow!10, rounded corners, draw=black!50, dashed]
-      (a1) rectangle (a2);
-    \path (a1.east |- a1.south)+(0.8,-0.3) node[texto]
-      {\scriptsize\textbf{Bit Stream}};
-    \path[fill=yellow!10, rounded corners, draw=black!50, dashed]
-      (a3) rectangle (a4);
-    \path (a3.east |- a3.south)+(1.0,-0.3) node[texto]{\scriptsize\textbf{Byte Streams}};
-\end{pgfonlayer}}
-
-\path (a1.south) + (12.0, -2.3) \encodedblocklarge {7} {Core Data Block};
-\path (p7.south) + (0.0, -2.0) \encodedblock {8} {External Data Block};
-\path (p8.south) + (0.0, -1.0) \encodedblock {9} {External Data Block}; 
-\path (p9.south) + (0.0, -1.0) \encodedblock {10}{External Data Block...};
-
-\blockStreams {p7} {p8} {p9} {p10}
-
-\node[minimum size=4cm, right = of p2, single arrow, draw, single arrow head indent=0ex, black] {Bit encodings (Huffman, ...) };
-
-\node[minimum size=4cm, right = of p5, single arrow, draw, single arrow head indent=0ex, black] {Byte encodings (external, ...) };
-
-\end{tikzpicture}
-
-Figure 5: The relationship between core and external encodings, and core and external data blocks.
-
-\end{center}
-
-{\color{gray}
-FIXME: we may also wish to enforce one data series to one external
-block (in which case the block IDs may as well also be fixed)?  This
-is a restriction, but also a simplification and matches current
-practice (check Java)?
-}
-The picture shows how a CRAM record (on the left) is distributed between the core 
-data block and one or more external data blocks, via core or external encodings. The specific 
-encodings presented are only examples for purposes of illustration. The main point is 
-to distinguish between core bit encodings whose output is always stored in a core data 
-block, and external byte encodings whose output is always stored in external data 
-blocks.
-
-\section{\textbf{End of file container}}
+\subsection{End of file container}
 
 A special container is used to mark the end of a file or stream. It is required in version 3 or later.
 The idea is to provide an easy and a quick way to detect that a CRAM file or stream is complete.
@@ -1171,15 +1104,13 @@ The marker is an empty container with ref seq id set to -1 (unaligned) and align
 
 It is recommended that implementations of CRAM validate EOF by checking these values rather than direct comparison of byte values, as these checks will be valid for all versions of CRAM
 
-\section{\textbf{Record structure}}
+\section{Record structure}
 \label{sec:record}
 
 CRAM record is based on the SAM record but has additional features allowing for 
-more efficient data storage.  In contrast to BAM record CRAM record uses bits as 
-well as bytes for data storage. This way, for example, various coding techniques 
-which output variable length binary codes can be used directly in CRAM. On the 
-other hand, data series that do not require binary coding can be stored separately 
-in external blocks with some other compression applied to them independently.
+more efficient data storage.  In contrast to BAM record CRAM records
+are separated by type of data into a series of data blocks.  These
+blocks can then use content type aware compression techniques.
 
 As CRAM data series may be interleaved within the same blocks\footnote{Interleaving can sometimes provide better compression, however it also adds dependency between types of data meaning it is not possible to selectively decode one data series if it co-locates with another data series in the same block.} understanding the order in which CRAM data series must be decoded is vital.
 
@@ -1187,7 +1118,7 @@ The overall flowchart is below, with more detailed description in the subsequent
 
 \algnewcommand\algorithmicto{\text{ \textbf{to} }}
 
-\subsection{\textbf{CRAM record}}
+\subsection{CRAM record}
 
 Both mapped and unmapped reads start with the following fields. Please note that 
 the data series type refers to the logical data type and the data series name corresponds 
@@ -1213,7 +1144,7 @@ uint & CF & CRAM bit flags & see CRAM bit flags below\tabularnewline
 \hline
 \end{tabular}
 
-\subsubsection*{\textbf{BAM bit flags (BF data series)}}
+\subsubsection*{BAM bit flags (BF data series)}
 
 The following flags are duplicated from the SAM and BAM specification, with identical meaning.
 Note however some of these flags can be derived during decode, so may be omitted in the CRAM file and the bits computed based on both reads of a pair-end library residing within the same slice.
@@ -1259,7 +1190,7 @@ This may happen for a non-linear template (such as one constructed by stitching 
 \end{tablenotes}
 \end{threeparttable}
 
-\subsubsection*{\textbf{CRAM bit flags (CF data series)}}
+\subsubsection*{CRAM bit flags (CF data series)}
 
 The CRAM bit flags (also known as compression bit flags) expressed as an integer represent the CF data series. 
 The following compression flags are defined for each CRAM read record:
@@ -1288,7 +1219,7 @@ recreate the CIGAR string.\tabularnewline
 The following pseudocode describes the general process of decoding an entire CRAM record.
 The sequence data itself is in one of two encoding formats depending on whether the record is aligned (mapped).
 
-\subsubsection*{\textbf{Decode pseudocode}}
+\subsubsection*{Decode pseudocode}
 \newlength{\maxwidth}
 \newcommand{\algalign}[2] % #1 = text to left, #2 = text to right
 {\makebox[\maxwidth][l]{$#1{}$}${}#2$}
@@ -1312,7 +1243,7 @@ The sequence data itself is in one of two encoding formats depending on whether 
 \EndProcedure
 \end{algorithmic}
 
-\subsection{\textbf{CRAM positional data}}
+\subsection{CRAM positional data}
 \label{subsec:positions}
 
 Following the bit-wise BAM and CRAM flags, CRAM encodes positional related data including reference, alignment positions and length, and read-group.
@@ -1385,7 +1316,7 @@ byte[] & RN & read names & read names\tabularnewline
 \EndProcedure
 \end{algorithmic}
 
-\subsection{\textbf{Mate record}}
+\subsection{Mate record}
 \label{subsec:mate}
 
 There are two ways in which mate information can be preserved in CRAM: number of records downstream (distance, within this slice) to the next fragment in the template and a special mate record if the next fragment is not in the current slice.
@@ -1442,9 +1373,7 @@ strand\tabularnewline
 \end{tabular}
 
 
-\subsubsection*{\textbf{Decode mate pseudocode}}
-
-In the following pseudocode we are assuming the current record is $this$ and its mate is $next\_frag$.
+\subsubsection*{Decode mate pseudocode}
 
 \begin{algorithmic}[1]
 \Procedure{DecodeMateData}{}
@@ -1503,7 +1432,7 @@ uint & TL & tag line & an index into the tag dictionary (TD)\tabularnewline
   \If{$tag(type) = ``*''$}
   \State $tag(name)\gets$ \Call{GenerateTag}{$name$}
   \Else
-  \State $tag(name)\gets$ \Call{ReadItem}{$ele$, Byte[]}
+  \State $tag(name)\gets$ \Call{ReadItem}{$ele$, Byte[]}\Comment{Type specific}
   \EndIf
 \EndFor
 \EndProcedure
@@ -1523,16 +1452,16 @@ The MD and NM auxiliary tags store the differences (an edit string) between the 
 These may optionally be created on-the-fly during reference-based sequence reconstruction and should match the description provided in the SAMtags document.
 An encoder may decide to store these verbatim when no reference is used or where the automatically constructed values differ to the input data.
 
-The tag type \texttt{*} is used in conjunction with MD, NM and RG as a flag to indicate that this tag was present but is not being stored verbatim.
+The tag type \texttt{*} is used in conjunction with MD, NM and RG as a flag to indicate that this tag is present but is not being stored verbatim.
 (If MD is being stored verbatim, we would expect MDZ in the TD dictionary for this tag line.)
-The \texttt{*} type is also useful for ensuring the ordering of tags does not change.
+The \texttt{*} type is also useful for ensuring the ordering of tags can be preserved.
 
 Note it is permitted for decoders to choose to auto-generate MD and NM tags even in the absence of MD* and NM* entries.
 
-\subsection{\textbf{Mapped reads}}
+\subsection{Mapped reads}
 \label{subsec:mapped}
 
-\subsubsection*{\textbf{Read feature records}}
+\subsubsection*{Read feature records}
 \label{subsec:features}
 
 Read features are used to store read details that are expressed using read coordinates 
@@ -1713,7 +1642,7 @@ be followed by 4 more bytes representing substitutions for reference bases C, G,
 \EndProcedure
 \end{algorithmic}
 
-\subsection{\textbf{Unmapped reads}}
+\subsection{Unmapped reads}
 \label{subsec:unmapped}
 
 The CRAM record structure for unmapped reads has the following additional fields:
@@ -1873,7 +1802,7 @@ If the read name is still empty, the name is auto-generated.  It is suggested th
 \EndProcedure
 \end{algorithmic}
 
-\section{\textbf{Reference sequences}}
+\section{Reference sequences}
 
 CRAM format is natively based upon usage of reference sequences even though in 
 some cases they are not required. In contrast to BAM format CRAM format has strict 
@@ -1907,7 +1836,7 @@ range reference bases are all assumed to be `N'.
 slices. 
 \end{enumerate}
 
-\section{\textbf{Indexing}}
+\section{Indexing}
 
 \subsubsection*{General notes}
 
@@ -2002,150 +1931,180 @@ This allows to apply BAM indexing to CRAM files, however it introduces some over
 in seeking specific alignment start because all preceding records in the slice 
 must be read and discarded.
 
-\section{\textbf{Encodings}}
+\section{Encodings}
 \label{sec:encodings}
 
 % FIXME: we have a mishash of coding, encoding and codec.  We should
 % go through the entire document and be consistent.
 
-\subsection{\textbf{Introduction}}
+\subsection{Introduction}
 
-The basic idea for codings is to efficiently represent some values in binary format. 
+The basic idea for encodings is to efficiently represent byte and integer values.
 This can be achieved in a number of ways that most frequently involve some knowledge 
 about the nature of the values being encoded, for example, distribution statistics. 
 The methods for choosing the best encoding and determining its parameters are very 
 diverse and are not part of the CRAM format specification, which only describes 
 how the information needed to decode the values should be stored.
 
-Note two of the encodings (Golomb and Golomb-Rice) are listed as deprecated.
-These are still formally part of the CRAM specification, but have not been used by the primary implementations and may not be well supported.
-Therefore their use is permitted, but not recommended.
+\subsection{BYTE}
 
-\subsubsection*{Offset}
-
-Many of the codings listed below encode positive integer numbers. An integer offset 
-value is used to allow any integer numbers and not just positive ones to be encoded. 
-It can also be used for monotonically decreasing distributions with the maximum 
-not equal to zero. For example, given offset is 10 and the value to be encoded 
-is 1, the actually encoded value would be offset+value=11. Then when decoding, 
-the offset would be subtracted from the decoded value. 
-
-\subsection{EXTERNAL: codec ID 1}
-
-Can encode types \textit{Byte}, \textit{Integer}.
-
-The EXTERNAL coding is simply storage of data verbatim to an external block with a given ID.
-If the type is \textit{Byte} the data is stored as-is, otherwise for \textit{Integer} type the data is stored in uint7 or sint7 depending on the sign of the data series.
+This encoding simply stores byte values verbatim to a block with a given ID.
 
 \subsubsection*{Parameters}
 
-CRAM format defines the following parameters of EXTERNAL coding: 
+CRAM format defines the following parameters for BYTE encoding: 
 
 \begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
 \hline
 \textbf{Data type} & \textbf{Name} & \textbf{Comment}
 \tabularnewline
 \hline
-uint7 & external id & id of an external block containing the byte stream\tabularnewline
+uint7 & id & id of a block containing the byte stream\tabularnewline
 \hline
 \end{tabular}
 
-\subsection{Huffman coding: codec ID 3}
+\subsection{VARINT\_UNSIGNED}
 
-Can encode types \textit{Byte}, \textit{Integer}.
+This encoding stores unsigned integer values using the Variable Length Quantity
+format (VLQ)\footnote{https://en.wikipedia.org/wiki/Variable-length\_quantity}.
 
-Huffman coding replaces symbols (values to encode) by binary codewords, with common symbols having shorter codewords such that the total message of binary codewords is shorter than using uniform binary codeword lengths.
-The general process consists of the following steps.
+It is not permitted to store any negative values using this encoding.
+However given several data series have ranges that have the
+possibility of small negative values (such as -1 for Alignment
+Position), it is possible to skew the values slightly by adding an
+offset prior to encoding.  This provides a mechanism for guaranteeing
+all values remain positive.
 
-\begin{itemize}
-\item Obtain symbol code lengths.
-\begin{itemize}
-\item If encoding:\\
-- Compute symbol frequencies.\\
-- Compute code lengths from frequencies.
-\item If decoding:\\
-- Read code lengths from codec parameters.
-\end{itemize}
+Note this offset is added to the value after that value has been
+decoded so to encode -1 we may wish to set offset to -1 and encode a
+zero.  This mechanism may also be used to skew a range of values that
+do not cluster around zero.  For example if a data series has values
+ranging from 1000 to 1200, then setting offset to 1000 and encoding
+values between 0 and 200 would provide a smaller data footprint.
 
-\item Compute canonical Huffman codewords from code lengths\footnote{\url{https://en.wikipedia.org/wiki/Canonical_Huffman_code}}.
-
-\item Encode or decode bits as per the symbol to codeword table.
-Codewords have the ``prefix property'' that no codeword is a prefix of another codeword, enabling unambiguous decode bit by bit.
-\end{itemize}
-
-The use of canonical Huffman codes means that we only need to store the code lengths and use the same algorithm in both encoder and decoder to generate the codewords.
-This is achieved by ensuring our symbol alphabet has a natural sort order and codewords are assigned in numerical order.
-
-\textbf{Important note: for alphabets with only one value, the codeword will be zero bits long.}
-This makes the Huffman codec an efficient mechanism for specifying constant values.
-
-\subsubsection*{Canonical code computation}
-
-\begin{enumerate}
-\item Sort the alphabet ascending using bit-lengths and then using numerical order 
-of the values.
-
-\item The first symbol in the list gets assigned a codeword which is the same length 
-as the symbol's original codeword but all zeros. This will often be a single zero 
-('0').
-
-\item Each subsequent symbol is assigned the next binary number in sequence, ensuring
-that following codes are always higher in value.
-
-\item When you reach a longer codeword, then after incrementing, append zeros until 
-the length of the new codeword is equal to the length of the old codeword.
-\end{enumerate}
-
-\subsubsection*{Examples}
-
-\begin{tabular}{|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|>{\raggedright}p{105pt}|}
-\hline
-\textbf{Symbol} & \textbf{Code length} & \textbf{Codeword}\tabularnewline
-\hline
-A & 1 & 0\tabularnewline
-\hline
-B & 3 & 100\tabularnewline
-C & 3 & 101\tabularnewline
-D & 3 & 110\tabularnewline
-\hline
-E & 4 & 1110\tabularnewline
-F & 4 & 1111\tabularnewline
-\hline
-\end{tabular}
+For data series that require a broader scope of signed values we would
+recommend using VARINT\_SIGNED instead.
 
 \subsubsection*{Parameters}
+
+CRAM format defines the following parameters for VARINT\_UNSIGNED encoding: 
 
 \begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
 \hline
 \textbf{Data type} & \textbf{Name} & \textbf{Comment}
 \tabularnewline
 \hline
-array<uint7> & alphabet & list of all encoded symbols (values)\tabularnewline
+sint7 & offset & amount to add to decoded values\tabularnewline
 \hline
-array<uint7> & bit-lengths & array of bit-lengths for each symbol in the alphabet\tabularnewline
+uint7 & id & id of a block containing the byte stream\tabularnewline
 \hline
 \end{tabular}
 
-\subsection{Byte array coding}
+\subsection{VARINT\_SIGNED}
 
-Often there is a need to encode an array of bytes where the length is not predetermined.
-For example the read identifiers differ per alignment record, possibly with different lengths, and this length must be stored somewhere.
-There are two choices available: storing the length explicitly (BYTE\_ARRAY\_LEN) or continuing to read bytes until a termination value is seen (BYTE\_ARRAY\_STOP).
+This encoding permits storing a broad range of both positive and
+negative values while still following the property of low magnitude
+values taking up less space than large magnitude ones.
 
-Note in contrast to this, quality values are known to be the same length as the sequence which is an already known quantity, so this does not need to be encoded using the byte array codecs.
+It achieves this by using ZigZag encoding where signed values 0, -1,
++1, -2, +2 and so on are mapped to unsigned values 0, 1, 2, 3, 4.
+These unsigned values are then stored using the same VLQ system used
+by VARINT\_UNSIGNED.
 
-\subsubsection*{BYTE\_ARRAY\_LEN: codec ID 4}
+As with VARINT\_UNSIGNED, an offset is added to the value after it has
+been VLQ and ZigZag decoded.  Combined these permit efficient storage
+of a distribution of values centred around a mean.  For example if
+the distribution of values in a data series ranged from 1000 to 2000
+with a peak at 1500, we could set offset to 1500 and encode values
+-500 to +500.
+
+\subsubsection*{Parameters}
+
+CRAM format defines the following parameters for VARINT\_SIGNED encoding: 
+
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
+\tabularnewline
+\hline
+sint7 & offset & amount to add to decoded values\tabularnewline
+\hline
+uint7 & id & id of a block containing the byte stream\tabularnewline
+\hline
+\end{tabular}
+
+
+\subsection{CONST\_BYTE}
+
+Sometimes a data series has a constant value throughout the
+container.  In this case we can record this value in the Container
+Compression Header and avoid the need to store the data series.
+
+\subsubsection*{Parameters}
+
+CRAM format defines the following parameters for CONST\_BYTE encoding: 
+
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
+\tabularnewline
+\hline
+byte & value & the constant value\tabularnewline
+\hline
+\end{tabular}
+
+\subsection{CONST\_INT}
+
+As per CONST\_BYTE, but the value is a signed integer encoded with
+VLQ and ZigZag methods.
+The overhead of using ZigZag encoding on a constant unsigned value is
+an average of 1 bit per container per use of this encoding.
+
+\subsubsection*{Parameters}
+
+CRAM format defines the following parameters for CONST\_INT encoding: 
+
+\begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
+\hline
+\textbf{Data type} & \textbf{Name} & \textbf{Comment}
+\tabularnewline
+\hline
+sint & value & the constant value\tabularnewline
+\hline
+\end{tabular}
+
+\subsection{BYTE\_ARRAY\_LEN (ID 4)}
 
 Can encode types \textit{Byte[]}.
 
-Byte arrays are captured length-first, meaning that the length of every array element is written using an additional encoding.
-For example this could be a HUFFMAN encoding or another EXTERNAL block.
-The length is decoded first followed by the data, followed by the next length and data, and so on.
+Often there is a need to encode an array of bytes where the length is
+not predetermined.  For example the read identifiers differ per
+alignment record, possibly with different lengths, and this length
+must be stored somewhere.   Note in contrast to this, quality values
+are known to be the same length as the sequence which is an already
+known quantity, so the CRAM record encodes this using an implicit
+array by asking for multiple values to be decoded rather than using an
+explicit byte array encoding.
 
-This encoding can therefore be considered as a nested encoding, with each pair of nested encodings containing their own set of parameters.
-The byte stream for parameters of the BYTE\_ARRAY\_LEN encoding is therefore the concatenation of the length and value encoding parameters as described in section~\ref{subsec:writing-bytes}.
+With BYTE\_ARRAY\_LEN the length is explicitly encoded via its own
+sub-encoding prior to the array of bytes itself, also via its own
+sub-encoding.
 
-The parameter for BYTE\_ARRAY\_LEN are listed below:
+Note these sub-encodings may store the data in the same block, in
+which case the length comes first. Alternatively we may decide that
+the lengths have their own unique distribution which differs
+substantially to the data itself and so should be stored in a
+different block to permit better compression.  Having decoded the
+length, the decoder must then call the value sub-encoding that many
+times to retrieve the bytes.
+
+Given the recursion used here of an encoding using two sub-encodings,
+the byte stream for BYTE\_ARRAY\_LEN is the concatenation of both
+sub-encodings.
+
+\subsubsection*{Parameters}
+
+The parameters for BYTE\_ARRAY\_LEN are listed below:
 
 \begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
 \hline
@@ -2153,42 +2112,57 @@ The parameter for BYTE\_ARRAY\_LEN are listed below:
 \tabularnewline
 \hline
 encoding\texttt{<}int\texttt{>} & lengths encoding & an encoding describing how 
-the arrays lengths are captured\tabularnewline
+the arrays lengths are stored\tabularnewline
 \hline
 encoding\texttt{<}byte\texttt{>} & values encoding & an encoding describing how 
-the values are captured\tabularnewline
+the values (bytes) are stored\tabularnewline
 \hline
 \end{tabular}
 
-For example, the bytes specifying a BYTE\_ARRAY\_LEN encoding, including the codec and parameters, for a 16-bit X0 auxiliary tag (``X0C'') may use HUFFMAN encoding to specify the length (always 2 bytes) and an EXTERNAL encoding to store the value to an external block with ID 200.
+\subsubsection*{Example}
+
+The bytes for an X0:i SAM auxiliary field consisting of 16-bit items
+may be written as an X0S tag line.  Despite the size being known, all
+tag items are stored as byte arrays, so BYTE\_ARRAY\_LEN is ideal when
+coupled with a CONST\_INT encoding to hold the fixed size lengths and
+BYTE for the values.
 
 \begin{tabular}{lll}
 \hline
 \textbf{Bytes} & & \textbf{Meaning}\\
 \hline
-\texttt{0x04}         & & BYTE\_ARRAY\_LEN codec ID                                    \\
-\texttt{0x0a}         & & 10 remaining bytes of BYTE\_ARRAY\_LEN parameters            \\
+\texttt{0x04}         & & BYTE\_ARRAY\_LEN encoding ID                                    \\
+\texttt{0x07}         & & 7 remaining bytes of BYTE\_ARRAY\_LEN parameters            \\
 \\
-\texttt{0x03}         & & HUFFMAN codec ID, for aux tag lengths                        \\
-\texttt{0x04}         & & 4 more bytes of HUFFMAN parameters                           \\
-\texttt{0x01}         & & Alphabet array size = 1                                      \\
-\texttt{0x02}         & & alphabet symbol; (length = 2)                                \\
-\texttt{0x01}         & & Codeword array size = 1                                      \\
-\texttt{0x00}         & & Code length = 0 (zero bits needed as alphabet is size 1)     \\
+\texttt{0x44}         & & CONST\_INT encodng ID, for the aux tag lengths \\
+\texttt{0x01}         & & remaining length of CONST\_INT encoding \\
+\texttt{0x05}         & & length 2 as Zig-Zag format \\
 \\
-\texttt{0x01}         & & EXTERNAL codec ID, for aux tag values                        \\
-\texttt{0x02}         & & 2 more bytes of EXTERNAL parameters                          \\
+\texttt{0x01}         & & BYTE encoding ID, for the aux tag values \\
+\texttt{0x02}         & & 2 more bytes of BYTE parameters                          \\
 \texttt{0x81 0x48}    & & uint7 encoding for block ID 200                              \\
 \hline
 \end{tabular}
 
-\subsubsection*{BYTE\_ARRAY\_STOP: codec ID 5}
+\subsection{BYTE\_ARRAY\_STOP (ID 5)}
 
 Can encode types \textit{Byte[]}.
 
-Byte arrays are captured as a sequence of bytes terminated by a special stop byte.
-The data returned does not include the stop byte itself.
-In contrast to BYTE\_ARRAY\_LEN the value is always encoded with EXTERNAL so the parameter is an external id instead of another encoding.
+Instead of encoding an explicit length (as per BYTE\_ARRAY\_LEN) this
+encoding stores bytes ending in a termination value.  The data
+returned should not include this termination byte.  Hence this is
+comparable to the C language string encoding, which uses a nul
+character for termination, while BYTE\_ARRAY\_LEN is more similar to
+the Pascal language string encoding.
+
+Given this encoding is capturing the length within the same data
+stream as the bytes, unlike BYTE\_ARRAY\_LEN this does not require
+use of sub-encodings.  This makes it considerably simpler, but it has
+redundancy when the stored arrays have constant lengths.
+
+The choice of termination symbol is up to the encoder, but logical
+choices may include the nul byte or the tab character as both are
+illegal within SAM records.
 
 \begin{tabular}{|>{\raggedright}p{100pt}|>{\raggedright}p{100pt}|>{\raggedright}p{230pt}|}
 \hline
@@ -2197,7 +2171,7 @@ In contrast to BYTE\_ARRAY\_LEN the value is always encoded with EXTERNAL so the
 \hline
 byte & stop byte & a special byte treated as a delimiter\tabularnewline
 \hline
-uint8 & external id & id of an external block containing the byte stream\tabularnewline
+uint7 & block id & id of a block containing the byte stream\tabularnewline
 \hline
 \end{tabular}
 
@@ -2512,26 +2486,21 @@ uint8 & external id & id of an external block containing the byte stream\tabular
 % Golomb-Rice coding is a special case of Golomb coding when the M parameter is a power of 2.
 % The reason for this coding is that the division operations in Golomb coding can be replaced with bit shift operators as well as avoiding the extra $r < 2^{b}-M$ check.
 
-\section{\textbf{External compression methods}}
+\section{Block compression methods}
 
-External encoding operates on bytes only. Therefore any data series must be translated into bytes before sending data into an external block.
+Each block will hold different types of data and may have very
+different characteristics for compression.  Hence CRAM can utilise
+several different compression methods. Each method has an associated numeric code which is defined in Section~\ref{sec:block-struct}.
+
 The following methods are defined.
 Exact definitions of these methods are in their respective internet links or the ancillary \textit{CRAMcodecs} document found along side this specification.
 
-Integer values are written as ITF8, which then can be translated into an array 
-of bytes. 
-
-Strings, like read name, are translated into bytes according to UTF8 rules. In 
-most cases these should coincide with ASCII, making the translation trivial.
-
-Each method has an associated numeric code which is defined in Section~\ref{sec:block-struct}.
-
-\subsection{\textbf{Gzip}}
+\subsection{Gzip}
 
 The Gzip specification is defined in RFC 1952.
 Gzip in turn is an encapsulation on the Deflate algorithm defined in RFC 1951.
 
-\subsection{\textbf{Bzip2}}
+\subsection{Bzip2}
 
 First available in CRAM v2.0.
 
@@ -2541,14 +2510,14 @@ It is often superior to Gzip for textual data.
 An informal format specification exists:\\
 \url{https://github.com/dsnet/compress/blob/master/doc/bzip2-format.pdf}
 
-\subsection{\textbf{LZMA}}
+\subsection{LZMA}
 
 First available in CRAM v3.0.
 
 LZMA is the Lempel-Ziv Markov chain algorithm.
 CRAM uses the xz Stream format to encapsulate this algorithm, as defined in \url{https://tukaani.org/xz/xz-file-format.txt}.
 
-\subsection{\textbf{rANS4x8 codec}}
+\subsection{rANS4x8 codec}
 
 First available in CRAM v3.0.
 
@@ -2562,7 +2531,7 @@ This variant of rANS first appeared in CRAM v3.0.
 
 Details of this algorithm have been moved to the \textit{CRAMcodecs} document.
 
-\subsection{\textbf{rANS4x16 codec}}
+\subsection{rANS4x16 codec}
 
 First available in CRAM v3.1.
 
@@ -2571,7 +2540,7 @@ This variant of rANS first appeared in CRAM v3.1.
 
 Details of this algorithm are listed in the \textit{CRAMcodecs} document.
 
-\subsection{\textbf{adaptive arithemtic coding}}
+\subsection{adaptive arithemtic coding}
 
 First available in CRAM v3.1.
 
@@ -2581,7 +2550,7 @@ and decompresses instead of using a fixed table.
 
 Details of this algorithm are listed in the \textit{CRAMcodecs} document.
 
-\subsection{\textbf{fqzcomp codec}}
+\subsection{fqzcomp codec}
 
 First available in CRAM v3.1.
 
@@ -2589,7 +2558,7 @@ This is a method dedicated to compression of quality values.
 
 Details of this algorithm are listed in the \textit{CRAMcodecs} document.
 
-\subsection{\textbf{name tokeniser}}
+\subsection{name tokeniser}
 
 First available in CRAM v3.1.
 
@@ -2597,7 +2566,16 @@ This is a method dedicated to compression of read names.
 
 Details of this algorithm are listed in the \textit{CRAMcodecs} document.
 
-\section*{Appendix 1: Choosing the container size}
+\appendix
+\renewcommand{\thesection}{\arabic{section}}
+
+\newcommand{\appsection}[1]{%
+  \addtocounter{section}{1}
+  \section*{Appendix~\thesection \quad #1}
+  \addcontentsline{toc}{section}{Appendix~\thesection \quad #1}
+}
+
+\appsection{Choosing the container size}
 
 The CRAM format does not constrain the size of the containers.
 However, the following should be considered when deciding the container size:
@@ -2617,7 +2595,8 @@ As a guidance, the default container size for htslib and htsjdk is one
 slice of 10,000 short reads (fewer for long reads), but some users
 find 1,000 is more appropriate if they need a lot of random access.
 
-\section*{Appendix 2: CRAM 4.0 changes and rationale}
+\appsection{CRAM 4.0 changes and rationale}
+\label{sec:cram4changes}
 
 CRAM 4.0 has a number of changes.  For those familier with the version
 3.0 format, this is a list of changes along with a rationale for
@@ -2692,18 +2671,6 @@ making them.
   reducing the compressed size.
 
 {\color{gray}
-\item[(Planned) Removal of CORE block and bit-encodings]\ \newline
-  The bit based mechanisms are no predominantly unused in htslib and
-  htsjdk for CRAM 3.0 as separating into external blocks offers
-  greater flexibility for partial decoding.
-
-  The sole use of HUFFMAN in htslib is to specify constant values,
-  which by definition have zero length codes (and consume no
-  additional space).  Hence HUFFMAN is replaced by a new CONSTANT
-  encoding schema.
-}
-
-{\color{gray}
 \item[(For consideration) Removal of slices]\ \newline
   CRAM 3.0 offers the ability to have multiple slices per container.
   
@@ -2713,6 +2680,16 @@ making them.
 
   Removal of multi-slice containers, and by extension slices
   themselves, offers a simplified interface.
+
+  An alternative to this is to permit another set of blocks prior to
+  the first slice, with duplicate block IDs to those used in the
+  slices.  These blocks pertain to the container and are utilised in
+  unison with the per slice blocks.  For rANS they could hold the
+  frequency tables, permitting this to be shared across slices.  For
+  gzip or zstd they could hold a predefined dictionary, permitting
+  more efficient compression of small blocks.  This may grant finer
+  grained random access capability without suffering so much data
+  expansion.
 }
 
 \item[TODO: add PACK, RLE and DELTA encodings]\ \newline
@@ -2722,6 +2699,13 @@ making them.
   auto-generate if not, there's no need for this field.  We can just
   store blank names and cull the whole RN in DecodeMateData vs in-line
   shenanigans.
+
+\item[TODO: make all aux tags first class encoding objects]\ \newline
+  Right now aux tags are basically byte arrays encoded as per BAM.
+  This isn't so efficient.  For example an XX:S data series with
+  values ranging 0 to 500 but with many more small values are a few
+  large ones would be better encoded as VLQ than an array of 16-bit
+  quantities.
 
 \end{description}
 
