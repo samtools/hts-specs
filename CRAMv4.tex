@@ -141,12 +141,12 @@ The fields of these structures use a mixture of fundamental types - boolean, byt
 % Slice:      sint, uint, uint[], byte[16], byte[]
 
 \begin{tabular}{lll}
-\textbf{Field type}  & \textbf{Encoding} & \textbf{Description}\\
-\textit{bool}  & BYTE & A boolean, 0 (false) or 1 (true), stored as a byte. \\
-\textit{byte}  & BYTE & An unsigned single byte (8 bits)  \\
-\textit{uint}  & VARINT\_UNSIGNED & A variable length integer $x >= 0$\\
-\textit{sint}  & VARINT\_SIGNED   & A variable length integer (may be negative)\\
-\textit{array\texttt{<}type\texttt{>}} & ARRAY & An array of items of \textit{type} including the dimension\\
+\textbf{Field type}  & \textbf{Format} & \textbf{Description}\\
+\textit{bool}  & \textbf{byte} & A boolean, 0 (false) or 1 (true), stored as a byte. \\
+\textit{byte}  & \textbf{byte} & An unsigned single byte (8 bits)  \\
+\textit{uint}  & \textbf{VLQ\_unsigned} & A variable length integer $x >= 0$\\
+\textit{sint}  & \textbf{VLQ\_signed}   & A variable length integer (may be negative)\\
+\textit{array\texttt{<}type\texttt{>}} & \textbf{array} & An array of items of \textit{type} including the dimension\\
 \\
 \textit{type[]}  & \textit{as appropriate} & Zero or more items with unspecified length\\
 \textit{type[4]} & \textit{as appropriate} & A constant number of items, dimension not stored\\
@@ -156,10 +156,10 @@ The fields of these structures use a mixture of fundamental types - boolean, byt
 The on-disk format for each of these encodings is listed below:
 
 \begin{description}
-\item[BYTE]\ \newline
+\item[\textbf{byte}]\ \newline
 A single byte
 
-\item[VARINT\_UNSIGNED]\ \newline
+\item[\textbf{VLQ\_unsigned}]\ \newline
 Integer values are encoded using Variable Length
 Quantity\footnote{\url{https://en.wikipedia.org/wiki/Variable-length_quantity}}.
 
@@ -184,7 +184,7 @@ Algorithmically this looks like:
   \EndFunction
 \end{algorithmic}
 
-\item[VARINT\_SIGNED]\ \newline
+\item[\textbf{VLQ\_unsigned}]\ \newline
 Signed integers are initially transformed to unsigned values using a zig-zag transformation, and then encoded as per unsigned values.
 This maps signed values 0, -1, +1, -2, +2 to unsigned values 0, 1, 2, 3, 4 respectively, and vice versa during decode.
 
@@ -206,46 +206,13 @@ below.
   \EndFunction
 \end{algorithmic}
 
-\item[ARRAY]\ \newline
+\item[\textbf{array}]\ \newline
 An array of items with the array dimension explicitly stored.
-The array dimen is first, in VARINT\_UNSIGNED encoding, followed by the array elements stored as per their \textit{type}.
+The array dimension is first, using VLQ\_signed format, followed by the array elements stored as per their \textit{type}.
 
 \end{description}
 
 Other custom data types exist, but will be introduced in the relevant sections.
-
-\subsection*{Data series}
-
-Each data series in CRAM has a designated type - boolean, byte, integer or array thereof - but unlike the structures which explicitly state sign and encoding, the encoder has choice of how these types are stored.
-This type encoding meta-data is held in the compression header structure, once per data series.
-Hence the decoder has baked-in knowledge of the fundamental type of each data series (e.g. \textit{byte} vs \textit{int}) but the description of how that data is stored, whether it is constant or variable and whether it may be negative, is part of the file itself.
-
-Integers are stored as a variable length quantity, with two distinct encodings for unsigned and unsigned values (a departure from CRAM 3.0 and earlier).
-The latter may still store positive numbers, but permits a mixture of positives and negatives in the same block.
-
-A full description of the encoding methods can be found later.(FIXME add ref)
-Where \textit{N/A} is listed in the Encoding column below this data type only occurs within a structure and so has no encoding associated with it.
-
-\begin{tabular}{lll}
-\textbf{Data Type}  & \textbf{Encoding} & \textbf{Description}\\
-\hline
-\\
-\textit{byte}  & BYTE             & An unsigned single byte (8 bits)  \\
-               & CONST\_BYTE      & A fixed byte value\\
-\\
-\textit{byte[]}& BYTE\_ARRAY\_LEN & Zero or more items with unspecified length\\
-\textit{byte[]}& BYTE\_ARRAY\_STOP& Zero or more items with unspecified length\\
-\\
-\textit{int}   & VARINT\_UNSIGNED & A variable length integer $x >= 0$\\
-               & VARINT\_SIGNED   & A variable length integer (may be negative)\\
-               & CONST\_INT       & A fixed integer value (signed)\\
-\end{tabular}
-
-\vskip 10pt
-
-For example, the reference ID (\textbf{RI}) data series has a value data type of \textit{encoding<int>}.
-If all alignments in tihs slice are mapped ($RI >= 0$) then the encoding may be VARINT\_UNSIGNED.
-If some data is unmapped ($RI = -1$) then the encoding will be VARINT\_SIGNED.
 
 \section{File Layout}
 
@@ -430,9 +397,9 @@ fields:
 \hline
 byte[4] & format magic number & CRAM (0x43 0x52 0x41 0x4d)\tabularnewline
 \hline
-unsigned byte & major format number & 3 (0x3)\tabularnewline
+byte & major format number & 3 (0x3)\tabularnewline
 \hline
-unsigned byte & minor format number & 1 (0x1)\tabularnewline
+byte & minor format number & 1 (0x1)\tabularnewline
 \hline
 byte[20] & file id & CRAM file identifier (e.g. file name or SHA1 checksum)\tabularnewline
 \hline
@@ -695,16 +662,18 @@ The boolean values are optional, defaulting to true when absent, although it is 
 
 \subsubsection{Encoding structure}
 
-The next map utilises another custom data type, \textit{encoding\texttt{<}type\texttt{>}}.
+The data series encoding map utilises another custom data type, \textit{encoding\texttt{<}type\texttt{>}}.
 This is used to describe the data encapsulation format for a specific data series; how and where the values are stored.  This could be
 the definition of a constant, a series of data transformations, or the
 block content id for a data block.  Some encodings may be nested,
 such as \texttt{BYTE\_ARRAY\_LEN} which defines one sub-encoding for the
 length and another for the bytes.
 
-Encoding notation is defined as the keyword `encoding' followed by its data type 
-in angular brackets, for example `encoding\texttt{<}byte\texttt{>}' stands for 
-an encoding that operates on a data series of data type `byte'.
+Encoding notation is defined as the keyword `encoding' followed by its data type in angular brackets, for example `encoding\texttt{<}byte\texttt{>}' stands for an encoding that operates on a data series of data type `byte'.
+Note there are distinct encodings dealing with signed and unsigned
+data in addition to offsets applies to each, so for integer data the
+data series use `encoding\texttt{<}int\texttt{>}` and let the specific
+encoding and meta-data handle the sign as appropriate.
 
 The \textit{encoding} format consists of an encoding type and type specific meta-data stored as an array (dimension followed by the array elements).
 
@@ -713,49 +682,57 @@ The \textit{encoding} format consists of an encoding type and type specific meta
 \textbf{Data type} & \textbf{Name} & \textbf{Value}
 \tabularnewline
 \hline
-uint7 & encoding\_type & encoding type\tabularnewline
+uint7 & encoding\_ID & encoding type identifier\tabularnewline
 \hline
 array\texttt{<}byte\texttt{>} & encoding\_meta & type specific meta-data for this encoding, serialised as a byte stream\tabularnewline
 \hline
 \end{tabular}
 
-The list of recognised encoding\_type values is:
+\vskip 10pt
 
-\begin{tabular}{|l|l|>{\raggedright}p{155pt}|>{\raggedright}p{160pt}|}
+Note unlike the fields in structures, data series types here do not
+distinguish signed integer (sint) vs unsigned integer (uint) as this
+distinction is handled by the encoding itself.  This is different to
+CRAM 3.0 and earlier where the sign and size of the data series types
+was written into the specification, rather than stored as meta-data in
+the CRAM file.
+
+For example, the alignment position (\textbf{AP}) data series has a value data type of \textit{encoding<int>}.
+Typically on a position sorted file this is delta encoded and all
+values are positive, so a suitable encoding is VARINT\_UNSIGNED.  If
+the slice contains data aligned against multiple reference sequences
+then this may contain some negative deltas in which case
+VARINT\_SIGNED could be appropriate.
+
+A list of data types along with their possible encodings is listed
+below.
+
+\begin{tabular}{llll}
+\textbf{ID}  & \textbf{Encoding} & \textbf{Data Type} & \textbf{Description}\\
 \hline
-\textbf{Encoding Type} & \textbf{ID} & \textbf{Parameters} & \textbf{Comment}\tabularnewline
-\hline
-NULL & 0 & none & series not preserved\tabularnewline
-\hline
-BYTE\_ARRAY\_LEN & 4 & encoding\texttt{<}int\texttt{>} array length, encoding\texttt{<}byte\texttt{>} 
-bytes & coding of byte arrays with array length\tabularnewline
-\hline
-BYTE\_ARRAY\_STOP & 5 & byte stop, int block id\linebreak{}
-content id & coding of byte arrays with a stop value \tabularnewline
-\hline
-BYTE & 40 & uint block content id & the block content identifier used to associate 
-data blocks with data series\tabularnewline
-\hline
-VARINT\_UNSIGNED & 41 & sint offset, uint block content id & the block content identifier used to associate data blocks with data series\tabularnewline
-\hline
-VARINT\_SIGNED & 42 & sint offset, uint block content id & the block content identifier used to associate data blocks with data series\tabularnewline
-\hline
-CONST\_BYTE & 43 & byte value & the constant byte value\tabularnewline
-\hline
-CONST\_INT & 44 & sint value & the constant signed integer value\tabularnewline
-\hline
+\\
+0  & NULL             & \textit{N/A} & Data series not present\\
+\\
+1  & BYTE (EXTERNAL)  & byte   & An unsigned single byte (8 bits)  \\
+\\
+4  & BYTE\_ARRAY\_LEN & byte[] & Zero or more items with unspecified length\\
+5  & BYTE\_ARRAY\_STOP& byte[] & Zero or more items with unspecified length\\
+\\
+41 & VARINT\_UNSIGNED & int    & A variable length integer (VLQ $x >= 0$)\\
+42 & VARINT\_SIGNED   & int    & A variable length integer (VLQ, may be negative)\\
+\\
+43 & CONST\_BYTE      & byte   & A fixed byte value\\
+44 & CONST\_INT       & int    & A fixed integer value (VLQ, signed)\\
 \end{tabular}
+
+\vskip 10pt
 
 See section~\ref{sec:encodings} for more detailed descriptions of all
 the above coding algorithms and their parameters.  Note the encoding
 ID values here have been chosen to not clash with CRAM 3.0 and earlier
 with the exception of the BYTE\_ARRAY\_LEN and BYTE\_ARRAY\_STOP
-encodings which have not changed.
-
-For example the byte stream for an encoding\texttt{<}int\texttt{>}
-Data Series with values ranging from 1000 to 2000 may be encoded as
-VARINT\_UNSIGNED with offset 1000, as 0x41 (the encoding ID) 0x8f 0x51
-(1000 as sint), 0x20 (block ID 32).
+encodings which have not changed and BYTE which is identical and
+synonymous with EXTERNAL in the CRAM 3.0 specification.
 
 \subsubsection{Data series encoding map}
 
@@ -869,51 +846,51 @@ keys and are decoded in approximately this order\footnote{The precise order is d
 \hline
 \textbf{Key} & \textbf{Value data type} & \textbf{Name} & \textbf{Value}\tabularnewline
 \hline
-BF & encoding\texttt{<}uint\texttt{>} & BAM bit flags & see separate section\tabularnewline
+BF & encoding\texttt{<}int\texttt{>} & BAM bit flags & see separate section\tabularnewline
 \hline
-CF & encoding\texttt{<}uint\texttt{>} & CRAM bit flags & see specific section\tabularnewline
+CF & encoding\texttt{<}int\texttt{>} & CRAM bit flags & see specific section\tabularnewline
 \hline
 RI & encoding\texttt{<}int\texttt{>} & reference id & record reference id from
 the SAM file header\tabularnewline
 \hline
-RL & encoding\texttt{<}uint\texttt{>} & read lengths & read lengths\tabularnewline
+RL & encoding\texttt{<}int\texttt{>} & read lengths & read lengths\tabularnewline
 \hline
-AP & encoding\texttt{<}sint\texttt{>} & in-seq positions & if \textbf{AP-Delta} = true: 0-based alignment start
+AP & encoding\texttt{<}int\texttt{>} & in-seq positions & if \textbf{AP-Delta} = true: 0-based alignment start
 delta from the AP value in the previous record.
 Note this delta may be negative, for example when switching references in a multi-reference slice.
 When the record is the first in the slice, the previous position used is the slice alignment-start field (hence the first delta should be zero for single-reference slices, or the AP value itself for multi-reference slices).  \linebreak{}
 if \textbf{AP-Delta} = false: encodes the alignment start position directly\tabularnewline
 \hline
-RG & encoding\texttt{<}sint\texttt{>} & read groups & read groups. Special value 
+RG & encoding\texttt{<}int\texttt{>} & read groups & read groups. Special value 
 `-1' stands for no group.\tabularnewline
 \hline
 RN\tnote{a} & encoding\texttt{<}byte[ ]\texttt{>} & read names & read names\tabularnewline
 \hline
-MF & encoding\texttt{<}uint\texttt{>} & next mate bit flags & see specific section\tabularnewline
+MF & encoding\texttt{<}int\texttt{>} & next mate bit flags & see specific section\tabularnewline
 \hline
 NS & encoding\texttt{<}int\texttt{>} & next fragment reference sequence id & reference 
 sequence ids for the next fragment \tabularnewline
 \hline
-NP & encoding\texttt{<}uint\texttt{>} & next mate alignment start & alignment positions 
+NP & encoding\texttt{<}int\texttt{>} & next mate alignment start & alignment positions 
 for the next fragment\tabularnewline
 \hline
-TS & encoding\texttt{<}uint\texttt{>} & template size & template sizes\tabularnewline
+TS & encoding\texttt{<}int\texttt{>} & template size & template sizes\tabularnewline
 \hline
-NF & encoding\texttt{<}uint\texttt{>} & distance to next fragment & number of records
+NF & encoding\texttt{<}int\texttt{>} & distance to next fragment & number of records
 to the next fragment\tnote{b}\tabularnewline
 \hline
-TL\tnote{c} & encoding\texttt{<}uint\texttt{>} & tag ids  & list of tag ids, see tag encoding
+TL\tnote{c} & encoding\texttt{<}int\texttt{>} & tag ids  & list of tag ids, see tag encoding
 section\tabularnewline
 \hline
-FN & encoding\texttt{<}uint\texttt{>} & number of read features & number of read
+FN & encoding\texttt{<}int\texttt{>} & number of read features & number of read
 features in each record\tabularnewline
 \hline
 FC & encoding\texttt{<}byte\texttt{>} & read features codes & see separate section\tabularnewline
 \hline
-FP & encoding\texttt{<}uint\texttt{>} & in-read positions & positions of the read
+FP & encoding\texttt{<}int\texttt{>} & in-read positions & positions of the read
 features\tabularnewline
 \hline
-DL & encoding\texttt{<}uint\texttt{>} & deletion lengths & base-pair deletion lengths\tabularnewline
+DL & encoding\texttt{<}int\texttt{>} & deletion lengths & base-pair deletion lengths\tabularnewline
 \hline
 BB & encoding\texttt{<}byte[ ]\texttt{>} & stretches of bases & bases\tabularnewline
 \hline
@@ -924,16 +901,16 @@ codes\tabularnewline
 \hline
 IN & encoding\texttt{<}byte[ ]\texttt{>} & insertion & inserted bases\tabularnewline
 \hline
-RS & encoding\texttt{<}uint\texttt{>} & reference skip length & number of skipped 
+RS & encoding\texttt{<}int\texttt{>} & reference skip length & number of skipped 
 bases for the `N' read feature\tabularnewline
 \hline
-PD & encoding\texttt{<}uint\texttt{>} & padding & number of padded bases\tabularnewline
+PD & encoding\texttt{<}int\texttt{>} & padding & number of padded bases\tabularnewline
 \hline
-HC & encoding\texttt{<}uint\texttt{>} & hard clip & number of hard clipped bases\tabularnewline
+HC & encoding\texttt{<}int\texttt{>} & hard clip & number of hard clipped bases\tabularnewline
 \hline
 SC & encoding\texttt{<}byte[ ]\texttt{>} & soft clip & soft clipped bases\tabularnewline
 \hline
-MQ & encoding\texttt{<}uint\texttt{>} & mapping qualities & mapping quality scores\tabularnewline
+MQ & encoding\texttt{<}int\texttt{>} & mapping qualities & mapping quality scores\tabularnewline
 \hline
 BA & encoding\texttt{<}byte\texttt{>} & bases & bases\tabularnewline
 \hline
@@ -1257,13 +1234,13 @@ Note for multi-reference slices this may mean that the AP series includes negati
 \hline
 \textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
 \hline
-uint & RI & ref id & reference sequence id (only present in multiref slices)\tabularnewline
+int & RI & ref id & reference sequence id (only present in multiref slices)\tabularnewline
 \hline
-uint & RL & read length & the length of the read\tabularnewline
+int & RL & read length & the length of the read\tabularnewline
 \hline
-sint & AP & alignment start & the alignment start position\tabularnewline
+int & AP & alignment start & the alignment start position\tabularnewline
 \hline
-sint & RG & read group & the read group identifier expressed as the N\textsuperscript{th} record in the header, starting from 0 with -1 for no group\tabularnewline
+int & RG & read group & the read group identifier expressed as the N\textsuperscript{th} record in the header, starting from 0 with -1 for no group\tabularnewline
 \hline
 \end{tabular}
 
@@ -1328,7 +1305,7 @@ For mates within the slice only the distance is captured, and only for the first
 \hline
 \textbf{Data series type} & \textbf{Data series name} & \textbf{Description}\tabularnewline
 \hline
-uint & NF & the number of records to the next fragment\tabularnewline
+int & NF & the number of records to the next fragment\tabularnewline
 \hline
 \end{tabular}
 
@@ -1343,15 +1320,15 @@ Note there are cases where read-pairs within the same slice may be marked as det
 \hline
 \textbf{Data series type} & \textbf{Data series name} & \textbf{Description}\tabularnewline
 \hline
-uint & MF & next mate bit flags, see table below\tabularnewline
+int & MF & next mate bit flags, see table below\tabularnewline
 \hline
 byte[ ] & RN & the read name (if and only if not known already)\tabularnewline
 \hline
-uint & NS & mate reference sequence identifier \tabularnewline
+int & NS & mate reference sequence identifier \tabularnewline
 \hline
-uint & NP & mate alignment start position \tabularnewline
+int & NP & mate alignment start position \tabularnewline
 \hline
-uint & TS & the size of the template (insert size)\tabularnewline
+int & TS & the size of the template (insert size)\tabularnewline
 \hline
 \end{tabular}
 
@@ -1416,7 +1393,7 @@ See section \ref{subsubsec:tags} for a more detailed description of this process
 \hline
 \textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
 \hline
-uint & TL & tag line & an index into the tag dictionary (TD)\tabularnewline
+int & TL & tag line & an index into the tag dictionary (TD)\tabularnewline
 \hline
 \textit{various} & \textit{various} & tag name/type & 3 character key (2 tag identifier and 1 tag type), as specified by the tag dictionary\tabularnewline
 \hline
@@ -1474,15 +1451,15 @@ Finally the single mapping quality and per-base quality scores are stored.
 \hline
 \textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
 \hline
-uint & FN & number of read features & the number of read features\tabularnewline
+int & FN & number of read features & the number of read features\tabularnewline
 \hline
-uint & FP & in-read-position\tnote{a} & position of the read feature\tabularnewline 
+int & FP & in-read-position\tnote{a} & position of the read feature\tabularnewline 
 \hline
 byte & FC & read feature code\tnote{a} & See feature codes below\tabularnewline
 \hline
 * & * & read feature data\tnote{a} & See feature codes below\tabularnewline
 \hline
-uint & MQ & mapping qualities & mapping quality score\tabularnewline
+int & MQ & mapping qualities & mapping quality score\tabularnewline
 \hline
 byte[read length] & QS & quality scores & the base qualities, if preserved\tabularnewline
 \hline
@@ -1520,19 +1497,19 @@ M and =\tabularnewline
 \hline
 Insertion & I (0x49) & byte[ ] & IN & inserted bases, SAM operator I\tabularnewline
 \hline
-Deletion & D (0x44) & uint & DL & number of deleted bases, SAM operator D\tabularnewline
+Deletion & D (0x44) & int & DL & number of deleted bases, SAM operator D\tabularnewline
 \hline
 Insert base & i (0x69) & byte & BA & single inserted base, SAM operator I\tabularnewline
 \hline
 Quality score & Q (0x51) & byte & QS & single quality score\tabularnewline
 \hline
-Reference skip & N (0x4E) & uint & RS & number of skipped bases, SAM operator N\tabularnewline
+Reference skip & N (0x4E) & int & RS & number of skipped bases, SAM operator N\tabularnewline
 \hline
 Soft clip & S (0x53) & byte[ ] & SC & soft clipped bases, SAM operator S\tabularnewline
 \hline
-Padding & P (0x50) & uint & PD & number of padded bases, SAM operator P\tabularnewline
+Padding & P (0x50) & int & PD & number of padded bases, SAM operator P\tabularnewline
 \hline
-Hard clip & H (0x48) & uint & HC & number of hard clipped bases, SAM operator H\tabularnewline
+Hard clip & H (0x48) & int & HC & number of hard clipped bases, SAM operator H\tabularnewline
 \hline
 \end{tabular}
 
