@@ -312,9 +312,9 @@ The {\tt TP} field is often omitted, which implies linear.}\\\cline{2-3}
   & {\tt LB} & Library.\\\cline{2-3}
   & {\tt PG} & Programs used for processing the read group.\\\cline{2-3}
   & {\tt PI} & Predicted median insert size.\\\cline{2-3}
-  & {\tt PL} & Platform/technology used to produce the reads. \emph{Valid values are}:
- {\tt CAPILLARY},  {\tt DNBSEQ} (MGI/BGI), {\tt HELICOS}, {\tt ILLUMINA}, {\tt IONTORRENT}, {\tt LS454}, {\tt ONT} (Oxford Nanopore), {\tt PACBIO} (Pacific Biotechnology), and {\tt SOLID}.
-  Tag should be omitted when the technology is not in this list, (though the {\tt PM} tag may still be present in this case) or is unknown.\\\cline{2-3}
+  & {\tt PL} & Platform/technology used to produce the reads. \emph{Valid values}:
+  {\tt CAPILLARY}, {\tt DNBSEQ} (MGI/BGI), {\tt HELICOS}, {\tt ILLUMINA}, {\tt IONTORRENT}, {\tt LS454}, {\tt ONT} (Oxford Nanopore), {\tt PACBIO} (Pacific Biotechnology), and {\tt SOLID}.
+  This field should be omitted when the technology is not in this list (though the {\tt PM} field may still be present in this case) or is unknown.\\\cline{2-3}
   & {\tt PM} & Platform model. Free-form text providing further details of the platform/technology used.\\\cline{2-3}
   & {\tt PU} & Platform unit (e.g., flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
   & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\cline{1-3}
@@ -1411,6 +1411,7 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item Add {\tt DNBSEQ} to the list of {\tt @RG PL} header tag values. (Apr 2020)
 \item Add {\tt @SQ TP} circular/linear topology header tag. (May 2019)
 \item\textbf{Restricted the allowable punctuation characters in reference sequence names} (in {\tt @SQ SN}, {\sf RNAME}, etc).
 The sets of characters allowed in {\tt @SQ SN} and {\tt @SQ AN} are now identical, which enlarges the previous {\tt AN} set. (Jan 2019)
