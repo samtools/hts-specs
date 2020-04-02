@@ -95,7 +95,7 @@ Characters with special meaning (such as field delimiters `\verb|;|' in INFO or 
 
 \subsection{Data types}
 Data types supported by VCF are: Integer (32-bit, signed), Float (32-bit IEEE-754, formatted to match one of the regular expressions \verb|^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$| or \verb"^[-+]?(INF|INFINITY|NAN)$" case insensitively),%
-\footnote{Note Java's {\tt Double.valueOf} is particular about capitalisation, so additional code is needed to parse all VCF infinite/NaN values.}
+\footnote{Note Java's {\tt Double.valueOf} is particular about capitalization, so additional code is needed to parse all VCF infinite/NaN values.}
 Flag, Character, and String.
 For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in the binary version and therefore are disallowed in both VCF and BCF, see \ref{BcfTypeEncoding}.
 
