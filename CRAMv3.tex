@@ -111,7 +111,7 @@ Signed 32-bit integer.
 Signed 64-bit integer. 
 
 \item[Array]\ \newline
-An array of any logical data type: \texttt{<}type\texttt{>}[ ] 
+An array of any logical data type: array\texttt{<}type\texttt{>}
 \end{description}
 
 % \begin{tabular}{ll}
@@ -214,9 +214,13 @@ number of bytes used to encode a single value. To do so 64 bits are required and
 this can be done with 9 byte at most with the first byte consisting of just 1s 
 or 0xFF value. 
 
-\item[{Array ([ ])}]\ \newline
-Array length is written first as integer (itf8), followed by the elements of the 
-array. 
+\item[{Array (array\texttt{<}type\texttt{>})}]\ \newline
+A variable sized array with an explicitly written dimension.
+Array length is written first as integer (itf8), followed by the elements of the array.
+
+Implicit or fixed-size arrays are also used, written as \textit{type}\texttt{[ ]} or \textit{type}\texttt{[4]} (for example).
+These have no explicit dimension included in the file format and instead rely on the specification itself to document the array size.
+
 
 \item[{Encoding}]\ \newline
 Encoding is a data type that specifies how data series have been compressed. Encodings 
@@ -301,7 +305,7 @@ external data blocks with data series\tabularnewline
 \hline
 Deprecated (GOLOMB) & 2 & int offset, int M & Golomb coding\tabularnewline
 \hline
-HUFFMAN & 3 & int array, int array & coding with int/byte values\tabularnewline
+HUFFMAN & 3 & array\texttt{<}int\texttt{>}, array\texttt{<}int\texttt{>} & coding with int/byte values\tabularnewline
 \hline
 BYTE\_ARRAY\_LEN & 4 & encoding\texttt{<}int\texttt{>} array length, encoding\texttt{<}byte\texttt{>} 
 bytes & coding of byte arrays with array length\tabularnewline
@@ -559,7 +563,7 @@ ltf8 & bases & number of read bases\tabularnewline
 \hline
 itf8 & number of blocks & the total number of blocks in this container\tabularnewline
 \hline
-itf8[ ] & landmarks & the locations of slices in this container as byte offsets from the end of 
+array\texttt{<}itf8\texttt{>} & landmarks & the locations of slices in this container as byte offsets from the end of
 this container header, used for random access indexing.
 The landmark count must equal the slice count.\linebreak{}
 Since the block before the first slice is the compression header,
@@ -707,8 +711,7 @@ the data completely\tabularnewline
 \hline
 SM & byte[5] & substitution matrix & substitution matrix\tabularnewline
 \hline
-TD & byte[ ] & tag ids dictionary & a list of lists of tag ids, see tag encoding 
-section\tabularnewline
+TD & array\texttt{<}byte\texttt{>} & tag ids dictionary & a list of lists of tag ids, see tag encoding section\tabularnewline
 \hline
 \end{tabular}
 
@@ -908,7 +911,7 @@ boundaries.  If this slice has reference sequence id of -1 (unmapped) or -2 (mul
 the MD5 should be 16 bytes of \textbackslash{}0. For embedded references, the MD5
 can either be all-zeros or the MD5 of the embedded sequence.\tabularnewline
 \hline
-byte[] & optional tags & a series of tag,type,value tuples encoded as
+byte[ ] & optional tags & a series of tag,type,value tuples encoded as
 per BAM auxiliary fields.\tabularnewline
 \hline
 \end{tabular}
@@ -1317,7 +1320,7 @@ In this situation the record will be marked as detached (see the CF data series)
 \hline
 \textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
 \hline
-byte[] & RN & read names & read names\tabularnewline
+byte[ ] & RN & read names & read names\tabularnewline
 \hline
 \end{tabular}
 
@@ -1951,7 +1954,7 @@ Note in contrast to this, quality values are known to be the same length as the 
 
 \subsubsection*{BYTE\_ARRAY\_LEN: codec ID 4}
 
-Can encode types \textit{Byte[]}.
+Can encode types \textit{Byte[ ]}.
 
 Byte arrays are captured length-first, meaning that the length of every array element is written using an additional encoding.
 For example this could be a HUFFMAN encoding or another EXTERNAL block.
@@ -2001,7 +2004,7 @@ For example, the bytes specifying a BYTE\_ARRAY\_LEN encoding, including the cod
 
 \subsubsection*{BYTE\_ARRAY\_STOP: codec ID 5}
 
-Can encode types \textit{Byte[]}.
+Can encode types \textit{Byte[ ]}.
 
 Byte arrays are captured as a sequence of bytes terminated by a special stop byte.
 The data returned does not include the stop byte itself.
@@ -2402,9 +2405,9 @@ int & compressed size & the size in bytes of frequency table and compressed blob
 \hline
 int & data size & raw or uncompressed data size in bytes\tabularnewline
 \hline
-byte[] & frequency table & byte frequencies of input data written using RLE\tabularnewline
+byte[ ] & frequency table & byte frequencies of input data written using RLE\tabularnewline
 \hline
-byte[] & compressed blob & compressed data\tabularnewline
+byte[ ] & compressed blob & compressed data\tabularnewline
 \hline
 \end{tabular}
 
