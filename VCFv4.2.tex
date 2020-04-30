@@ -1171,16 +1171,16 @@ The final four bits encodes an unsigned integer that indicates the type of the u
 \vspace{0.3cm}
 \begin{tabular}{|l | l | l|} \hline
 Lowest 4 bits & Hexadecimal encoding & Corresponding atomic type \\ \hline
-0 & 0x00 & A missing value without an explicit type provided \\ \hline
+0 & 0x00 & A MISSING value without an explicit type provided \\ \hline
 1 & 0x?1 & Integer [8 bit] \\ \hline
 2 & 0x?2 & Integer [16 bit] \\ \hline
 3 & 0x?3 & Integer [32 bit] \\ \hline
 5 & 0x?5 & Float [32 bit] \\ \hline
-7 & 0x?7 & Character, ASCII encoded in 8 bits \\ \hline
+7 & 0x?7 & Character, ASCII encoded in 8 bits.  This type is used for string values. \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
-Note this is not used in BCF2, but its type is reserved in case this becomes necessary.  In BCF2 characters are simply represented by strings with a single element 4,6,8-15 reserved for future use.
+Type codes 4,6,8--15 are reserved for future use.
 
 \vspace{0.3cm}
 
@@ -1213,7 +1213,11 @@ MISSING &	0b0111 1111 1000 0000 0000 0000 0000 0001 & 0x7F800001 \\ \hline
 \textbf{Flags} values -- which can only appear in INFO fields -- in BCF2 should be encoded by any non-MISSING value.  The recommended best practice is to encode the value as an 1-element INT8 (type 0x11) with value of 1 to indicate present.  Because FLAG values can only be encoded in INFO fields, BCF2 provides no mechanism to encode FLAG values in genotypes, but could be easily extended to do so if allowed in a future VCF version.
 
 \vspace{0.3cm}
-\textbf{String} values have two basic encodings.  For INFO, FORMAT, and FILTER keys these are encoded by integer offsets into the header dictionary.  For string values, such as found in the ID, REF, ALT, INFO, and FORMAT fields, strings are encoded as typed array of ASCII encoded bytes.  The array isn't terminated by a null byte.  The length of the string is given by the length of the type descriptor.
+\textbf{String} values have two basic encodings.
+For INFO, FORMAT, and FILTER keys these are encoded by integer offsets into the header dictionary.
+For string values, such as found in the ID, REF, ALT, INFO, and FORMAT fields, strings are encoded as typed array of ASCII encoded bytes.
+The array isn't terminated by a NUL byte.
+The length of the string is given by the length of the type descriptor.
 
 Suppose you want to encode the string ``{\tt ACAC}''.  First, we need the type descriptor byte, which is the string type 0x07 or'd with inline size (4) yielding the type byte of 0x40 $|$ 0x07 = 0x47.  Immediately following the type byte is the four byte ASCII encoding of ``{\tt ACAC}'': 0x41 0x43 0x41 0x43.  So the final encoding is:
 

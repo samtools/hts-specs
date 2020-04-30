@@ -1604,17 +1604,16 @@ The final four bits encodes an unsigned integer that indicates the type of the u
 \vspace{0.3cm}
 \begin{tabular}{|l | l | l|} \hline
 Lowest 4 bits & Hexadecimal encoding & Corresponding atomic type \\ \hline
-0 & 0x00 & A missing value without an explicit type provided \\ \hline
+0 & 0x00 & A MISSING value without an explicit type provided \\ \hline
 1 & 0x?1 & Integer [8 bit] \\ \hline
 2 & 0x?2 & Integer [16 bit] \\ \hline
 3 & 0x?3 & Integer [32 bit] \\ \hline
 5 & 0x?5 & Float [32 bit] \\ \hline
-7 & 0x?7 & Character, ASCII encoded in 8 bits \\ \hline
+7 & 0x?7 & Character, ASCII encoded in 8 bits.  This type is used for string values. \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
-Note this is not used in BCF2, but its type is reserved in case this becomes necessary.
-In BCF2 characters are simply represented by strings with a single element 4,6,8--15 reserved for future use.
+Type codes 4,6,8--15 are reserved for future use.
 
 \vspace{0.3cm}
 
@@ -1669,7 +1668,7 @@ Because FLAG values can only be encoded in INFO fields, BCF2 provides no mechani
 \textbf{String} values have two basic encodings.
 For INFO, FORMAT, and FILTER keys these are encoded by integer offsets into the header dictionary.
 For string values, such as found in the ID, REF, ALT, INFO, and FORMAT fields, strings are encoded as typed array of ASCII encoded bytes.
-The array isn't terminated by a null byte.
+The array isn't terminated by a NUL byte.
 The length of the string is given by the length of the type descriptor.
 
 Suppose you want to encode the string ``{\tt ACAC}''.
