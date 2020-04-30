@@ -1074,8 +1074,8 @@ rlen      & int32\_t  & Length of the record as projected onto the reference seq
                         May be the actual length of the REF allele but for symbolic alleles should be the declared
                         length respecting the END attribute \\ \hline
 QUAL      & float     & Variant quality; 0x7F800001 for a missing value \\ \hline
-n\_allele\_info & int32\_t & The low 16 n\_allele bits represent the number of REF+ALT alleles in this record and the
-                             high 16 n\_info bits represent the number of VCF INFO fields in this record \\ \hline
+n\_allele & uint16\_t & The number of REF+ALT alleles in this record \\ \hline
+n\_info   & uint16\_t & The number of INFO fields in this record \\ \hline
 n\_fmt\_sample & uint32\_t & The low 24 n\_samples bits represent the number of samples in this record and the
                              high 8 n\_fmt bits represent the number of format fields for genotypes.
                              Note that the number of samples must be equal to the number of samples in the header \\ \hline
