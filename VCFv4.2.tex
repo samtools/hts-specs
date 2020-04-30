@@ -1184,6 +1184,7 @@ The final four bits encodes an unsigned integer that indicates the type of the u
 \vspace{0.3cm}
 \begin{tabular}{|l | l | l|} \hline
 Lowest 4 bits & Hexadecimal encoding & Corresponding atomic type \\ \hline
+0 & 0x00 & A MISSING value without an explicit type provided \\ \hline
 1 & 0x?1 & Integer [8 bit] \\ \hline
 2 & 0x?2 & Integer [16 bit] \\ \hline
 3 & 0x?3 & Integer [32 bit] \\ \hline
@@ -1192,7 +1193,9 @@ Lowest 4 bits & Hexadecimal encoding & Corresponding atomic type \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
-Note this is not used in BCF2, but its type is reserved in case this becomes necessary.  In BCF2 characters are simply represented by strings with a single element 0,4,6,8-15 reserved for future use.
+In BCF2 strings are type=7 with an appropriate length.
+Single characters are represented as strings with length=1.
+Type codes 4,6,8--15 are reserved for future use.
 
 \vspace{0.3cm}
 
@@ -1225,7 +1228,11 @@ MISSING &	0b0111 1111 1000 0000 0000 0000 0000 0001 & 0x7F800001 \\ \hline
 \textbf{Flags} values -- which can only appear in INFO fields -- in BCF2 should be encoded by any non-MISSING value.  The recommended best practice is to encode the value as an 1-element INT8 (type 0x11) with value of 1 to indicate present.  Because FLAG values can only be encoded in INFO fields, BCF2 provides no mechanism to encode FLAG values in genotypes, but could be easily extended to do so if allowed in a future VCF version.
 
 \vspace{0.3cm}
-\textbf{String} values have two basic encodings.  For INFO, FORMAT, and FILTER keys these are encoded by integer offsets into the header dictionary.  For string values, such as found in the ID, REF, ALT, INFO, and FORMAT fields, strings are encoded as typed array of ASCII encoded bytes.  The array isn't terminated by a null byte.  The length of the string is given by the length of the type descriptor.
+\textbf{String} values have two basic encodings.
+For INFO, FORMAT, and FILTER keys these are encoded by integer offsets into the header dictionary.
+For string values, such as found in the ID, REF, ALT, INFO, and FORMAT fields, strings are encoded as typed array of ASCII encoded bytes.
+The array isn't terminated by a NUL byte.
+The length of the string is given by the length of the type descriptor.
 
 Suppose you want to encode the string ``{\tt ACAC}''.  First, we need the type descriptor byte, which is the string type 0x07 or'd with inline size (4) yielding the type byte of 0x40 $|$ 0x07 = 0x47.  Immediately following the type byte is the four byte ASCII encoding of ``{\tt ACAC}'': 0x41 0x43 0x41 0x43.  So the final encoding is:
 
@@ -1314,10 +1321,6 @@ $0/1\mid2$ & is tetraploid with a single phased allele & 0x02 04 07 \\ \hline
 The final example is something seen on chrX when we have a haploid male and a diploid female. The spare male allele is just assigned the missing value.
 \vspace{0.3cm}
 
-\textbf{Misc. notes}
-
-A type byte value of 0x00 is an allowed special case meaning MISSING but without an explicit type provided.
-
 
 
 \subsection{Encoding a VCF record example}
@@ -1399,11 +1402,13 @@ Just for discussion, suppose instead that ALT was ALT=C,T.  The only thing that 
 HM3;AC=3;AN=6;AA=C
 Let's assume that the header dictionary elements for HM3, AC, AN, and AA are at 80, 81, 82, and 83 respectively.  All of these can be encoded by 1-element INT8 values (0x11), with associated hex values of 0x50, 0x51, 0x52, and 0x53 respectively.
 
-First is HM3.  The entry begins with the key: 0x11 0x50.  Next we have a Flag value to indicate the field is present, represented as a 1 element INT8 value of 1.  Altogether we have:
+First is HM3.  The entry begins with the key: 0x11 0x50.
+The HM3 field is a flag with no associated value and therefore the rest of the entry is the special case of a missing value without an explicit type provided.
+Altogether we have:
 
 \vspace{0.3cm}
 \begin{tabular}{|l| l|} \hline
-0x11 0x50 0x11 0x01 & HM3 flag is present \\ \hline
+0x11 0x50 0x00 & HM3 flag is present \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
@@ -1466,30 +1471,35 @@ So the genotype block contains:
 
 We need to determine a few values before writing out the final block:
 
-l\_shared = 52 (Data length from CHROM to the end of INFO)
+l\_shared = 51 (Data length from CHROM to the end of INFO)
 
 l\_indiv = 42 (Data length of FORMAT and individual genotype fields)
 
-n\_allele\_info = n\_allele$<<16\mid$n\_info = $2 << 16 \mid 4$ = 0x00020004
+n\_info = 4 (Number of INFO fields)
 
-n\_fmt\_samples = n\_fmt$<<24\mid$n\_sample = $5 << 24 \mid 3$ = 0x05000003
+n\_allele = 2 (Number of alleles, including REF)
 
+n\_sample = 3 (Number of samples)
+
+n\_fmt = 5 (Number of FORMAT keys)
 
 \vspace{0.3cm}
 \begin{tabular}{|l| l|} \hline
-0x34000000 & l\_shared as little endian hex \\ \hline
-0x2A000000 & l\_indiv as little endian hex \\ \hline
+0x33000000 & l\_shared as 32-bit little endian hex \\ \hline
+0x2A000000 & l\_indiv as 32-bit little endian hex \\ \hline
 0x01000000 & CHROM offset is at 1 in 32 bit little endian \\ \hline
-0x64000000 & POS in 0 base 32 bit little endian \\ \hline
+0x64000000 & POS in 0 based 32-bit little endian \\ \hline
 0x01000000 & rlen = 1 (it's just a SNP) \\ \hline
 0x41 0xF0 0xCC 0xCD & QUAL = 30.1 as 32-bit float \\ \hline
-0x00020004 & n\_allele\_info \\ \hline
-0x05000003 & n\_fmt\_samples \\ \hline
+0x0400     & n\_info as 16-bit little-endian \\ \hline
+0x0200     & n\_allele as 16-bit little-endian \\ \hline
+0x030000   & n\_sample as 24-bit little-endian \\ \hline
+0x05       & n\_fmt \\ \hline
 0x57 0x72 0x73 0x31 0x32 0x33 & ID \\ \hline
 0x17 0x41 & REF A \\ \hline
 0x17 0x43 & ALT C \\ \hline
 0x11 0x00 & FILTER field PASS \\ \hline
-0x11 0x50 0x11 0x01 & HM3 flag is present \\ \hline
+0x11 0x50 0x00 & HM3 flag is present \\ \hline
 0x11 0x51 & AC key \\ \hline
 0x11 0x03 & with value of 3 \\ \hline
 0x11 0x52 & AN key \\ \hline
