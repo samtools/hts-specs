@@ -1080,23 +1080,33 @@ In BCF2, the original VCF records are converted to binary and encoded as BGZF bl
 
 \subsubsection{Site encoding}
 
-BCF2 site information encoding
-Field	Type	Notes
-l\_shared	uint32\_t	Data length from CHROM to the end of INFO
-l\_indiv	uint32\_t	Data length of FORMAT and individual genotype fields
-CHROM	int32\_t	Given as an offset into the mandatory contig dictionary
-POS	int32\_t	0-based leftmost coordinate
-rlen	int32\_t	Length of the record as projected onto the reference sequence.  May be the actual length of the REF allele but for symbolic alleles should be the declared length respecting the END attribute
-QUAL	float	Variant quality; 0x7F800001 for a missing value
-n\_allele\_info	 int32\_t	 The low 16 n\_allele bits represent the number of REF+ALT alleles in this record and the high 16 n\_info bits represent the number of VCF INFO fields in this record \\ \hline
-n\_fmt\_sample	 uint32\_t	 The low 24 n\_samples bits represent the number of samples in this record and the hight 8 n\_fmt bits represent the number of format fields for genotypes. Note that the number of samples must be equal to the number of samples in the header \\ \hline
-ID	       typed string  Variant identifier; 0x07 for a missing value \\ \hline
-REF+ALT	list of n\_allele typed strings	the first allele is REF (mandatory) followed by n\_alleles - 1 ALT
-alleles, all encoded as typed strings
-FILTER	Typed vector of integers	a vector of integer offsets into dictionary, one for each FILTER field value.  ``.'' is encoded as MISSING
-INFO field key/value pairs	n\_info pairs of typed vectors	The first value must be a typed atomic integer giving the offset of the INFO field key into the dictionary.  The second value is a typed vector giving the value of the field
-Genotype value block	see below	see below
-
+{\small
+\begin{tabular}{|l | l | p{30em} | } \hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\ \hline
+l\_shared & uint32\_t & Data length from CHROM to the end of INFO \\ \hline
+l\_indiv  & uint32\_t & Data length of FORMAT and individual genotype fields \\ \hline
+CHROM     & int32\_t  & Given as an offset into the mandatory contig dictionary \\ \hline
+POS       & int32\_t  & 0-based leftmost coordinate \\ \hline
+rlen      & int32\_t  & Length of the record as projected onto the reference sequence.
+                        May be the actual length of the REF allele but for symbolic alleles should be the declared
+                        length respecting the END attribute \\ \hline
+QUAL      & float     & Variant quality; 0x7F800001 for a missing value  \\ \hline
+n\_allele\_info & int32\_t & The low 16 n\_allele bits represent the number of REF+ALT alleles in this record and the
+                             high 16 n\_info bits represent the number of VCF INFO fields in this record \\ \hline
+n\_fmt\_sample & uint32\_t & The low 24 n\_samples bits represent the number of samples in this record and the
+                             high 8 n\_fmt bits represent the number of format fields for genotypes.
+                             Note that the number of samples must be equal to the number of samples in the header \\ \hline
+ID       & typed string & Variant identifier; 0x07 for a missing value  \\ \hline
+REF+ALT  & list of n\_allele typed strings & the first allele is REF (mandatory) followed by n\_alleles - 1 ALT
+                                             alleles, all encoded as typed strings \\ \hline
+FILTER & Typed vector of integers & a vector of integer offsets into dictionary, one for each FILTER field value.
+                                    ``.'' is encoded as MISSING \\ \hline
+INFO & field key/value pairs & n\_info pairs of typed vectors.
+                               The first value must be a typed atomic integer giving the offset of the INFO field
+                               key into the dictionary.
+                               The second value is a typed vector giving the value of the field \\ \hline
+Genotype value block & see below & see below \\ \hline
+\end{tabular}}
 
 \subsubsection{Genotype encoding}
 
