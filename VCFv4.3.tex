@@ -1413,10 +1413,25 @@ A BCF2 header follows exactly the specification as VCF, with a few extensions/re
 
 \subsection{Header}
 
-The BCF2 header begins with the ``BCF2 magic'' 5 bytes that encode {\tt BCF\em XY} where {\em X} and {\em Y} are bytes indicating the major number (currently 2) and the minor number (currently 2).
-This magic can be used to quickly examine the file to determine that it's a BCF2 file.
-Immediately following the BCF2 magic is an unsigned 4-byte integer containing the length of the header text which includes the NUL terminator character.
-Follow the standard NUL-terminated VCF header lines in text format, beginning with \verb|##fileformat=VCFvX.Y|.
+The BCF2 header contains the following items:
+
+{\small
+\begin{tabular}{|l | l | p{30em} | } \hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\ \hline
+magic          & char[3]     & The characters 'B', 'C', 'F' \\ \hline
+major\_version & uint8\_t    & Currently 2 \\ \hline
+minor\_version & uint8\_t    & Currently 2 \\ \hline
+l\_text        & uint32\_t   & Length of the ``text'' section, including the terminating NUL character \\ \hline
+text           & char string & VCF format header text, NUL-terminated. \\ \hline
+\end{tabular}}
+
+The ``magic'' field and version numbers can be used to quickly examine the file to determine that it's a BCF2.2 file.
+
+Immediately following the minor\_version is an unsigned 4-byte integer containing the length of the header text which
+includes a terminating NUL character.
+This is followed by the standard VCF header lines in text format, beginning with \verb|##fileformat=VCFvX.Y| and
+ending with a NUL character.
+
 Because the type is encoded directly in the header, the recommended extension for BCF2 formatted files is {\sl .bcf}.
 BCF2 supports encoding values in a dictionary of strings.
 The string map is provided by the keyword \verb|##dictionary=S0,S1,...,SN| as a comma-separate ordered list of strings.
