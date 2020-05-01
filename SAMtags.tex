@@ -87,7 +87,7 @@ or
   {\tt IH} & i & Query hit total count \\
   {\tt LB} & Z & Library \\
   {\tt MC} & Z & CIGAR string for mate/next segment \\
-  {\tt MD} & Z & String for mismatching positions \\
+  {\tt MD} & Z & String encoding mismatched and deleted reference bases \\
   {\tt MF} & ? & Reserved for backwards compatibility reasons \\
   {\tt MI} & Z & Molecular identifier; a string that uniquely identifies the molecule from which the record was derived \\
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
@@ -182,15 +182,29 @@ record.
 CIGAR string for mate/next segment.
 
 \item[MD:Z:\tagregex{[0-9]+(([A-Z]|\char92\char94[A-Z]+)[0-9]+)*}]
-String for mismatching positions.
+\hfill\\
+String encoding mismatched and deleted reference bases, used in conjunction with the {\sf CIGAR} and {\sf SEQ} fields to reconstruct the bases of the reference sequence interval to which the alignment has been mapped.
+This can enable variant calling without requiring access to the entire original reference.
 
-The {\tt MD} field aims to achieve SNP/indel calling without
-looking at the reference. For example, a string `{\tt 10A5\char94AC6}' means
+The {\tt MD} string consists of the following items, concatenated without additional delimiter characters:
+\begin{itemize}
+\item \verb"[0-9]+", indicating a run of reference bases that are identical to the corresponding {\sf SEQ} bases;
+\item \verb"[A-Z]", identifying a single reference base that differs from the {\sf SEQ} base aligned at that position;
+\item \verb"\^[A-Z]+", identifying a run of reference bases that have been deleted in the alignment.
+\end{itemize}
+
+As shown in the complete regular expression above, numbers alternate with the other items.
+Thus if two mismatches or deletions are adjacent without a run of identical bases between them, a `{\tt 0}' (indicating a 0-length run) must be used to separate them in the {\tt MD} string.
+
+Clipping, padding, reference skips, and insertions (`{\tt H}', `{\tt S}', `{\tt P}', `{\tt N}', and `{\tt I}' {\sf CIGAR} operations) are not represented in the {\tt MD} string.
+When reconstructing the reference sequence, inserted and soft-clipped {\sf SEQ} bases are omitted as determined by tracking `{\tt I}' and `{\tt S}' operations in the {\sf CIGAR} string.
+(If the {\sf CIGAR} string contains `{\tt N}' operations, then the corresponding skipped parts of the reference sequence cannot be reconstructed.)
+
+For example, a string `\verb"10A5^AC6"' means
 from the leftmost reference base in the alignment, there are 10 matches
 followed by an A on the reference which is different from the aligned read
 base; the next 5 reference bases are matches followed by a 2bp deletion from
 the reference; the deleted sequence is AC; the last 6~bases are matches.
-The {\tt MD} field ought to match the {\sf CIGAR} string.
 
 \item[MQ:i:\tagvalue{score}]
 Mapping quality of the mate/next segment.
