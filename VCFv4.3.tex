@@ -77,7 +77,7 @@ UTF-8 is a multi-byte character encoding that is a strict superset of 7-bit ASCI
 As a result, most software that processes VCF files does not have to be aware of the possible presence of multi-byte UTF-8 characters.
 Note that non-printable characters U+0000--U+0008, U+000B--U+000C, U+000E--U+001F are disallowed.
 Line separators must be CR+LF or LF and they are allowed only as line separators at end of line.
-Characters with special meaning (such as field delimiters `\verb|;|' in INFO or `\verb|:|' FORMAT fields) must be represented using the capitalized percent encoding:
+Some characters have a special meaning when they appear explicitly (such as field delimiters `\verb|;|' in INFO or `\verb|:|' FORMAT fields), and for any other meaning they must be represented with the capitalized percent encoding:
 
 \begingroup\footnotesize
 \begin{tabular}{l l l}
