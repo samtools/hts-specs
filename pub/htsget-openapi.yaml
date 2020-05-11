@@ -4,7 +4,7 @@ servers:
     url: htsget/1
 info:
   description: This data retrieval API bridges from existing genomics bulk data transfers to a client/server model
-  version: 1.2.0
+  version: 1.3.0
   title: htsget
   contact:
     name: GA4GH
@@ -176,7 +176,20 @@ paths:
       security:
         - htsget_auth:
           - read:genomic_variants
-
+  /service-info:
+    get:
+      summary: Get features this htsget deployment supports
+      description: Retrieves GA4GH Service Info metadata, and htsget-specific features supported by the web service
+      operationId: serviceInfo
+      responses:
+        '200':
+          description: display configuration for htsget service deployment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/htsgetServiceInfo'
+        '500':
+          description: Internal Server Error
 components:
   schemas:
     htsgetResponse:
@@ -230,6 +243,115 @@ components:
         - $ref: '#/components/schemas/htsgetUrl'
         - example:
             - url: https://example.com/sample1234/run1.vcf
+    
+    htsgetServiceInfo:
+      allOf:
+        - '$ref': https://raw.githubusercontent.com/ga4gh-discovery/ga4gh-service-info/develop/service-info.yaml#/components/schemas/Service
+        - type: object
+          description: ServiceType 'artifact' property MUST be 'htsget'
+          required:
+            - type
+          properties:
+            type:
+              type: object
+              required:
+                - artifact
+              properties:
+                artifact:
+                  type: string
+                  enum: [htsget]
+                  example: htsget
+        - type: object
+          description: contains extended attributes specific to htsget web services
+          properties:
+            htsget:
+              type: object
+              description: htsget-specific extended attributes
+              properties:
+                reads:
+                  type: object
+                  description: supported features for web service 'reads' endpoint
+                  properties:
+                    endpointSupported:
+                      type: boolean
+                      description: Indicates whether the web service supports alignment data transfer by 'reads' endpoint. Assumed true if property not specified.
+                    endpoint:
+                      type: string
+                      description: >
+                        Indicates a non-default reads endpoint. If the web service serves alignment data from an endpoint other than the default (/reads/{id}),
+                        this property can specify that endpoint. The default endpoint is assumed if this property is not provided.
+                      example: '/getreads/{id}'
+                      pattern: '\{id\}'
+                    supportedFormats:
+                      type: array
+                      description: >
+                        List of alignment file formats supported by the htsget service.
+                        If this property is not provided, it is assumed the service only serves BAMs. 
+                      items:
+                        type: string
+                        enum: [BAM, CRAM]
+                    fieldsParameterSupported:
+                      type: boolean
+                      description: >
+                        Indicates whether the web service supports modifiable alignment field inclusion/exclusion via the 'fields' parameter.
+                        Assumed true if property not specified.
+                    tagsParametersSupported:
+                      type: boolean
+                      description: >
+                        Indicates whether the web service supports modifiable alignment tag inclusion/exclusion via the 'tags' and 'notags' parameters.
+                        Assumed true if property not specified.
+                    tags:
+                      type: array
+                      description: List of alignment tags supported by the web service that can be included or excluded via 'tags' or 'notags' respectively.
+                      items:
+                        $ref: '#/components/schemas/SAMtagDefinition'
+                variants:
+                  type: object
+                  properties:
+                    endpointSupported:
+                      type: boolean
+                      description: Indicates whether the web service supports variant data transfer by 'variants' endpoint. Assumed true if property not specified.
+                    endpoint:
+                      type: string
+                      description: >
+                        Indicates a non-default variants endpoint. If the web service serves variant data from an endpoint other than the default (/variants/{id}),
+                        this property can specify that endpoint. The default endpoint is assumed if this property is not provided.
+                      example: '/getvariants/{id}'
+                      pattern: '\{id\}'
+                    supportedFormats:
+                      type: array
+                      description: >
+                        List of variant file formats supported by the htsget service.
+                        If this property is not provided, it is assumed the service only serves VCFs. 
+                      items:
+                        type: string
+                        enum: [VCF, BCF]
+
+    SAMtagDefinition:
+      type: object
+      description: >
+        Definition of a supplementary, per-alignment tag. In BAM/CRAM, a tag is specified as `TAG:TYPE:VALUE`, where
+        `TAG` is the two-letter tag label, and `TYPE` is the tag's data type. See [SAMtags](https://samtools.github.io/hts-specs/SAMtags.pdf)
+        and the [SAM specification](https://samtools.github.io/hts-specs/SAMv1.pdf) for more information.
+      required:
+        - tag
+        - type
+        - description
+      properties:
+        tag:
+          type: string
+          description: SAMtag two-letter label
+          pattern: '^[A-Z]{2}$'
+          example: NH
+        type:
+          type: string
+          description: SAMtag data type
+          example: i
+          enum: [A, B, f, H, i, Z]
+        description:
+          type: string
+          description: Description of the SAMtag
+          example: Edit distance to the reference
 
     Error:
       type: object
