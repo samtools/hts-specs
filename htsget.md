@@ -16,7 +16,7 @@ This data retrieval API bridges from existing genomics bulk data transfers to a 
 * Clients can provide hints of the information to be retrieved; servers can respond with more information than requested but not less.
 * We use the following pan-GA4GH standards:
    * 0 start, half open coordinates
-   * The structuring of POST inputs, redirects and other non-reads data will be protobuf3 compatible JSON
+   * JSON format for signaling messages (redirect responses & POST request bodies), describable by [OpenAPI Schemas](https://swagger.io/docs/specification/data-models/)
 
 Explicitly this API does NOT:
 
