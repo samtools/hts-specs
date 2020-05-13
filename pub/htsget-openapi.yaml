@@ -176,18 +176,32 @@ paths:
       security:
         - htsget_auth:
           - read:genomic_variants
-  /service-info:
+  /reads/service-info:
     get:
-      summary: Get features this htsget deployment supports
-      description: Retrieves GA4GH Service Info metadata, and htsget-specific features supported by the web service
-      operationId: serviceInfo
+      summary: Get htsget reads API service info
+      description: Retrieves GA4GH Service Info, and htsget reads API features supported by the web service
+      operationId: readsServiceInfo
       responses:
         '200':
-          description: display configuration for htsget service deployment
+          description: displays configuration of htsget service reads API
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/htsgetServiceInfo'
+                $ref: '#/components/schemas/htsgetReadsServiceInfo'
+        '500':
+          description: Internal Server Error
+  /variants/service-info:
+    get:
+      summary: Get htsget variants API service info
+      description: Retrieves GA4GH Service Info, and htsget variants API features supported by the web service
+      operationId: variantsServiceInfo
+      responses:
+        '200':
+          description: displays configuration of htsget service variants API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/htsgetVariantsServiceInfo'
         '500':
           description: Internal Server Error
 components:
@@ -243,12 +257,15 @@ components:
         - $ref: '#/components/schemas/htsgetUrl'
         - example:
             - url: https://example.com/sample1234/run1.vcf
-    
-    htsgetServiceInfo:
+
+    ServiceInfo:
+      type: object
+      '$ref': https://raw.githubusercontent.com/ga4gh-discovery/ga4gh-service-info/develop/service-info.yaml#/components/schemas/Service
+    htsgetReadsServiceInfo:
       allOf:
-        - '$ref': https://raw.githubusercontent.com/ga4gh-discovery/ga4gh-service-info/develop/service-info.yaml#/components/schemas/Service
+        - '$ref': '#/components/schemas/ServiceInfo'
         - type: object
-          description: ServiceType 'artifact' property MUST be 'htsget'
+          description: ServiceType 'artifact' property MUST be 'htsget-reads'
           required:
             - type
           properties:
@@ -259,73 +276,66 @@ components:
               properties:
                 artifact:
                   type: string
-                  enum: [htsget]
-                  example: htsget
+                  enum: [htsget-reads]
+                  example: htsget-reads
         - type: object
-          description: contains extended attributes specific to htsget web services
+          description: contains extended attributes for htsget reads API
           properties:
-            htsget:
+            htsgetReads:
               type: object
-              description: htsget-specific extended attributes
+              description: extended attributes for htsget reads API
               properties:
-                reads:
-                  type: object
-                  description: supported features for web service 'reads' endpoint
-                  properties:
-                    endpointSupported:
-                      type: boolean
-                      description: Indicates whether the web service supports alignment data transfer by 'reads' endpoint. Assumed true if property not specified.
-                    endpoint:
-                      type: string
-                      description: >
-                        Indicates a non-default reads endpoint. If the web service serves alignment data from an endpoint other than the default (/reads/{id}),
-                        this property can specify that endpoint. The default endpoint is assumed if this property is not provided.
-                      example: '/getreads/{id}'
-                      pattern: '\{id\}'
-                    supportedFormats:
-                      type: array
-                      description: >
-                        List of alignment file formats supported by the htsget service.
-                        If this property is not provided, it is assumed the service only serves BAMs. 
-                      items:
-                        type: string
-                        enum: [BAM, CRAM]
-                    fieldsParameterSupported:
-                      type: boolean
-                      description: >
-                        Indicates whether the web service supports modifiable alignment field inclusion/exclusion via the 'fields' parameter.
-                        Assumed true if property not specified.
-                    tagsParametersSupported:
-                      type: boolean
-                      description: >
-                        Indicates whether the web service supports modifiable alignment tag inclusion/exclusion via the 'tags' and 'notags' parameters.
-                        Assumed true if property not specified.
-                    tags:
-                      type: array
-                      description: List of alignment tags supported by the web service that can be included or excluded via 'tags' or 'notags' respectively.
-                      items:
-                        $ref: '#/components/schemas/SAMtagDefinition'
-                variants:
-                  type: object
-                  properties:
-                    endpointSupported:
-                      type: boolean
-                      description: Indicates whether the web service supports variant data transfer by 'variants' endpoint. Assumed true if property not specified.
-                    endpoint:
-                      type: string
-                      description: >
-                        Indicates a non-default variants endpoint. If the web service serves variant data from an endpoint other than the default (/variants/{id}),
-                        this property can specify that endpoint. The default endpoint is assumed if this property is not provided.
-                      example: '/getvariants/{id}'
-                      pattern: '\{id\}'
-                    supportedFormats:
-                      type: array
-                      description: >
-                        List of variant file formats supported by the htsget service.
-                        If this property is not provided, it is assumed the service only serves VCFs. 
-                      items:
-                        type: string
-                        enum: [VCF, BCF]
+                formats:
+                  type: array
+                  description: >
+                    List of alignment file formats supported by the htsget service.
+                    If this property is not provided, it is assumed the service only serves BAMs. 
+                  items:
+                    type: string
+                    enum: [BAM, CRAM]
+                fieldsParameterEffective:
+                  type: boolean
+                  description: >
+                    Indicates whether the web service supports modifiable alignment field inclusion/exclusion via the 'fields' parameter.
+                    Assumed true if property not specified.
+                tagsParametersEffective:
+                  type: boolean
+                  description: >
+                    Indicates whether the web service supports modifiable alignment tag inclusion/exclusion via the 'tags' and 'notags' parameters.
+                    Assumed true if property not specified.
+
+    htsgetVariantsServiceInfo:
+      allOf:
+        - '$ref': '#/components/schemas/ServiceInfo'
+        - type: object
+          description: ServiceType 'artifact' property MUST be 'htsget-variants'
+          required:
+            - type
+          properties:
+            type:
+              type: object
+              required:
+                - artifact
+              properties:
+                artifact:
+                  type: string
+                  enum: [htsget-variants]
+                  example: htsget-variants
+        - type: object
+          description: contains extended attributes for htsget variants API
+          properties:
+            htsgetVariants:
+              type: object
+              description: extended attributes for htsget variants API
+              properties:        
+                formats:
+                  type: array
+                  description: >
+                    List of variant file formats supported by the htsget service.
+                    If this property is not provided, it is assumed the service only serves VCFs. 
+                  items:
+                    type: string
+                    enum: [VCF, BCF]
 
     SAMtagDefinition:
       type: object
