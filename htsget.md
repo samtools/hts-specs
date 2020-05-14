@@ -150,6 +150,8 @@ The format of this identifier is left to the discretion of the API provider, inc
 * Samples: NA12878 or /data/platinum/NA12878
 * Runs: ERR148333 or /byRun/ERR148333
 
+The id `service-info` is reserved to serve GA4GH service-info metadata, detailed below.
+
 </td></tr>
 </table>
 
@@ -445,55 +447,46 @@ The data block URL and headers might contain embedded authentication tokens; the
 
 # GA4GH service-info
 
-Following the [GA4GH service-info specification](https://github.com/ga4gh-discovery/ga4gh-service-info), htsget servers SHOULD also expose a `/service-info` endpoint alongside `/reads/<id>` and/or `/variants/<id>`. In addition to the standard service-info fields, including `{"type": {"group": "org.ga4gh", "artifact": "htsget", "version": "x.y.z"}}`, the response SHOULD include an object describing the supported reads and/or variants endpoints:
-
-`{"htsget": {"reads": endpoint-description, "variants": endpoint-description}}`; where `endpoint-description` is an object with the following fields:
+Following the [GA4GH service-info specification](https://github.com/ga4gh-discovery/ga4gh-service-info), htsget servers SHOULD also expose `/reads/service-info` and/or `/variants/service-info` metadata endpoints. In addition to the standard service-info fields, including `{"type": {"group": "org.ga4gh", "artifact": "htsget", "version": "x.y.z"}}`, the response SHOULD include an `htsget` object further describing htsget-specific capabilities, with the following fields:
 
 <table>
 <tr markdown="block"><td>
 
-`endpointSupported`
-_optional boolean_
+`type`  
+_string_
 </td><td>
 
-Indicates whether the server provides the `reads` or `variants` data type. Assumed true if property not specified.
+One of:
+
+* `reads`
+* `variants`
 </td></tr>
 <tr markdown="block"><td>
 
-`endpoint`
-_optional string_
-</td><td>
-
-Indicates that the data type is served from a non-default endpoint name (other than `/reads` or `/variants`). The default endpoint is assumed if this property is not provided.
-
-Example: `/getreads/{id}`
-</td></tr>
-<tr markdown="block"><td>
-
-`supportedFormats`
+`formats`  
 _optional array of strings_
 </td><td>
 
-List of requested `format` that can be satisfied. Defaults:
+List of requested `format` that can be satisfied. If absent, assume:
 
 * reads: BAM
 * variants: VCF
 </td></tr>
 <tr markdown="block"><td>
 
-`tagsParametersSupported`
+`fieldsParameterEffective`  
 _optional boolean_
 </td><td>
 
-Indicates whether the `reads` service supports modifiable alignment tag inclusion/exclusion via the `tags` and `notags` parameters. Assumed true if property not specified.
+Indicates whether the service is capable of server-side result set filtration using the `fields` query parameter. If absent, the client should assume the result set will not be filtered on `fields`.
 </td></tr>
 <tr markdown="block"><td>
 
-`tags`
-_optional array of strings_
+`tagsParametersEffective`  
+_optional boolean_  
 </td><td>
 
-List of alignment tags supported by the `reads` service that can be included or excluded via `tags` or `notags` respectively.
+Indicates whether the service is capable of server-side result set filtration using the `tags` and `notags` query parameters. If absent, the client should assume the result set will not be filtered on `tags`.
 </td></tr>
 </table>
 
@@ -511,13 +504,9 @@ Example service-info response:
       "version":      "1.3.0"
    },
    "htsget": {
-      "reads": {
-         "supportedFormats":  ["BAM", "CRAM"]
-      },
-      "variants" {
-         "endpoint":          "/ExampleCoVariants/{id}",
-         "supportedFormats":  ["VCF", "BCF"]
-      }
+      "formats":  ["BAM", "CRAM"],
+      "fieldsParameterEffective": true,
+      "tagsParametersEffective": false
    }
 }
 ```
