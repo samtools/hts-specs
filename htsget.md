@@ -14,7 +14,7 @@ This data retrieval API bridges from existing genomics bulk data transfers to a 
 * Multiple server implementations are supported, including those that do format transcoding on the fly, and those that return essentially unaltered filesystem data.
 * Multiple use cases are supported, including access to small subsets of genomic data (e.g. for browsing a given region) and to full genomes (e.g. for calling variants).
 * Clients can provide hints of the information to be retrieved; servers can respond with more information than requested but not less.
-* We use the following pan-GA4GH standards:
+* We use the following conventions:
    * 0 start, half open coordinates
    * JSON format for signaling messages (redirect responses & POST request bodies), describable by [OpenAPI Schemas](https://swagger.io/docs/specification/data-models/)
 
