@@ -397,6 +397,7 @@ Additional Genotype keys can be defined in the meta-information, however, softwa
 
 If any of the fields is missing, it is replaced with the MISSING value.
 For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing.
+If a field contains a list of missing values, it can be represented either as a single MISSING value (`.') or as a list of missing values (e.g. `.,.,.' if the field was Number=3).
 Trailing fields can be dropped, with the exception of the GT field, which should always be present if specified in the FORMAT field.
 
 
