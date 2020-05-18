@@ -331,8 +331,8 @@ Fixed fields are:
   If filters have not been applied, then this field must be set to the MISSING value.
   (String, no white-space or semi-colons permitted, duplicate values not allowed.)
   \item INFO --- additional information: (String, no semi-colons or equals-signs permitted; commas are permitted only as delimiters for lists of values; characters with special meaning can be encoded using the percent encoding, see Section~\ref{character-encoding}; space characters are allowed).
-  If there is no additional information, then the MISSING value must be used.
 
+  If there is no additional information, then the MISSING value must be used.
   INFO fields are encoded as a semicolon-separated series of short keys with optional values in the format: key[=data[,data]].
   INFO keys must match the regular expression \texttt{\^{}([A-Za-z\_][0-9A-Za-z\_.]*|1000G)\$}, please note that ``1000G'' is allowed as a special legacy value.
   Duplicate keys are not allowed.
