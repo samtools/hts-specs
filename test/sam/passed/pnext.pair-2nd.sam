@@ -1,0 +1,20 @@
+@SQ	SN:xx	LN:100
+@SQ	SN:yy	LN:100
+@CO	Validation of FLAG/PNEXT
+@CO	A1 contains a a pair READ1, READ2 that aligns to two different
+@CO	references.  Both pairs are internally consistent, but the
+@CO	secondary pair RNEXT/PNEXT refer to the primary alignment and.
+@CO	TLEN is only defined for the primary pair.
+@CO	
+@CO	Example aligners: bwa mem
+@CO	
+@CO     xx	11        21        31        41
+@CO     	--------->          <---------
+@CO	
+@CO     yy	111       121                 141       151
+@CO     	--------->                    <---------
+@CO	
+a1	99	xx	11	1	10M	=	31	30	AAAAAAAAAA	**********
+a1	147	xx	31	1	10M	=	11	-30	TTTTTTTTTT	**********
+a1	355	yy	111	1	10M	xx	31	0	AAAAAAAAAA	**********
+a1	403	yy	141	1	10M	xx	11	0	TTTTTTTTTT	**********

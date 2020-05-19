@@ -1,0 +1,5 @@
+@SQ	SN:CHROMOSOME_I	LN:1009800
+@CO	Validation of SEQ
+chars2	4	*	0	0	*	*	0	0	*A	II
+chars3	4	*	0	0	*	*	0	0	~\	II
+chars4	4	*	0	0	*	*	0	0	0.	II

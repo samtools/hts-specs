@@ -1,0 +1,4 @@
+@CO	Validation of AUX
+@CO	TAG checking
+tag1	4	*	0	0	*	*	0	0	CAT	QQQ	0A:Z:0	9a:Z:9
+tag2	4	*	0	0	*	*	0	0	CAT	QQQ	A/:Z:/	A_:Z:_	A@:Z:@	A{:Z:{
