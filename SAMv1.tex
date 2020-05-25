@@ -1307,7 +1307,7 @@ saved.
 \footnotetext{The number of chunks in a single bin is effectively limited by available memory and in any case is typically a maximum of some thousands.}
 
 The index file may optionally contain additional metadata providing a summary
-of the number of mapped and unmapped read-segments per reference sequence,
+of the number of mapped and placed unmapped read-segments per reference sequence,
 and of any unplaced unmapped read-segments.\footnote{By \emph{placed unmapped
 read} we mean a read that is unmapped according to its {\sf FLAG} but whose
 {\sf RNAME} and~{\sf POS} fields are filled in, thus ``placing'' it on a
@@ -1328,12 +1328,16 @@ compatible with real bins and their chunks:
   \hline
   {\sf bin} & Magic bin number & {\tt uint32\_t} & 37450 \\\hline
   {\sf n\_chunk} & \# chunks & {\tt uint32\_t} & 2 \\\hline
-  {\sf unmapped\_beg} & (Virtual) file offset of the start of placed unmapped reads & {\tt uint64\_t} & \\\hline
-  {\sf unmapped\_end} & (Virtual) file offset of the end of placed unmapped reads & {\tt uint64\_t} & \\\hline
+  {\sf ref\_beg} & (Virtual) file offset of the start of reads placed on this reference& {\tt uint64\_t} & \\\hline
+  {\sf ref\_end} & (Virtual) file offset of the end of reads placed on this reference& {\tt uint64\_t} & \\\hline
   {\sf n\_mapped} & Number of mapped read-segments for this reference & {\tt uint64\_t} & \\\hline
   {\sf n\_unmapped} & Number of unmapped read-segments for this reference & {\tt uint64\_t} & \\\hline
 \end{tabular}
 \end{table}
+
+\noindent
+The {\sf ref\_beg}/{\sf ref\_end} fields locate the first and last reads on this reference sequence, whether they are mapped or placed unmapped.
+Thus they are equal to the minimum {\sf chunk\_beg} and maximum {\sf chunk\_end} respectively.
 
 \subsection{C source code for computing bin number and overlapping bins}\label{sec:code}
 The following functions compute bin numbers and overlaps for a BAI-style
@@ -1425,6 +1429,7 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item Correct the description of index pseudo-bins, which previously stated that {\sf ref\_beg}/{\sf ref\_end}, then named {\sf unmapped\_beg}/{\sf unmapped\_end}, include only placed unmapped reads. (Jul 2020)
 \item Add {\tt DNBSEQ} to the list of {\tt @RG PL} header tag values. (Apr 2020)
 \item Add {\tt @SQ TP} circular/linear topology header tag. (May 2019)
 \item\textbf{Restricted the allowable punctuation characters in reference sequence names} (in {\tt @SQ SN}, {\sf RNAME}, etc).
