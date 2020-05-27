@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=Value with whitespace
+##PEDIGREE=<ID=Pedigree1,Father=Somebody,Mother=Somebody wrong>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

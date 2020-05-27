@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=INFO DB Type is not Flag
+##INFO=<ID=DB,Number=0,Type=String,Description="dbSNP membership">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

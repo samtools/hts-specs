@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=Meta-data entry is not a key-value pair
+##pedigreeDB=<>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=Sample field does not match Number definition in meta section
+##FORMAT=<ID=AL,Number=R,Type=Float,Description="Field with alternate alleles cardinality">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00096
+1	61462	rs56992750	T	A	100	PASS	AC=9	GT:DS:AL	0|0:0.050:-0.06,-0.90,-5.00

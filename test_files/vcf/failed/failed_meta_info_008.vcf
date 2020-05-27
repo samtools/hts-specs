@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=INFO AD Type is not Integer
+##INFO=<ID=AD,Number=R,Type=String,Description="Total read depth for each allele">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	AD=E

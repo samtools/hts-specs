@@ -1,0 +1,4 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=cardinality in PL does not match the cardinality derived from allele number and GT ploidy
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00096
+1	61462	.	T	A	100	PASS	.	GT:PL	0|0:1,2

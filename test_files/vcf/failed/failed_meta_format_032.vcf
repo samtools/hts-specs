@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=FORMAT PS Type is not Integer
+##FORMAT=<ID=PS,Number=1,Type=Float,Description="Phase set">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

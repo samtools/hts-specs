@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=INFO NS Type is not Integer
+##INFO=<ID=NS,Number=1,Type=Float,Description="Number of samples with data">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	NS=0.2

@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=SAMPLE ID contains a comma
+##SAMPLE=<ID=1,A,Assay=WholeGenome>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

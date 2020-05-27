@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=FORMAT GT Type is not String
+##FORMAT=<ID=GT,Number=1,Type=Float,Description="Genotype">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

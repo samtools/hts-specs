@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=INFO AF Type is not Float
+##INFO=<ID=AF,Number=A,Type=Integer,Description="Allele frequency for each ALT allele in the same order as listed (estimated from primary data, not called genotypes)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	AF=2

@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=INFO DP Type is not Integer
+##INFO=<ID=DP,Number=1,Type=String,Description="Combined depth across samples">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	DP=X

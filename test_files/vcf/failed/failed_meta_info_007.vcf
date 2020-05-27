@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=INFO AC Number is not A
+##INFO=<ID=AC,Number=1,Type=Integer,Description="Allele count in genotypes, for each ALT allele, in the same order as listed">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	AC=2
