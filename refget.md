@@ -4,7 +4,7 @@ title: refget protocol
 suppress_footer: true
 ---
 
-# Refget API Specification v1.0.0
+# Refget API Specification v1.0.1
 {:.no_toc}
 
 * Do not remove this line (it will not be displayed)
@@ -12,9 +12,9 @@ suppress_footer: true
 
 ## Introduction
 
-Reference sequences are fundamental to genomic analysis and interpretation however naming is a serious issue. For example the reference genomic sequence GRCh38/1 is also known as hg38/chr1, CM000663.2 and NC_000001.11. In addition there is no standardised way to access reference sequence from providers such as INSDC (ENA, Genbank, DDBJ), Ensembl or UCSC. 
+Reference sequences are fundamental to genomic analysis and interpretation however naming is a serious issue. For example the reference genomic sequence GRCh38/1 is also known as hg38/chr1, CM000663.2 and NC_000001.11. In addition there is no standardised way to access reference sequence from providers such as INSDC (ENA, Genbank, DDBJ), Ensembl or UCSC.
 
-Refget enables access to reference sequences using an identifier derived from the sequence itself. 
+Refget enables access to reference sequences using an identifier derived from the sequence itself.
 
 Refget uses a hash algorithm (by default `MD5`) to generate a checksum identifier, which is a digest of the underlying sequence. This removes the need for a single accessioning authority to identify a reference sequence and improves the provenance of sequence used in analysis. In addition refget defines a simple scheme to retrieve reference sequence via this checksum identifier.
 
@@ -34,7 +34,7 @@ Explicitly this API does NOT:
 
 ## OpenAPI Description
 
-An OpenAPI description of this specification is available and [describes the 1.0.0 version](pub/refget-openapi.yaml). OpenAPI is a language independent way of describing REST services and is compatible with a number of [third party tools](http://openapi.tools/). (Note: if there are differences between this text and the OpenAPI description, this specification text is definitive.)
+An OpenAPI description of this specification is available and [describes the 1.0.1 version](pub/refget-openapi.yaml). OpenAPI is a language independent way of describing REST services and is compatible with a number of [third party tools](http://openapi.tools/). (Note: if there are differences between this text and the OpenAPI description, this specification text is definitive.)
 
 ## Compliance
 
@@ -57,24 +57,24 @@ Range headers are the preferred method for clients making sub-sequence requests,
 Requests MAY include an Accept header specifying the protocol version they are using:
 
 ```
-Accept: text/vnd.ga4gh.refget.v1.0.0+plain
+Accept: text/vnd.ga4gh.refget.v1.0.1+plain
 ```
 
-Responses from the server MUST include a Content-Type header containing the encoding for the invoked method and protocol version:
+Responses from the server MUST include a Content-Type header. A plain text (`text/plain`) response MAY include the encoding for the invoked method and protocol version. The refget protocol reserves `text/plain` for the transfer of sequence data. A JSON response MUST include the encoding for the invoked method and protocol version for example:
 
 ```
-Content-Type: text/vnd.ga4gh.refget.v1.0.0+plain; charset=us-ascii
+Content-Type: application/vnd.ga4gh.refget.v1.0.1+json; charset=us-ascii
 ```
 
 ## Internet Media Types Handling
 
 When responding to a request a server MUST use the fully specified media type for that endpoint. When determining if a request is well-formed, a server MUST allow a internet type to degrade like so
 
-- `text/vnd.ga4gh.refget.v1.0.0+plain; charset=us-ascii`
-  - `text/vnd.ga4gh.refget.v1.0.0+plain`
+- `text/vnd.ga4gh.refget.v1.0.1+plain; charset=us-ascii`
+  - `text/vnd.ga4gh.refget.v1.0.1+plain`
   - `text/plain`
-- `application/vnd.ga4gh.refget.v1.0.0+json; charset=us-ascii`
-  - `application/vnd.ga4gh.refget.v1.0.0+json`
+- `application/vnd.ga4gh.refget.v1.0.1+json; charset=us-ascii`
+  - `application/vnd.ga4gh.refget.v1.0.1+json`
   - `application/json`
 
 ## Errors
@@ -144,7 +144,7 @@ A server may support circular chromosomes as a reference sequence, but this is n
 Unless negotiated with the client and allowed by the server, the default encoding for this method is:
 
 ```
-Content-type: text/vnd.ga4gh.refget.v1.0.0+plain
+Content-type: text/vnd.ga4gh.refget.v1.0.1+plain
 ```
 
 #### URL parameters
@@ -165,7 +165,7 @@ Content-type: text/vnd.ga4gh.refget.v1.0.0+plain
 | Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Range`   | string                  | Optional | Range header as specified in [RFC 7233](https://tools.ietf.org/html/rfc7233#section-3.1), however only a single byte range per GET request is supported by the specification. The byte range of the sequence to return, 0-based inclusive of start and end bytes specified. The server MUST respond with a `Bad Request` error if both a Range header and start or end query parameters are specified. The server MUST respond with a `Bad Request` error if one or more ranges are out of bounds of the sequence.                                                                                                                     |
-| `Accept`    | string                  | Optional | The formatting of the returned sequence, defaults to `text/vnd.ga4gh.refget.v1.0.0+plain` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+| `Accept`    | string                  | Optional | The formatting of the returned sequence, defaults to `text/vnd.ga4gh.refget.v1.0.1+plain` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
 
 #### Response
 
@@ -207,7 +207,7 @@ Due to the possibility of multiple checksum algorithms being supported by a serv
 Unless negotiated with the client and allowed by the server, the default encoding for this method is:
 
 ```
-Content-type: application/vnd.ga4gh.refget.v1.0.0+json
+Content-type: application/vnd.ga4gh.refget.v1.0.1+json
 ```
 
 #### URL parameters
@@ -220,7 +220,7 @@ Content-type: application/vnd.ga4gh.refget.v1.0.0+json
 
 | Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v1.0.0+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+| `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v1.0.1+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
 
 #### Response
 
@@ -315,14 +315,14 @@ Return configuration information about this server implementation.
 Unless negotiated with the client and allowed by the server, the default encoding for this method is:
 
 ```
-Content-type: application/vnd.ga4gh.refget.v1.0.0+json
+Content-type: application/vnd.ga4gh.refget.v1.0.1+json
 ```
 
 #### Request parameters
 
 | Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v1.0.0+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+| `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v1.0.1+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
 
 #### Response
 The server shall return a document detailing specifications of the service implementation. A JSON encoded response shall have the following fields:
@@ -624,3 +624,9 @@ The specification makes no attempt to enforce a strict naming authority across i
 | `Ensembl` | Ensembl | Used for an identifier assigned by the Ensembl project |
 | `RefSeq` | RefSeq | Used for an identifier assigned by the RefSeq group |
 | `vmc` | VMC | Used for when an identifier is a VMC compatible digest (as described above) |
+
+## Appendix 2 - Changes
+
+### v1.0.1
+
+- `plain/text` responses no longer need to specify a VND. `application/json` responses continue to need to do this.
