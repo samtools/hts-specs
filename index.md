@@ -20,7 +20,6 @@ Specifications:
 - [BCF v1](BCFv1_qref.pdf)
 - [BCF v2.1](BCFv2_qref.pdf)
 - [CSI v1](CSIv1.pdf)
-- [CSI v2 (draft)](CSIv2.pdf)
 - [Tabix](tabix.pdf)
 - [VCF v4.1](VCFv4.1.pdf)
 - [VCF v4.2](VCFv4.2.pdf)
