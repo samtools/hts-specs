@@ -63,7 +63,7 @@ mostlyclean:
 clean: mostlyclean
 	-rm -f $(PDFS:%=new/%)$(if $(wildcard new),; rmdir new)
 	-rm -f $(PDFS:%=diff/%)$(if $(wildcard diff),; rmdir diff)
-	-rm -rf _site
+	-rm -rf .jekyll-cache .jekyll-metadata _site
 
 
 .PHONY: all pdf diff diffs show-styles mostlyclean clean

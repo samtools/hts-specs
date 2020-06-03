@@ -15,4 +15,6 @@ GNUmakefile
 /diff/*.pdf
 /diff/*.tex
 /new/*.pdf
+/.jekyll-cache
+/.jekyll-metadata
 /_site
