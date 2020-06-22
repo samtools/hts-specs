@@ -317,9 +317,9 @@ Fixed fields are:
 
   \item ALT --- alternate base(s): Comma separated list of alternate non-reference alleles.
   These alleles do not have to be called in any of the samples.
-  Options are base Strings made up of the bases A,C,G,T,N,*, (case insensitive) or a MISSING value `.' (no variant) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in the section on breakends.
-  The `*' allele is reserved to indicate that the allele is missing due to an overlapping deletion.
+  Options are base Strings made up of the bases A,C,G,T,N (case insensitive) or the `*' symbol (allele missing due to overlapping deletion) or a MISSING value `.' (no variant) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in Section \ref{Breakends}.
   If there are no alternative alleles, then the MISSING value must be used.
+  In other words, the ALT field must be a symbolic allele, or a breakend replacement string, or match the regular expression \texttt{\^{}([ACGTNacgtn]+|\string\*|\string\.)\$}.
   Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.
   (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
   \item QUAL --- quality: Phred-scaled quality score for the assertion made in ALT. i.e.\ $-10log_{10}$ prob(call in ALT is wrong).
@@ -877,6 +877,7 @@ VCF STRUCTURAL VARIANT EXAMPLE
 \normalsize
 
 \subsection{Specifying complex rearrangements with breakends}
+\label{Breakends}
 
 An arbitrary rearrangement event can be summarized as a set of novel \textbf{adjacencies}. Each adjacency ties together $2$ \textbf{breakends}.
 The two breakends at either end of a novel adjacency are called \textbf{mates}.
