@@ -276,24 +276,24 @@ components:
                     List of alignment or variant file formats supported
                     by the htsget endpoint. If this property is not provided, it
                     is assumed the service only serves BAM files from the reads
-                    endpoint, and VCF files from the variants endpoint. 
+                    endpoint, and VCF files from the variants endpoint.
                   items:
                     type: string
                     enum: [BAM, CRAM, VCF, BCF]
                 fieldsParameterEffective:
                   type: boolean
                   description: >
-                    Indicates whether the web service supports modifiable
-                    alignment field inclusion/exclusion via the 'fields'
-                    parameter. Assumed true if property not specified.
-                    This property has no bearing on the variants endpoint.
+                    Indicates whether the web service supports alignment field
+                    inclusion/exclusion via the `fields` parameter. If absent,
+                    the client should assume the server will not filter fields 
+                    based on `fields`
                 tagsParametersEffective:
                   type: boolean
                   description: >
-                    Indicates whether the web service supports modifiable 
-                    alignment tag inclusion/exclusion via the 'tags' and 
-                    'notags' parameters. Assumed true if property not specified.
-                    This property has no bearing on the variants endpoint.
+                    Indicates whether the web service supports alignment tag
+                    inclusion/exclusion via the `tags` and `notags` parameters.
+                    If absent, the client should assume the server will not
+                    filter tags based on `tags` and `notags`
         - type: object
           description: >
             This response extends the GA4GH Service Info specification
