@@ -447,20 +447,9 @@ The data block URL and headers might contain embedded authentication tokens; the
 
 # GA4GH service-info
 
-Following the [GA4GH service-info specification](https://github.com/ga4gh-discovery/ga4gh-service-info), htsget servers SHOULD also expose `/reads/service-info` and/or `/variants/service-info` metadata endpoints. In addition to the standard service-info fields, including `{"type": {"group": "org.ga4gh", "artifact": "htsget", "version": "x.y.z"}}`, the response SHOULD include an `htsget` object further describing htsget-specific capabilities, with the following fields:
+Following the [GA4GH service-info specification](https://github.com/ga4gh-discovery/ga4gh-service-info), htsget servers SHOULD also expose `/reads/service-info` and/or `/variants/service-info` metadata endpoints. In addition to the standard service-info fields, including `{"type": {"group": "org.ga4gh", "artifact": "htsget-TYPE", "version": "x.y.z"}}` where TYPE is either `reads` or `variants`, the response SHOULD include an `htsget` object further describing htsget-specific capabilities, with the following fields:
 
 <table>
-<tr markdown="block"><td>
-
-`type`  
-_string_
-</td><td>
-
-One of:
-
-* `reads`
-* `variants`
-</td></tr>
 <tr markdown="block"><td>
 
 `formats`  
@@ -478,7 +467,7 @@ List of requested `format` that can be satisfied. If absent, assume:
 _optional boolean_
 </td><td>
 
-Indicates whether the service is capable of server-side result set filtration using the `fields` query parameter. If absent, the client should assume the result set will not be filtered on `fields`.
+Indicates whether the service is capable of returning only a subset of available fields based on the `fields` query parameter.
 </td></tr>
 <tr markdown="block"><td>
 
@@ -486,7 +475,7 @@ Indicates whether the service is capable of server-side result set filtration us
 _optional boolean_  
 </td><td>
 
-Indicates whether the service is capable of server-side result set filtration using the `tags` and `notags` query parameters. If absent, the client should assume the result set will not be filtered on `tags`.
+Indicates whether the service is capable of server-side result tag inclusion/exclusion using the `tags` and `notags` query parameters.
 </td></tr>
 </table>
 
@@ -500,7 +489,7 @@ Example service-info response:
    "version":       "0.1.0"
    "type":  {
       "group":        "org.ga4gh",
-      "artifact":     "htsget",
+      "artifact":     "htsget-reads",
       "version":      "1.3.0"
    },
    "htsget": {
