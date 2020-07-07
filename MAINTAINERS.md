@@ -30,9 +30,10 @@ Past VCF/BCF maintainers include Cristina Yenyxe Gonzalez Garcia, Ryan Poplin, a
 
 ### Htsget
 
-* Jerome Kelleher (@jeromekelleher)
 * Mike Lin (@mlin)
 * John Marshall (@jmarshall)
+
+Past htsget maintainers include Jerome Kelleher.
 
 ### Refget
 
