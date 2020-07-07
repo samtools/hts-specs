@@ -29,7 +29,7 @@ paths:
         - in: "query"
           name: fields
           description: A list of fields to include, such as QNAME, FLAG, RNAME, etc...
-          example: "fields=QNAME,RNAME"
+          example: "QNAME,RNAME"
           required: false
           schema:
             enum:
@@ -48,14 +48,14 @@ paths:
         - in: "query"
           name: tags
           description: A comma separated list of tags to include, by default all.
-          example: "cancer,melanoma"
+          example: "MD,NM"
           required: false
           schema:
             type: string
         - in: "query"
           name: notags
           description: A comma separated list of tags to exclude, default none.
-          example: "normal,healthy"
+          example: "OQ"
           required: false
           schema:
             type: string
