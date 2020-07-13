@@ -625,6 +625,20 @@ However, the alternate allele assembly file may contain additional information a
 \end{verbatim}
 \normalsize
 
+\footnotesize
+\begin{verbatim}
+##INFO=<ID=SVCLAIM,Number=1,Type=String,Description="Claim made by the structural variant call. Valid values are CN, BP, CNBP for copy number, breakpoint and both respectively.">
+\end{verbatim}
+\normalsize
+
+This field disambuates the claim being made by variant caller for DEL, INS, DUP structural variants.
+CN indicates the claim is a copy number claim and the call has been made based on a measure of DNA abundance of the called region.
+BP indicates the claim is a breakpoint claim and the call has been made based on the detection of a non-reference DNA adjacency.
+CNBP indicates the claim is both a copy number and breakpoint claim.
+Records with SVTYPE of CNV are implicitly copy number claims. SVCLAIM is optional for these records but, if specified, cannot be BP.
+Records with SVTYPE of BND or INV are implicitly breakpoint claims. SVCLAIM is optional for these records but, if specified, cannot be CN.
+
+
 \section{FORMAT keys used for structural variants}
 \label{sv-format-keys}
 \footnotesize
