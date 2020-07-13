@@ -1,0 +1,9 @@
+##fileformat=VCFv4.2
+##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=INS,Description="Insertion">
+##ALT=<ID=DUP,Description="Duplication">
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=CNV,Description="Copy number variation">
+##ALT=<ID=INS:THIS-IS-VALID,Description="Valid ALT metadata ID with non-alphanumeric characters">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

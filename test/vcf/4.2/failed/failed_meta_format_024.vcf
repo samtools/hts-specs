@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=FORMAT PQ Type is not Integer
+##FORMAT=<ID=PQ,Number=1,Type=Float,Description="Phasing quality">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=Genomes field missing
+##SAMPLE=<ID=SAMPLE1,Mixture=N1;N2;NK,Description="Some sample">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

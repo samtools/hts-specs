@@ -1,0 +1,4 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=FORMAT predefined tag GT has missing alleles
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00096	HG00097
+1	100	rs;rsa	C	T	100	PASS	AB=1	GT:DP:GP	0/|1:12:0,0.1,0	0|1:1.000:0.1,1,0.12

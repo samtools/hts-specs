@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=INFO SOMATIC Type is not Flag
+##INFO=<ID=SOMATIC,Number=0,Type=String,Description="Somatic mutation (for cancer genomics)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

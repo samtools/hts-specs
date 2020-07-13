@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=FORMAT GP Type is not Float
+##FORMAT=<ID=GP,Number=G,Type=String,Description="Genotype posterior probabilities">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=Incorrect ALT Number value
+##ALT=<ID=DEL,Number=B,Type=String,Description="Deletion">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

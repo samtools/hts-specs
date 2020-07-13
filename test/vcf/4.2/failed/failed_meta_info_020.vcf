@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=INFO END Type is not Integer
+##INFO=<ID=END,Number=1,Type=String,Description="End position (for use with symbolic alleles)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	END=X

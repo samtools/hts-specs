@@ -1,0 +1,4 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=Sample contains more fields than the FORMAT column
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00096
+1	55388	rs182711216	C	T	100	PASS	THETA=0.0102;AA=C	GT:GS:GL	0/1:0.000:-0.18,-0.48,-2.49:extra

@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=INFO H3 Number is not 0
+##INFO=<ID=H3,Number=1,Type=Flag,Description="HapMap3 membership">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	H3=0

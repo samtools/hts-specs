@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=INFO BQ Number is not 1
+##INFO=<ID=BQ,Number=R,Type=Float,Description="RMS base quality">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	BQ=0.2

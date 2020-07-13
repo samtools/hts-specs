@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##PEDIGREE=<Name_0=Something,Name_1=Something_else,Name_2=Something.more>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.
+

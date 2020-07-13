@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=Sample field does not match Number definition in meta section
+##FORMAT=<ID=DS,Number=1,Type=Float,Description="Genotype dosage from MaCH/Thunder">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00096
+1	61462	rs56992750	T	A	100	PASS	AC=9	GT:DS:GL	.|0:0.050,0.001:-0.19,-0.46,-2.28
