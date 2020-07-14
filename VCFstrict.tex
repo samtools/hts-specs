@@ -1,0 +1,254 @@
+\documentclass[10pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{longtable}
+\usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
+\usepackage[title]{appendix}
+
+% #1: short error code
+% #2: short error description 
+% #3: rule description
+% #4: categories
+% #5: additional explanatory text
+\newcommand{\vcfstrictrule}[5]{
+	\paragraph{#1} #2 #4	
+	#5
+	\par
+}
+% Rule is part of the base VCF specifications
+\newcommand{\vcfspec}{\tt VCF}
+\newcommand{\SPECISSUE}[1]{\paragraph{} #1}
+\newcommand{\TODO}[1]{\paragraph{TODO} complete this section: #1}
+% #1: Meta-information key
+% #2: Missing field
+\newcommand{\structuredheadermissingfield}[2] {
+	\vcfstrictrule{mi.#1.#2.missing}{Missing meta-information \tt{#1} \tt{#2} key}{Missing \tt{#1} field for \tt{#2} meta-information line.}{\vcfspec}{}
+}
+\newcommand{\externalfilevalidation}[5] {
+	\TODO{Should we check external URL be included? My preference is that is it not and the validation should be entirely self-contained in the VCF}
+}
+\newcommand{\phredoob}[2] {
+	\vcfstrictrule{#1}{#2}{Phred-scaled fields must be greater than or equal to zero.}{}{}
+}
+
+% Rule categories
+% "global": multi-record validations 
+% "sv":
+% "external": relies on an external file
+
+\begin{document}
+
+\input{VCFstrict.ver}
+\title{VCF Strict Specification}
+\author{Daniel L Cameron}
+\date{\headdate}
+\maketitle
+\begin{quote}\small
+The master version of this document can be found at
+\url{https://github.com/samtools/hts-specs}.\\
+This printing is version~\commitdesc\ from that repository,
+last modified on the date shown above.
+\end{quote}
+\vspace*{1em}
+
+\noindent
+This document is a companion to the {\sl Variant Call Format Specification} that defines the VCF file format.
+\footnote{See \href{http://samtools.github.io/hts-specs/VCFv4.3.pdf}{\tt VCFv4.3.pdf} at \url{https://github.com/samtools/hts-specs}.}
+The VCF file format defines the syntax required for a file to be a valid VCF file.
+It does not require such files to be semantically valid and internally consistent.
+This document describes a set of additional semantic restrictions for which the subset of syntactically valid VCF files that comply with these restrictions can be described as \textit{VCF strict compliant}.
+
+\renewcommand{\abstractname}{Introduction}
+\begin{abstract}
+
+The VCF specifications have been instrumental in standardising the file formats used for variant calling.
+A large ecosystem of bioinformatics tools is now capable of reading and/or writing VCF files.
+Unfortunately, many tools that read VCF files are tightly coupled to a particular upstream tool  and fail to correctly execute on valid VCF files written by other tools.
+In part, this is due to the lack of semantic restrictions inherent in the VCF file format.
+A syntactically valid VCF file can be both internally inconsistent and semantically nonsensical.
+
+The purpose of this document is to provide a baseline of semantic validity for which tools should comply with when outputing VCF files, and tools which input VCF files can safely assume when they require input files to be \textit{VCF strict compliant}.
+
+\end{abstract}
+
+\section{Format}
+
+\vcfstrictrule{file.encoding}{Invalid file encoding}{File is not a valid UTF-8 file.}{\vcfspec}{}
+\vcfstrictrule{file.newlines}{Inconsistent newlines}{File mixes CR and CR+LF line terminators.}{}{}
+\vcfstrictrule{file.blankline}{Blank line}{File contains a blank line.}{}{}
+
+\section{Meta-information Lines}
+
+
+\vcfstrictrule{mi.keyvalue.malformed}{Malformed Meta-information line}{Meta-information line is not of the form key=value}{\vcfspec}{}
+\vcfstrictrule{mi.key.malformed}{Invalid Meta-information key}{Meta-information line key must conform to the regex \tt{[::alpha::]+}}{}{}
+
+\subsection{Structured fields}
+
+\vcfstrictrule{mi.structured.value.malformed}{Malformed structured meta-information}{Structured meta-information line value does not start with \tt{<} and end with \tt{>}.}{\vcfspec}{}
+\vcfstrictrule{mi.structured.extrafield.position}{Incorrrectly placed structured meta-information extra field }{Structured meta-information extra field located before a default field.}{\vcfspec}{}
+\vcfstrictrule{mi.structured.extrafield.malformed}{Incorrectly type structured meta-information extra field}{Structured meta-information extra field not start and end with \tt{"}.}{\vcfspec}{}
+\vcfstrictrule{mi.structured.duplicated}{Duplicate structured meta-information line}{Multiple meta-information lines with with same key and \tt{ID} found.}{\vcfspec}{}
+
+\SPECISSUE{What's the point of quotes in structured header fields? Just so they can contain commas?}
+
+\subsection{fileformat}
+\vcfstrictrule{mi.fileformat.missing}{Missing fileformat}{fileformat meta-information line is missing}{\vcfspec}{}
+\vcfstrictrule{mi.fileformat.position}{fileformat not first}{fileformat meta-information line is not the first line}{\vcfspec}{}
+\vcfstrictrule{mi.fileformat.invalid}{Malformed fileformat}{fileformat value is not one of \tt{VCFv4.1}}{\vcf41}{}
+\vcfstrictrule{mi.fileformat.invalid}{Malformed fileformat}{fileformat value is not one of \tt{VCFv4.2}}{\vcf42}{}
+\vcfstrictrule{mi.fileformat.invalid}{Malformed fileformat}{fileformat value is not one of \tt{VCFv4.3}}{\vcf43}{}
+\vcfstrictrule{mi.fileformat.invalid}{Malformed fileformat}{fileformat value is not one of \tt{VCFv4.4}}{\vcf44}{}
+\vcfstrictrule{old.rule}{Malformed fileformat}{fileformat value is not one of \tt{VCFv4.4}}{\vcf41, \vcf42}{}
+
+
+\subsection{INFO}
+
+\structuredheadermissingfield{INFO}{ID}
+\structuredheadermissingfield{INFO}{Number}
+\structuredheadermissingfield{INFO}{Type}
+\structuredheadermissingfield{INFO}{Description}
+
+\vcfstrictrule{mi.INFO.ID.malformed}{Malformed meta-information \tt{INFO} \tt{ID} field}{INFO ID field does not match to regex \tt{\^([A-Za-z\_][0-9A-Za-z\_.]*|1000G)\$}}{\vcfspec}{}
+\vcfstrictrule{mi.INFO.Number.malformed}{Malformed meta-information \tt{INFO} \tt{Number} field}{INFO Number field is not a positive integer, \tt{A}, \tt{R}, \tt{G}, or \tt{.}.}{\vcfspec}{}
+\TODO{Check fields are valid for each VCF version}
+\vcfstrictrule{mi.INFO.Type.malformed}{Malformed meta-information \tt{INFO} \tt{Type} field}{INFO Type field is not one of \tt{Integer}, \tt{Float}, \tt{Flag}, \tt{Character}, \tt{String}.}{\vcfspec}{}
+
+\subsection{FILTER}
+
+\structuredheadermissingfield{FILTER}{ID}
+\structuredheadermissingfield{FILTER}{Description}
+
+\subsection{FORMAT}
+
+\structuredheadermissingfield{FORMAT}{ID}
+\structuredheadermissingfield{FORMAT}{Number}
+\structuredheadermissingfield{FORMAT}{Type}
+\structuredheadermissingfield{FORMAT}{Description}
+
+\vcfstrictrule{mi.INFO.ID.malformed}{Malformed meta-information \tt{INFO} \tt{ID} field}{INFO ID field does not match the regex \tt{\^[A-Za-z\_][0-9A-Za-z\_.]*}}{\vcfspec}{}
+\vcfstrictrule{mi.INFO.Number.malformed}{Malformed meta-information \tt{INFO} \tt{Number} field}{INFO Number field is not a positive integer, \tt{A}, \tt{R}, \tt{G}, or \tt{.}.}{\vcfspec}{}
+\TODO{Check fields are valid for each VCF version}
+\vcfstrictrule{mi.INFO.Type.malformed}{Malformed meta-information \tt{INFO} \tt{Type} field}{INFO Type field is not one of \tt{Integer}, \tt{Float}, \tt{Character}, \tt{String}.}{\vcfspec}{}
+
+
+\subsection{ALT}
+
+\structuredheadermissingfield{FILTER}{ID}
+\structuredheadermissingfield{FILTER}{Description}
+
+\SPECISSUE{CNV, BND are a valid 3-base IUPAC code. Very bad. DUP also problematic for RNA}
+\SPECISSUE{Why are IUPAC codes here? Seems like a bad idea to have to define every possible IUPAC indel used}
+\SPECISSUE{BND is not actually a valid ALT allele.}
+\SPECISSUE{DUP/DEL is defined as SVCLAIM=CN}
+
+\subsection{assembly}
+\TODO{Should checking the URL be included? My preference is that is it not and the validation should be entirely self-contained in the VCF}
+\externalfilevalidation{assembly.missingfile}
+
+\SPECISSUE{What happens if there are multiple assembly files specified?}
+\SPECISSUE{Why must the assembly file be a fasta file? GRIDSS uses a BAM file for breakpoint assembly contigs.}
+\SPECISSUE{This is defined as a breakpoint assembly file, but 1.6.1.1 refers to it directly. Is this an inconsisent double-use of this header field?}
+
+\vcfstrictrule{mi.assembly.contig.reserved}{Assembly contig name is reserved.}{ The assembly file contains a reserved contig name.}{\vcfspec}{
+Reserved contigs names are contigs named, or containing a colon and starting with any of \tt{DEL}, \tt{DUP}, \tt{INV}, \tt{INS}, \tt{CNV}, \tt{*}.
+}
+
+\subsection{contig}
+
+\structuredheadermissingfield{contig}{ID}
+\structuredheadermissingfield{length}{ID} % Should not be in \vcfspec category since it's not required by the specs
+\vcfstrictrule{mi.contig.ID.malformed}{Malformed meta-information \tt{contig} \tt{ID} field}{contig ID field does not match the regex \tt{[0-9A-Za-z!\#\$\%\&+./:;?@\^\_|\~-][0-9A-Za-z!\#\$\%\&*+./:;=?@\^\_|\~-]*}.}{\vcfspec}{}
+\vcfstrictrule{mi.contig.length.malformed}{Malformed meta-information \tt{contig} \tt{length} field}{contig length field is not an integer.}{\vcfspec}{}
+\vcfstrictrule{mi.contig.length.outofbounds}{Meta-information \tt{contig} \tt{length} field out of bounds.}{Out of bounds contig length field. Minimum value is 0. Maximum value is 2,147,483,647 (2^31-1). }{\bcf}{
+BCF encodes position using a signed 32 bit integer.
+}
+\externalfilevalidation{mi.contig.url}
+
+\subsection{SAMPLE / META / PEDIGREE }
+
+\SPECISSUE{These aren't specified nearly well enough.}
+\SPECISSUE{META and SAMPLE are not defined as structured fields in s1.4.0}
+
+\subsection{pedigreeDB }
+
+\externalfilevalidation{mi.pedigreeDB}
+
+\section{Header}
+
+\vcfstrictrule{header.sampleID.duplicate}{Duplicate sample ID}{Duplicated sample ID found.}{\vcfspec}{}
+\vcfstrictrule{header.sampleID.empty}{Empty sample ID}{Header sample ID must be at least 1 character in length.}{}{}
+
+\section{Data lines}
+
+\vcfstrictrule{line.length.mismatch}{Mismatching sample count}{The number of sample genotype information has been provided for does not match the number of samples defined in the header.}{}{}
+\vcfstrictrule{line.CHROM.grouped}{CHROM ungrouped}{Records are not grouped by CHROM.}{}{\vcfspec}{}
+\vcfstrictrule{line.POS.outoforder}{CHROM unsorted}{Records grouped by CHROM are not in ascending order by POS.}{}{}
+\vcfstrictrule{line.CHROM.outoforder}{CHROM unsorted}{CHROM ordering does not match the order of the meta-information contig records.}{}{}
+
+\subsection{CHROM}
+
+\vcfstrictrule{CHROM.missing}{Missing contig}{ No ##contig meta-information line found for this records. Does not apply to angle-bracketed ID Strings. }{}{}
+\vcfstrictrule{CHROM.assembly.assembly.missing}{Missing assembly file}{ No assembly file specified using ##assembly. Applies only to angle-bracketed ID Strings. }{\vcfspec}{}
+\vcfstrictrule{CHROM.assembly.missing}{Missing assembly contig}{ Assembly file contig identifier not found in the assembly file. Applies only to angle-bracketed ID Strings. }{\vcfspec}{}
+
+\subsection{POS}
+
+\vcfstrictrule{POS.outofbounds}{POS out of bounds }{ Value of out of representable bounds. Minimum value is 0. Maximum value is 2,147,483,647 (2^31-1). }{\vcfspec}{}
+\vcfstrictrule{POS.contig.outofbounds}{POS exceeds contig length. }{ POS must be less than, or equal to, the contig length + 1 }{}{}
+\vcfstrictrule{POS.telomere.nonbnd}{Telomeric records must be BND }{ Telomeric with POS of 0 or contig length + 1 must be BND symbolic alleles.}{}{}
+
+\subsection{POS}
+
+\vcfstrictrule{ID.duplicate}{ Duplicate ID }{ One or more of the semi-colon separated IDs in this field is not unique. }{\vcfspec}{}
+\SPECISSUE{VCF merging problematic if different VCFs have different INFO.}
+
+\subsection{REF}
+
+\vcfstrictrule{REF.malformed}{ Invalid REF }{ REF does not match the regex [ACGTNacgtn]+. }{\vcfspec}{}
+\vcfstrictrule{REF.reference.mismatch}{REF does not match reference }{ REF does not match reference genome sequence. }{}{}
+
+\subsection{ALT}
+
+\vcfstrictrule{ALT.malformed}{ Invalid ALT }{ ALT does not match the regex [ACGTNacgtn]+, \tt{.}, \tt{*}, a breakpoint string, a single breakend string, or a symbolic allele. }{\vcfspec}{}
+\SPECISSUE{Is "ACT,." a valid ALT? The definition of QUAL could be read to mean that . must be the only ALT if it is supplied.}
+\SPECISSUE{Single breakend are not explicitly required to have at least one base - "." could be interpreted as a single breakend.}
+\vcfstrictrule{ALT.duplicate}{ Duplicated ALT }{ ALT alleles are not unique within this record. }{}{}
+\vcfstrictrule{ALT.breakpoint.POS.outofbounds }{ The breakpoint is out of bounds. }{ The position of the other side of the breakpoint occurs is greater than the relevant contig length + 1}{}{}
+\vcfstrictrule{ALT.breakpoint.CHROM.missing }{ The breakpoint contig is not valid. }{ No ##contig meta-information line found for this record, and, if angle bracketed, is not found in the assembly file. }{}{}
+\vcfstrictrule{ALT.breakpoint.telomere.orientation }{The breakpoint orientation is invalid.}{ If the breakpoint position is 0 or contig length + 1, the breakpoint orientation must be towards to telomere. }{}{}
+
+\subsection{QUAL}
+
+\phredoob{QUAL.outofbounds}{QUAL out of bounds}
+
+\subsection{FILTER}
+
+\vcfstrictrule{FILTER.malformed}{Malformed FILTER}{ Filter cannot be \tt{0}.}{\vcfspec}{}
+\vcfstrictrule{FILTER.empty}{Empty FILTER}{ Filter cannot be the empty string.}{}{}
+\vcfstrictrule{FILTER.missing}{Invalid FILTER}{ Missing FILTER meta-information line. }{}{}
+\vcfstrictrule{FILTER.missingvalue.notsolo}{FILTER MISSING value must only record.}{ No other values can be present if the MISSING value is present.}{}{}
+\vcfstrictrule{FILTER.duplicate}{Duplicated FILTER}{ FILTER is not unique within this record. }{}{}
+
+\subsection{INFO}
+
+- Duplicate tags
+- 
+
+\section{Sematics}
+
+\subsection { Breakpoints }
+\vcfstrictrule{breakpoint.MATEID.missing}{Breakpoint MATEID required}{Breakpoint record must have MATEID specified.}{}{}
+\vcfstrictrule{breakpoint.MATEID.malformed}{Malformed MATEID}{MATEID cannot be the MISSING value.}{}{}
+\vcfstrictrule{breakpoint.ID.missing}{Breakpoint ID missing}{Breakpoint ID cannot be the MISSING value \tt{.}.}
+\vcfstrictrule{breakpoint.mate.missing}{Missing breakpoint mate}{A breakpoint record with ID matching MATEID must exist.}{}{}
+\vcfstrictrule{breakpoint.POS.mismatch}{Breakpoint POS mismatch}{The POS of the matching breakpoint record does not match the position in the ALT field}{}{}
+\vcfstrictrule{breakpoint.CHROM.mismatch}{Breakpoint CHROM mismatch}{The CHROM of the matching breakpoint record does not match the contig in the ALT field}{}{}
+\vcfstrictrule{breakpoint.HOMLEN.mismatch}{Breakpoint HOMLEN mismatch}{The HOMLEN of the matching breakpoint record does not match the HOMLEN of this record.}{}{}
+\vcfstrictrule{breakpoint.HOMSEQ.mismatch}{Breakpoint HOMSEQ mismatch}{After adjusting for breakend orientations, the HOMSEQ of the matching breakpoint record does not match the HOMSEQ of this record.}{}{}
+\vcfstrictrule{breakpoint.CIPOS.mismatch}{Breakpoint CIPOS mismatch}{After adjusting for breakend orientations, the CIPOS of the matching breakpoint record does not match the CIPOS of this record.}{}{
+Note: this rule only applies to events that are not IMPRECISE.
+A breakpoint can validly have an different confidence intervals on either side of a breakpoint.
+For example, a breakpoint into a poly-A stretch of indeterminate length can have the position known exactly on one side, but a wide CIPOS on the side with a poly-A reference sequence.
+}
+
+\end{document}

@@ -8,6 +8,8 @@ PDFS =	BCFv1_qref.pdf \
 	CSIv1.pdf \
 	SAMv1.pdf \
 	SAMtags.pdf \
+	SAMstrict.pdf \
+	VCFstrict.pdf \
 	tabix.pdf \
 	VCFv4.1.pdf \
 	VCFv4.2.pdf \
@@ -19,15 +21,17 @@ pdf: $(PDFS:%=new/%)
 %.pdf: new/%.pdf
 	cp $^ $@
 
-new/CRAMv2.1.pdf diff/CRAMv2.1.pdf: CRAMv2.1.tex new/CRAMv2.1.ver
-new/CRAMv3.pdf   diff/CRAMv3.pdf:   CRAMv3.tex   new/CRAMv3.ver
-new/crypt4gh.pdf diff/crypt4gh.pdf: crypt4gh.tex new/crypt4gh.ver
-new/SAMv1.pdf    diff/SAMv1.pdf:    SAMv1.tex    new/SAMv1.ver
-new/SAMtags.pdf  diff/SAMtags.pdf:  SAMtags.tex  new/SAMtags.ver
-new/VCFv4.1.pdf  diff/VCFv4.1.pdf:  VCFv4.1.tex  new/VCFv4.1.ver
-new/VCFv4.2.pdf  diff/VCFv4.2.pdf:  VCFv4.2.tex  new/VCFv4.2.ver
-new/VCFv4.3.pdf  diff/VCFv4.3.pdf:  VCFv4.3.tex  new/VCFv4.3.ver
-new/VCFv4.4.pdf  diff/VCFv4.4.pdf:  VCFv4.4.tex  new/VCFv4.4.ver
+new/CRAMv2.1.pdf  diff/CRAMv2.1.pdf:  CRAMv2.1.tex  new/CRAMv2.1.ver
+new/CRAMv3.pdf    diff/CRAMv3.pdf:    CRAMv3.tex    new/CRAMv3.ver
+new/crypt4gh.pdf  diff/crypt4gh.pdf:  crypt4gh.tex  new/crypt4gh.ver
+new/SAMv1.pdf     diff/SAMv1.pdf:     SAMv1.tex     new/SAMv1.ver
+new/SAMtags.pdf   diff/SAMtags.pdf:   SAMtags.tex   new/SAMtags.ver
+new/SAMstrict.pdf diff/SAMstrict.pdf: SAMstrict.tex new/SAMstrict.ver
+new/VCFstrict.pdf diff/SAMstrict.pdf: VCFstrict.tex new/VCFstrict.ver
+new/VCFv4.1.pdf   diff/VCFv4.1.pdf:   VCFv4.1.tex   new/VCFv4.1.ver
+new/VCFv4.2.pdf   diff/VCFv4.2.pdf:   VCFv4.2.tex   new/VCFv4.2.ver
+new/VCFv4.3.pdf   diff/VCFv4.3.pdf:   VCFv4.3.tex   new/VCFv4.3.ver
+new/VCFv4.4.pdf   diff/VCFv4.4.pdf:   VCFv4.4.tex   new/VCFv4.4.ver
 
 PDFLATEX = pdflatex
 
