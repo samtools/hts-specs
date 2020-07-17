@@ -7,6 +7,11 @@
 \usepackage[margin=0.75in]{geometry}
 \usepackage[pdfborder={0 0 0}]{hyperref}
 
+\usepackage{draftwatermark}
+\SetWatermarkAngle{315}
+\SetWatermarkText{PRELIMINARY}
+\SetWatermarkScale{4}
+
 \usepackage{listings}
 \lstset{
    basicstyle=\ttfamily,
@@ -17,7 +22,7 @@
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 
 \begin{document}
-\input{VCFv4.4.ver}
+\input{VCFv4.4.draft.ver}
 \title{\huge \color{red} DRAFT SPEC SUBJECT TO CHANGE \\ The Variant Call Format Specification \\ \vspace{0.5em} \large VCFv4.4 and BCFv2.2}
 \date{\headdate}
 \maketitle
