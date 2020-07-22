@@ -1077,13 +1077,14 @@ those marked ``\textit{limited}'' are limited by available memory and the practi
 \subsubsection{BIN field calculation}\label{sec:bin-field}
 {\sf BIN} is calculated using the {\sf reg2bin()} function in
 Section~\ref{sec:code}.
-For mapped reads this uses {\sf POS-1} (i.e.,~0-based left position) and the
+For mapped reads this uses $\mbox{\sf POS}-1$ (i.e.,~0-based left position) and the
 alignment end point using the alignment length from the {\sf CIGAR} string.
-For unmapped reads (e.g.,~paired end reads where only one part is mapped, see
-Section~\ref{sec:recommended-practice}) the alignment is treated as
-being length one.
+For unmapped reads (e.g.,~paired-end reads where only one part is mapped, see
+Section~\ref{sec:recommended-practice}) and reads whose {\sf CIGAR} strings
+consume no reference bases at all, the alignment is treated as
+being of length one.
 Note unmapped reads with {\sf POS} $0$ (which becomes $-1$ in BAM) therefore
-use {\sf reg2bin(-1, 0)} which is $4680$.
+use $\mbox{\sf reg2bin}(-1, 0)$ which is $4680$.
 
 \subsubsection{N\_CIGAR\_OP field}\label{sec:ncigar}
 With 16 bits, {\sf n\_cigar\_op} can keep at most 65535 CIGAR
@@ -1429,6 +1430,7 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item Bin calculation changed for alignment records whose CIGAR strings consume no reference bases: like unmapped records, they are considered to have length one (rather than zero). (Jan 2021)
 \item Correct the description of index pseudo-bins, which previously stated that {\sf ref\_beg}/{\sf ref\_end}, then named {\sf unmapped\_beg}/{\sf unmapped\_end}, include only placed unmapped reads. (Jul 2020)
 \item Add {\tt DNBSEQ} to the list of {\tt @RG PL} header tag values. (Apr 2020)
 \item Add {\tt @SQ TP} circular/linear topology header tag. (May 2019)
