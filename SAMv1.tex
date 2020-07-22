@@ -562,8 +562,9 @@ Each bit is explained in the following table:
   0 when the information is unavailable. This field equals {\sf POS} at the primary line of
   the next read. If {\sf PNEXT} is 0, no assumptions can be made on
   {\sf RNEXT} and bit 0x20.
-\item {\sf TLEN}: signed observed Template LENgth. If all segments are
-  mapped to the same reference sequence, the absolute value of TLEN
+\item {\sf TLEN}: signed observed Template LENgth.
+  For primary reads where the primary alignments of all reads in the template
+  are mapped to the same reference sequence, the absolute value of TLEN
   equals the distance between the mapped end of the template and the
   mapped start of the template, inclusively (i.e., $\mbox{end}-\mbox{start}+1$).%
   \footnote{Thus a segment
@@ -1438,6 +1439,7 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item Clarify the meaning of TLEN when secondary alignments are present. (May 2021)
 \item Bin calculation changed for alignment records whose CIGAR strings consume no reference bases: like unmapped records, they are considered to have length one (rather than zero). (Jan 2021)
 \item Correct the description of index pseudo-bins, which previously stated that {\sf ref\_beg}/{\sf ref\_end}, then named {\sf unmapped\_beg}/{\sf unmapped\_end}, include only placed unmapped reads. (Jul 2020)
 \item Add {\tt DNBSEQ} to the list of {\tt @RG PL} header tag values. (Apr 2020)
