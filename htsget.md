@@ -150,7 +150,7 @@ The format of this identifier is left to the discretion of the API provider, inc
 * Samples: NA12878 or /data/platinum/NA12878
 * Runs: ERR148333 or /byRun/ERR148333
 
-The id `service-info` is reserved to serve GA4GH service-info metadata, detailed below.
+The id `service-info` SHOULD be reserved to serve GA4GH service-info metadata, detailed below.
 
 </td></tr>
 </table>
