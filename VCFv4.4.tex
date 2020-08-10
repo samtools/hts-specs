@@ -444,13 +444,13 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   No white-space or semi-colons permitted.
   \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
   \item GP (Float): Genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities.
- \item GT (String): Genotype, encoded as allele value followed by either of $/$ or $\mid$. 
-    The last separator may be omitted and will be assumed to be not phased in that case.
-    However, in order to reference the last allele in the PSL and PQL (see below) there needs to be a $\mid$ following it.
+ \item GT (String): Genotype, encoded as allele value preceded by either of $/$ or $\mid$ depending on whether that allele is considered phased. 
+    The first separator may be omitted and will be assumed to be not phased in that case.
+    However, in order to reference the first allele in the PSL and PQL (see below) there needs to be a $\mid$ preceding it.
     The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on.
     For diploid calls examples could be $0/1$, $1\mid0$, or $1/2$, etc.
     Haploid calls, e.g.\ on Y, male non-pseudoautosomal X, or mitochondrion, are indicated by having only one allele value.
-    A triploid call might look like $0/0/1$, and a partially phased triploid call could be $0/1/2|$ to indicate that the last allele is phased with another variant in the genome.
+    A triploid call might look like $0/0/1$, and a partially phased triploid call could be $|0/1/2$ to indicate that the first allele is phased with another variant in the genome.
     If a call cannot be made for a sample at a given locus, `$.$' must be specified for each missing allele in the {\tt GT} field (for example `$./.$' for a diploid genotype and `$.$' for haploid genotype).
     The meanings of the separators are as follows (see the {\tt PS} and {\tt PSL} fields below for more details on incorporating phasing information into the genotypes):
     	\begin{itemize}
