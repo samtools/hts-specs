@@ -627,26 +627,38 @@ However, the alternate allele assembly file may contain additional information a
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=SVCLAIM,Number=1,Type=String,Description="Claim made by the structural variant call. Valid values are CN, BP, CNBP for copy number, breakpoint and both respectively.">
+##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are CN, BP, CNBP for copy number, breakpoint and both respectively.">
 \end{verbatim}
 \normalsize
 
-This field disambiguates the claim being made by variant caller for DEL, INS, DUP structural variants.
+This field disambiguates the claim being made by DEL and DUP structural variants.
 
-The distinction between different claim types is made necessary by the fact that many structural variants affect both the overall copy number of a region and its adjacency structure, but often only one of those effects is being directly observed. It is important to specify which one, because if this is not done, other events in a genome may make the call ambiguous.
+The distinction between different claim types is made necessary by the fact that many structural variants affect both the overall copy number of a region and its adjacency structure, but often only one of those effects is being directly observed.
+It is important to specify which one, because if this is not done, other events in a genome may make the call ambiguous.
 
-For example, a ``conventional'' deletion deletion usually both decreases the total copy number of a region and creates an adjacency between two sequence locations, which are the breakpoints of that deletion. However, if a deletion is accompanied by a compensatory event elsewhere in the genome, it may only cause changes in the adjacency structure, but not the overall copy number. On the contrary, combinations of certain complex events in a genome may cause the overall copy number decrease, but not the linear excision of a sequence fragment.
+For example, a ``conventional'' deletion usually both decreases the total copy number of a region and creates an adjacency between two sequence locations, which are the breakpoints of that deletion.
+However, if a deletion or duplication is accompanied by a compensatory event elsewhere in the genome, it may only cause changes in the adjacency structure, but not the overall copy number.
+On the contrary, combinations of certain complex events in a genome may cause the overall copy number decrease, but not the linear excision of a sequence fragment.
 
-To address this, three claim types are defined:
+A copy number based duplication call does not make any claims on where the duplicated region is in the genome.
+It could be a simple tandem duplication, a dispersed duplication, retrotransposition, or even form part of extra-chromosomal DNA such as a double minute.
+In contrast, a breakpoint based duplication call requires that the end of the duplicated region be adjacent to the start of the duplicated region.
+This rules out events such as dispersed duplication or retrotransposition, but is consistent with simple tandem duplications as well as double minutes.
+Both deletion and duplication breakpoint calls can form part of more complex events that result in no copy number change in the deleted/duplicated region.
+
+To resolve any ambiguity in the interpretation of deletion and duplication symbolic alleles, three claim types are defined:
 
 \begin{itemize}
-  \item CN (copy number) claim indicates that the call has been made based only on a measure of DNA abundance of the called region, with no evidence to support changes in breakpoint structure.
-  \item BP (breakpoint) claim indicates that the call has been made based on the detection of a non-reference DNA adjacency, with no evidence to support overall changes in DNA abundance.
-  \item CNBP indicates that there is evidence for both DNA abundancy and adjacency changes, which are consistent with each other and suggest the structural variant of the type being reported.
+  \item D (abun\textbf{\emph{d}}ance / read \textbf{\emph{D}}epth) claim indicates that the call has been made based only on a measure of DNA abundance of the called region, with no evidence to support changes in breakpoint structure. This includes indirect claims of abundance made using SNV variant allele frequency.
+  \item J (ad\textbf{\emph{j}}acency / break \textbf{\emph{J}}unction) claim indicates that the call has been made based on the detection of a non-reference DNA adjacency, with no evidence to support overall changes in DNA abundance.
+  \item DJ indicates that there is evidence for both DNA abundancy and adjacency changes, which are consistent with each other and suggest the structural variant of the type being reported.
 \end{itemize}
-Records with SVTYPE of CNV are implicitly copy number claims. SVCLAIM is optional for these records but, if specified, cannot be BP.
-Records with SVTYPE of BND or INV are implicitly breakpoint claims. SVCLAIM is optional for these records but, if specified, cannot be CN.
-
+CNV alleles are implicitly abundance claims (SVCLAIM=D).
+SVCLAIM is optional but, if specified, must be D, DJ, or the missing value ``.'', which is equivalent to D.
+INV, INS, breakpoint, and single breakend alleles are implicitly adjacency claims (SVCLAIM=J).
+SVCLAIM is optional but, if specified, must be J, DJ, or the missing value ``.'', which is equivalent to J.
+Non-SV alleles should use the missing value ``.''.
+If all alleles contain the missing value ``.'', the SVCLAIM field can be omitted.
 
 \section{FORMAT keys used for structural variants}
 \label{sv-format-keys}
