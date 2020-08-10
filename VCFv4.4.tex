@@ -631,10 +631,19 @@ However, the alternate allele assembly file may contain additional information a
 \end{verbatim}
 \normalsize
 
-This field disambuates the claim being made by variant caller for DEL, INS, DUP structural variants.
-CN indicates the claim is a copy number claim and the call has been made based on a measure of DNA abundance of the called region.
-BP indicates the claim is a breakpoint claim and the call has been made based on the detection of a non-reference DNA adjacency.
-CNBP indicates the claim is both a copy number and breakpoint claim.
+This field disambiguates the claim being made by variant caller for DEL, INS, DUP structural variants.
+
+The distinction between different claim types is made necessary by the fact that many structural variants affect both the overall copy number of a region and its adjacency structure, but often only one of those effects is being directly observed. It is important to specify which one, because if this is not done, other events in a genome may make the call ambiguous.
+
+For example, a ``conventional'' deletion deletion usually both decreases the total copy number of a region and creates an adjacency between two sequence locations, which are the breakpoints of that deletion. However, if a deletion is accompanied by a compensatory event elsewhere in the genome, it may only cause changes in the adjacency structure, but not the overall copy number. On the contrary, combinations of certain complex events in a genome may cause the overall copy number decrease, but not the linear excision of a sequence fragment.
+
+To address this, three claim types are defined:
+
+\begin{itemize}
+  \item CN (copy number) claim indicates that the call has been made based only on a measure of DNA abundance of the called region, with no evidence to support changes in breakpoint structure.
+  \item BP (breakpoint) claim indicates that the call has been made based on the detection of a non-reference DNA adjacency, with no evidence to support overall changes in DNA abundance.
+  \item CNBP indicates that there is evidence for both DNA abundancy and adjacency changes, which are consistent with each other and suggest the structural variant of the type being reported.
+\end{itemize}
 Records with SVTYPE of CNV are implicitly copy number claims. SVCLAIM is optional for these records but, if specified, cannot be BP.
 Records with SVTYPE of BND or INV are implicitly breakpoint claims. SVCLAIM is optional for these records but, if specified, cannot be CN.
 
