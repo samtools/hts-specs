@@ -531,7 +531,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item PSL (List of Strings): The list of phase sets, one for each allele specified in the {\tt GT}. 
   Unphased alleles (without a $\mid$ separator before them) must have the value '$.$' in their corresponding position in the list. 
   The phase-set name must be unique across the genome (unlike {\tt PS}  as this tag can be used to phase across references.
-  Thus, the recommended value for phase-set names is CHR*POS*ALLELE-NUMBER of the "first" allele which is included in this set, with ALLELE-NUMBER being the index of the allele in the {\tt GT} field, since multiple distinct phase-sets could start at the same position. \footnote{The '*' character is used as a separator since ':' is already a separator in VCF.}
+  Thus, the recommended value for phase-set names is CHR*POS*ALLELE-NUMBER of the ``first'' allele which is included in this set, with ALLELE-NUMBER being the index of the allele in the {\tt GT} field, since multiple distinct phase-sets could start at the same position. \footnote{The `*' character is used as a separator since `:' is already a separator in VCF.}
   A given sample-genotype must not have values for both PS and PSL.
   In addition, PS and PSL are not interoperable, in that a PS mentioned in one variant cannot be referenced in a PSL in another, 
   since when used in PS it isn't connected to any specific haplotype (i.e. first or second), but PSL is. 
