@@ -260,7 +260,7 @@ components:
 
     ServiceInfo:
       type: object
-      '$ref': https://raw.githubusercontent.com/ga4gh-discovery/ga4gh-service-info/develop/service-info.yaml#/components/schemas/Service
+      '$ref': https://raw.githubusercontent.com/ga4gh-discovery/ga4gh-service-info/v1.0.0/service-info.yaml#/components/schemas/Service
     htsgetServiceInfo:
       allOf:
         - '$ref': '#/components/schemas/ServiceInfo'
