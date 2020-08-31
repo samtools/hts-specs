@@ -270,13 +270,21 @@ components:
               type: object
               description: extended attributes for htsget reads API
               properties:
+                datatype:
+                    type: string
+                    description: >
+                      Indicates the htsget datatype category ('reads' or 'variants')
+                      served by the ticket endpoint related to this service-info
+                      endpoint
+                    enum: [reads, variants]
+                    example: reads
                 formats:
                   type: array
                   description: >
                     List of alignment or variant file formats supported
-                    by the htsget endpoint. If this property is not provided, it
-                    is assumed the service only serves BAM files from the reads
-                    endpoint, and VCF files from the variants endpoint.
+                    by the htsget endpoint. If absent, clients cannot make 
+                    assumptions about what formats are supported ahead
+                    of making a query.
                   items:
                     type: string
                     enum: [BAM, CRAM, VCF, BCF]
@@ -285,21 +293,22 @@ components:
                   description: >
                     Indicates whether the web service supports alignment field
                     inclusion/exclusion via the `fields` parameter. If absent,
-                    the client should assume the server will not include or 
-                    exclude fields based on `fields`
+                    clients cannot make assumptions about whether the `fields`
+                    parameter is effective ahead of making a query.
                 tagsParametersEffective:
                   type: boolean
                   description: >
                     Indicates whether the web service supports alignment tag
                     inclusion/exclusion via the `tags` and `notags` parameters.
-                    If absent, the client should assume the server will not
-                    include or exclude tags based on `tags` and `notags`
+                    If absent, clients cannot make assumptions about whether the
+                    `tags` and `notags` parameters are effective ahead of making
+                    a query.
         - type: object
           description: >
             This response extends the GA4GH Service Info specification
             with htsget-specific properties under the 'htsget' attribute.
-            ServiceType 'artifact' property MUST be 'htsget-reads' for reads 
-            endpoint, 'htsget-variants' for variants endpoint.
+            ServiceType 'artifact' property MUST be 'htsget' for both reads 
+            and variants endpoints.
           required:
             - type
           properties:
@@ -310,8 +319,8 @@ components:
               properties:
                 artifact:
                   type: string
-                  enum: [htsget-reads, htsget-variants]
-                  example: htsget-reads
+                  enum: [htsget]
+                  example: htsget
 
     Error:
       type: object
