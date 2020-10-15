@@ -24,9 +24,9 @@ Past CRAM maintainers include Vadim Zalunin.
 
 * Louis Bergelson (@lbergelson)
 * Petr Danecek (@pd3)
-* Jose Miguel Mut Lopez (@jmmut)
+* Kirill Tsukanov (@tskir)
 
-Past VCF/BCF maintainers include Cristina Yenyxe Gonzalez Garcia, Ryan Poplin, and David Roazen.
+Past VCF/BCF maintainers include Cristina Yenyxe Gonzalez Garcia, Jose Miguel Mut Lopez, Ryan Poplin, and David Roazen.
 
 ### Htsget
 
