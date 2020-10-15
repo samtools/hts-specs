@@ -1084,7 +1084,7 @@ Section~\ref{sec:recommended-practice}) and reads whose {\sf CIGAR} strings
 consume no reference bases at all, the alignment is treated as
 being of length one.
 Note unmapped reads with {\sf POS} $0$ (which becomes $-1$ in BAM) therefore
-use $\mbox{\sf reg2bin}(-1, 0)$ which is $4680$.
+use $\mbox{\sf reg2bin}(-1, 0)$ which is computed as $4680$.
 
 \subsubsection{N\_CIGAR\_OP field}\label{sec:ncigar}
 With 16 bits, {\sf n\_cigar\_op} can keep at most 65535 CIGAR
@@ -1345,6 +1345,14 @@ The following functions compute bin numbers and overlaps for a BAI-style
 binning scheme with $6$~levels and a minimum bin size of $2^{14}$~bp.
 See the CSI specification for generalisations of these functions designed for
 binning schemes with arbitrary depth and sizes.
+
+When these functions are called with regions representing unplaced
+unmapped reads, e.g., $\mbox{\sf reg2bin}(-1, 0)$, they involve operations
+such as \verb|(-1)>>14| which are undefined or implementation-defined in
+some programming languages.
+They must be implemented as if these operations use the common
+two's-complement semantics: $\mbox{\sf reg2bin}(-1, 0) = 4680$ and
+$\mbox{\sf reg2bins}(-1, 0, \ldots)$ returns $[\,0, 0, 8, 72, 584, 4680\,]$.
 
 {\small
 \begin{verbatim}
