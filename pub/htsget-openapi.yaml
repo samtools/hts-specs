@@ -36,7 +36,7 @@ paths:
         - $ref: '#/components/parameters/endParam'
         - in: query
           name: fields
-          description: A comma separated list of SAM fields to include. By default, i.e., when fields is not specified, all fields will be included
+          description: A comma-separated list of SAM fields to include. By default, i.e., when fields is not specified, all fields will be included
           example: QNAME,RNAME
           required: false
           schema:
@@ -55,18 +55,19 @@ paths:
             type: string
         - in: query
           name: tags
-          description: A comma separated list of tags to include. By default, i.e., when tags is not specified, all tags will be included
+          description: A comma-separated list of tags to include. By default, i.e., when tags is not specified, all tags will be included
           example: MD,NM
           required: false
           schema:
             type: string
         - in: query
           name: notags
-          description: A comma separated list of tags to exclude. By default, i.e., when notags is not specified, no tags will be excluded
+          description: A comma-separated list of tags to exclude. By default, i.e., when notags is not specified, no tags will be excluded
           example: OQ
           required: false
           schema:
             type: string
+
       responses:
         200:
           description: results matching criteria
@@ -100,9 +101,11 @@ paths:
           $ref: '#/components/responses/500InternalServerErrorResponse'
         default:
           $ref: '#/components/responses/500InternalServerErrorResponse'
+
       security:
         - htsget_auth:
           - read:genomic_reads
+
   /variants/{id}:
     get:
       summary: Gets the variants from a pre-indexed id
@@ -125,18 +128,17 @@ paths:
         - $ref: '#/components/parameters/endParam'
         - in: query
           name: tags
-          description: A comma separated list of tags to include, by default all.
-          example: cancer,melanoma
+          description: A comma-separated list of tags to include, by default all.
           required: false
           schema:
             type: string
         - in: query
           name: notags
-          description: A comma separated list of tags to exclude, default none.
-          example: normal,skin
+          description: A comma-separated list of tags to exclude, default none.
           required: false
           schema:
             type: string
+
       responses:
         200:
           description: results matching criteria
@@ -170,9 +172,11 @@ paths:
           $ref: '#/components/responses/500InternalServerErrorResponse'
         default:
           $ref: '#/components/responses/500InternalServerErrorResponse'
+
       security:
         - htsget_auth:
           - read:genomic_variants
+
 components:
   schemas:
     htsgetResponse:
@@ -193,6 +197,7 @@ components:
               type: string
               description: MD5 digest of the blob resulting from concatenating all of the payload data
               example: 8a6049fad4943ff4c6de5c22df97d001
+
     htsgetUrl:
       type: object
       required:
@@ -209,6 +214,7 @@ components:
           description: Indicates whether the header or body of the requested file will be retrieved by this url
           example: body
           enum: [header, body]
+
     htsgetUrlReads:
       allOf:
         - $ref: '#/components/schemas/htsgetUrl'
@@ -218,11 +224,13 @@ components:
               headers:
                 Authorization: Bearer xxxxx
                 Range: bytes=65536-1003750
+
     htsgetUrlVariants:
       allOf:
         - $ref: '#/components/schemas/htsgetUrl'
         - example:
             - url: https://example.com/sample1234/run1.vcf
+
     Error:
       type: object
       description: Generic error response object
@@ -326,6 +334,7 @@ components:
                   example: InternalServerError
                 message:
                   example: An internal server error occurred
+
   parameters:
     idPathParam:
       in: path
@@ -371,6 +380,7 @@ components:
         type: integer
         format: int64
         minimum: 0
+
   securitySchemes:
     htsget_auth:
       type: oauth2
@@ -381,6 +391,7 @@ components:
           scopes:
             read:genomic_reads: read access to genomic reads
             read:genomic_variants: read access to genomic variants
+
   responses:
     400BadRequestResponse:
       description: Bad request
