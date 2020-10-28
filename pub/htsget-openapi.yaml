@@ -266,7 +266,7 @@ components:
       allOf:
         - $ref: '#/components/schemas/Error'
         - type: object
-          description: 	Authorization is required to access the resource
+          description: Authorization is required to access the resource
           properties:
             htsget:
               properties:
