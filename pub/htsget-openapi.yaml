@@ -1,10 +1,10 @@
-openapi: 3.0.2
+openapi: 3.0.3
 servers:
   - description: htsget genomics api
-    url: "htsget/1"
+    url: htsget/1
 info:
-  description: "This data retrieval API bridges from existing genomics bulk data transfers to a client/server model"
-  version: "1.2.0"
+  description: This data retrieval API bridges from existing genomics bulk data transfers to a client/server model
+  version: 1.2.0
   title: htsget
   contact:
     name: GA4GH
@@ -18,246 +18,160 @@ paths:
       summary: Gets the reads from a pre-indexed id
       operationId: searchReadId
       description: |
-        Searches a pre-indexed object id.
+        Searches a pre-indexed object id
       parameters:
-        - in: "path"
-          name: id
-          description: identifier of the read object
-          required: true
-          schema:
-            type: string
-        - in: "query"
+        - $ref: '#/components/parameters/idPathParam'
+        - in: query
           name: format
-          description: File format, BAM (default), CRAM.
-          example: "BAM"
+          description: Desired file format
+          example: BAM
           required: false
           schema:
             type: string
-        - in: "query"
-          name: class
-          description: Request different classes of data (such as header or body).
-          example: "header"
-          required: false
-          schema:
-            type: string
-        - in: "query"
-          name: referenceName
-          description: Reference sequence name
-          example: "chr1"
-          required: false
-          schema:
-            type: string
-        - in: "query"
-          name: start
-          description: The start position of the range on the reference, 0-based, inclusive.
-          example: "12312"
-          required: false
-          schema:
-            type: integer
-            format: int64
-            minimum: 0
-        - in: "query"
-          name: end
-          description: The end position of the range on the reference, 0-based exclusive.
-          example: "99999"
-          required: false
-          schema:
-            type: integer
-            format: int64
-            minimum: 0
-        - in: "query"
+            enum: [BAM, CRAM]
+            default: BAM
+        - $ref: '#/components/parameters/classParam'
+        - $ref: '#/components/parameters/referenceNameParam'
+        - $ref: '#/components/parameters/startParam'
+        - $ref: '#/components/parameters/endParam'
+        - in: query
           name: fields
-          description: A list of fields to include, such as QNAME, FLAG, RNAME, etc...
-          example: "fields=QNAME,RNAME"
+          description: A comma-separated list of SAM fields to include. By default, i.e., when fields is not specified, all fields will be included
+          example: QNAME,RNAME
           required: false
           schema:
             enum:
-              - "QNAME"
-              - "FLAG"
-              - "RNAME"
-              - "POS"
-              - "MAPQ"
-              - "CIGAR"
-              - "RNEXT"
-              - "PNEXT"
-              - "TLEN"
-              - "SEQ"
-              - "QUAL"
+              - QNAME
+              - FLAG
+              - RNAME
+              - POS
+              - MAPQ
+              - CIGAR
+              - RNEXT
+              - PNEXT
+              - TLEN
+              - SEQ
+              - QUAL
             type: string
-        - in: "query"
+        - in: query
           name: tags
-          description: A comma separated list of tags to include, by default all.
-          example: "cancer,melanoma"
+          description: A comma-separated list of tags to include. By default, i.e., when tags is not specified, all tags will be included
+          example: MD,NM
           required: false
           schema:
             type: string
-        - in: "query"
+        - in: query
           name: notags
-          description: A comma separated list of tags to exclude, default none.
-          example: "normal,healthy"
+          description: A comma-separated list of tags to exclude. By default, i.e., when notags is not specified, no tags will be excluded
+          example: OQ
           required: false
           schema:
             type: string
 
-# Cannot reuse those since responses does not accept $ref directly, yet:
-# https://github.com/OAI/OpenAPI-Specification/issues/1586
       responses:
-        '200':
+        200:
           description: results matching criteria
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IdResponse'
-              example:
-                {
-                   "htsget" : {
-                      "format" : "BAM",
-                      "urls" : [
-                         {
-                            "url" : "https://htsget.blocksrv.example/sample1234/run1.bam",
-                            "headers" : {
-                               "Authorization" : "Bearer xxxx",
-                               "Range" : "bytes=2744831-9375732"
-                            },
-                            "class" : "body"
-                         }
-                      ]
-                   }
-                }
-        '400':
-          description: Something went wrong
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/UnsupportedFormat'
-                  - $ref: '#/components/schemas/InvalidInput'
-                  - $ref: '#/components/schemas/InvalidRange'
-        '401':
-          description: Authorization provided is invalid
-        '403':
-          description: Authorization is required to access the resource
-        '404':
-          $ref: '#/components/schemas/NotFound'
-        '500':
-          description: Internal Server Error
+                allOf:
+                  - $ref: '#/components/schemas/htsgetResponse'
+                  - properties:
+                      htsget:
+                        properties:
+                          format:
+                            example: BAM
+                            enum: [BAM, CRAM]
+                          urls:
+                            type: array
+                            description: An array providing URLs from which raw alignment data can be retrieved
+                            items:
+                              $ref: '#/components/schemas/htsgetUrlReads'
+                        required:
+                          - urls
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+        500:
+          $ref: '#/components/responses/500InternalServerErrorResponse'
         default:
-          description: Internal Server Error
-
+          $ref: '#/components/responses/500InternalServerErrorResponse'
 
       security:
         - htsget_auth:
           - read:genomic_reads
 
-
   /variants/{id}:
     get:
       summary: Gets the variants from a pre-indexed id
       operationId: searchVariantId
-      description: Searches a pre-indexed object id.
+      description: Searches a pre-indexed object id
       parameters:
-        - in: "path"
-          name: id
-          description: identifier of the variant object
-          required: true
-          schema:
-            type: string
-        - in: "query"
+        - $ref: '#/components/parameters/idPathParam'
+        - in: query
           name: format
-          description: File format, VCF (default), BCF.
-          example: "VCF"
+          description: Desired file format
+          example: VCF
           required: false
           schema:
             type: string
-        - in: "query"
-          name: class
-          description: Request different classes of data (such as header or body).
-          example: "body"
-          required: false
-          schema:
-            type: string
-        - in: "query"
-          name: referenceName
-          description: Reference sequence name
-          example: "chr1"
-          required: false
-          schema:
-            type: string
-        - in: "query"
-          name: start
-          description: The start position of the range on the reference, 0-based, inclusive.
-          example: "12312"
-          required: false
-          schema:
-            type: integer
-            format: int64
-            minimum: 0
-        - in: "query"
-          name: end
-          description: The end position of the range on the reference, 0-based exclusive.
-          example: "99999"
-          required: false
-          schema:
-            type: integer
-            format: int64
-            minimum: 0
-        - in: "query"
+            enum: [VCF, BCF]
+            default: VCF
+        - $ref: '#/components/parameters/classParam'
+        - $ref: '#/components/parameters/referenceNameParam'
+        - $ref: '#/components/parameters/startParam'
+        - $ref: '#/components/parameters/endParam'
+        - in: query
           name: tags
-          description: A comma separated list of tags to include, by default all.
-          example: "cancer,melanoma"
+          description: A comma-separated list of tags to include, by default all.
           required: false
           schema:
             type: string
-        - in: "query"
+        - in: query
           name: notags
-          description: A comma separated list of tags to exclude, default none.
-          example: "normal,skin"
+          description: A comma-separated list of tags to exclude, default none.
           required: false
           schema:
             type: string
 
       responses:
-        '200':
+        200:
           description: results matching criteria
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/IdResponse'
-              example:
-                {
-                   "htsget" : {
-                      "format" : "VCF",
-                      "urls" : [
-                         {
-                            "url" : "https://htsget.blocksrv.example/sample1234/variants1.vcf",
-                            "headers" : {
-                               "Authorization" : "Bearer xxxx",
-                               "Range" : "bytes=2744831-9375732"
-                            },
-                            "class" : "body"
-                         }
-                      ]
-                   }
-                }
-        '400':
-          description: Something went wrong
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/UnsupportedFormat'
-                  - $ref: '#/components/schemas/InvalidInput'
-                  - $ref: '#/components/schemas/InvalidRange'
-        '401':
-          description: Authorization provided is invalid
-        '403':
-          description: Authorization is required to access the resource
-        '404':
-          $ref: '#/components/schemas/NotFound'
-        '500':
-          description: Internal Server Error
+                allOf:
+                  - $ref: '#/components/schemas/htsgetResponse'
+                  - properties:
+                      htsget:
+                        properties:
+                          format:
+                            example: VCF
+                            enum: [VCF, BCF]
+                          urls:
+                            type: array
+                            description: An array providing URLs from which raw variant data can be retrieved
+                            items:
+                              $ref: '#/components/schemas/htsgetUrlVariants'
+                        required:
+                          - urls
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+        500:
+          $ref: '#/components/responses/500InternalServerErrorResponse'
         default:
-          description: Internal Server Error
+          $ref: '#/components/responses/500InternalServerErrorResponse'
 
       security:
         - htsget_auth:
@@ -265,59 +179,207 @@ paths:
 
 components:
   schemas:
-    IdResponse:
-      $ref: '#/components/schemas/htsgetResponse'
-
     htsgetResponse:
       type: object
+      required:
+        - htsget
       properties:
         htsget:
           type: object
+          description: Container for response object
           required:
             - format
-            - urls
           properties:
             format:
               type: string
-              example:
-                "BAM"
-            urls:
-              $ref: '#/components/schemas/htsgetUrlsHeaders'
-
+              description: Response data is in this format
             md5:
               type: string
-              example: "8a6049fad4943ff4c6de5c22df97d001"
+              description: MD5 digest of the blob resulting from concatenating all of the payload data
+              example: 8a6049fad4943ff4c6de5c22df97d001
 
-
-    htsgetUrlsHeaders:
-      type: array
-      example:
-        - url: "data:application/vnd.ga4gh.vcf;base64,QkFNAQ=="
-        - url: "https://htsget.blocksrv.example/sample1234/run1.bam"
-          headers:
-            "Authorization": "Bearer xxxxx"
-            "Range": "bytes=65536-1003750"
-      items:
-        $ref: '#/components/schemas/urlsItems'
-
-    urlsItems:
+    htsgetUrl:
       type: object
       required:
         - url
       properties:
         url:
           type: string
+          description: URL to download data block
         headers:
           type: object
+          description: JSON object of key-value pairs representing HTTP headers. If supplied, the client MUST provide these as headers to the data download url
+        class:
+          type: string
+          description: Indicates whether the header or body of the requested file will be retrieved by this url
+          example: body
+          enum: [header, body]
 
-    UnsupportedFormat:
-      description: The requested file format is not supported by the server
-    InvalidInput:
-      description: The request parameters do not adhere to the specification
-    InvalidRange:
-      description: The requested range cannot be satisfied
-    NotFound:
-      description: The resource requested was not found
+    htsgetUrlReads:
+      allOf:
+        - $ref: '#/components/schemas/htsgetUrl'
+        - example:
+            - url: data:application/vnd.ga4gh.vcf;base64,QkFNAQ==
+            - url: https://htsget.blocksrv.example/sample1234/run1.bam
+              headers:
+                Authorization: Bearer xxxxx
+                Range: bytes=65536-1003750
+
+    htsgetUrlVariants:
+      allOf:
+        - $ref: '#/components/schemas/htsgetUrl'
+        - example:
+            - url: https://example.com/sample1234/run1.vcf
+
+    Error:
+      type: object
+      description: Generic error response object
+      required:
+        - htsget
+      properties:
+        htsget:
+          type: object
+          description: Container for the error response object
+          required:
+            - error
+            - message
+          properties:
+            error:
+              type: string
+              description: The type of error
+            message:
+              type: string
+              description: A message specific to the error providing information on how to debug the problem. Clients MAY display this message to the user.
+    InvalidAuthenticationError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          description: Authorization provided is invalid
+          properties:
+            htsget:
+              properties:
+                error:
+                  example: InvalidAuthentication
+                message:
+                  example: Invalid authentication credentials provided
+    PermissionDeniedError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          description: Authorization is required to access the resource
+          properties:
+            htsget:
+              properties:
+                error:
+                  example: PermissionDenied
+                message:
+                  example: Client is not authorized to access this resource
+    NotFoundError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          description: The resource requested was not found
+          properties:
+            htsget:
+                properties:
+                    error:
+                        example: NotFound
+                    message:
+                        example: The requested resource could not be found
+    UnsupportedFormatError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          description: The requested file format is not supported by the server
+          properties:
+            htsget:
+              properties:
+                error:
+                  example: UnsupportedFormat
+                message:
+                  example: The requested file format is not supported by the server
+    InvalidInputError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          description: The request parameters do not adhere to the specification
+          properties:
+            htsget:
+              properties:
+                error:
+                  example: InvalidInput
+                message:
+                  example: The request parameters do not adhere to the specification
+    InvalidRangeError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          description: The requested range cannot be satisfied
+          properties:
+            htsget:
+              properties:
+                error:
+                  example: InvalidRange
+                message:
+                  example: The requested range cannot be satisfied
+    InternalServerError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          description: Internal server error
+          properties:
+            htsget:
+              properties:
+                error:
+                  example: InternalServerError
+                message:
+                  example: An internal server error occurred
+
+  parameters:
+    idPathParam:
+      in: path
+      name: id
+      description: read or variant object identifier
+      required: true
+      schema:
+        type: string
+    classParam:
+      in: query
+      name: class
+      description: Request different classes of data. By default, i.e., when class is not specified, the response will represent a complete read or variant data stream, encompassing SAM/CRAM/VCF headers, body data records, and EOF marker
+      example: header
+      required: false
+      schema:
+        type: string
+        enum: [header]
+    referenceNameParam:
+      in: query
+      name: referenceName
+      description: Reference sequence name
+      example: chr1
+      required: false
+      schema:
+        type: string
+    startParam:
+      in: query
+      name: start
+      description: The start position of the range on the reference, 0-based, inclusive
+      example: 12312
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
+    endParam:
+      in: query
+      name: end
+      description: The end position of the range on the reference, 0-based exclusive
+      example: 99999
+      required: false
+      schema:
+        type: integer
+        format: int64
+        minimum: 0
 
   securitySchemes:
     htsget_auth:
@@ -329,3 +391,38 @@ components:
           scopes:
             read:genomic_reads: read access to genomic reads
             read:genomic_variants: read access to genomic variants
+
+  responses:
+    400BadRequestResponse:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/UnsupportedFormatError'
+              - $ref: '#/components/schemas/InvalidInputError'
+              - $ref: '#/components/schemas/InvalidRangeError'
+    401UnauthorizedResponse:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InvalidAuthenticationError'
+    403ForbiddenResponse:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PermissionDeniedError'
+    404NotFoundResponse:
+      description: NotFound
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NotFoundError'
+    500InternalServerErrorResponse:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/InternalServerError'
