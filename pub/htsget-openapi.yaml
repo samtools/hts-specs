@@ -268,7 +268,7 @@ components:
           properties:
             htsget:
               type: object
-              description: extended attributes for htsget reads API
+              description: extended attributes for htsget
               properties:
                 datatype:
                     type: string

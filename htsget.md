@@ -520,7 +520,9 @@ Example service-info response:
 The [GA4GH Service Registry API specification](https://github.com/ga4gh-discovery/ga4gh-service-registry) allows information about GA4GH-compliant web services, including htsget services, to be aggregated into registries and made available via a standard API. The following considerations SHOULD be followed when registering htsget services within a service registry.
 
 * Endpoints for different htsget data types should be registered as separate entities within the registry. If an htsget service provides both `reads` and `variants` data, both endpoints should be registered.
-* The `url` property should reference the API's `service-info` endpoint for a single data type (i.e. an htsget reads API registration should provide the URL to the reads `service-info` endpoint, an htsget variants API registration should provide the URL to the variants `service-info` endpoint). Clients should be able to assume that by replacing the URL's "service-info" string with an object id, they will hit the corresponding `reads`/`variants` endpoint.
+* The `url` property should reference the API's ticket endpoint for a single data type, excluding any particular `id` (i.e. an htsget reads API registration should provide the URL to the reads ticket endpoint, an htsget variants API registration should provide the URL to the variants ticket endpoint). Clients should be able to assume that:
+   + Adding `/{id}` to the registered `url` will hit the corresponding ticket endpoint (i.e. `/reads/{id}` or `/variants/{id}`).
+   + Adding `/service-info` to the registered `url` will hit the corresponding `service-info` endpoint (i.e. `/reads/service-info` or `/variants/service-info`).
 * The value of the `type` object's `artifact` property should be `htsget` (i.e. the same as it appears in `service-info`)
 
 Example listing of htsget reads API and variants API registrations from a service registry's `/services` endpoint:
@@ -532,7 +534,7 @@ Example listing of htsget reads API and variants API registrations from a servic
       "name": "ExampleCo htsget reads API",
       "description": "Serves alignment data (BAM, CRAM) via htsget protocol",
       "version": "0.1.0",
-      "url": "https://htsget.exampleco.com/v1/reads/service-info",
+      "url": "https://htsget.exampleco.com/v1/reads",
       "organization":  {
          "name":       "ExampleCo",
          "url":        "https://exampleco.com"
@@ -548,7 +550,7 @@ Example listing of htsget reads API and variants API registrations from a servic
       "name": "ExampleCo htsget variants API",
       "description": "Serves variant data (VCF, BCF) via htsget protocol",
       "version": "0.1.0",
-      "url": "https://htsget.exampleco.com/v1/variants/service-info"
+      "url": "https://htsget.exampleco.com/v1/variants"
       "organization":  {
          "name":       "ExampleCo",
          "url":        "https://exampleco.com"
