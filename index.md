@@ -7,7 +7,7 @@ title: HTS format specifications
 {% capture readme %}{% include_relative README.md %}{% endcapture %}
 {% assign readme_lines = readme | split: newline %}
 
-{% for line in readme_lines limit: 2 %}
+{% for line in readme_lines limit: 6 %}
 {{line}}{% endfor %}
 
 <div class="sidebar lowered">
@@ -30,7 +30,7 @@ Specifications:
 - [Refget](refget.html)
 </div>
 <div class="mainbar">
-{% for line in readme_lines offset: 8 %}
+{% for line in readme_lines offset: 12 %}
 {{line}}{% endfor %}
 </div>
 <div class="clear"></div>
