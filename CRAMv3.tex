@@ -2970,4 +2970,111 @@ could be written into three containers: $1\MB + 1\MB + 0.4\MB$.
 
 \newpage
 
+\subsection{CRAM History}
+
+\subsubsection*{Pre-CRAM: 2010}
+
+The primary concepts and ideas of CRAM stem from work at the European
+Bioinformatics Institute in 2010 and 2011, published in:
+
+\begin{quote}\small
+Markus Hsi-Yang Fritz,
+Rasko Leinonen, Guy Cochrane, and Ewan Birney,
+\textbf{Efficient storage of high throughput DNA sequencing data using reference-based compression},
+{\sl Genome Res.}~2011~21: 734--740;
+\href{http://dx.doi.org/doi:10.1101/gr.114819.110}{doi:10.1101/gr.114819.110};
+{\sc pmid:}21245279.
+\end{quote}
+
+\subsubsection*{CRAM 0.x: 2011}
+
+Vadim Zalunin implemented the ideas in the paper, now named CRAM, in
+the Java CRAMtools package.  This included versions from 0.3 to 0.86\footnote{\url{https://github.com/vadimzalunin/crammer/releases}}.
+
+\subsubsection*{CRAM 1.0: 2012}
+
+The first official launch of the CRAM specification, in the Java
+CRAMtools package\footnote{\url{https://github.com/enasequence/cramtools}}
+
+This was publicised at \url{https://github.com/enasequence/cramtools}.
+
+\subsubsection*{CRAM 2.0: 2013}
+
+Reimplementing CRAM in C
+\footnote{Staden IO\_Lib 1.13.0 and later HTSlib 0.2.0} exposed a number of issues with the
+1.0 specification and disparities between the specification text and
+the Java implementation.  CRAM 2.0 unified implementation with
+specification.
+
+Other changes included:
+
+\begin{itemize}
+\item Support for multiple references per container, to permit storage
+of highly fragmented assemblies.
+
+\item Soft-clips and inserted bases moved to their own separate
+data-series instead of sharing one.
+
+\item Slice headers contain meta-data tracking the number of records
+and bases.
+
+\item Corrected the BF (bam flag) data series to match the BAM
+specification.
+
+\item Improved encoding of auxiliary tags.
+\end{itemize}
+
+\subsubsection*{CRAM 2.1: 2014}
+
+This is the first version to appear in HTSJDK (version 1.127), ported
+from the Java CRAMtools package.
+
+\begin{itemize}
+\item EOF blocks are added in order to spot truncated files.
+\end{itemize}
+
+\subsubsection*{CRAM 3.0: 2014}
+
+Primarily this is an optimisation of size and speed.
+
+\begin{itemize}
+\item Inclusion of LZMA compression library.
+\item Inclusion of the custom rANS Order-0 and Order-1 entropy encoders.
+\item Checksums added to all file format structures to ensure data integrity.
+\end{itemize}
+
+\newpage
+
+\subsection{\textbf{Contributors and Acknowledgements}}
+
+\begin{itemize}
+\item
+Markus Fritz, Rasko Leinonen, Guy Cochrane and Ewan Birney (EBI):
+Initial ideas behind CRAM.
+
+\item Vadim Zalunin (EBI):
+Initial JAVA implementation of CRAM and previous maintainer of CRAM specification.
+
+\item James Bonfield (Sanger Institute):
+Initial C implementation of CRAM and current maintainer of CRAM
+specification.
+
+\item Joel Thibault (Broad Institute):
+previous maintainer of CRAM specification.
+
+\item Chris Norman (Broad Institute):
+previous maintainer of CRAM specification and worked on
+the HTSJDK implementation.
+
+\item Robert Buels (UC Berkeley): First JavaScript implementation of CRAM
+
+\item Michael Macias (St Jude Children's Research Hospital): First Rust implementation of CRAM
+
+\item Other specification contributors include: John Marshall, Rishi Nag,
+Kenta Sato, Artem Tarasov and Jason Travis.
+
+\item Plus a big thank you to everyone who has raised GitHub issues
+and/or helped us improve the specification in other ways.
+\end{itemize}
+
 \end{document}
