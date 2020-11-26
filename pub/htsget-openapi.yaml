@@ -23,50 +23,28 @@ paths:
         - $ref: '#/components/parameters/idPathParam'
         - in: query
           name: format
-          description: Desired file format
-          example: BAM
           required: false
           schema:
-            type: string
-            enum: [BAM, CRAM]
-            default: BAM
+            $ref: '#/components/schemas/FormatReads'
         - $ref: '#/components/parameters/classParam'
         - $ref: '#/components/parameters/referenceNameParam'
         - $ref: '#/components/parameters/startParam'
         - $ref: '#/components/parameters/endParam'
         - in: query
           name: fields
-          description: A comma-separated list of SAM fields to include. By default, i.e., when fields is not specified, all fields will be included
-          example: QNAME,RNAME
           required: false
           schema:
-            enum:
-              - QNAME
-              - FLAG
-              - RNAME
-              - POS
-              - MAPQ
-              - CIGAR
-              - RNEXT
-              - PNEXT
-              - TLEN
-              - SEQ
-              - QUAL
-            type: string
+            $ref: '#/components/schemas/FieldsReads'
         - in: query
           name: tags
-          description: A comma-separated list of tags to include. By default, i.e., when tags is not specified, all tags will be included
-          example: MD,NM
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/TagsReads'
         - in: query
           name: notags
-          description: A comma-separated list of tags to exclude. By default, i.e., when notags is not specified, no tags will be excluded
-          example: OQ
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/NoTagsReads'
 
       responses:
         200:
@@ -74,21 +52,7 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/htsgetResponse'
-                  - properties:
-                      htsget:
-                        properties:
-                          format:
-                            example: BAM
-                            enum: [BAM, CRAM]
-                          urls:
-                            type: array
-                            description: An array providing URLs from which raw alignment data can be retrieved
-                            items:
-                              $ref: '#/components/schemas/htsgetUrlReads'
-                        required:
-                          - urls
+                $ref: '#/components/schemas/htsgetResponseReads'
         400:
           $ref: '#/components/responses/400BadRequestResponse'
         401:
@@ -105,6 +69,43 @@ paths:
       security:
         - htsget_auth:
           - read:genomic_reads
+    
+    post:
+      summary: Get htsget ticket for reads data streaming
+      operationId: postRead
+      description: |
+        Servers may optionally accept `POST` requests to enable alignment data
+        streaming of more than one genomic region 
+      parameters:
+        - $ref: '#/components/parameters/idPathParam'
+      requestBody:
+        description: Specify output format, fields, genomic regions, etc.
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestBodyReads'
+      responses:
+        200:
+          description: Successfully retrieved ticket for streaming alignment file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/htsgetResponseReads'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+        413:
+          $ref: '#/components/responses/413PayloadTooLargeResponse'
+        500:
+          $ref: '#/components/responses/500InternalServerErrorResponse'
+        default:
+          $ref: '#/components/responses/500InternalServerErrorResponse'
 
   /variants/{id}:
     get:
@@ -115,29 +116,23 @@ paths:
         - $ref: '#/components/parameters/idPathParam'
         - in: query
           name: format
-          description: Desired file format
-          example: VCF
           required: false
           schema:
-            type: string
-            enum: [VCF, BCF]
-            default: VCF
+            $ref: '#/components/schemas/FormatVariants'
         - $ref: '#/components/parameters/classParam'
         - $ref: '#/components/parameters/referenceNameParam'
         - $ref: '#/components/parameters/startParam'
         - $ref: '#/components/parameters/endParam'
         - in: query
           name: tags
-          description: A comma-separated list of tags to include, by default all.
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/TagsVariants'
         - in: query
           name: notags
-          description: A comma-separated list of tags to exclude, default none.
           required: false
           schema:
-            type: string
+            $ref: '#/components/schemas/NoTagsVariants'
 
       responses:
         200:
@@ -145,21 +140,7 @@ paths:
           content:
             application/json:
               schema:
-                allOf:
-                  - $ref: '#/components/schemas/htsgetResponse'
-                  - properties:
-                      htsget:
-                        properties:
-                          format:
-                            example: VCF
-                            enum: [VCF, BCF]
-                          urls:
-                            type: array
-                            description: An array providing URLs from which raw variant data can be retrieved
-                            items:
-                              $ref: '#/components/schemas/htsgetUrlVariants'
-                        required:
-                          - urls
+                $ref: '#/components/schemas/htsgetResponseVariants'
         400:
           $ref: '#/components/responses/400BadRequestResponse'
         401:
@@ -176,6 +157,44 @@ paths:
       security:
         - htsget_auth:
           - read:genomic_variants
+    
+    post:
+      summary: Get htsget ticket for variant data streaming
+      operationId: postVariant
+      description: |
+        Servers may optionally accept `POST` requests to enable variant data
+        streaming of more than one genomic region.
+      parameters:
+        - $ref: '#/components/parameters/idPathParam'
+      requestBody:
+        description: Specify output format, genomic regions, etc.
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestBodyVariants'
+      responses:
+        200:
+          description: Successfully retrieved ticket for streaming variant file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/htsgetResponseVariants'
+        400:
+          $ref: '#/components/responses/400BadRequestResponse'
+        401:
+          $ref: '#/components/responses/401UnauthorizedResponse'
+        403:
+          $ref: '#/components/responses/403ForbiddenResponse'
+        404:
+          $ref: '#/components/responses/404NotFoundResponse'
+        413:
+          $ref: '#/components/responses/413PayloadTooLargeResponse'
+        500:
+          $ref: '#/components/responses/500InternalServerErrorResponse'
+        default:
+          $ref: '#/components/responses/500InternalServerErrorResponse'
+
   /reads/service-info:
     get:
       summary: Get htsget reads API service info
@@ -204,6 +223,7 @@ paths:
                 $ref: '#/components/schemas/htsgetServiceInfo'
         '500':
           description: Internal Server Error
+
 components:
   schemas:
     htsgetResponse:
@@ -224,6 +244,40 @@ components:
               type: string
               description: MD5 digest of the blob resulting from concatenating all of the payload data
               example: 8a6049fad4943ff4c6de5c22df97d001
+    
+    htsgetResponseReads:
+      allOf:
+        - $ref: '#/components/schemas/htsgetResponse'
+        - properties:
+            htsget:
+              properties:
+                format:
+                  example: BAM
+                  enum: [BAM, CRAM]
+                urls:
+                  type: array
+                  description: An array providing URLs from which raw alignment data can be retrieved
+                  items:
+                    $ref: '#/components/schemas/htsgetUrlReads'
+              required:
+                - urls
+    
+    htsgetResponseVariants:
+      allOf:
+        - $ref: '#/components/schemas/htsgetResponse'
+        - properties:
+            htsget:
+              properties:
+                format:
+                  example: VCF
+                  enum: [VCF, BCF]
+                urls:
+                  type: array
+                  description: An array providing URLs from which raw variant data can be retrieved
+                  items:
+                    $ref: '#/components/schemas/htsgetUrlVariants'
+              required:
+                - urls
 
     htsgetUrl:
       type: object
@@ -257,6 +311,140 @@ components:
         - $ref: '#/components/schemas/htsgetUrl'
         - example:
             - url: https://example.com/sample1234/run1.vcf
+
+    FormatReads:
+      type: string
+      description: Desired alignment file format
+      enum: [BAM, CRAM]
+      example: BAM
+      default: BAM
+    
+    FormatVariants:
+      type: string
+      description: Desired variant file format
+      enum: [VCF, BCF]
+      example: VCF
+      default: VCF
+
+    Class:
+      type: string
+      description: Request different classes of data. By default, i.e., when class is not specified, the response will represent a complete read or variant data stream, encompassing SAM/CRAM/VCF headers, body data records, and EOF marker
+      enum: [header]
+      example: header
+
+    ReferenceName:
+      type: string
+      description: Reference sequence name
+      example: chr1
+
+    Start:
+      type: integer
+      description: The start position of the range on the reference, 0-based, inclusive
+      format: int64
+      minimum: 0
+      example: 12312
+
+    End:
+      type: integer
+      description: The end position of the range on the reference, 0-based exclusive
+      format: int64
+      minimum: 0
+      example: 99999
+
+    Region:
+      type: object
+      description: A genomic region to return
+      properties:
+        referenceName:
+          $ref: '#/components/schemas/ReferenceName'
+        start:
+          $ref: '#/components/schemas/Start'
+        end:
+          $ref: '#/components/schemas/End'
+      required:
+        - referenceName
+
+    FieldsReads:
+      type: array
+      description: A list of SAM fields to include. By default, i.e., when fields is not specified, all fields will be included
+      items:
+        type: string        
+        example: [QNAME, RNAME]
+        enum:
+          - QNAME
+          - FLAG
+          - RNAME
+          - POS
+          - MAPQ
+          - CIGAR
+          - RNEXT
+          - PNEXT
+          - TLEN
+          - SEQ
+          - QUAL
+    
+    TagsReads:
+      type: array
+      description: A list of SAM tags to include. By default, i.e., when tags is not specified, all tags will be included
+      items:
+        type: string
+        example: [MD, NM]
+    
+    TagsVariants:
+      type: array
+      description: A list of tags to include, by default all
+      items:
+        type: string
+
+    NoTagsReads:
+      type: array
+      description: A list of SAM tags to exclude. By default, i.e., when notags is not specified, no tags will be excluded
+      items:
+        type: string
+        example: [OQ]
+    
+    NoTagsVariants:
+      type: array
+      description: A list of tags to exclude, default none
+
+    RequestBody:
+      type: object
+      properties:
+        regions:
+          type: array
+          description: A list of genomic regions to return. If not present, the entire file will be returned.
+          items:
+            $ref: '#/components/schemas/Region'
+
+    RequestBodyReads:
+      allOf:
+        - type: object
+          properties:
+            format:
+              $ref: '#/components/schemas/FormatReads'
+            class:
+              $ref: '#/components/schemas/Class'
+            fields:
+              $ref: '#/components/schemas/FieldsReads'
+            tags:
+              $ref: '#/components/schemas/TagsReads'
+            notags:
+              $ref: '#/components/schemas/NoTagsReads'
+        - $ref: '#/components/schemas/RequestBody'
+
+    RequestBodyVariants:
+      allOf:
+        - type: object
+          properties:
+            format:
+              $ref: '#/components/schemas/FormatVariants'
+            class:
+              $ref: '#/components/schemas/Class'
+            tags:
+              $ref: '#/components/schemas/TagsVariants'
+            notags:
+              $ref: '#/components/schemas/NoTagsVariants'
+        - $ref: '#/components/schemas/RequestBody'
 
     ServiceInfo:
       type: object
@@ -413,6 +601,18 @@ components:
                   example: InvalidRange
                 message:
                   example: The requested range cannot be satisfied
+    PayloadTooLargeError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          description: POST request size is too large
+          properties:
+            htsget:
+              properties:
+                error:
+                  example: PayloadTooLarge
+                message:
+                  example: POST request size is too large
     InternalServerError:
       allOf:
         - $ref: '#/components/schemas/Error'
@@ -437,40 +637,27 @@ components:
     classParam:
       in: query
       name: class
-      description: Request different classes of data. By default, i.e., when class is not specified, the response will represent a complete read or variant data stream, encompassing SAM/CRAM/VCF headers, body data records, and EOF marker
-      example: header
       required: false
       schema:
-        type: string
-        enum: [header]
+        $ref: '#/components/schemas/Class'
     referenceNameParam:
       in: query
       name: referenceName
-      description: Reference sequence name
-      example: chr1
       required: false
       schema:
-        type: string
+        $ref: '#/components/schemas/ReferenceName'
     startParam:
       in: query
       name: start
-      description: The start position of the range on the reference, 0-based, inclusive
-      example: 12312
       required: false
       schema:
-        type: integer
-        format: int64
-        minimum: 0
+        $ref: '#/components/schemas/Start'
     endParam:
       in: query
       name: end
-      description: The end position of the range on the reference, 0-based exclusive
-      example: 99999
       required: false
       schema:
-        type: integer
-        format: int64
-        minimum: 0
+        $ref: '#/components/schemas/End'
 
   securitySchemes:
     htsget_auth:
@@ -511,6 +698,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/NotFoundError'
+    413PayloadTooLargeResponse:
+      description: PayloadTooLarge
+      content:
+       application/json:
+         schema:
+           $ref: '#/components/schemas/PayloadTooLargeError'
     500InternalServerErrorResponse:
       description: Internal Server Error
       content:
