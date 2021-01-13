@@ -306,7 +306,7 @@ Fixed fields are:
   It is permitted to have multiple records with the same POS.
   Telomeres are indicated by using positions 0 or N+1, where N is the length of the corresponding chromosome or contig.
   (Integer, Required)
-  \item ID --- identifier: Semicolon separated list of unique identifiers where available.
+  \item ID --- identifier: Semicolon-separated list of unique identifiers where available.
   If this is a dbSNP variant the rs number(s) should be used.
   No identifier should be present in more than one data record.
   If there is no identifier available, then the MISSING value should be used.
@@ -445,7 +445,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item EC (Integer): Comma separated list of expected alternate allele counts for each alternate allele in the same order as listed in the ALT field.
   Typically used in association analyses.
   \item FT (String): Sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field).
-  Again, use PASS to indicate that all filters have been passed, a semicolon separated list of codes for filters that fail, or `.' to indicate that filters have not been applied.
+  Again, use PASS to indicate that all filters have been passed, a semicolon-separated list of codes for filters that fail, or `.' to indicate that filters have not been applied.
   These values should be described in the meta-information in the same way as FILTERs.
   No whitespace or semicolons permitted.
   \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
