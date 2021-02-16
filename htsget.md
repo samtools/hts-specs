@@ -4,7 +4,7 @@ title: htsget protocol
 suppress_footer: true
 ---
 
-# Htsget retrieval API spec v1.3.0
+# Htsget retrieval API spec v1.2.1
 
 # Design principles
 
