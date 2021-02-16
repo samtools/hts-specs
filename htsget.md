@@ -504,7 +504,7 @@ Example service-info response:
    "type":  {
       "group":        "org.ga4gh",
       "artifact":     "htsget",
-      "version":      "1.3.0"
+      "version":      "1.2.1"
    },
    "htsget": {
       "datatype": "reads",
@@ -542,7 +542,7 @@ Example listing of htsget reads API and variants API registrations from a servic
       "type": {
          "group": "org.ga4gh",
          "artifact": "htsget",
-         "version": "1.2.0"
+         "version": "1.2.1"
       }
    },
    {
@@ -558,7 +558,7 @@ Example listing of htsget reads API and variants API registrations from a servic
       "type": {
          "group": "org.ga4gh",
          "artifact": "htsget",
-         "version": "1.2.0"
+         "version": "1.2.1"
       }
    }
 ]
