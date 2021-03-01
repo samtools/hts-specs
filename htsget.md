@@ -4,7 +4,7 @@ title: htsget protocol
 suppress_footer: true
 ---
 
-# Htsget retrieval API spec v1.2.0
+# Htsget retrieval API spec v1.2.1
 
 # Design principles
 
@@ -149,6 +149,8 @@ The format of this identifier is left to the discretion of the API provider, inc
 * Studies: PRJEB4019 or /byStudy/PRJEB4019
 * Samples: NA12878 or /data/platinum/NA12878
 * Runs: ERR148333 or /byRun/ERR148333
+
+The id `service-info` SHOULD be reserved to serve GA4GH service-info metadata, detailed below.
 
 </td></tr>
 </table>
@@ -443,6 +445,124 @@ Initial guidelines, which we expect to revise in light of future experience:
 
 The data block URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
 
+# GA4GH service-info
+
+Following the [GA4GH service-info specification](https://github.com/ga4gh-discovery/ga4gh-service-info), htsget servers SHOULD also expose `/reads/service-info` and/or `/variants/service-info` metadata endpoints. In addition to the standard service-info fields, including `{"type": {"group": "org.ga4gh", "artifact": "htsget", "version": "x.y.z"}}`, the response SHOULD include an `htsget` object further describing htsget-specific capabilities, with the following fields:
+
+<table>
+
+<tr markdown="block"><td>
+
+`datatype`  
+_optional string_
+</td><td>
+Indicates the htsget datatype category ('reads' or 'variants') served by the ticket endpoint related to this service-info endpoint. Use either:
+
+* reads
+* variants
+</td></tr>
+<tr markdown="block"><td>
+
+`formats`  
+_optional array of strings_
+</td><td>
+
+List of requested `format` that can be satisfied. Allowed values:
+
+* reads: BAM and/or CRAM
+* variants: VCF and/or BCF
+</td></tr>
+<tr markdown="block"><td>
+
+`fieldsParameterEffective`  
+_optional boolean_
+</td><td>
+
+Indicates whether the service is capable of returning only a subset of available fields based on the `fields` query parameter.
+</td></tr>
+<tr markdown="block"><td>
+
+`tagsParametersEffective`  
+_optional boolean_  
+</td><td>
+
+Indicates whether the service is capable of server-side result tag inclusion/exclusion using the `tags` and `notags` query parameters.
+</td></tr>
+</table>
+
+Example service-info response:
+
+```
+{ 
+   "id":            "net.exampleco.htsget",
+   "name":          "ExampleCo genomics data service",
+   "version":       "0.1.0",
+   "organization":  {
+      "name":       "ExampleCo",
+      "url":        "https://exampleco.com"
+   },
+   "type":  {
+      "group":        "org.ga4gh",
+      "artifact":     "htsget",
+      "version":      "1.2.1"
+   },
+   "htsget": {
+      "datatype": "reads",
+      "formats":  ["BAM", "CRAM"],
+      "fieldsParameterEffective": true,
+      "tagsParametersEffective": false
+   }
+}
+```
+
+# GA4GH Service Registry
+
+The [GA4GH Service Registry API specification](https://github.com/ga4gh-discovery/ga4gh-service-registry) allows information about GA4GH-compliant web services, including htsget services, to be aggregated into registries and made available via a standard API. The following considerations SHOULD be followed when registering htsget services within a service registry.
+
+* Endpoints for different htsget data types should be registered as separate entities within the registry. If an htsget service provides both `reads` and `variants` data, both endpoints should be registered.
+* The `url` property should reference the API's ticket endpoint for a single data type, excluding any particular `id` (i.e. an htsget reads API registration should provide the URL to the reads ticket endpoint, an htsget variants API registration should provide the URL to the variants ticket endpoint). Clients should be able to assume that:
+   + Adding `/{id}` to the registered `url` will hit the corresponding ticket endpoint (i.e. `/reads/{id}` or `/variants/{id}`).
+   + Adding `/service-info` to the registered `url` will hit the corresponding `service-info` endpoint (i.e. `/reads/service-info` or `/variants/service-info`).
+* The value of the `type` object's `artifact` property should be `htsget` (i.e. the same as it appears in `service-info`)
+
+Example listing of htsget reads API and variants API registrations from a service registry's `/services` endpoint:
+
+```
+[
+   {
+      "id": "net.exampleco.htsget-reads",
+      "name": "ExampleCo htsget reads API",
+      "description": "Serves alignment data (BAM, CRAM) via htsget protocol",
+      "version": "0.1.0",
+      "url": "https://htsget.exampleco.com/v1/reads",
+      "organization":  {
+         "name":       "ExampleCo",
+         "url":        "https://exampleco.com"
+      },
+      "type": {
+         "group": "org.ga4gh",
+         "artifact": "htsget",
+         "version": "1.2.1"
+      }
+   },
+   {
+      "id": "net.exampleco.htsget-variants",
+      "name": "ExampleCo htsget variants API",
+      "description": "Serves variant data (VCF, BCF) via htsget protocol",
+      "version": "0.1.0",
+      "url": "https://htsget.exampleco.com/v1/variants"
+      "organization":  {
+         "name":       "ExampleCo",
+         "url":        "https://exampleco.com"
+      },
+      "type": {
+         "group": "org.ga4gh",
+         "artifact": "htsget",
+         "version": "1.2.1"
+      }
+   }
+]
+```
 
 # Possible future enhancements
 

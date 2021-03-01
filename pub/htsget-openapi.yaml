@@ -4,7 +4,7 @@ servers:
     url: htsget/1
 info:
   description: This data retrieval API bridges from existing genomics bulk data transfers to a client/server model
-  version: 1.2.0
+  version: 1.2.1
   title: htsget
   contact:
     name: GA4GH
@@ -176,7 +176,34 @@ paths:
       security:
         - htsget_auth:
           - read:genomic_variants
-
+  /reads/service-info:
+    get:
+      summary: Get htsget reads API service info
+      description: Retrieves GA4GH Service Info, and htsget reads API features supported by the web service
+      operationId: readsServiceInfo
+      responses:
+        '200':
+          description: displays configuration of htsget service reads API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/htsgetServiceInfo'
+        '500':
+          description: Internal Server Error
+  /variants/service-info:
+    get:
+      summary: Get htsget variants API service info
+      description: Retrieves GA4GH Service Info, and htsget variants API features supported by the web service
+      operationId: variantsServiceInfo
+      responses:
+        '200':
+          description: displays configuration of htsget service variants API
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/htsgetServiceInfo'
+        '500':
+          description: Internal Server Error
 components:
   schemas:
     htsgetResponse:
@@ -230,6 +257,70 @@ components:
         - $ref: '#/components/schemas/htsgetUrl'
         - example:
             - url: https://example.com/sample1234/run1.vcf
+
+    ServiceInfo:
+      type: object
+      '$ref': https://raw.githubusercontent.com/ga4gh-discovery/ga4gh-service-info/v1.0.0/service-info.yaml#/components/schemas/Service
+    htsgetServiceInfo:
+      allOf:
+        - '$ref': '#/components/schemas/ServiceInfo'
+        - type: object
+          properties:
+            htsget:
+              type: object
+              description: extended attributes for htsget
+              properties:
+                datatype:
+                    type: string
+                    description: >
+                      Indicates the htsget datatype category ('reads' or 'variants')
+                      served by the ticket endpoint related to this service-info
+                      endpoint
+                    enum: [reads, variants]
+                    example: reads
+                formats:
+                  type: array
+                  description: >
+                    List of alignment or variant file formats supported
+                    by the htsget endpoint. If absent, clients cannot make 
+                    assumptions about what formats are supported ahead
+                    of making a query.
+                  items:
+                    type: string
+                    enum: [BAM, CRAM, VCF, BCF]
+                fieldsParameterEffective:
+                  type: boolean
+                  description: >
+                    Indicates whether the web service supports alignment field
+                    inclusion/exclusion via the `fields` parameter. If absent,
+                    clients cannot make assumptions about whether the `fields`
+                    parameter is effective ahead of making a query.
+                tagsParametersEffective:
+                  type: boolean
+                  description: >
+                    Indicates whether the web service supports alignment tag
+                    inclusion/exclusion via the `tags` and `notags` parameters.
+                    If absent, clients cannot make assumptions about whether the
+                    `tags` and `notags` parameters are effective ahead of making
+                    a query.
+        - type: object
+          description: >
+            This response extends the GA4GH Service Info specification
+            with htsget-specific properties under the 'htsget' attribute.
+            ServiceType 'artifact' property MUST be 'htsget' for both reads 
+            and variants endpoints.
+          required:
+            - type
+          properties:
+            type:
+              type: object
+              required:
+                - artifact
+              properties:
+                artifact:
+                  type: string
+                  enum: [htsget]
+                  example: htsget
 
     Error:
       type: object
