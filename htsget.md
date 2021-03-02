@@ -4,7 +4,7 @@ title: htsget protocol
 suppress_footer: true
 ---
 
-# Htsget retrieval API spec v1.2.1
+# Htsget retrieval API spec v1.3.0
 
 # Design principles
 
@@ -684,7 +684,7 @@ Example service-info response:
    "type":  {
       "group":        "org.ga4gh",
       "artifact":     "htsget",
-      "version":      "1.2.1"
+      "version":      "1.3.0"
    },
    "htsget": {
       "datatype": "reads",
@@ -722,7 +722,7 @@ Example listing of htsget reads API and variants API registrations from a servic
       "type": {
          "group": "org.ga4gh",
          "artifact": "htsget",
-         "version": "1.2.1"
+         "version": "1.3.0"
       }
    },
    {
@@ -738,7 +738,7 @@ Example listing of htsget reads API and variants API registrations from a servic
       "type": {
          "group": "org.ga4gh",
          "artifact": "htsget",
-         "version": "1.2.1"
+         "version": "1.3.0"
       }
    }
 ]

@@ -4,7 +4,7 @@ servers:
     url: htsget/1
 info:
   description: This data retrieval API bridges from existing genomics bulk data transfers to a client/server model
-  version: 1.2.1
+  version: 1.3.0
   title: htsget
   contact:
     name: GA4GH
