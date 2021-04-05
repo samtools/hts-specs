@@ -632,16 +632,16 @@ However, the alternate allele assembly file may contain additional information a
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are CN, BP, CNBP for copy number, breakpoint and both respectively.">
+##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively.">
 \end{verbatim}
 \normalsize
 
 This field disambiguates the claim being made by DEL and DUP structural variants.
 
-The distinction between different claim types is made necessary by the fact that many structural variants affect both the overall copy number of a region and its adjacency structure, but often only one of those effects is being directly observed.
+The distinction between different claim types is made necessary by the fact that many structural variants affect both the overall abundance of a region and its adjacency structure, but often only one of those effects is being directly observed.
 It is important to specify which one, because if this is not done, other events in a genome may make the call ambiguous.
 
-For example, a ``conventional'' deletion usually both decreases the total copy number of a region and creates an adjacency between two sequence locations, which are the breakpoints of that deletion.
+For example, a ``conventional'' deletion usually both decreases the DNA abundance of a region and creates an adjacency between two sequence locations, which are the breakpoints of that deletion.
 However, if a deletion or duplication is accompanied by a compensatory event elsewhere in the genome, it may only cause changes in the adjacency structure, but not the overall copy number.
 On the contrary, combinations of certain complex events in a genome may cause the overall copy number decrease, but not the linear excision of a sequence fragment.
 
@@ -656,14 +656,22 @@ To resolve any ambiguity in the interpretation of deletion and duplication symbo
 \begin{itemize}
   \item D (abun\textbf{\emph{d}}ance / read \textbf{\emph{D}}epth) claim indicates that the call has been made based only on a measure of DNA abundance of the called region, with no evidence to support changes in breakpoint structure. This includes indirect claims of abundance made using SNV variant allele frequency.
   \item J (ad\textbf{\emph{j}}acency / break \textbf{\emph{J}}unction) claim indicates that the call has been made based on the detection of a non-reference DNA adjacency, with no evidence to support overall changes in DNA abundance.
-  \item DJ indicates that there is evidence for both DNA abundancy and adjacency changes, which are consistent with each other and suggest the structural variant of the type being reported.
+  \item DJ indicates that there is evidence for both DNA abundance and adjacency changes, which are consistent with each other and suggest the structural variant of the type being reported.
 \end{itemize}
-CNV alleles are implicitly abundance claims (SVCLAIM=D).
-SVCLAIM is optional but, if specified, must be D, DJ, or the missing value ``.'', which is equivalent to D.
-INV, INS, breakpoint, and single breakend alleles are implicitly adjacency claims (SVCLAIM=J).
-SVCLAIM is optional but, if specified, must be J, DJ, or the missing value ``.'', which is equivalent to J.
-Non-SV alleles should use the missing value ``.''.
+
+Rules of applying SVCLAIM field are different depending on symbolic allele type:
+
+\begin{itemize}
+  \item DEL/DUP: SVCLAIM must be specified and can be be D, J, or DJ. J and DJ claims indicate a breakpoint between the start and end of the DEL/DUP.
+  \item CNV: implicit abundance claim (SVCLAIM=D). SVCLAIM is optional but, if specified, must be D, or the missing value ``.'', which is equivalent to D.
+  \item INV/INS: implicit adjacency claims (SVCLAIM=J). SVCLAIM is optional but, if specified, must be J, DJ, or the missing value ``.'', which is equivalent to J.
+  \item breakend alleles are implicit adjacency claims (SVCLAIM=J). SVCLAIM is optional but, if specified, must be J, or the missing value ``.'', which is equivalent to J.
+  \item Non-SV alleles should use the missing value ``.''.
+\end{itemize}
+
 If all alleles contain the missing value ``.'', the SVCLAIM field can be omitted.
+
+Note that the scope of SVCLAIM is the single ALT allele taken in isolation. Complex events such as a cut and paste transposition of a mobile element result in multiple interrelated copy number and breakpoint claims. These records should be linked using EVENT/EVENTTYPE, with the SVCLAIM field on each record specifying the claim of that individual allele record. That is, a J claim must not be made on a CNV record even if the corresponding start/end breakpoints are known, and a DJ claim on a DEL or DUP is a claim of a simple, isolated deletion or tandem duplication.
 
 \section{FORMAT keys used for structural variants}
 \label{sv-format-keys}
