@@ -4,7 +4,7 @@ title: htsget protocol
 suppress_footer: true
 ---
 
-# Htsget retrieval API spec v1.2.0
+# Htsget retrieval API spec v1.3.0
 
 # Design principles
 
@@ -84,6 +84,7 @@ Error type	| HTTP status code | Description
 InvalidAuthentication	| 401	| Authorization provided is invalid
 PermissionDenied	| 403	| Authorization is required to access the resource
 NotFound		| 404	| The resource requested was not found
+PayloadTooLarge         | 413   | POST request size is too large
 UnsupportedFormat	| 400	| The requested file format is not supported by the server
 InvalidInput		| 400	| The request parameters do not adhere to the specification
 InvalidRange		| 400	| The requested range cannot be satisfied
@@ -119,7 +120,7 @@ If a request to the URL of an API method includes the `Origin` header, its conte
 The values of `Origin` and `Access-Control-Request-Headers` (if any) of the request will be propagated to `Access-Control-Allow-Origin` and `Access-Control-Allow-Headers` respectively in the preflight response.
 The `Access-Control-Max-Age` of the preflight response is set to the equivalent of 30 days.
 
-# Request
+# GET request
 
 ## Methods
 
@@ -149,6 +150,8 @@ The format of this identifier is left to the discretion of the API provider, inc
 * Studies: PRJEB4019 or /byStudy/PRJEB4019
 * Samples: NA12878 or /data/platinum/NA12878
 * Runs: ERR148333 or /byRun/ERR148333
+
+The id `service-info` SHOULD be reserved to serve GA4GH service-info metadata, detailed below.
 
 </td></tr>
 </table>
@@ -277,6 +280,185 @@ SEQ	| Read bases
 QUAL	| Base quality scores
 
 Example: `fields=QNAME,FLAG,POS`.
+
+# POST request
+
+In addition to the GET method, servers may optionally also accept POST requests.
+The main differences to the GET method are that query parameters are encoded in JSON format and it is possible to request data for more than one genomic range.
+The data returned is a JSON "ticket", as described for the GET method.
+
+Htsget POST requests must be "safe" as defined in section 4.2.1 of [RFC 7231], that is they must be essentially read-only.
+
+It should be expected that htsget servers will have a limit on the size of POST request that they can accept.
+If an incoming POST request is too large, the server SHOULD reply with a `PayloadTooLarge` error.
+
+## URL parameters
+
+POST and GET requests should use the same URLs.
+
+POST requests MUST NOT use and of the query parameters defined for GET requests on the URL.
+If query parameters are present, the server SHOULD reply with an `InvalidInput` error.
+
+## Request body
+
+The POST request body is a JSON object containing the request parameters,
+which have similar names and meanings to those used in the GET query.
+A notable difference is that the  `referenceName`, `start` and `end` parameters are not used at the top level of the JSON object.
+Instead as they are put into an array under the `regions` key, which allows more than one range to be specified.
+
+<table><tbody><tr markdown="block"><td>
+
+`format`  _optional string_
+</td><td>
+
+Request data in this format.
+The allowed values for each type of record are:
+
+* Reads: BAM (default), CRAM.
+* Variants: VCF (default), BCF.
+
+The server SHOULD reply with an `UnsupportedFormat` error if the requested format is not supported.
+</td></tr>
+<tr markdown="block"><td>
+
+`class`
+_optional string_
+</td><td>
+
+Request different classes of data.
+As for GET requests, if `class` is not specified the response will comprise the full data stream including file headers, body data records and EOF marker.
+If `class` is specified, its value MUST be one of the following:
+
+<table>
+<tr markdown="block"><td>
+
+`header`
+</td><td>
+
+Request the SAM/CRAM/VCF headers only.
+
+The server SHOULD respond with an `InvalidInput` error if any parameters other than `format` are specified at the same time as `"class" : "header"`.
+</td></tr>
+</table>
+</td></tr>
+
+`fields`  _optional array of strings_
+</td><td>
+
+List of fields to include.  See Field filtering.
+  <table><tbody><tr markdown="block"><td>
+
+Field name _string_
+  </td></tr></tbody></table>
+</td></tr>
+<tr markdown="block"><td>
+
+`tags`  _optional array of strings_
+</td><td>
+
+List of tags to include, default: all.  If an empty array is specified, no tags are included.
+
+The server SHOULD respond with an `InvalidInput` error if `tags` and `notags` intersect.
+  <table><tbody><tr markdown="block"><td>
+
+Tag name _string_
+  </td></tr></tbody></table>
+</td></tr>
+<tr markdown="block"><td>
+
+`notags`  _optional array of strings_
+</td><td>
+
+List of tags to exclude, default: none.
+
+The server SHOULD respond with an `InvalidInput` error if `tags` and `notags` intersect.
+  <table><tbody><tr markdown="block"><td>
+
+Tag name _string_
+  </td></tr></tbody></table>
+</td></tr>
+<tr markdown="block"><td>
+
+`regions` _optional array of objects_
+</td><td>
+
+Regions to return.
+
+If not present, the entire file will be returned.
+When present, the array must contain at least one region specification.
+Note that regions will be returned in the order that they appear in the file, which may not match the order in the list.
+Any overlapping regions will be merged.
+
+The server SHOULD respond with an `InvalidInput` error if the region list is empty or not well-formed.
+  <table><tbody><tr markdown="block"><td>
+
+`referenceName` _string_
+  </td><td>
+
+The reference sequence name, for example "chr1", "1", or "chrX".
+
+The server SHOULD respond with an `InvalidInput` error if `referenceName` is not specified.
+
+The server SHOULD reply with a `NotFound` error if the requested reference does not exist.
+  </td></tr>
+  <tr markdown="block"><td>
+
+`start` _optional unsigned integer_
+  </td><td>
+
+The start position of the range on the reference, 0-based, inclusive.
+
+If not present, data will be returned starting from the first base in `referenceName`.
+
+The server SHOULD respond with an `InvalidRange` error if `start` and `end`
+are specified and `start` is greater than or equal to `end`.
+  </td></tr>
+  <tr markdown="block"><td>
+
+`end` _optional unsigned integer_
+  </td><td>
+
+The end position of the range on the reference, 0-based exclusive.
+
+If not present, data will be returned up to the end of the reference.
+
+The server SHOULD respond with an `InvalidRange` error if `start` and `end`
+are specified and `start` is greater than or equal to `end`.
+  </td></tr></tbody></table>
+</td></tr></tbody></table>
+
+### Example
+
+```json
+{
+   "format" : "bam",
+   "fields" : ["QNAME", "FLAG", "RNAME", "POS", "CIGAR", "SEQ"],
+   "tags" : ["RG"],
+   "notags" : ["OQ"],
+   "regions" : [
+      { "referenceName" : "chr1" },
+      { "referenceName" : "chr2", "start" : 999, "end" : 1000 },
+      { "referenceName" : "chr2", "start" : 2000, "end" : 2100 }
+   ]
+}
+```
+
+## Region list
+
+The `regions` parameter is an array of objects which describe the locations to be returned.
+Each location object contains a `referenceName`, which must always be present, and optional `start` and `end` tags.
+
+The first region in the example above shows how to return all reads for reference "chr1".
+
+To return reads covering a single base, the client should use an end position one greater than the start, as shown in the second region in the example which requests the 1000th base of reference "chr2".
+
+The regions list acts as a filter on the requested file.
+Records that overlap the requested regions will be returned in the order that they occurred in the original file.
+This may not be the same as the order in the list.
+A record will only be returned once, even if it matches more than one location in the list.
+
+As with the GET request, the server response may contain a super-set of the desired results.
+Clients will need to filter out any extraneous records if necessary.
 
 # Response
 
@@ -443,12 +625,129 @@ Initial guidelines, which we expect to revise in light of future experience:
 
 The data block URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
 
+# GA4GH service-info
+
+Following the [GA4GH service-info specification](https://github.com/ga4gh-discovery/ga4gh-service-info), htsget servers SHOULD also expose `/reads/service-info` and/or `/variants/service-info` metadata endpoints. In addition to the standard service-info fields, including `{"type": {"group": "org.ga4gh", "artifact": "htsget", "version": "x.y.z"}}`, the response SHOULD include an `htsget` object further describing htsget-specific capabilities, with the following fields:
+
+<table>
+
+<tr markdown="block"><td>
+
+`datatype`  
+_optional string_
+</td><td>
+Indicates the htsget datatype category ('reads' or 'variants') served by the ticket endpoint related to this service-info endpoint. Use either:
+
+* reads
+* variants
+</td></tr>
+<tr markdown="block"><td>
+
+`formats`  
+_optional array of strings_
+</td><td>
+
+List of requested `format` that can be satisfied. Allowed values:
+
+* reads: BAM and/or CRAM
+* variants: VCF and/or BCF
+</td></tr>
+<tr markdown="block"><td>
+
+`fieldsParameterEffective`  
+_optional boolean_
+</td><td>
+
+Indicates whether the service is capable of returning only a subset of available fields based on the `fields` query parameter.
+</td></tr>
+<tr markdown="block"><td>
+
+`tagsParametersEffective`  
+_optional boolean_  
+</td><td>
+
+Indicates whether the service is capable of server-side result tag inclusion/exclusion using the `tags` and `notags` query parameters.
+</td></tr>
+</table>
+
+Example service-info response:
+
+```
+{ 
+   "id":            "net.exampleco.htsget",
+   "name":          "ExampleCo genomics data service",
+   "version":       "0.1.0",
+   "organization":  {
+      "name":       "ExampleCo",
+      "url":        "https://exampleco.com"
+   },
+   "type":  {
+      "group":        "org.ga4gh",
+      "artifact":     "htsget",
+      "version":      "1.3.0"
+   },
+   "htsget": {
+      "datatype": "reads",
+      "formats":  ["BAM", "CRAM"],
+      "fieldsParameterEffective": true,
+      "tagsParametersEffective": false
+   }
+}
+```
+
+# GA4GH Service Registry
+
+The [GA4GH Service Registry API specification](https://github.com/ga4gh-discovery/ga4gh-service-registry) allows information about GA4GH-compliant web services, including htsget services, to be aggregated into registries and made available via a standard API. The following considerations SHOULD be followed when registering htsget services within a service registry.
+
+* Endpoints for different htsget data types should be registered as separate entities within the registry. If an htsget service provides both `reads` and `variants` data, both endpoints should be registered.
+* The `url` property should reference the API's ticket endpoint for a single data type, excluding any particular `id` (i.e. an htsget reads API registration should provide the URL to the reads ticket endpoint, an htsget variants API registration should provide the URL to the variants ticket endpoint). Clients should be able to assume that:
+   + Adding `/{id}` to the registered `url` will hit the corresponding ticket endpoint (i.e. `/reads/{id}` or `/variants/{id}`).
+   + Adding `/service-info` to the registered `url` will hit the corresponding `service-info` endpoint (i.e. `/reads/service-info` or `/variants/service-info`).
+* The value of the `type` object's `artifact` property should be `htsget` (i.e. the same as it appears in `service-info`)
+
+Example listing of htsget reads API and variants API registrations from a service registry's `/services` endpoint:
+
+```
+[
+   {
+      "id": "net.exampleco.htsget-reads",
+      "name": "ExampleCo htsget reads API",
+      "description": "Serves alignment data (BAM, CRAM) via htsget protocol",
+      "version": "0.1.0",
+      "url": "https://htsget.exampleco.com/v1/reads",
+      "organization":  {
+         "name":       "ExampleCo",
+         "url":        "https://exampleco.com"
+      },
+      "type": {
+         "group": "org.ga4gh",
+         "artifact": "htsget",
+         "version": "1.3.0"
+      }
+   },
+   {
+      "id": "net.exampleco.htsget-variants",
+      "name": "ExampleCo htsget variants API",
+      "description": "Serves variant data (VCF, BCF) via htsget protocol",
+      "version": "0.1.0",
+      "url": "https://htsget.exampleco.com/v1/variants"
+      "organization":  {
+         "name":       "ExampleCo",
+         "url":        "https://exampleco.com"
+      },
+      "type": {
+         "group": "org.ga4gh",
+         "artifact": "htsget",
+         "version": "1.3.0"
+      }
+   }
+]
+```
 
 # Possible future enhancements
 
 * add a mechanism to request reads from more than one ID at a time (e.g. for a trio)
 * allow clients to provide a suggested data block size to the server
-* add POST support (if and when request sizes get large)
 * [dglazer] add a way to request reads in GA4GH binary format [^d] (e.g. fmt=proto)
 
 ## Existing clarification suggestions
@@ -465,5 +764,6 @@ The data block URL and headers might contain embedded authentication tokens; the
 [RFC 5246]: https://tools.ietf.org/html/rfc5246
 [RFC 6749]: https://tools.ietf.org/html/rfc6749
 [RFC 6750]: https://tools.ietf.org/html/rfc6750
+[RFC 7231]: https://tools.ietf.org/html/rfc7231
 
 <!-- vim:set linebreak: -->

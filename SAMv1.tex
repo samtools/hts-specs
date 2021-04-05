@@ -315,7 +315,7 @@ The {\tt TP} field is often omitted, which implies linear.}\\\cline{2-3}
   & {\tt PG} & Programs used for processing the read group.\\\cline{2-3}
   & {\tt PI} & Predicted median insert size.\\\cline{2-3}
   & {\tt PL} & Platform/technology used to produce the reads. \emph{Valid values}:
-  {\tt CAPILLARY}, {\tt DNBSEQ} (MGI/BGI), {\tt HELICOS}, {\tt ILLUMINA}, {\tt IONTORRENT}, {\tt LS454}, {\tt ONT} (Oxford Nanopore), {\tt PACBIO} (Pacific Biotechnology), and {\tt SOLID}.
+  {\tt CAPILLARY}, {\tt DNBSEQ} (MGI/BGI), {\tt HELICOS}, {\tt ILLUMINA}, {\tt IONTORRENT}, {\tt LS454}, {\tt ONT} (Oxford Nanopore), {\tt PACBIO} (Pacific Biosciences), and {\tt SOLID}.
   This field should be omitted when the technology is not in this list (though the {\tt PM} field may still be present in this case) or is unknown.\\\cline{2-3}
   & {\tt PM} & Platform model. Free-form text providing further details of the platform/technology used.\\\cline{2-3}
   & {\tt PU} & Platform unit (e.g., flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
@@ -1077,13 +1077,14 @@ those marked ``\textit{limited}'' are limited by available memory and the practi
 \subsubsection{BIN field calculation}\label{sec:bin-field}
 {\sf BIN} is calculated using the {\sf reg2bin()} function in
 Section~\ref{sec:code}.
-For mapped reads this uses {\sf POS-1} (i.e.,~0-based left position) and the
+For mapped reads this uses $\mbox{\sf POS}-1$ (i.e.,~0-based left position) and the
 alignment end point using the alignment length from the {\sf CIGAR} string.
-For unmapped reads (e.g.,~paired end reads where only one part is mapped, see
-Section~\ref{sec:recommended-practice}) the alignment is treated as
-being length one.
+For unmapped reads (e.g.,~paired-end reads where only one part is mapped, see
+Section~\ref{sec:recommended-practice}) and reads whose {\sf CIGAR} strings
+consume no reference bases at all, the alignment is treated as
+being of length one.
 Note unmapped reads with {\sf POS} $0$ (which becomes $-1$ in BAM) therefore
-use {\sf reg2bin(-1, 0)} which is $4680$.
+use $\mbox{\sf reg2bin}(-1, 0)$ which is computed as $4680$.
 
 \subsubsection{N\_CIGAR\_OP field}\label{sec:ncigar}
 With 16 bits, {\sf n\_cigar\_op} can keep at most 65535 CIGAR
@@ -1307,7 +1308,7 @@ saved.
 \footnotetext{The number of chunks in a single bin is effectively limited by available memory and in any case is typically a maximum of some thousands.}
 
 The index file may optionally contain additional metadata providing a summary
-of the number of mapped and unmapped read-segments per reference sequence,
+of the number of mapped and placed unmapped read-segments per reference sequence,
 and of any unplaced unmapped read-segments.\footnote{By \emph{placed unmapped
 read} we mean a read that is unmapped according to its {\sf FLAG} but whose
 {\sf RNAME} and~{\sf POS} fields are filled in, thus ``placing'' it on a
@@ -1328,18 +1329,30 @@ compatible with real bins and their chunks:
   \hline
   {\sf bin} & Magic bin number & {\tt uint32\_t} & 37450 \\\hline
   {\sf n\_chunk} & \# chunks & {\tt uint32\_t} & 2 \\\hline
-  {\sf unmapped\_beg} & (Virtual) file offset of the start of placed unmapped reads & {\tt uint64\_t} & \\\hline
-  {\sf unmapped\_end} & (Virtual) file offset of the end of placed unmapped reads & {\tt uint64\_t} & \\\hline
+  {\sf ref\_beg} & (Virtual) file offset of the start of reads placed on this reference& {\tt uint64\_t} & \\\hline
+  {\sf ref\_end} & (Virtual) file offset of the end of reads placed on this reference& {\tt uint64\_t} & \\\hline
   {\sf n\_mapped} & Number of mapped read-segments for this reference & {\tt uint64\_t} & \\\hline
   {\sf n\_unmapped} & Number of unmapped read-segments for this reference & {\tt uint64\_t} & \\\hline
 \end{tabular}
 \end{table}
+
+\noindent
+The {\sf ref\_beg}/{\sf ref\_end} fields locate the first and last reads on this reference sequence, whether they are mapped or placed unmapped.
+Thus they are equal to the minimum {\sf chunk\_beg} and maximum {\sf chunk\_end} respectively.
 
 \subsection{C source code for computing bin number and overlapping bins}\label{sec:code}
 The following functions compute bin numbers and overlaps for a BAI-style
 binning scheme with $6$~levels and a minimum bin size of $2^{14}$~bp.
 See the CSI specification for generalisations of these functions designed for
 binning schemes with arbitrary depth and sizes.
+
+When these functions are called with regions representing unplaced
+unmapped reads, e.g., $\mbox{\sf reg2bin}(-1, 0)$, they involve operations
+such as \verb|(-1)>>14| which are undefined or implementation-defined in
+some programming languages.
+They must be implemented as if these operations use the common
+two's-complement semantics: $\mbox{\sf reg2bin}(-1, 0) = 4680$ and
+$\mbox{\sf reg2bins}(-1, 0, \ldots)$ returns $[\,0, 0, 8, 72, 584, 4680\,]$.
 
 {\small
 \begin{verbatim}
@@ -1425,6 +1438,8 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item Bin calculation changed for alignment records whose CIGAR strings consume no reference bases: like unmapped records, they are considered to have length one (rather than zero). (Jan 2021)
+\item Correct the description of index pseudo-bins, which previously stated that {\sf ref\_beg}/{\sf ref\_end}, then named {\sf unmapped\_beg}/{\sf unmapped\_end}, include only placed unmapped reads. (Jul 2020)
 \item Add {\tt DNBSEQ} to the list of {\tt @RG PL} header tag values. (Apr 2020)
 \item Add {\tt @SQ TP} circular/linear topology header tag. (May 2019)
 \item\textbf{Restricted the allowable punctuation characters in reference sequence names} (in {\tt @SQ SN}, {\sf RNAME}, etc).

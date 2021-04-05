@@ -34,6 +34,7 @@ Variant calling data files
 --------------------------
 
 **[VCFv4.3.tex]** is the canonical specification for the Variant Call Format and its textual (VCF) and binary (BCF) encodings, while **[VCFv4.1.tex]** and **[VCFv4.2.tex]** describe their predecessors.
+**[VCFv4.4.draft.tex]** is a working draft of the upcoming version of VCF format and is under active revision.
 These formats are discussed on the [vcftools-spec mailing list][vcfspec-ml].
 
 **[BCFv1_qref.tex]** summarizes the obsolete BCF1 format historically produced by [samtools].  This format is no longer recommended for use, as it has been superseded by the more widely-implemented BCF2.
@@ -61,6 +62,7 @@ Transfer protocols
 [VCFv4.1.tex]:  http://samtools.github.io/hts-specs/VCFv4.1.pdf
 [VCFv4.2.tex]:  http://samtools.github.io/hts-specs/VCFv4.2.pdf
 [VCFv4.3.tex]:  http://samtools.github.io/hts-specs/VCFv4.3.pdf
+[VCFv4.4.draft.tex]:  http://samtools.github.io/hts-specs/VCFv4.4.draft.pdf
 [BCFv1_qref.tex]: http://samtools.github.io/hts-specs/BCFv1_qref.pdf
 [BCFv2_qref.tex]: http://samtools.github.io/hts-specs/BCFv2_qref.pdf
 [crypt4gh.tex]: http://samtools.github.io/hts-specs/crypt4gh.pdf

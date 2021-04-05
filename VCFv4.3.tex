@@ -295,17 +295,17 @@ Fixed fields are:
 \begin{enumerate}
   \item CHROM --- chromosome: An identifier from the reference genome or an angle-bracketed ID String (``$<$ID$>$'') pointing to a contig in the assembly file (cf.\ the \#\#assembly line in the header).
   All entries for a specific CHROM must form a contiguous block within the VCF file.
-  (String, no white-space permitted, Required).
+  (String, no whitespace permitted, Required).
   \item POS --- position: The reference position, with the 1st base having position 1.
   Positions are sorted numerically, in increasing order, within each reference sequence CHROM.
   It is permitted to have multiple records with the same POS.
   Telomeres are indicated by using positions 0 or N+1, where N is the length of the corresponding chromosome or contig.
   (Integer, Required)
-  \item ID --- identifier: Semi-colon separated list of unique identifiers where available.
+  \item ID --- identifier: Semicolon-separated list of unique identifiers where available.
   If this is a dbSNP variant the rs number(s) should be used.
   No identifier should be present in more than one data record.
   If there is no identifier available, then the MISSING value should be used.
-  (String, no white-space or semi-colons permitted, duplicate values not allowed.)
+  (String, no whitespace or semicolons permitted, duplicate values not allowed.)
   \item REF --- reference base(s): Each base must be one of A,C,G,T,N (case insensitive).
   Multiple bases are permitted.
   The value in the POS field refers to the position of the first base in the String.
@@ -329,7 +329,7 @@ Fixed fields are:
   Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g.\ ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples.
   `0' is reserved and must not be used as a filter String.
   If filters have not been applied, then this field must be set to the MISSING value.
-  (String, no white-space or semi-colons permitted, duplicate values not allowed.)
+  (String, no whitespace or semicolons permitted, duplicate values not allowed.)
   \item INFO --- additional information: Semicolon-separated series of additional information fields, or the MISSING value `{\tt .}'\ if none are present.
   Each subfield consists of a short \emph{key} with optional \emph{values} in the format: key[=value[,\,\ldots,value]].
   Literal semicolon (`{\tt ;}') and equals sign (`{\tt =}') characters are not permitted in these values, and literal commas (`{\tt ,}') are permitted only as delimiters for lists of values; characters with special meaning can be encoded using percent encoding, see Section~\ref{character-encoding}.
@@ -440,9 +440,9 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item EC (Integer): Comma separated list of expected alternate allele counts for each alternate allele in the same order as listed in the ALT field.
   Typically used in association analyses.
   \item FT (String): Sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field).
-  Again, use PASS to indicate that all filters have been passed, a semi-colon separated list of codes for filters that fail, or `.' to indicate that filters have not been applied.
+  Again, use PASS to indicate that all filters have been passed, a semicolon-separated list of codes for filters that fail, or `.' to indicate that filters have not been applied.
   These values should be described in the meta-information in the same way as FILTERs.
-  No white-space or semi-colons permitted.
+  No whitespace or semicolons permitted.
   \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
   \item GP (Float): Genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities.
   \item GT (String): Genotype, encoded as allele values separated by either of $/$ or $\mid$.
