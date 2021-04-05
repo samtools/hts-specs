@@ -564,9 +564,9 @@ Several tag names follow conventions indicating how their values are represented
 \begin{samepage}
 The following INFO keys are reserved for encoding structural variants.
 In general, when these keys are used by imprecise variants, the values should be best estimates.
-When present, per allele keys must be specified for all ALT alleles (including non-structural alleles).
-The missing value should be used as a placeholder for the ALT alleles for which the key does not have a meaningful value.
-The empty string is used to encode missing values in lists of strings.
+When present, per allele values must be specified for all ALT alleles (including non-structural alleles).
+Except in lists of strings, the missing value should be used as a placeholder for the ALT alleles for which the key does not have a meaningful value.
+The empty string should be used to encode missing values in lists of strings.
 
 \footnotesize
 \begin{verbatim}
@@ -605,14 +605,15 @@ The reserved values must be used for the types listed below:
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
+##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Length of the structural variant">
 \end{verbatim}
 \normalsize
 
 One value for each ALT allele.
-Longer ALT alleles (e.g.\ insertions) have positive values, shorter ALT alleles (e.g.\ deletions) have negative values.
-Inversion events should have $SVLEN=0$ since the total length of the allele matches the reference.
-The missing value should be used for inter-chromosomal $BND$ records, and may be used for intra-chromosomal $BND$ record.
+
+SVLEN is defined for $INS$, $DUP$, $INV$, and $DEL$ symbolic alleles as the number of the inserted, duplicated, inverted, and deleted bases respectively.
+SVLEN is defined for $CNV$ symbolic alleles as the length of the segment over which the copy number variant is defined.
+The missing value should be used for all other ALT allele, including ALT alleles using breakend notation.
 
 \footnotesize
 \begin{verbatim}
@@ -626,7 +627,7 @@ For example, $CIPOS=-5,5,0,0$ indicates a 5bp confidence interval in each direct
 
 When breakpoint sequence homology exists, $CIPOS$ should be used in conjunction with $HOMSEQ$ to specify the interval of homology.
 
-If both $IMPRECISE$ and $CIPOS$ are omitted, $CIPOS$ is defined as 0,0 for all alleles.
+If both $IMPRECISE$ and $CIPOS$ are omitted, $CIPOS$ is implicitly defined as 0,0 for all alleles.
 
 Each $CIPOS$ interval must span 0. That is, the lower bound cannot be greater than 0, and the upper bound cannot be less than 0.
 
