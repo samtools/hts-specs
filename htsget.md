@@ -259,6 +259,15 @@ A comma separated list of tags to exclude, default: none.
 
 The server SHOULD respond with an `InvalidInput` error if `tags` and `notags` intersect.
 </td></tr>
+<tr markdown="block"><td>
+`maxBlockSize`  
+_optional_
+</td><td>
+The requested maximum size of returned blocks in bytes. See the 
+[maximum block sizes](#maximum-block-sizes) section for details.
+
+TODO: Add error conditions.
+</td></tr>
 </table>
 
 ### Field filtering
@@ -535,6 +544,17 @@ _optional hex string_
 
 MD5 digest of the blob resulting from concatenating all of the "payload" data --- the url data blocks.
 </td></tr>
+
+</td></tr>
+<tr markdown="block"><td>
+`maxBlockSize`  
+_optional unsigned integer_
+</td><td>
+An upper limit on the maximum size of the data blocks in bytes. If this value is not 
+present, then client cannot assume any upper bound on the size of data blocks.
+See the [maximum block sizes](#maximum-block-sizes) section for details. 
+</td></tr>
+
 </table>
 </td></tr>
 </table>
@@ -612,6 +632,22 @@ The client obtains the data block by decoding the embedded base64 payload.
 2. client should ignore the media type (if any), treating the payload as a partial blob.
 
 Note: the base64 text should not be additionally percent encoded.
+
+### Maximum block sizes 
+
+To facilitate efficient buffering, the client MAY specify a ``maxBlockSize`` argument.
+This value is a requested maximum size for the blocks returned by the server, in bytes.
+The server treats this value as a request, but it is not obliged to comply. If the server
+does not support this feature, then it SHOULD NOT include a ``maxBlockSize`` value in
+the response. The server MAY return a ``maxBlockSize`` value that is larger than the 
+client requests. The server MUST ensure that the size of all returned blocks is less than or 
+equal to the returned ``maxBlockSize``. The returned value is an upper limit on the size 
+of the blocks, and not necessarily the maximum size of the returned blocks.
+
+The client MUST check for the presence of the ``maxBlockSize`` in the response
+and support arbitrarily large blocks if it is not included. The client MUST NOT
+assume that the requested ``maxBlockSize`` and the value returned by the server
+are the same.
 
 ### Reliability & performance considerations
 
