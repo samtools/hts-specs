@@ -1,0 +1,20 @@
+@SQ	SN:CHROMOSOME_I	LN:1009800
+@SQ	SN:CHROMOSOME_II	LN:5000
+@SQ	SN:1032################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################1032	LN:9999
+@SQ	SN:!#$%&*+-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_abcdefghijklmnopqrstuvwxyz|~	LN:1000
+@CO	Validation of RNEXT
+@CO	differ to rname
+@CO	"=" - matches rname
+@CO	"*" - unknown
+@CO	Subset: other read is listed in RNEXT, but missing from file
+@CO	Long names
+@CO	Symbols permitted
+match	99	CHROMOSOME_I	51	1	50M	=	201	200	CTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCT	IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+match	147	CHROMOSOME_I	201	1	50M	=	51	-200	CTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCT	IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+unknown	99	CHROMOSOME_I	51	1	50M	*	201	0	CTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCT	IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+unknown	147	CHROMOSOME_I	201	1	50M	*	0	0	CTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCT	IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+subset	99	CHROMOSOME_I	51	1	50M	=	201	200	CTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCT	IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+mismatch	99	CHROMOSOME_I	51	1	50M	CHROMOSOME_II	201	0	CTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCT	IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+mismatch	147	CHROMOSOME_II	201	1	50M	CHROMOSOME_I	51	0	CTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCT	IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+long	99	CHROMOSOME_I	51	1	50M	1032################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################1032	201	0	CTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCT	IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
+symbols	99	CHROMOSOME_I	51	1	50M	!#$%&*+-./0123456789:;=?@ABCDEFGHIJKLMNOPQRSTUVWXYZ^_abcdefghijklmnopqrstuvwxyz|~	201	0	CTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCTAAGCCT	IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII

@@ -1,0 +1,16 @@
+@SQ	SN:xx	LN:100
+@SQ	SN:yy	LN:100
+@CO	Validation of FLAG/PNEXT
+@CO	A1 contains a a pair READ1, READ2 that aligns to two different
+@CO	references.  Both pairs are consistent with each other, but
+@CO	second pair *should* point back to first (spec).
+@CO	Strict interpretation: primary excludes supplementary
+@CO	
+@CO     11        21   25   31   35   41
+@CO     ---->     ~~~~><~~~~     <----
+@CO     1         1rS   2RrS      2R      (R=rev, r=mate rev, S=Supp)
+@CO	
+a1	67	xx	11	1	5M5S	=	35	30	AAAAAAAAAA	**********
+a1	2147	xx	21	1	5S5M	=	35	30	AAAAAAAAAA	**********
+a1	2227	xx	25	1	5S5M	=	11	-30	TTTTTTTTTT	**********
+a1	147	xx	35	1	5M5S	=	11	-30	TTTTTTTTTT	**********

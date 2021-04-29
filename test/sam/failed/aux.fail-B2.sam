@@ -1,0 +1,4 @@
+@CO	Validation of AUX
+@CO	Type B
+b1	4	*	0	0	*	*	0	0	CAT	QQQ	BC:B:C,-1	bC:B:C,256	bc:B:c,-129	Bc:B:c,128
+b2	4	*	0	0	*	*	0	0	CAT	QQQ	bS:B:S,-1	BS:B:S,65536	bS:B:s,-32769	Bs:B:s,32768
