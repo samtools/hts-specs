@@ -1,0 +1,7 @@
+##fileformat=VCFv4.1
+##FORMAT=<ID=ID1,Number=1,Type=Integer,Description="Regular description">
+##FORMAT=<ID=ID2,Number=A,Type=Float,Description="Format field with \"escaped quotes\"">
+##FORMAT=<ID=ID3,Number=G,Type=Character,Description="">
+##FORMAT=<ID=ID4,Number=.,Type=String,Description="Regular description">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

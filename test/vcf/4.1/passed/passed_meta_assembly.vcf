@@ -1,0 +1,5 @@
+##fileformat=VCFv4.1
+##assembly=ftp://www.ebi.ac.uk:8080/valid/host/to/file.fastq
+##assembly=http://123.0.1.2:8080/valid/host/to/file.fastq
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

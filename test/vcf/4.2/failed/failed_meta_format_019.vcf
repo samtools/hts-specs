@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=FORMAT HQ Number is not 2
+##FORMAT=<ID=HQ,Number=1,Type=Integer,Description="Haplotype quality">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=Incorrect INFO Number value
+##INFO=<ID=DP,Number=N,Type=Integer,Description="Raw read depth">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

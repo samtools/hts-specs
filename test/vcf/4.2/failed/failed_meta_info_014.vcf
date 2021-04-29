@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=INFO CIGAR Type is not String
+##INFO=<ID=CIGAR,Number=A,Type=Float,Description="Cigar string describing how to align an alternate allele to the reference allele">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	CIGAR=0.2

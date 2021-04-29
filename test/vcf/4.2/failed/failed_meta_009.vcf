@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=Meta-data entry is not a key-value pair (empty value)
+##reference=
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

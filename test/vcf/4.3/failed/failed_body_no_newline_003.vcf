@@ -1,0 +1,3 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=no newline at end of file
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00096	HG00097

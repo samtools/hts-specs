@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=INFO Description must be surrounded by double quotes
+##INFO=<ID=DP,Number=1,Type=Integer,Description=Raw read depth>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

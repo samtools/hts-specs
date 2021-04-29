@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=FORMAT GL Number is not G
+##FORMAT=<ID=GL,Number=A,Type=Float,Description="Genotype likelihoods">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

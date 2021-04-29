@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=Meta entry without quotation mark at the end
+##FORMAT=<ID=DUP,Description="Duplication without quotation mark at the end>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

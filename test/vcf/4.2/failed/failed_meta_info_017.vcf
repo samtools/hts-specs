@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=INFO DB Number is not 0
+##INFO=<ID=DB,Number=1,Type=Flag,Description="dbSNP membership">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	DB=0

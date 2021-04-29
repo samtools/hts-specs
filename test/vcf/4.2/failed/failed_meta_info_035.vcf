@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=INFO 1000G Type is not Flag
+##INFO=<ID=1000G,Number=0,Type=String,Description="1000 Genomes membership">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

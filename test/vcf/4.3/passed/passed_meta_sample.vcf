@@ -1,0 +1,9 @@
+##fileformat=VCFv4.3
+##SAMPLE=<ID=Sample1,Assay=WholeGenome,Ethnicity=AFR,Disease=None,Description="Patient germline genome from unaffected",DOI=url>
+##SAMPLE=<ID=Sample2,Assay=Exome,Ethnicity=CEU,Disease=Cancer,Tissue=Breast,Description="European patient exome from breast cancer">
+##SAMPLE=<ID=Sample3,Genomes=G1_ID;G2_ID;GK_ID,Mixture=N1;N2;NK,Description="S1;S2;SK">
+##SAMPLE=<ID=Sample4,Genomes="G1_ID,G2_ID,GK_ID",Description="S1;S2;SK">
+##SAMPLE=<ID=Blood,Genomes=Germline,Mixture=1.,Description="Patient germline genome">
+##SAMPLE=<ID=TissueSample,Genomes=Germline;Tumor,Mixture=.3;.7,Description="Patient germline genome;Patient tumor genome">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

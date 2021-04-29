@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=The ALT ID contains an opening angle bracket
+##ALT=<ID=DEL:A<B,Description="Deletion with invalid suffix">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

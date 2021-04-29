@@ -1,0 +1,13 @@
+##fileformat=VCFv4.2
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=GL,Number=G,Type=Float,Description="Genotype likelihood">
+##FORMAT=<ID=MY,Number=.,Type=Character,Description="Some custom field (unbounded characters)">
+##FORMAT=<ID=CU,Number=A,Type=Integer,Description="Another custom field (list of integers)">
+##FORMAT=<ID=CU2,Number=R,Type=Float,Description="Another custom field (list of floats)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00096	HG00097
+1	100	rs180734498	C	T	100	PASS	AC=4	GT	0|0	0|1
+1	200	rs180734498	C	T	100	PASS	AC=4	GL	-0.13,-0.58,-3.62	-2.45,-0.00,-5.00
+1	300	rs180734498	C	T	100	PASS	AC=4	GT:MY	1/0:A	0|1:A,B,C
+1	400	rs180734498	C	T,A	100	PASS	AC=4,5	GT:CU	1/2:1,5	0|1:2,0
+1	500	rs180734498	C	T,G	100	PASS	AC=4,6	GT:CU2	1/2:-0.13,-0.58,-3.62	0|1:-2.45,-0.00,-5.00
+1	600	rs180734498	C	T	100	PASS	AC=4	DP	1	4

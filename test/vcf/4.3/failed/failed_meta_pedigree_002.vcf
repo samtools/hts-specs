@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=Original value contains an illegal character
+##PEDIGREE=<ID=Pedigree1,Original=Some,thing>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.
