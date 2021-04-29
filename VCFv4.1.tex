@@ -1002,8 +1002,8 @@ The BCF2 header contains the following items:
 magic          & char[3]     & The characters ``{\tt BCF}'' \\ \hline
 major\_version & uint8\_t    & 2 \\ \hline
 minor\_version & uint8\_t    & 1 \\ \hline
-l\_text        & uint32\_t   & Length of the ``text'' section, including the terminating NUL character \\ \hline
-text           & char[l\_text] & VCF format header text, NUL-terminated. \\ \hline
+l\_text        & uint32\_t   & Length of the ``text'' field, including the terminating NUL character \\ \hline
+text           & char[l\_text] & VCF format header text, NUL-terminated \\ \hline
 \end{tabular}}
 \vspace{0.3cm}
 
@@ -1192,7 +1192,7 @@ s111 1111 1axx xxxx xxxx xxxx xxxx xxxx where s is the sign (most often ignored 
 is an extra payload (most often ignored in applications).  If a = 1, it is a quiet NaN; if a is zero and the payload is nonzero, then it is a
 signaling NaN.
 
-A good way to understand these values is to play around with the IEEE encoder webiste.
+A good way to understand these values is to play around with the IEEE encoder website.
 
 \vspace{0.3cm}
 BCF2 bit representation for floating point NaN and MISSING
@@ -1473,7 +1473,7 @@ n\_fmt = 5 (Number of FORMAT keys)
 0x33000000 & l\_shared as 32-bit little endian hex \\ \hline
 0x2A000000 & l\_indiv as 32-bit little endian hex \\ \hline
 0x01000000 & CHROM offset is at 1 in 32 bit little endian \\ \hline
-0x64000000 & POS in 0 based 32-bit little endian \\ \hline
+0x64000000 & POS in 0-based 32-bit little endian \\ \hline
 0x01000000 & rlen = 1 (it's just a SNP) \\ \hline
 0x41 0xF0 0xCC 0xCD & QUAL = 30.1 as 32-bit float \\ \hline
 0x0400     & n\_info as 16-bit little-endian \\ \hline
