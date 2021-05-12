@@ -219,7 +219,7 @@ The URL field specifies the location of a fasta file containing breakpoint assem
 \subsubsection{Contig field format}
 \label{sec-contig-field}
 It is recommended for VCF, and required for BCF, that the header includes tags describing the contigs referred to in the file.
-The structured \texttt{contig} field must include the ID attribute and typically includes also sequence length, MD5 checksum, URL tag to indicate where the sequence can be found, etc.
+The structured \texttt{contig} field must include the ID attribute and typically includes also sequence length, MD5 checksum of the sequence as defined in the \href{https://github.com/samtools/hts-specs/blob/master/refget.md}{Refget specification}, URL tag to indicate where the sequence can be found, etc.
 For example:
 \begin{verbatim}
 ##contig=<ID=ctg1,length=81195210,URL=ftp://somewhere.org/assembly.fa,...>
@@ -1514,8 +1514,8 @@ Here's a more concrete example:
 \small
 \begin{verbatim}
 ##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens">
-##contig=<ID=21,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens">
-##contig=<ID=22,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens">
+##contig=<ID=21,length=46944323,assembly=B36,md5=f1b74b7f9f4cdbaeb6832ee86cb426c6,species="Homo sapiens">
+##contig=<ID=22,length=49691432,assembly=B36,md5=2041e6a0c914b48dd537922cca63acb8,species="Homo sapiens">
 #CHROM POS ID REF ALT QUAL FILTER INFO
 20 1 . T A . PASS .
 21 2 . T A . PASS .
