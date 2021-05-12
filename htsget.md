@@ -5,6 +5,10 @@ suppress_footer: true
 ---
 
 # Htsget retrieval API spec v1.3.0
+{:.no_toc}
+
+* Do not remove this line (it will not be displayed)
+{:toc}
 
 # Design principles
 
