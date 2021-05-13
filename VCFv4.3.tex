@@ -1437,9 +1437,24 @@ A BCF2 header follows exactly the specification as VCF, with a few extensions/re
 
 \subsection{Header}
 
-The BCF2 header begins with the ``BCF2 magic'' 5 bytes that encode {\tt BCF\em XY} where {\em X} and {\em Y} are bytes indicating the major number (currently 2) and the minor number (currently 2).
-This magic can be used to quickly examine the file to determine that it's a BCF2 file.
-Immediately following the BCF2 magic is the standard VCF header lines in text format, beginning with \verb|##fileformat=VCFvX.Y|.
+The BCF2 header contains the following items:
+
+\vspace{0.3cm}
+{\small
+\begin{tabular}{|l | l | p{30em} | } \hline
+\textbf{Field} & \textbf{Type} & \textbf{Notes} \\ \hline
+magic          & char[3]     & The characters ``{\tt BCF}'' \\ \hline
+major\_version & uint8\_t    & 2 \\ \hline
+minor\_version & uint8\_t    & 2 \\ \hline
+l\_text        & uint32\_t   & Length of the ``text'' field, including the terminating NUL character \\ \hline
+text           & char[l\_text] & VCF format header text, NUL-terminated \\ \hline
+\end{tabular}}
+\vspace{0.3cm}
+
+The ``magic'' field and version numbers can be used to quickly examine the file to determine that it's a BCF2.2 file.
+The ``text'' field contains the standard VCF header lines in text format, from \verb|##fileformat=VCFv4.3|
+to \verb|#CHROM ...| inclusive, terminated by a NUL character.
+
 Because the type is encoded directly in the header, the recommended extension for BCF2 formatted files is {\sl .bcf}.
 BCF2 supports encoding values in a dictionary of strings.
 The string map is provided by the keyword \verb|##dictionary=S0,S1,...,SN| as a comma-separate ordered list of strings.
@@ -1525,22 +1540,33 @@ Compression of a BCF file is recommended but not required.
 {\small
 \begin{tabular}{|l | l | p{30em} | } \hline
 \textbf{Field} &	\textbf{Type} &	\textbf{Notes} \\ \hline
-l\_shared &	uint32\_t &	Data length from CHROM to the end of INFO \\ \hline
-l\_indiv  &	uint32\_t &	Data length of FORMAT and individual genotype fields \\ \hline
-CHROM	  & int32\_t  &	Given as an offset into the mandatory contig dictionary \\ \hline
-POS	      & int32\_t  &	0-based leftmost coordinate \\ \hline
-rlen      &	int32\_t  &	Length of the record as projected onto the reference sequence. Must be the length of the REF allele or the declared length of a symbolic allele respecting the END attribute \\ \hline
-n\_allele\_info	& int32\_t	& n\_info, where n\_allele is the number of REF+ALT alleles in this record, and n\_info is the number of VCF INFO fields present in this record \\ \hline
-n\_fmt\_sample	& uint32\_t	& n\_sample, where n\_fmt is the number of format fields for genotypes in this record, and n\_samples is the number of samples present in this sample.  Note that the number of samples must be equal to the number of samples in the header \\ \hline
-QUAL	  & float	  & Variant quality; 0x7F800001 for a missing value \\ \hline
-ID	      & typed string & Identifier; 0x07 for a missing value \\ \hline
-REF+ALT   & list of n\_allele typed strings & the first allele is REF (mandatory) followed by n\_alleles - 1 ALT alleles, all encoded as typed strings \\ \hline
-FILTER	  & Typed vector of integers	& a vector of integer offsets into dictionary, one for each FILTER field value.  ``.'' is encoded as MISSING \\ \hline
-INFO      & field key/value pairs	    & n\_info pairs of typed vectors	The first value must be a typed atomic integer giving the offset of the INFO field key into the dictionary.  The second value is a typed vector giving the value of the field \\ \hline
-Genotype values &	see below	& see below \\ \hline
+l\_shared & uint32\_t & Data length from CHROM to the end of INFO \\ \hline
+l\_indiv  & uint32\_t & Data length of FORMAT and individual genotype fields \\ \hline
+CHROM     & int32\_t  & Given as an offset into the mandatory contig dictionary \\ \hline
+POS       & int32\_t  & 0-based leftmost coordinate \\ \hline
+rlen      & int32\_t  & Length of the record as projected onto the reference sequence.
+                        Must be the length of the REF allele or the declared length of a symbolic allele
+                        respecting the END attribute \\ \hline
+QUAL      & float     & Variant quality; 0x7F800001 for a missing value \\ \hline
+n\_info   & uint16\_t & The number of INFO fields in this record \\ \hline
+n\_allele & uint16\_t & The number of REF+ALT alleles in this record \\ \hline
+n\_sample & uint24\_t & The number of samples in this record, stored as a \textbf{three} byte little-endian value.
+                        Note that n\_sample must be equal to the number of samples in the header \\ \hline
+n\_fmt    & uint8\_t  & The number of FORMAT keys.  See \ref{GenotypeEncoding} \\ \hline
+ID       & typed string & Variant identifier; 0x07 for a missing value \\ \hline
+REF+ALT  & list of n\_allele typed strings & the first allele is REF (mandatory) followed by n\_alleles - 1 ALT
+                                             alleles, all encoded as typed strings \\ \hline
+FILTER   & Typed vector of integers & a vector of integer offsets into dictionary, one for each FILTER field value.
+                                      ``.'' is encoded as MISSING \\ \hline
+INFO     & field key/value pairs & n\_info pairs of typed vectors.
+                                   The first value must be a typed atomic integer giving the offset of the INFO field
+                                   key into the dictionary.
+                                   The second value is a typed vector giving the value of the field \\ \hline
+Genotype values & see below & see below \\ \hline
 \end{tabular}}
 
 \subsubsection{Genotype encoding}
+\label{GenotypeEncoding}
 
 Genotype fields are encoded not by sample as in VCF but rather by field, with a vector of values for each sample following each field.
 In BCF2, the following VCF line:
@@ -1618,6 +1644,7 @@ The final four bits encodes an unsigned integer that indicates the type of the u
 \vspace{0.3cm}
 \begin{tabular}{|l | l | l|} \hline
 Lowest 4 bits & Hexadecimal encoding & Corresponding atomic type \\ \hline
+0 & 0x00 & A MISSING value without an explicit type provided \\ \hline
 1 & 0x?1 & Integer [8 bit] \\ \hline
 2 & 0x?2 & Integer [16 bit] \\ \hline
 3 & 0x?3 & Integer [32 bit] \\ \hline
@@ -1626,8 +1653,9 @@ Lowest 4 bits & Hexadecimal encoding & Corresponding atomic type \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
-Note this is not used in BCF2, but its type is reserved in case this becomes necessary.
-In BCF2 characters are simply represented by strings with a single element 0,4,6,8--15 reserved for future use.
+In BCF2 strings are type=7 with an appropriate length.
+Single characters are represented as strings with length=1.
+Type codes 4,6,8--15 are reserved for future use.
 
 \vspace{0.3cm}
 
@@ -1682,7 +1710,7 @@ Because FLAG values can only be encoded in INFO fields, BCF2 provides no mechani
 \textbf{String} values have two basic encodings.
 For INFO, FORMAT, and FILTER keys these are encoded by integer offsets into the header dictionary.
 For string values, such as found in the ID, REF, ALT, INFO, and FORMAT fields, strings are encoded as typed array of ASCII encoded bytes.
-The array isn't terminated by a null byte.
+The array isn't terminated by a NUL byte.
 The length of the string is given by the length of the type descriptor.
 
 Suppose you want to encode the string ``{\tt ACAC}''.
@@ -1819,10 +1847,6 @@ The final example is something seen on chrX when we have a haploid male and a di
 The male genotype vector is terminated prematurely by the END\_OF\_VECTOR value.
 \vspace{0.3cm}
 
-\textbf{Misc. notes}
-
-A type byte value of 0x00 is an allowed special case meaning MISSING but without an explicit type provided.
-
 
 \subsection{Encoding a VCF record example}
 
@@ -1907,12 +1931,12 @@ All of these can be encoded by 1-element INT8 values (0x11), with associated hex
 
 First is HM3.
 The entry begins with the key: 0x11 0x50.
-Next we have a Flag value to indicate the field is present, represented as a 1 element INT8 value of 1.
+The HM3 field is a flag with no associated value and therefore the rest of the entry is the special case of a missing value without an explicit type provided.
 Altogether we have:
 
 \vspace{0.3cm}
 \begin{tabular}{|l| l|} \hline
-0x11 0x50 0x11 0x01 & HM3 flag is present \\ \hline
+0x11 0x50 0x00 & HM3 flag is present \\ \hline
 \end{tabular}
 \vspace{0.3cm}
 
@@ -2002,30 +2026,35 @@ So the genotype block contains:
 
 We need to determine a few values before writing out the final block:
 
-l\_shared = 52 (Data length from CHROM to the end of INFO)
+l\_shared = 51 (Data length from CHROM to the end of INFO)
 
 l\_indiv = 42 (Data length of FORMAT and individual genotype fields)
 
-n\_allele\_info = n\_allele$<<16\mid$n\_info = $2 << 16 \mid 4$ = 0x00020004
+n\_info = 4 (Number of INFO fields)
 
-n\_fmt\_samples = n\_fmt$<<24\mid$n\_sample = $5 << 24 \mid 3$ = 0x05000003
+n\_allele = 2 (Number of alleles, including REF)
 
+n\_sample = 3 (Number of samples)
+
+n\_fmt = 5 (Number of FORMAT keys)
 
 \vspace{0.3cm}
 \begin{tabular}{|l| l|} \hline
-0x34000000 & l\_shared as little endian hex \\ \hline
-0x2A000000 & l\_indiv as little endian hex \\ \hline
+0x33000000 & l\_shared as 32-bit little endian hex \\ \hline
+0x2A000000 & l\_indiv as 32-bit little endian hex \\ \hline
 0x01000000 & CHROM offset is at 1 in 32 bit little endian \\ \hline
-0x64000000 & POS in 0 base 32 bit little endian \\ \hline
+0x64000000 & POS in 0-based 32-bit little endian \\ \hline
 0x01000000 & rlen = 1 (it's just a SNP) \\ \hline
 0x41 0xF0 0xCC 0xCD & QUAL = 30.1 as 32-bit float \\ \hline
-0x00020004 & n\_allele\_info \\ \hline
-0x05000003 & n\_fmt\_samples \\ \hline
+0x0400     & n\_info as 16-bit little-endian \\ \hline
+0x0200     & n\_allele as 16-bit little-endian \\ \hline
+0x030000   & n\_sample as 24-bit little-endian \\ \hline
+0x05       & n\_fmt \\ \hline
 0x57 0x72 0x73 0x31 0x32 0x33 & ID = rs123 \\ \hline
 0x17 0x41 & REF A \\ \hline
 0x17 0x43 & ALT C \\ \hline
 0x11 0x00 & FILTER field PASS \\ \hline
-0x11 0x50 0x11 0x01 & HM3 flag is present \\ \hline
+0x11 0x50 0x00 & HM3 flag is present \\ \hline
 0x11 0x51 & AC key \\ \hline
 0x11 0x03 & with value of 3 \\ \hline
 0x11 0x52 & AN key \\ \hline
