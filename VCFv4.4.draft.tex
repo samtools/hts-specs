@@ -224,11 +224,21 @@ The URL field specifies the location of a fasta file containing breakpoint assem
 \subsubsection{Contig field format}
 \label{sec-contig-field}
 It is recommended for VCF, and required for BCF, that the header includes tags describing the contigs referred to in the file.
-The structured \texttt{contig} field must include the ID attribute and typically includes also sequence length, MD5 checksum of the sequence as defined in the \href{https://github.com/samtools/hts-specs/blob/master/refget.md}{Refget specification}, URL tag to indicate where the sequence can be found, etc.
+The structured \texttt{contig} field must include the ID attribute and can includes additional optional fields with
+the following fields reserved:
+\begin{itemize}
+  \item length: the length of the sequence
+  \item md5: MD5 checksum of the sequence as defined in the Sam specification v1\footnote{See Reference MD5 calculation
+      section in \href{https://github.com/samtools/hts-specs/blob/master/SAMv1.pdf}{\tt SAMv1.pdf}.} Briefly, the digest
+      is calculated including all characters outside of the inclusive range 33 (`\char33') to 126 (`\char126').
+      and all lowercase characters converted to uppercase. The MD5 digest is calculated as described in
+      \href{https://tools.ietf.org/html/rfc1321}{\sl RFC 1321} and presented as a 32 character lowercase hexadecimal number.
+  \item URL: tag to indicate where the sequence can be found
+\end{itemize}
+
 For example:
 \begin{verbatim}
-##contig=<ID=ctg1,length=81195210,URL=ftp://somewhere.org/assembly.fa,...>
-\end{verbatim}
+##contig=<ID=ctg1,length=81195210,URL=ftp://somewhere.org/assembly.fa, md5=f126cdf8a6e0c7f379d618ff66beb2da, ...>
 
 \noindent
 Contig names follow the same rules as the SAM format's reference sequence names:
