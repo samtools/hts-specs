@@ -1,0 +1,393 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}
+
+\usepackage[letterpaper,margin=1in]{geometry}
+
+\usepackage{acronym}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage[flushmargin,hang]{footmisc}
+\usepackage{microtype}
+\usepackage{newverbs}
+\usepackage{tablefootnote}
+\usepackage{tabularx}
+\usepackage{todonotes}
+\usepackage[hyperfootnotes=false]{hyperref} % doesn't work in tabulars as currently set
+\usepackage{footnotehyper}
+\usepackage[strict]{changepage}
+\usepackage[binary-units=true]{siunitx}
+\usepackage[mark]{gitinfo2}
+
+\hypersetup{colorlinks=true,
+  linkcolor=blue,
+  filecolor=magenta,
+  urlcolor=blue,
+  pdfinfo={githash=\gitHash}}
+
+\definecolor{cverbbg}{gray}{0.93}
+
+\title{The Browser Extensible Data~(BED) format}
+\author{Jeffrey Niu, Danielle Denisko, Michael M.~Hoffman}
+\date{\today}
+
+\setlength{\emergencystretch}{\hsize}
+\setlength{\footnotemargin}{1em}
+
+\interfootnotelinepenalty=1000000
+\makesavenoteenv{tabularx}
+
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+% eliminate passive voice warnings
+% chktex-file -3
+
+\begin{document}
+\makeatletter
+\renewcommand*{\AC@hyperlink}[2]{#2} % do not hyperlink acronyms
+\makeatother
+
+
+\frenchspacing
+
+\maketitle
+
+\acused{ASCII}
+
+\section{Specification}
+
+\Ac{BED} is a whitespace-delimited file format, where each~\textbf{file} consists of one or more~\textbf{line}s.\footnote{``Frequently Asked Questions: Data File Formats.'' \ac{UCSC} Genome Browser FAQ, \url{https://genome.ucsc.edu/FAQ/FAQformat.html}}
+Each~\textbf{line} describes discrete genomic~\textbf{feature}s by physical start and end position on a linear~\textbf{chromosome}.
+The file extension for the \ac{BED} format is~\texttt{.bed}.
+
+\subsection{Typographic conventions}
+
+This document uses the following typographic conventions:
+
+\vspace{2ex}
+
+\noindent
+\begin{tabularx}{\textwidth}{r L L}
+  \toprule
+  Style & Meaning & Examples \\
+  \midrule
+  Bold & Terms defined in subsections~\ref{sec:terms}--\ref{sec:lines} & \textbf{chromosome}{\quad}\textbf{file} \\
+  Sans serif & Names of~\textbf{field}s & \textsf{chrom}{\quad}\textsf{chromStart}{\quad}\textsf{chromEnd} \\
+  Fixed-width & Literals or \ac{regex}es\footnote{POSIX/IEEE~1003.1--2017 Extended Regular Expressions, for the ``C'' locale.
+                \emph{IEEE Standard for Information Technology---Portable Operating System Interface~(POSIX) Base Specifications}, IEEE~1003.1--2017, 2017} & \texttt{.bed}{\quad}\texttt{grep}{\quad}\texttt{[[:alnum:]]+}{\quad}\texttt{ATCG} \\
+  \bottomrule
+\end{tabularx}
+
+\subsection{Terminology and concepts}\label{sec:terms}
+\begin{description}
+\item[0-start, half-open coordinate system:]
+  A coordinate system where the first base starts at position~0, and the start of the interval is included but the end is not.
+  For example, for a sequence of bases~\texttt{ACTGCG}, the bases given by the interval~[2,~4) are~\texttt{TG}. % chktex 9
+
+\item[BED$n$:]
+  A~\textbf{file} with the first $n$~\textbf{field}s of the \ac{BED} format.
+  For example, \textbf{BED3}~means a~\textbf{file} with only the first 3~\textbf{field}s; \textbf{BED12}~means a~\textbf{file} with all 12~\textbf{field}s.
+
+\item[BED$n$+:]
+  A~\textbf{file} that has $n$~\textbf{field}s of the \ac{BED} format, followed by any number of~\textbf{field}s of custom data defined by a user.
+
+\item[BED$n$+$m$:]
+  A~\textbf{file} that has a custom tab-delimited format starting with the first $n$~\textbf{field}s of the \ac{BED} format, followed by $m$~\textbf{field}s of custom data defined by a user.
+  For example, \textbf{BED6+4}~means a~\textbf{file} with the first 6~\textbf{field}s of the \ac{BED} format, followed by 4~user-defined~\textbf{field}s.
+
+\item[block:]
+  Linear subfeatures within a~\textbf{feature}.
+  Usually used to designate exons.
+
+\item[chromosome:]
+  A sequence of nucleobases with a name.
+  In this specification, ``chromosome'' may also describe a named scaffold that does not fit the biological definition of a chromosome.
+  Often, chromosomes are numbered starting from~\texttt{1}.
+  There are also often sex chromosomes such as~\texttt{W}, \texttt{X}, \texttt{Y}, and~\texttt{Z}, mitochondrial chromosomes such as~\texttt{M}, and possibly scaffolds from an unknown chromosome, often labeled~\texttt{Un}.
+  The name of each chromosome is often prefixed with~\texttt{chr}.
+  Examples of chromosome names include~\texttt{chr1}, \texttt{21}, \texttt{chrX}, \texttt{chrM}, \texttt{chrUn}, \texttt{chr19\_KI270914v1\_alt}, and~\texttt{chrUn\_KI270435v1}.
+
+\item[feature:]
+  A linear region of a~\textbf{chromosome} with specified properties.
+  For example, a~\textbf{file}'s~\textbf{feature}s might all be peaks called from ChIP-seq data, or transcript.
+
+\item[field:]
+  Data stored as non-tab text.
+  All~\textbf{field}s are 7-bit US \ac{ASCII}.
+
+\item[file:]
+  Sequence of one or more~\textbf{line}s.
+
+\item[line:]
+  String terminated by a~\textbf{line separator}, in one of the following classes.
+  Either a~\textbf{data line}, a~\textbf{comment line}, or a~\textbf{blank line}.
+  Discussed more fully in~\autoref{sec:lines}
+
+\item[line separator:]
+  Either carriage return, line feed, or carriage return followed by line feed.
+  The same \textbf{line separator} must be used throughout the \textbf{file}.
+\end{description}
+
+\subsection{Lines}\label{sec:lines}
+
+\subsubsection{Data lines}
+
+Data lines contain \textbf{feature}~information.
+A data line is composed of~\textbf{field}s separated by whitespace.
+The whitespace must match the \ac{regex}~\texttt{[[:space:]]+}\footnote{\texttt{[[:space:]]} includes the following characters: space, form-feed, newline, carriage-return, tab, and vertical-tab}.
+
+\subsubsection{Comment lines and blank lines}
+
+Both comment lines and blank lines provide no~\textbf{feature} data.
+
+Comment lines start with~\texttt{\#} with no whitespace beforehand.
+A~\texttt{\#} appearing anywhere else in a line is treated as~\textbf{feature} data, not a comment.
+
+Blank lines consist entirely of whitespace.
+Both comment and blank lines may appear as any line in a~\textbf{file}, at the beginning, middle, or end of the file.
+They may appear in any quantity.
+
+\subsection{\acs{BED} fields}
+
+Each~\textbf{data line} contains between~3 and 12~whitespace-delimited~\textbf{field}s.
+The first 3~\textbf{field}s are mandatory, and the last 9~\textbf{field}s are optional.
+In optional~\textbf{field}s, the order is binding---if 1~\textbf{field} is filled, then all previous~\textbf{field}s must also be filled.
+However, \textbf{BED10} and \textbf{BED11} are prohibited.
+
+In a \ac{BED}~\textbf{file}, each~\textbf{data line} must have the same number of~\textbf{field}s.
+The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-based, half-open coordinate system}.
+
+\begin{adjustwidth}{-0.5in}{-0.5in}
+  \noindent
+  \begin{tabularx}{\linewidth}{r l l l L}
+    \toprule
+    Col & Field & Type & Regex or range & Brief description \\
+    \midrule
+    1 & \textsf{chrom} & String & \texttt{[[:alnum:]\_]\{1,255\}}{\footnotemark} & \textbf{Chromosome} name \\
+    2 & \textsf{chromStart} & Int & $[0, 2^{64}-1]$ & \textbf{Feature} start position \\
+    3 & \textsf{chromEnd} & Int & $[0, 2^{64} -1]$ & \textbf{Feature} end position \\
+    4 & \textsf{name} & String & \texttt{[{\textasciicircum}{\textbackslash}t]\{0,255\}} & \textbf{Feature} description \\
+    5 & \textsf{score} & Int & $[0, 1000]$ & A numerical value \\
+    6 & \textsf{strand} & String & \texttt{[-+.]} & \textbf{Feature} strand \\
+    7 & \textsf{thickStart} & Int & $[0, 2^{64}-1]$ & Thick start position \\
+    8 & \textsf{thickEnd} & Int & $[0, 2^{64}-1]$ & Thick end position \\
+    9 & \textsf{itemRgb} & Int,Int,Int & \texttt{(}$[0, 255], [0,255], [0,255]$\texttt{) | 0} & Display color \\ % chktex 9
+    10 & \textsf{blockCount} & Int & $[0, \textsf{chromEnd}-\textsf{chromStart}]${\footnotemark} & Number of \textbf{block}s \\
+    11 & \textsf{blockSizes} & List[Int] & \texttt{([[:digit:]]+,)\{\textsf{blockCount}$-1$\}[[:digit:]]+,?}{\footnotemark} & \textbf{Block} sizes \\
+    12 & \textsf{blockStarts} & List[Int] & \texttt{([[:digit:]]+,)\{\textsf{blockCount}$-1$\}[[:digit:]]+,?} & \textbf{Block} start positions \\
+    \bottomrule
+  \end{tabularx}\label{sec:table}
+  \footnotetext[5]{\texttt{[[:alnum:]\_]} is equivalent to the \ac{regex} \texttt{[A-Za-z0-9\_]}. % chktex 8
+      It is also equivalent to the Perl extension \texttt{[[:word:]]}.}
+  \footnotetext[6]{\textsf{chromEnd}-\textsf{chromStart} is the maximum number of~\textbf{block}s that may exist without overlaps.}
+  \footnotetext{For example, if~$\textsf{blockCount} = 4$, then the allowed \ac{regex} would be~\texttt{([[:digit:]]+,)\{3\}[[:digit:]]+,?}}
+\end{adjustwidth}
+
+\subsection{Coordinates}
+\begin{enumerate}
+\item \textsf{chrom}: The name of the~\textbf{chromosome} or scaffold where the~\textbf{feature} is present.
+  Limiting only to word characters only, instead of all non-whitespace characters, makes \ac{BED}~\textbf{file}s more portable to varying environments which may make different assumptions about allowed characters.
+  The name must be between~1 and 255~characters long, inclusive.
+
+\item \textsf{chromStart}: Start position of the~\textbf{feature} on the~\textbf{chromosome} or scaffold.
+  \textsf{chromStart}~must be an integer greater than or equal to~0 and less than the total number of bases of the~\textbf{chromosome} to which it belongs.
+  If the size of the~\textbf{chromosome} is unknown, then \textsf{chromStart}~must be less than or equal to~$2^{64} - 1$, which is the maximum size of an unsigned 64-bit integer.
+
+\item \textsf{chromEnd}: End position of the~\textbf{feature} on the~\textbf{chromosome} or scaffold.
+  \textsf{chromEnd}~must be an integer greater than or equal to the value of~\textsf{chromStart} and less than or equal to the total number of bases in the~\textbf{chromosome} to which it belongs.
+  If the size of the~\textbf{chromosome} is unknown, then \textsf{chromEnd}~must be less than or equal to~$2^{64} - 1$, the maximum size of an unsigned 64-bit integer.
+\end{enumerate}
+
+\subsection{Simple attributes}
+\begin{enumerate}
+  \setcounter{enumi}{3}
+
+\item \textsf{name}: String that describes the~\textbf{feature}.
+  The name must be~0 to 255~non-tab characters.
+  The name must not be empty or contain whitespace, unless all fields in file are delimited exclusively using single tab characters.
+  A visual representation of the \ac{BED} format may display the name next to the~\textbf{feature}.
+
+\item \textsf{score}: Integer between~0 and~1000, inclusive.
+  If the~\textbf{feature} has no score information, then~\texttt{0} should be used as a default value.
+  A visual representation of the \ac{BED} format may shade features differently depending on their score.
+
+\item \textsf{strand}: Strand that the~\textbf{feature} appears on.
+  The strand may either refer to the~\texttt{+}~(sense or coding) strand or the~\texttt{-}~(antisense or complementary) strand.
+  If the~\textbf{feature} has no strand information or unknown strand, then a dot~(\texttt{.}) must be used.
+\end{enumerate}
+
+\subsection{Display attributes}
+\begin{enumerate}
+  \setcounter{enumi}{6}
+
+\item \textsf{thickStart}: Start position at which the~\textbf{feature} is visualized with a thicker or accented display.
+  This value must be an integer between~\textsf{chromStart} and~\textsf{chromEnd}, inclusive.
+  There is no specified default value for~\textsf{thickStart}.
+
+\item \textsf{thickEnd}: End position at which the~\textbf{feature} is visualized with a thicker or accented display.
+  This value must be an integer greater than or equal to~\textsf{thickStart} and less than or equal to~\textsf{chromEnd}, inclusive.
+  In \ac{BED} files with fewer than 7~\textbf{field}s, the whole~\textbf{feature} has thick display.
+  In \textbf{BED7+}~files, to achieve the same effect, set \textsf{thickStart}~equal to~\textsf{chromStart} and \textsf{thickEnd}~equal to~\textsf{chromEnd}.
+  If this~\textbf{field} is not specified but \textsf{thickStart}~is, then the entire~\textbf{feature} has thick display.
+  There is no specified default value for~\textsf{thickEnd}.
+
+\item \textsf{itemRgb}: A triple of integers that determines the color of this~\textbf{feature} when visualized.
+  The triple is three integers separated by commas.
+  Each integer is between~0 and~255, inclusive.
+  To make a~\textbf{feature} black, \textsf{itemRgb}~may be a single~\texttt{0}, which is visualized identically to a~\textbf{feature} with \textsf{itemRgb} of \texttt{0,0,0}.
+\end{enumerate}
+
+\subsection{Blocks}
+\begin{enumerate}
+  \setcounter{enumi}{9}
+
+\item \textsf{blockCount}: Number of~\textbf{block}s in the~\textbf{feature}.
+  \textsf{blockCount}~must be an integer greater than 0.
+  \textsf{blockCount}~is mandatory in~\textbf{BED12+}~files.
+  Null or empty~\textsf{blockCount} are not allowed, because~\textsf{blockSizes} and~\textsf{blockStarts} rely on~\textsf{blockCount}.
+  A visual representation of the \ac{BED} format may have blocks appear thicker than the rest of the~\textbf{feature}.
+
+\item \textsf{blockSizes}: Comma-separated list of length~\textsf{blockCount} containing the size of each~\textbf{block}.
+  There must be no spaces before or after commas.
+  There may be a trailing comma after the last element of the list.
+  \textsf{blockSizes}~is mandatory in \textbf{BED12+} files.
+  Null or empty~\textsf{blockSizes} is not allowed, because \textsf{blockStarts}~cannot be verified without~\textsf{blockSizes}.
+
+\item \textsf{blockStarts}: Comma-separated list of length~\textsf{blockCount} containing each \textbf{block}'s~start position, relative to~\textsf{chromStart}.
+  There must not be spaces before or after the commas.
+  There may be a trailing comma after the last element of the list.
+  Each element in~\textsf{blockStarts} is paired with the corresponding element in~\textsf{blockSizes}.
+  Each \textsf{blockStarts}~element must be an integer between~0 and~$\textsf{chromEnd} - \textsf{chromStart}$, inclusive.
+  For each couple~$i$ of~$(\textsf{blockStarts}_i, \textsf{blockSizes}_i)$, the quantity~$\textsf{chromStart} + \textsf{blockStarts}_i + \textsf{blockSizes}_i$ must be less or equal to \textsf{chromEnd}.
+  These conditions enforce that each~\textbf{block} is contained within the~\textbf{feature}.
+  The first~\textbf{block} must start at~\textsf{chromStart} and the last~\textbf{block} must end at~\textsf{chromEnd}.
+  Moreover, the~\textbf{block}s must not overlap.
+  The list must be sorted in ascending order.
+  \textsf{blockStarts}~is mandatory in~\textbf{BED12+} files.
+  Null or empty~\textsf{blockStarts} is not allowed.
+\end{enumerate}
+
+\section{Examples}
+
+\subsection[title]{Example BED6 file from the \acs{UCSC} Genome Browser FAQ\footnote{``Frequently
+    Asked Questions: Data File Formats.'' \ac{UCSC} Genome Browser FAQ,
+    \url{https://genome.ucsc.edu/FAQ/FAQformat.html}}}\label{sec:example-bed6}
+
+\begin{verbatim}
+chr7  127471196  127472363  Pos1  0  +
+chr7  127472363  127473530  Pos2  0  +
+chr7  127473530  127474697  Pos3  0  +
+chr7  127474697  127475864  Pos4  0  +
+chr7  127475864  127477031  Neg1  0  -
+chr7  127477031  127478198  Neg2  0  -
+chr7  127478198  127479365  Neg3  0  -
+chr7  127479365  127480532  Pos5  0  +
+chr7  127480532  127481699  Neg4  0  -
+\end{verbatim}
+
+\subsection{Example BED12 file from the \acs{UCSC} Genome Browser FAQ}
+\begin{verbatim}
+chr22 1000 5000 cloneA 960 + 1000 5000 0 2 567,488, 0,3512
+chr22 2000 6000 cloneB 900 - 2000 6000 0 2 433,399, 0,3601
+\end{verbatim}
+
+The~\textbf{block}s in this example satisfy the required constraints.
+The first~\textbf{block} starts at~\textsf{chromStart} since the first~\textsf{blockStarts} element is~0.
+The last~\textbf{block} ends at~\textsf{chromEnd} since the last~\textbf{block} starts at position 4512~(1000+3512) with size~488, and therefore ends at position 5000~(4512+488).
+
+\section{Recommended practice for the \acs{BED} format}
+
+\subsection{Mandatory fields}
+\begin{itemize}
+\item \textsf{chrom}: The name of each~\textbf{chromosome} should also match the names from a reference genome, if applicable.
+  For example, in the human genome, the chromosomes may be named~\texttt{chr1} to \texttt{chr22}, \texttt{chrX}, \texttt{chrY}, and~\texttt{chrM}.
+  Names should be consistent within a~\textbf{file}.
+  For example, one should not use both~\texttt{17} and~\texttt{chr17} to represent the same~\textbf{chromosome} in the same~\textbf{file}.
+\end{itemize}
+
+\subsection{Optional fields}\label{sec:optional}
+\begin{itemize}
+\item \textsf{name}: If a feature has no name, then a dot~(\texttt{.}) should be used.
+  Names should avoid using the space character even if the file is exclusively delimited with single tab characters because parsers may interpret a space as a delimiter.
+
+\item \textsf{itemRgb}: Eight or fewer colors should be used as too many colors may slow down visualizations and are difficult for humans to distinguish.\footnote{``Frequently
+    Asked Questions: Data File Formats.'' \ac{UCSC} Genome Browser FAQ,
+    \url{https://genome.ucsc.edu/FAQ/FAQformat.html}}
+
+\end{itemize}
+
+\subsection{User-defined fields}
+
+Custom data \textbf{fields} may contain any non-tab 7-bit US \ac{ASCII} character.
+Definitions of a custom \ac{BED} format should restrict the type of each \textbf{field} to the extent possible.
+Each custom \textbf{field} should contain either one of the following data types or a comma-separated list of values of the same type:
+
+\noindent
+\begin{tabularx}{\textwidth}{r L}
+  \toprule
+  Type & Definition \\
+  \midrule
+  Integer & String representation of 64-bit signed integer\footnote{\emph{IEEE 754--1985 IEEE Standard for Binary Floating-Point Arithmetic.} IEEE 754--1985, 1985} \\
+  Unsigned & String representation of 64-bit unsigned integer\footnotemark[10] \\
+  Float & String representation of 64-bit floating point number\footnotemark[10] \\
+  Character & One character, other than tab \\
+  String & One or more characters, other than tab \\
+  \bottomrule
+\end{tabularx}
+
+This specification does not contain a means for interchanging custom \ac{BED} format definitions.
+The AutoSQL format\footnote{Kent, W.~James.
+  (2000) ``AutoSQL.''
+  \url{https://hgwdev.gi.ucsc.edu/~kent/exe/doc/autoSql.doc}} provides one method for defining custom \ac{BED} formats in a separate file.
+
+\subsection{Sorting}
+\Ac{BED} \textbf{file}s should be sorted by~\textsf{chrom}, then by~\textsf{chromStart} numerically, and finally by~\textsf{chromEnd} numerically.
+\textsf{chrom} may be sorted using any scheme (such as lexicographic or numeric order), but all lines with the same~\textsf{chrom} value should occur consecutively.
+For example, the lexicographic order of~\texttt{chr1}, \texttt{chr10}, \texttt{chr11}, \texttt{chr12}, {\ldots}, \texttt{chr2}, \texttt{chr20}, \texttt{chr21}, {\ldots}, \texttt{chr3}, {\ldots}, \texttt{chrX}, \texttt{chrY}, \texttt{chrM} is an acceptable sorting.
+The numeric order of~\texttt{chr1}, \texttt{chr2}, {\ldots}, \texttt{chr21}, \texttt{chr22}, \texttt{chrM}, \texttt{chrX}, \texttt{chrY} is also acceptable.
+Regardless of the chromosome sorting scheme, lines for two features on the same chromosome should not have any lines for features on other chromosomes between them.
+
+\subsection{Whitespace}\label{sec:whitespace}
+Though lines may use any kind of whitespace as a delimiter between~\textbf{field}s, a single tab~(\texttt{{\textbackslash}t}) should be used.
+This is because almost all tools support tabs while some tools do not support other kinds of whitespace.
+Also, whitespace within the~\textsf{name}~\textbf{field} may be used only if the \textbf{field}~delimiter is tab throughout the \textbf{file}.
+
+\subsection{Large \acs{BED} files}
+If a~\textbf{file} intended for visualization is over \SI{50}{\mebi\byte} in size, the~\textbf{file} should be converted to~\texttt{bigBed} format, which is an indexed binary format.\footnote{Kent, W.~James et al.
+  (2010) ``BigWig and BigBed: enabling browsing of large distributed datasets.''
+  \emph{Bioinformatics} 26(17):2204--2207.
+  \url{https://doi.org/10.1093/bioinformatics/btq351}}
+The~\texttt{bedToBigBed} program may perform this conversion.\footnote{``bigBed Track Format.''
+  \Ac{UCSC} Genome Browser FAQ, \url{https://genome.ucsc.edu/goldenPath/help/bigBed.html}}
+
+\section{\acs{UCSC} track files}
+
+Track files are files that contain additional information intended for a visualization tool such as the \ac{UCSC} Genome Browser.\footnote{Haeussler, Maximilian et al.
+  (2019) ``The \acl{UCSC} Genome Browser database: 2019 update.''
+  \emph{Nucleic Acids Research} 47(D1):D853--D858.
+  \url{https://doi.org/10.1093/nar/gky1095}}
+Track files contain browser lines and track lines that precede lines from a file format supported by the Genome Browser.\footnote{``Displaying your own annotations in the Genome Browser.'' \ac{UCSC} Genome Browser FAQ, \url{https://genome.ucsc.edu/goldenPath/help/customTrack.html\#lines}}
+Track files are not valid \ac{BED} files --- valid \ac{BED} files must not have any browser or track lines.
+To distinguish between \ac{BED} files and track files, track files should use the file extension~\texttt{.track}.
+
+\section{Acronyms}
+\begin{acronym}[ASCII]
+  \acro{ASCII}{American Standard Code for Information Interchange}
+  \acro{BED}{Browser Extensible Data}
+  \acro{GA4GH}{Global Alliance for Genomics and Health}
+  \acro{regex}{regular expression}
+  \acro{UCSC}{University of California, Santa Cruz}
+\end{acronym}
+
+\section{Acknowledgments}
+
+We thank W.~James Kent and the \ac{UCSC} Genome Browser team for creating the \ac{BED} format.
+We thank W.~James Kent and Hiram Clawson~(\ac{UCSC}); Eric Roberts~(Princess Margaret Cancer Centre); John Marshall~(University of Glasgow); Aaron R.~Quinlan and Brent S.~Pedersen~(University of Utah); Ting Wang~(Washington University in St.~Louis); and the \ac{GA4GH} File Formats Task Team for comments on this specification.
+
+\end{document}
+
+% chktex-file 17
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
