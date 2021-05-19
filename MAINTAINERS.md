@@ -47,6 +47,11 @@ Past refget maintainers include Matt Laird.
 * Alexander Senf (@AlexanderSenf)
 * Robert Davies (@daviesrob)
 
+### BED
+
+* Michael Hoffman (@michaelmhoffman)
+* Aaron Quinlan (@arq5x)
+
 [ga4gh-ff]:  https://www.ga4gh.org/howwework/workstreams/#lsg
 
 

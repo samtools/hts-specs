@@ -3,9 +3,9 @@
 
 \usepackage[letterpaper,margin=1in]{geometry}
 
-\usepackage{acronym}
 \usepackage{amsmath}
 \usepackage{booktabs}
+\usepackage{calc}
 \usepackage[flushmargin,hang]{footmisc}
 \usepackage{microtype}
 \usepackage{newverbs}
@@ -13,22 +13,25 @@
 \usepackage{tabularx}
 \usepackage{todonotes}
 \usepackage[hyperfootnotes=false]{hyperref} % doesn't work in tabulars as currently set
+\usepackage[nohyperlinks]{acronym}
 \usepackage{footnotehyper}
 \usepackage[strict]{changepage}
 \usepackage[binary-units=true]{siunitx}
-\usepackage[mark]{gitinfo2}
+\usepackage{enumitem}
+
+\input{BEDv1.ver}
 
 \hypersetup{colorlinks=true,
   linkcolor=blue,
   filecolor=magenta,
   urlcolor=blue,
-  pdfinfo={githash=\gitHash}}
+  pdfinfo={githash=\commitdesc}}
 
 \definecolor{cverbbg}{gray}{0.93}
 
 \title{The Browser Extensible Data~(BED) format}
 \author{Jeffrey Niu, Danielle Denisko, Michael M.~Hoffman}
-\date{\today}
+\date{\headdate}
 
 \setlength{\emergencystretch}{\hsize}
 \setlength{\footnotemargin}{1em}
@@ -38,18 +41,22 @@
 
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 
+\providecommand*{\Ac}[1]{\ac{#1}} % work around outdated acronym.sty packages
+
+\frenchspacing
+
 % eliminate passive voice warnings
 % chktex-file -3
 
 \begin{document}
-\makeatletter
-\renewcommand*{\AC@hyperlink}[2]{#2} % do not hyperlink acronyms
-\makeatother
-
-
-\frenchspacing
 
 \maketitle
+
+\begin{small}
+\noindent
+The master version of this document can be found at \url{https://github.com/samtools/hts-specs}.
+This printing is version~\commitdesc\ from that repository, last modified on the date shown above.
+\end{small}
 
 \acused{ASCII}
 
@@ -370,7 +377,10 @@ Track files are not valid \ac{BED} files --- valid \ac{BED} files must not have 
 To distinguish between \ac{BED} files and track files, track files should use the file extension~\texttt{.track}.
 
 \section{Acronyms}
-\begin{acronym}[ASCII]
+
+% using the optional argument to acronym to set the label width causes it to use the list environment instead of description, which means we can't set nosep easily
+\setlist[description]{labelwidth=\widthof{\textbf{GA4GH}},nosep}
+\begin{acronym}
   \acro{ASCII}{American Standard Code for Information Interchange}
   \acro{BED}{Browser Extensible Data}
   \acro{GA4GH}{Global Alliance for Genomics and Health}
