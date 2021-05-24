@@ -217,6 +217,8 @@ is a two-character string that defines the format and content of {\tt VALUE}.
 Thus header lines match {\tt
   /\char94@(HD|SQ|RG|PG)(\char92t[A-Za-z][A-Za-z0-9]:[
   -\char126]+)+\$/} or {\tt /\char94@CO\char92t.*/}.
+Within each (non-{\tt @CO}) header line, no field tag may appear more than
+once and the order in which the fields appear is not significant.
 
 The following table describes the header record types that may be used
 and their predefined tags.
@@ -259,7 +261,7 @@ meanings can be avoided.}
     are grouped together but the file is not necessarily sorted overall.
     \emph{Valid values}: {\tt none} (default), {\tt query} (alignments are
     grouped by {\sf QNAME}), and {\tt reference} (alignments are grouped by
-    {\sf RNAME}/{\sf POS}).\\\cline{1-3}
+    {\sf RNAME}/{\sf POS}).\\\cline{2-3}
   & {\tt SS} & Sub-sorting order of alignments. Valid values are of the form \emph{sort-order}{\tt :}\emph{sub-sort}, where \emph{sort-order} is the same value stored in the {\tt SO} tag and \emph{sub-sort} is an implementation-dependent colon-separated string further describing the sort order, but with some predefined terms defined in Section~\ref{sec:sub-sort}.
     For example, if an algorithm relies on a {\tt coordinate} sort that, at each coordinate, is further sorted by query name then the header could contain {\tt @HD SO:coordinate SS:coordinate:queryname}.%
 \footnote{The repetition of \emph{sort-order} enables a limited form of validation.
@@ -642,8 +644,9 @@ Each bit is explained in the following table:
 \subsection{The alignment section: optional fields}\label{sec:alnaux}
 All optional fields follow the {\tt TAG:TYPE:VALUE} format
 where {\tt TAG} is a two-character string that matches {\tt /[A-Za-z][A-Za-z0-9]/}.
-Each {\tt TAG} can only appear once in one alignment line. A {\tt TAG}
-containing lowercase letters are reserved for end users.
+Within each alignment line, no {\tt TAG} may appear more than once
+and the order in which the optional fields appear is not significant.
+A {\tt TAG} containing lowercase letters is reserved for end users.
 In an optional field, {\tt TYPE} is a single case-sensitive letter which
 defines the format of {\tt VALUE}:
 \begin{center}\small
@@ -1439,6 +1442,7 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item Clarify that header field tags must be distinct within each line, and that the ordering of both header fields and alignment optional fields is not significant. (Jun 2021)
 \item Clarify the meaning of TLEN when secondary alignments are present. (May 2021)
 \item Bin calculation changed for alignment records whose CIGAR strings consume no reference bases: like unmapped records, they are considered to have length one (rather than zero). (Jan 2021)
 \item Correct the description of index pseudo-bins, which previously stated that {\sf ref\_beg}/{\sf ref\_end}, then named {\sf unmapped\_beg}/{\sf unmapped\_end}, include only placed unmapped reads. (Jul 2020)
