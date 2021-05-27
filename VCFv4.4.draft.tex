@@ -229,8 +229,8 @@ the following ones reserved:
 \begin{itemize}
   \item length: the length of the sequence
   \item md5: MD5 checksum of the sequence as defined in the Sam specification v1\footnote{See Reference MD5 calculation
-      section in \href{https://github.com/samtools/hts-specs/blob/master/SAMv1.pdf}{\tt SAMv1.pdf}.} Briefly, the digest
-      is calculated including all characters outside of the inclusive range 33 (`\char33') to 126 (`\char126').
+      section in \href{https://samtools.github.io/hts-specs/SAMv1.pdf}{\tt SAMv1.pdf}.} Briefly, the digest
+      is calculated excluding all characters outside of the inclusive range 33 (`\char33') to 126 (`\char126').
       and all lowercase characters converted to uppercase. The MD5 digest is calculated as described in
       \href{https://tools.ietf.org/html/rfc1321}{\sl RFC 1321} and presented as a 32 character lowercase hexadecimal number.
   \item URL: tag to indicate where the sequence can be found
