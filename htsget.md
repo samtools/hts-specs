@@ -432,6 +432,7 @@ are specified and `start` is greater than or equal to `end`.
 </td></tr></tbody></table>
 
 ### Example
+{:.no_toc}
 
 ```json
 {
@@ -617,7 +618,7 @@ The client obtains the data block by decoding the embedded base64 payload.
 
 Note: the base64 text should not be additionally percent encoded.
 
-### Reliability & performance considerations
+## Reliability & performance considerations
 
 To provide robustness to sporadic transfer failures, servers should divide large payloads into multiple data blocks in the `urls` array. Then if the transfer of any one block fails, the client can retry that block and carry on, instead of starting all over. Clients may also fetch blocks in parallel, which can improve throughput.
 
@@ -625,7 +626,7 @@ Initial guidelines, which we expect to revise in light of future experience:
 * Data blocks should not exceed ~1GB
 * Inline data URIs should not exceed a few megabytes
 
-### Security considerations
+## Security considerations
 
 The data block URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
 
