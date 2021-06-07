@@ -217,6 +217,8 @@ is a two-character string that defines the format and content of {\tt VALUE}.
 Thus header lines match {\tt
   /\char94@(HD|SQ|RG|PG)(\char92t[A-Za-z][A-Za-z0-9]:[
   -\char126]+)+\$/} or {\tt /\char94@CO\char92t.*/}.
+Within each (non-{\tt @CO}) header line, no field tag may appear more than
+once and the order in which the fields appear is not significant.
 
 The following table describes the header record types that may be used
 and their predefined tags.
@@ -259,12 +261,12 @@ meanings can be avoided.}
     are grouped together but the file is not necessarily sorted overall.
     \emph{Valid values}: {\tt none} (default), {\tt query} (alignments are
     grouped by {\sf QNAME}), and {\tt reference} (alignments are grouped by
-    {\sf RNAME}/{\sf POS}).\\\cline{1-3}
+    {\sf RNAME}/{\sf POS}).\\\cline{2-3}
   & {\tt SS} & Sub-sorting order of alignments. Valid values are of the form \emph{sort-order}{\tt :}\emph{sub-sort}, where \emph{sort-order} is the same value stored in the {\tt SO} tag and \emph{sub-sort} is an implementation-dependent colon-separated string further describing the sort order, but with some predefined terms defined in Section~\ref{sec:sub-sort}.
     For example, if an algorithm relies on a {\tt coordinate} sort that, at each coordinate, is further sorted by query name then the header could contain {\tt @HD SO:coordinate SS:coordinate:queryname}.%
 \footnote{The repetition of \emph{sort-order} enables a limited form of validation.
 For example, {\tt @HD SO:queryname SS:coordinate:TLEN} would indicate that the data has been re-sorted (by query name) by a non-{\tt SS}-aware tool and the {\tt SS} field should be ignored.}
-    If the primary sort is not one of the predefined primary sort orders, then {\tt unsorted} should be used and the subsort is effectively the major sort.
+    If the primary sort is not one of the predefined primary sort orders, then {\tt unsorted} should be used and the sub-sort is effectively the major sort.
     For example, if sorted by an auxiliary tag {\tt MI} then by coordinate then the header could contain {\tt @HD SO:unsorted SS:unsorted:MI:coordinate}.
     \newline
     \emph{Regular expression}: {\tt (coordinate|queryname|unsorted)(:[\verb"A-Za-z0-9_-"]+)+}\\\cline{1-3}
@@ -437,8 +439,8 @@ For segments that have been mapped to the reverse strand, the recorded {\sf SEQ}
 	multiple alignment lines, when its alignment is chimeric or when multiple
 	mappings are given.
 \item {\sf FLAG}: Combination of bitwise FLAGs.\footnote{The manipulation of
-bitwise flags is described at \href{http://en.wikipedia.org/wiki/Flag\_field}
-{Wikipedia (see ``Flag field'')} and elsewhere.}
+bitwise flags is described at \href{http://en.wikipedia.org/wiki/Bit\_field}
+{Wikipedia (see ``Bit field'')} and elsewhere.}
 Each bit is explained in the following table:
   \begin{center}\small
   \begin{tabular}{rrl}
@@ -562,8 +564,9 @@ Each bit is explained in the following table:
   0 when the information is unavailable. This field equals {\sf POS} at the primary line of
   the next read. If {\sf PNEXT} is 0, no assumptions can be made on
   {\sf RNEXT} and bit 0x20.
-\item {\sf TLEN}: signed observed Template LENgth. If all segments are
-  mapped to the same reference sequence, the absolute value of TLEN
+\item {\sf TLEN}: signed observed Template LENgth.
+  For primary reads where the primary alignments of all reads in the template
+  are mapped to the same reference sequence, the absolute value of TLEN
   equals the distance between the mapped end of the template and the
   mapped start of the template, inclusively (i.e., $\mbox{end}-\mbox{start}+1$).%
   \footnote{Thus a segment
@@ -641,8 +644,9 @@ Each bit is explained in the following table:
 \subsection{The alignment section: optional fields}\label{sec:alnaux}
 All optional fields follow the {\tt TAG:TYPE:VALUE} format
 where {\tt TAG} is a two-character string that matches {\tt /[A-Za-z][A-Za-z0-9]/}.
-Each {\tt TAG} can only appear once in one alignment line. A {\tt TAG}
-containing lowercase letters are reserved for end users.
+Within each alignment line, no {\tt TAG} may appear more than once
+and the order in which the optional fields appear is not significant.
+A {\tt TAG} containing lowercase letters is reserved for end users.
 In an optional field, {\tt TYPE} is a single case-sensitive letter which
 defines the format of {\tt VALUE}:
 \begin{center}\small
@@ -912,7 +916,7 @@ standard-compliant extensions:
 \begin{enumerate}
 \item The {\sf F.EXTRA} bit in the header is set to indicate that extra
   fields are present.
-\item The extra field used by BGZF uses the two subfield ID values 66 and 67 (ascii `BC').
+\item The extra field used by BGZF uses the two subfield ID values 66 and 67 (ASCII `BC').
 \item The length of the BGZF extra field payload (field {\sf LEN} in the
   gzip specification) is 2 (two bytes of payload).
 \item The payload of the BGZF extra field is a 16-bit unsigned integer
@@ -1226,7 +1230,7 @@ calls in average.
 
 In the BAI format, each bin may span $2^{29}$, $2^{26}$, $2^{23}$, $2^{20}$,
 $2^{17}$ or $2^{14}$ bp. Bin 0 spans a 512Mbp region, bins 1--8 span 64Mbp,
-9--72 8Mbp, 73--584 1Mbp, 585--4680 128Kbp, and bins 4681--37448 span 16Kbp
+9--72 8Mbp, 73--584 1Mbp, 585--4680 128kbp, and bins 4681--37448 span 16kbp
 regions.  This implies that this index format does not support reference
 chromosome sequences longer than $2^{29}-1$.
 
@@ -1438,6 +1442,8 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item Clarify that header field tags must be distinct within each line, and that the ordering of both header fields and alignment optional fields is not significant. (Jun 2021)
+\item Clarify the meaning of TLEN when secondary alignments are present. (May 2021)
 \item Bin calculation changed for alignment records whose CIGAR strings consume no reference bases: like unmapped records, they are considered to have length one (rather than zero). (Jan 2021)
 \item Correct the description of index pseudo-bins, which previously stated that {\sf ref\_beg}/{\sf ref\_end}, then named {\sf unmapped\_beg}/{\sf unmapped\_end}, include only placed unmapped reads. (Jul 2020)
 \item Add {\tt DNBSEQ} to the list of {\tt @RG PL} header tag values. (Apr 2020)

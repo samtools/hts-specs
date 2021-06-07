@@ -54,7 +54,9 @@ and validate it can round trip in and out of CRAM, as those files
 contain a variety of edge cases.
 
 Each CRAM file has an associated SAM file which represents the decoded
-data.
+data.  All listed CRAM files below are in the passed subdirectory
+unless explicitly stated otherwise.
+
 
 Prerequisites
 -------------
@@ -71,12 +73,18 @@ An empty file to check the file definition can be read.
 We require a SAM header too, but this is also empty (using one
 block, see below).
 
-- Empty CRAM file (0000_empty_noref.cram)
+- Empty CRAM file (failed/0000_empty_noref.cram)
   - File definition
   - SAM header container (zero content)
   - [End of file; no EOF block so may emit warning]
 
-  [Produced by manually removing EOF from 0001_empty_eof.cram]
+  [ Produced by manually removing EOF from 0001_empty_eof.cram ]
+
+    This file is classified as "failed" as the CRAM specification
+    states that the EOF block is mandatory.  However it is included in
+    this list as it is the minimal starting point for CRAM development,
+    validating handling of the file definition. (Implementors are free
+    to decide whether this constitutes a warning or a hard error.)
 
 - Empty CRAM file with EOF block (0001_empty_eof.cram)
   - As above, but with official EOF block.
