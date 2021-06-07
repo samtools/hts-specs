@@ -281,7 +281,7 @@ QUAL	| Base quality scores
 
 Example: `fields=QNAME,FLAG,POS`.
 
-As with range filtering, a server may return more fields than explicitly requested -- a possibility which clients must be prepared to handle. The `fieldsParameterEffective` attribute in the GA4GH service-info metadata (see below) indicates whether a server supports filtering individual fields. In any case, servers must not generate a response that is invalid under the respective format specification (for example, `SEQ` is required if `QUAL` is requested).
+As with range filtering, a server may include more fields than explicitly requested, a possibility which clients must be prepared to handle. The `fieldsParameterEffective` attribute in the GA4GH service-info metadata (see below) indicates whether a server supports filtering individual fields. In any case, servers must not generate any response payload that is invalid under the respective format specification (for example, if the request includes `QUAL`, then the response must provide `SEQ` as well).
 
 # POST request
 
