@@ -5,6 +5,10 @@ suppress_footer: true
 ---
 
 # Htsget retrieval API spec v1.3.0
+{:.no_toc}
+
+* Do not remove this line (it will not be displayed)
+{:toc}
 
 # Design principles
 
@@ -50,6 +54,7 @@ The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when a
 For errors that are specific to the `htsget` protocol, the response body SHOULD be a JSON object (content-type `application/json`) providing machine-readable information about the nature of the error, along with a human-readable description. The structure of this JSON object is described as follows.
 
 ### Error Response JSON fields
+{:.no_toc}
 
 <table>
 <tr markdown="block"><td>
@@ -428,6 +433,7 @@ are specified and `start` is greater than or equal to `end`.
 </td></tr></tbody></table>
 
 ### Example
+{:.no_toc}
 
 ```json
 {
@@ -613,7 +619,7 @@ The client obtains the data block by decoding the embedded base64 payload.
 
 Note: the base64 text should not be additionally percent encoded.
 
-### Reliability & performance considerations
+## Reliability & performance considerations
 
 To provide robustness to sporadic transfer failures, servers should divide large payloads into multiple data blocks in the `urls` array. Then if the transfer of any one block fails, the client can retry that block and carry on, instead of starting all over. Clients may also fetch blocks in parallel, which can improve throughput.
 
@@ -621,7 +627,7 @@ Initial guidelines, which we expect to revise in light of future experience:
 * Data blocks should not exceed ~1GB
 * Inline data URIs should not exceed a few megabytes
 
-### Security considerations
+## Security considerations
 
 The data block URL and headers might contain embedded authentication tokens; therefore, production clients and servers should not unnecessarily print them to console, write them to logs, embed them in error messages, etc.
 
@@ -751,6 +757,7 @@ Example listing of htsget reads API and variants API registrations from a servic
 * [dglazer] add a way to request reads in GA4GH binary format [^d] (e.g. fmt=proto)
 
 ## Existing clarification suggestions
+{:.no_toc}
 
 [^a]: This should probably be specified as a (comma separated?) list in preference order.  If the client can accept both BAM and CRAM it is useful for it to indicate this and let the server pick whichever format it is most comfortable with.
 [^d]: How will compression work in this case - can we benefit from columnar compression as does Parquet?
