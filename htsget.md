@@ -54,6 +54,7 @@ The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when a
 For errors that are specific to the `htsget` protocol, the response body SHOULD be a JSON object (content-type `application/json`) providing machine-readable information about the nature of the error, along with a human-readable description. The structure of this JSON object is described as follows.
 
 ### Error Response JSON fields
+{:.no_toc}
 
 <table>
 <tr markdown="block"><td>
@@ -756,6 +757,7 @@ Example listing of htsget reads API and variants API registrations from a servic
 * [dglazer] add a way to request reads in GA4GH binary format [^d] (e.g. fmt=proto)
 
 ## Existing clarification suggestions
+{:.no_toc}
 
 [^a]: This should probably be specified as a (comma separated?) list in preference order.  If the client can accept both BAM and CRAM it is useful for it to indicate this and let the server pick whichever format it is most comfortable with.
 [^d]: How will compression work in this case - can we benefit from columnar compression as does Parquet?
