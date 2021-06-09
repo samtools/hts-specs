@@ -95,12 +95,15 @@ You may wish to create a file named _GNUmakefile_ (which GNU Make will read in p
 include Makefile
 
 PDFLATEX = texfot pdflatex
+LATEXMK_FLAGS = --silent
+# LATEXMK = scripts/rerun.sh new/$* $(PDFLATEX)
 
 %+test.pdf: new/%.pdf
 	cp $^ $@
 ```
 
-Using `texfot` (where available) hides many of TeX's less interesting log messages.
+Using `texfot` (where available) and/or adding `--silent` to the latexmk invocation hides many of TeX's less interesting log messages.
+Alternatively you can override `$(LATEXMK)` entirely to use the previous _rerun.sh_ script instead of latexmk.
 Adding a rule for individualised PDF filenames allows you to type e.g. `make SAMv1+test.pdf` to generate distinctively-named working PDFs in the main directory.
 If you are working on separate changes in several _hts-specs_ directories at once, using different filenames for each directory helps identify which PDFs you're viewing.
 
