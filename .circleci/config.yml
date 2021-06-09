@@ -2,9 +2,15 @@ version: 2
 jobs:
   build:
     docker:
-      - image: htsspecs/circle-ci-image:0.7
+      - image: ghcr.io/xu-cheng/texlive-full:latest
     steps:
       - checkout
+      - run:
+          name: Install additional tools
+          command: |
+              apk add --no-cache curl git make nodejs npm patch
+              npm install --global circle-github-bot@2.0.1
+
       - run:
           name: Compile the LaTeX
           command: |
@@ -34,6 +40,8 @@ jobs:
 
       - run:
           name: Post PDFs to Github PR
+          environment:
+              NODE_PATH: /usr/lib/node_modules
           command: |
               .circleci/pdf_comment.js
       - store_artifacts:

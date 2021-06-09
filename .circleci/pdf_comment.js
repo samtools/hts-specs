@@ -1,4 +1,4 @@
-#!/usr/bin/env nodejs
+#!/usr/bin/env node
 
 const bot = require("circle-github-bot").create();
 const fs = require('fs');
