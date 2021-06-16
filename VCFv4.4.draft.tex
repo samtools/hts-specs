@@ -432,9 +432,9 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GT		& 1		& String	& Genotype \\
       HQ		& 2		& Integer	& Haplotype quality \\
       MQ		& 1		& Integer	& RMS mapping quality \\
-      PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
-      PP		& G		& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
-      PQ		& 1		& Integer	& Phasing quality \\
+      PL		& G		& Integer	& $-10\log_{10}$-scaled genotype likelihoods rounded to the closest integer \\
+      PP		& G		& Integer	& $-10\log_{10}$-scaled genotype posterior probabilities rounded to the closest integer \\
+      PQ		& 1		& Integer	& Phred-scaled phasing quality \\
       PS		& 1		& Integer	& Phase set \\
 \end{longtable}
 
@@ -520,8 +520,8 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
 
   \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
   \item MQ (Integer): RMS mapping quality, similar to the version in the INFO field.
-  \item PL (Integer): The phred-scaled genotype likelihoods rounded to the closest integer, and otherwise defined in the same way as the GL field.
-  \item PP (Integer): The phred-scaled genotype posterior probabilities rounded to the closest integer, and otherwise defined in the same way as the GP field.
+  \item PL (Integer): The $-10\log_{10}$-scaled genotype likelihoods rounded to the closest integer, and otherwise defined in the same way as the GL field.
+  \item PP (Integer): The $-10\log_{10}$-scaled genotype posterior probabilities rounded to the closest integer, and otherwise defined in the same way as the GP field.
   \item PQ (Integer): Phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set).
   We note that we have not yet included the specific measure for precisely defining ``phasing quality''; our intention for now is simply to reserve the PQ tag for future use as a measure of phasing quality.
   \item PS (non-negative 32-bit Integer): Phase set, defined as a set of phased genotypes to which this genotype belongs.
@@ -549,13 +549,14 @@ Several tag names follow conventions indicating how their values are represented
 \begin{itemize}
     \item The `L' suffix means \emph{likelihood} as log-likelihood in the sampling distribution, $\log_{10} \Pr(\mathrm{Data}|\mathrm{Model})$.
     Likelihoods are represented as $\log_{10}$ scale, thus they are negative numbers (e.g.\ GL, CNL).
-    The likelihood can be also represented in some cases as phred-scale in a separate tag (e.g.\ PL).
+    In some cases the likelihood may also be represented using a positive value in a separate tag (e.g.\ PL) using the $-10 \log_{10}(probability\_of\_being\_correct)$ scale.
+    In this case they may also be normalised so the most likely event has a score of 0.
 
     \item The `P' suffix means \emph{probability} as linear-scale probability in the posterior distribution, which is $\Pr(\mathrm{Model}|\mathrm{Data})$. Examples are GP, CNP.
 
     \item The `Q' suffix means \emph{quality} as log-complementary-phred-scale posterior probability, $-10 \log_{10} \Pr(\mathrm{Data}|\mathrm{Model})$, where the model is the most likely genotype that appears in the GT field.
     Examples are GQ, CNQ.
-    The fixed site-level QUAL field follows the same convention (represented as a phred-scaled number).
+    The fixed site-level QUAL field follows the same convention (represented as a phred-scaled number with $QUAL = -10 \log_{10}(probability\_of\_being\_incorrect)$).
 \end{itemize}
 
 
@@ -2223,6 +2224,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \subsection{Changes to VCFv4.3}
 
 \begin{itemize}
+\item Clarify distinction between Phred ($-10\log_{10}(p\_of\_incorrect)$) and $-10\log_{10}(p\_of\_correct)$.
 \item More strict language: ``should'' replaced with ``must'' where appropriate
 \item Tables with Type and Number definitions for INFO and FORMAT reserved keys
 
