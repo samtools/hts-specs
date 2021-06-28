@@ -18,6 +18,7 @@
 \usepackage[strict]{changepage}
 \usepackage[binary-units=true]{siunitx}
 \usepackage{enumitem}
+\usepackage{stackengine}
 
 \input{BEDv1.ver}
 
@@ -74,7 +75,7 @@ This document uses the following typographic conventions:
 \vspace{2ex}
 
 \noindent
-\begin{tabularx}{\textwidth}{r L L}
+\addstackgap[\baselineskip]{\begin{tabularx}{\textwidth}{r L L}
   \toprule
   Style & Meaning & Examples \\
   \midrule
@@ -83,7 +84,7 @@ This document uses the following typographic conventions:
   Fixed-width & Literals or \ac{regex}es\footnote{POSIX/IEEE~1003.1--2017 Extended Regular Expressions, for the ``C'' locale.
                 \emph{IEEE Standard for Information Technology---Portable Operating System Interface~(POSIX) Base Specifications}, IEEE~1003.1--2017, 2017} & \texttt{.bed}{\quad}\texttt{grep}{\quad}\texttt{[[:alnum:]]+}{\quad}\texttt{ATCG} \\
   \bottomrule
-\end{tabularx}
+\end{tabularx}}
 
 \subsection{Terminology and concepts}\label{sec:terms}
 \begin{description}
@@ -170,7 +171,7 @@ The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-bas
 
 \begin{adjustwidth}{-0.5in}{-0.5in}
   \noindent
-  \begin{tabularx}{\linewidth}{r l l l L}
+  \addstackgap[\baselineskip]{\begin{tabularx}{\linewidth}{r l l l L}
     \toprule
     Col & Field & Type & Regex or range & Brief description \\
     \midrule
@@ -187,7 +188,7 @@ The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-bas
     11 & \textsf{blockSizes} & List[Int] & \texttt{([[:digit:]]+,)\{\textsf{blockCount}$-1$\}[[:digit:]]+,?}{\footnotemark} & \textbf{Block} sizes \\
     12 & \textsf{blockStarts} & List[Int] & \texttt{([[:digit:]]+,)\{\textsf{blockCount}$-1$\}[[:digit:]]+,?} & \textbf{Block} start positions \\
     \bottomrule
-  \end{tabularx}\label{sec:table}
+  \end{tabularx}}
   \footnotetext[5]{\texttt{[[:alnum:]\_]} is equivalent to the \ac{regex} \texttt{[A-Za-z0-9\_]}. % chktex 8
       It is also equivalent to the Perl extension \texttt{[[:word:]]}.}
   \footnotetext[6]{\textsf{chromEnd}-\textsf{chromStart} is the maximum number of~\textbf{block}s that may exist without overlaps.}
@@ -341,7 +342,7 @@ Definitions of a custom \ac{BED} format should restrict the type of each \textbf
 Each custom \textbf{field} should contain either one of the following data types or a comma-separated list of values of the same type:
 
 \noindent
-\begin{tabularx}{\textwidth}{r L}
+\addstackgap[\baselineskip]{\begin{tabularx}{\textwidth}{r L}
   \toprule
   Type & Definition \\
   \midrule
@@ -351,7 +352,7 @@ Each custom \textbf{field} should contain either one of the following data types
   Character & One character, other than tab \\
   String & One or more characters, other than tab \\
   \bottomrule
-\end{tabularx}
+\end{tabularx}}
 
 This specification does not contain a means for interchanging custom \ac{BED} format definitions.
 The AutoSQL format\footnote{Kent, W.~James.
