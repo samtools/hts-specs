@@ -42,6 +42,7 @@
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 
 \providecommand*{\Ac}[1]{\ac{#1}} % work around outdated acronym.sty packages
+\newcommand*{\acrodefused}[2]{\acrodef{#1}{#2}\acused{#1}}
 
 \frenchspacing
 
@@ -63,7 +64,7 @@ This printing is version~\commitdesc\ from that repository, last modified on the
 \section{Specification}
 
 \Ac{BED} is a whitespace-delimited file format, where each~\textbf{file} consists of one or more~\textbf{line}s.\footnote{``Frequently Asked Questions: Data File Formats.'' \ac{UCSC} Genome Browser FAQ, \url{https://genome.ucsc.edu/FAQ/FAQformat.html}}
-Each~\textbf{line} describes discrete genomic~\textbf{feature}s by physical start and end position on a linear~\textbf{chromosome}.
+Data are in~\textbf{data line}s, which describe discrete genomic~\textbf{feature}s by physical start and end position on a linear~\textbf{chromosome}.
 The file extension for the \ac{BED} format is~\texttt{.bed}.
 
 \subsection{Typographic conventions}
@@ -98,7 +99,7 @@ This document uses the following typographic conventions:
   A~\textbf{file} that has $n$~\textbf{field}s of the \ac{BED} format, followed by any number of~\textbf{field}s of custom data defined by a user.
 
 \item[BED$n$+$m$:]
-  A~\textbf{file} that has a custom tab-delimited format starting with the first $n$~\textbf{field}s of the \ac{BED} format, followed by $m$~\textbf{field}s of custom data defined by a user.
+  A~\textbf{file} that has a custom format starting with the first $n$~\textbf{field}s of the \ac{BED} format, followed by $m$~\textbf{field}s of custom data defined by a user.
   For example, \textbf{BED6+4}~means a~\textbf{file} with the first 6~\textbf{field}s of the \ac{BED} format, followed by 4~user-defined~\textbf{field}s.
 
 \item[block:]
@@ -108,10 +109,10 @@ This document uses the following typographic conventions:
 \item[chromosome:]
   A sequence of nucleobases with a name.
   In this specification, ``chromosome'' may also describe a named scaffold that does not fit the biological definition of a chromosome.
-  Often, chromosomes are numbered starting from~\texttt{1}.
-  There are also often sex chromosomes such as~\texttt{W}, \texttt{X}, \texttt{Y}, and~\texttt{Z}, mitochondrial chromosomes such as~\texttt{M}, and possibly scaffolds from an unknown chromosome, often labeled~\texttt{Un}.
-  The name of each chromosome is often prefixed with~\texttt{chr}.
-  Examples of chromosome names include~\texttt{chr1}, \texttt{21}, \texttt{chrX}, \texttt{chrM}, \texttt{chrUn}, \texttt{chr19\_KI270914v1\_alt}, and~\texttt{chrUn\_KI270435v1}.
+  Often, \textbf{chromosome}s are numbered starting from~\texttt{1}.
+  There are also often sex \textbf{chromosome}s such as~\texttt{W}, \texttt{X}, \texttt{Y}, and~\texttt{Z}, mitochondrial \textbf{chromosome}s such as~\texttt{M}, and possibly scaffolds from an unknown chromosome, often labeled~\texttt{Un}.
+  The name of each \textbf{chromosome} is often prefixed with~\texttt{chr}.
+  Examples of \textbf{chromosome} names include~\texttt{chr1}, \texttt{21}, \texttt{chrX}, \texttt{chrM}, \texttt{chrUn}, \texttt{chr19\_KI270914v1\_alt}, and~\texttt{chrUn\_KI270435v1}.
 
 \item[feature:]
   A linear region of a~\textbf{chromosome} with specified properties.
@@ -119,7 +120,12 @@ This document uses the following typographic conventions:
 
 \item[field:]
   Data stored as non-tab text.
-  All~\textbf{field}s are 7-bit US \ac{ASCII}.
+  All~\textbf{field}s are 7-bit US \ac{ASCII} printable characters\footnote{Characters in the range `\texttt{{\textbackslash}x20}' to `\texttt{{\textbackslash}x7e}', therefore not including any control characters}.
+  Only some \textbf{field}s can be empty, and they can only be empty when a single tab is used as the \textbf{field separator}.
+
+\item[field separator:]
+  One or more horizontal whitespace characters (space or tab).
+  The \textbf{field} separator must match the \ac{regex}~\texttt{[ {\textbackslash}]+}.
 
 \item[file:]
   Sequence of one or more~\textbf{line}s.
@@ -130,7 +136,7 @@ This document uses the following typographic conventions:
   Discussed more fully in~\autoref{sec:lines}
 
 \item[line separator:]
-  Either carriage return, line feed, or carriage return followed by line feed.
+  Either carriage return, newline, or carriage return followed by newline\footnote{A newline is defined as `\texttt{{\textbackslash}n}'}
   The same \textbf{line separator} must be used throughout the \textbf{file}.
 \end{description}
 
@@ -138,24 +144,23 @@ This document uses the following typographic conventions:
 
 \subsubsection{Data lines}
 
-Data lines contain \textbf{feature}~information.
-A data line is composed of~\textbf{field}s separated by whitespace.
-The whitespace must match the \ac{regex}~\texttt{[[:space:]]+}\footnote{\texttt{[[:space:]]} includes the following characters: space, form-feed, newline, carriage-return, tab, and vertical-tab}.
+\textbf{Data line}s contain \textbf{feature}~information.
+A \textbf{data line} is composed of~\textbf{field}s separated by \textbf{field separator}s.
 
 \subsubsection{Comment lines and blank lines}
 
-Both comment lines and blank lines provide no~\textbf{feature} data.
+Both \textbf{comment line}s and \textbf{blank line}s provide no~\textbf{feature} data.
 
-Comment lines start with~\texttt{\#} with no whitespace beforehand.
-A~\texttt{\#} appearing anywhere else in a line is treated as~\textbf{feature} data, not a comment.
+\textbf{Comment line}s start with~\texttt{\#} with no horizontal whitespace beforehand.
+A~\texttt{\#} appearing anywhere else in a \textbf{data line} is treated as~\textbf{feature} data, not a comment.
 
-Blank lines consist entirely of whitespace.
-Both comment and blank lines may appear as any line in a~\textbf{file}, at the beginning, middle, or end of the file.
+\textbf{Blank line}s consist entirely of horizontal whitespace.
+Both comment and blank \textbf{line}s may appear as any \textbf{line} in a~\textbf{file}, at the beginning, middle, or end of the \textbf{file}.
 They may appear in any quantity.
 
 \subsection{\acs{BED} fields}
 
-Each~\textbf{data line} contains between~3 and 12~whitespace-delimited~\textbf{field}s.
+Each~\textbf{data line} contains between~3 and 12~~\textbf{field}s delimited by a \textbf{field separator}.
 The first 3~\textbf{field}s are mandatory, and the last 9~\textbf{field}s are optional.
 In optional~\textbf{field}s, the order is binding---if 1~\textbf{field} is filled, then all previous~\textbf{field}s must also be filled.
 However, \textbf{BED10} and \textbf{BED11} are prohibited.
@@ -172,7 +177,7 @@ The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-bas
     1 & \textsf{chrom} & String & \texttt{[[:alnum:]\_]\{1,255\}}{\footnotemark} & \textbf{Chromosome} name \\
     2 & \textsf{chromStart} & Int & $[0, 2^{64}-1]$ & \textbf{Feature} start position \\
     3 & \textsf{chromEnd} & Int & $[0, 2^{64} -1]$ & \textbf{Feature} end position \\
-    4 & \textsf{name} & String & \texttt{[{\textasciicircum}{\textbackslash}t]\{0,255\}} & \textbf{Feature} description \\
+    4 & \textsf{name} & String & \texttt{[{\textasciicircum}{\textbackslash}t]\{1,255\}} & \textbf{Feature} description \\
     5 & \textsf{score} & Int & $[0, 1000]$ & A numerical value \\
     6 & \textsf{strand} & String & \texttt{[-+.]} & \textbf{Feature} strand \\
     7 & \textsf{thickStart} & Int & $[0, 2^{64}-1]$ & Thick start position \\
@@ -191,16 +196,18 @@ The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-bas
 
 \subsection{Coordinates}
 \begin{enumerate}
-\item \textsf{chrom}: The name of the~\textbf{chromosome} or scaffold where the~\textbf{feature} is present.
+\item \textsf{chrom}: The name of the~\textbf{chromosome} where the~\textbf{feature} is present.
   Limiting only to word characters only, instead of all non-whitespace characters, makes \ac{BED}~\textbf{file}s more portable to varying environments which may make different assumptions about allowed characters.
   The name must be between~1 and 255~characters long, inclusive.
 
-\item \textsf{chromStart}: Start position of the~\textbf{feature} on the~\textbf{chromosome} or scaffold.
+\item \textsf{chromStart}: Start position of the~\textbf{feature} on the~\textbf{chromosome}.
   \textsf{chromStart}~must be an integer greater than or equal to~0 and less than the total number of bases of the~\textbf{chromosome} to which it belongs.
   If the size of the~\textbf{chromosome} is unknown, then \textsf{chromStart}~must be less than or equal to~$2^{64} - 1$, which is the maximum size of an unsigned 64-bit integer.
 
-\item \textsf{chromEnd}: End position of the~\textbf{feature} on the~\textbf{chromosome} or scaffold.
+\item \textsf{chromEnd}: End position of the~\textbf{feature} on the~\textbf{chromosome}.
   \textsf{chromEnd}~must be an integer greater than or equal to the value of~\textsf{chromStart} and less than or equal to the total number of bases in the~\textbf{chromosome} to which it belongs.
+  If \textsf{chromEnd}~is equal to~\textsf{chromStart}, this indicates a \textbf{feature} between \textsf{chromStart} and the preceding base, such as an insertion.
+  When \textsf{chromStart} and \textsf{chromEnd} are both~0, this indicates a feature before the entire~\textbf{chromosome}.
   If the size of the~\textbf{chromosome} is unknown, then \textsf{chromEnd}~must be less than or equal to~$2^{64} - 1$, the maximum size of an unsigned 64-bit integer.
 \end{enumerate}
 
@@ -209,17 +216,19 @@ The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-bas
   \setcounter{enumi}{3}
 
 \item \textsf{name}: String that describes the~\textbf{feature}.
-  The name must be~0 to 255~non-tab characters.
-  The name must not be empty or contain whitespace, unless all fields in file are delimited exclusively using single tab characters.
-  A visual representation of the \ac{BED} format may display the name next to the~\textbf{feature}.
+  \textsf{name} must be~1 to 255~non-tab characters.
+  \textsf{name} must not be empty or contain whitespace, unless the only \textbf{field separator} is a single tab.
+  A visual representation of the \ac{BED} format may display \textsf{name} next to the~\textbf{feature}.
 
 \item \textsf{score}: Integer between~0 and~1000, inclusive.
-  If the~\textbf{feature} has no score information, then~\texttt{0} should be used as a default value.
-  A visual representation of the \ac{BED} format may shade features differently depending on their score.
+  In~\textbf{BED6+} \textbf{file}s where all \textbf{feature}s have uninformative \textsf{score}s, \texttt{0} should be used as the \textsf{score} on every \textbf{data line}.
+  A visual representation of the \ac{BED} format may shade \textbf{feature}s differently depending on their \textsf{score}.
 
 \item \textsf{strand}: Strand that the~\textbf{feature} appears on.
-  The strand may either refer to the~\texttt{+}~(sense or coding) strand or the~\texttt{-}~(antisense or complementary) strand.
-  If the~\textbf{feature} has no strand information or unknown strand, then a dot~(\texttt{.}) must be used.
+  The \textsf{strand} may either refer to the~\texttt{+}~(sense or coding) strand or the~\texttt{-}~(antisense or complementary) strand.
+  If the~\textbf{feature} has no \textsf{strand} information or unknown \textsf{strand}, then a dot~(\texttt{.}) must be used as a default value.
+  \textsf{strand} cannot be empty in \textbf{BED6+} \textbf{file}s.
+  A parser should treat \textbf{files} that are not \textbf{BED6+} as if \textsf{strand} where \texttt{.}.
 \end{enumerate}
 
 \subsection{Display attributes}
@@ -232,10 +241,10 @@ The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-bas
 
 \item \textsf{thickEnd}: End position at which the~\textbf{feature} is visualized with a thicker or accented display.
   This value must be an integer greater than or equal to~\textsf{thickStart} and less than or equal to~\textsf{chromEnd}, inclusive.
-  In \ac{BED} files with fewer than 7~\textbf{field}s, the whole~\textbf{feature} has thick display.
-  In \textbf{BED7+}~files, to achieve the same effect, set \textsf{thickStart}~equal to~\textsf{chromStart} and \textsf{thickEnd}~equal to~\textsf{chromEnd}.
+  In \ac{BED} \textbf{file}s with fewer than 7~\textbf{field}s, the whole~\textbf{feature} has thick display.
+  In \textbf{BED7+}~\textbf{file}s, to achieve the same effect, set \textsf{thickStart}~equal to~\textsf{chromStart} and \textsf{thickEnd}~equal to~\textsf{chromEnd}.
   If this~\textbf{field} is not specified but \textsf{thickStart}~is, then the entire~\textbf{feature} has thick display.
-  There is no specified default value for~\textsf{thickEnd}.
+  For \textbf{BED7+} \textbf{file}s that are not \textbf{BED8+}, there is no specified default value for~\textsf{thickEnd}.
 
 \item \textsf{itemRgb}: A triple of integers that determines the color of this~\textbf{feature} when visualized.
   The triple is three integers separated by commas.
@@ -249,15 +258,15 @@ The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-bas
 
 \item \textsf{blockCount}: Number of~\textbf{block}s in the~\textbf{feature}.
   \textsf{blockCount}~must be an integer greater than 0.
-  \textsf{blockCount}~is mandatory in~\textbf{BED12+}~files.
-  Null or empty~\textsf{blockCount} are not allowed, because~\textsf{blockSizes} and~\textsf{blockStarts} rely on~\textsf{blockCount}.
+  \textsf{blockCount}~is mandatory in~\textbf{BED12+}~\textbf{file}s.
+  Empty~\textsf{blockCount} are not allowed, because~\textsf{blockSizes} and~\textsf{blockStarts} rely on~\textsf{blockCount}.
   A visual representation of the \ac{BED} format may have blocks appear thicker than the rest of the~\textbf{feature}.
 
 \item \textsf{blockSizes}: Comma-separated list of length~\textsf{blockCount} containing the size of each~\textbf{block}.
   There must be no spaces before or after commas.
   There may be a trailing comma after the last element of the list.
-  \textsf{blockSizes}~is mandatory in \textbf{BED12+} files.
-  Null or empty~\textsf{blockSizes} is not allowed, because \textsf{blockStarts}~cannot be verified without~\textsf{blockSizes}.
+  \textsf{blockSizes}~is mandatory in \textbf{BED12+} \textbf{file}s.
+  Empty~\textsf{blockSizes} is not allowed, because \textsf{blockStarts}~cannot be verified without~\textsf{blockSizes}.
 
 \item \textsf{blockStarts}: Comma-separated list of length~\textsf{blockCount} containing each \textbf{block}'s~start position, relative to~\textsf{chromStart}.
   There must not be spaces before or after the commas.
@@ -269,8 +278,8 @@ The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-bas
   The first~\textbf{block} must start at~\textsf{chromStart} and the last~\textbf{block} must end at~\textsf{chromEnd}.
   Moreover, the~\textbf{block}s must not overlap.
   The list must be sorted in ascending order.
-  \textsf{blockStarts}~is mandatory in~\textbf{BED12+} files.
-  Null or empty~\textsf{blockStarts} is not allowed.
+  \textsf{blockStarts}~is mandatory in~\textbf{BED12+} \textbf{file}s.
+  Empty~\textsf{blockStarts} is not allowed.
 \end{enumerate}
 
 \section{Examples}
@@ -306,25 +315,28 @@ The last~\textbf{block} ends at~\textsf{chromEnd} since the last~\textbf{block} 
 \subsection{Mandatory fields}
 \begin{itemize}
 \item \textsf{chrom}: The name of each~\textbf{chromosome} should also match the names from a reference genome, if applicable.
-  For example, in the human genome, the chromosomes may be named~\texttt{chr1} to \texttt{chr22}, \texttt{chrX}, \texttt{chrY}, and~\texttt{chrM}.
+  For example, in the human genome, the \textbf{chromosome}s may be named~\texttt{chr1} to \texttt{chr22}, \texttt{chrX}, \texttt{chrY}, and~\texttt{chrM}.
   Names should be consistent within a~\textbf{file}.
   For example, one should not use both~\texttt{17} and~\texttt{chr17} to represent the same~\textbf{chromosome} in the same~\textbf{file}.
 \end{itemize}
 
 \subsection{Optional fields}\label{sec:optional}
 \begin{itemize}
-\item \textsf{name}: If a feature has no name, then a dot~(\texttt{.}) should be used.
-  Names should avoid using the space character even if the file is exclusively delimited with single tab characters because parsers may interpret a space as a delimiter.
+\item \textsf{name}: If a \textbf{feature} has no name, then a dot~(\texttt{.}) should be used.
+  Names should avoid using the space character even if the only \textbf{field separator} is a single tab character, because parsers may interpret a space as a \textbf{field separator}.
 
 \item \textsf{itemRgb}: Eight or fewer colors should be used as too many colors may slow down visualizations and are difficult for humans to distinguish.\footnote{``Frequently
     Asked Questions: Data File Formats.'' \ac{UCSC} Genome Browser FAQ,
     \url{https://genome.ucsc.edu/FAQ/FAQformat.html}}
+  Color schemes should be colorblind-friendly.
+  Red-green color schemes should be avoided.
 
 \end{itemize}
 
 \subsection{User-defined fields}
 
-Custom data \textbf{fields} may contain any non-tab 7-bit US \ac{ASCII} character.
+Custom data \textbf{fields} may contain any printable 7-bit US \ac{ASCII} character (which includes spaces, but excludes tabs, newlines, and other control characters).
+Custom data \textbf{fields} can only be empty when a single tab is used as the \textbf{field separator} throughout the \textbf{file}.
 Definitions of a custom \ac{BED} format should restrict the type of each \textbf{field} to the extent possible.
 Each custom \textbf{field} should contain either one of the following data types or a comma-separated list of values of the same type:
 
@@ -348,15 +360,16 @@ The AutoSQL format\footnote{Kent, W.~James.
 
 \subsection{Sorting}
 \Ac{BED} \textbf{file}s should be sorted by~\textsf{chrom}, then by~\textsf{chromStart} numerically, and finally by~\textsf{chromEnd} numerically.
-\textsf{chrom} may be sorted using any scheme (such as lexicographic or numeric order), but all lines with the same~\textsf{chrom} value should occur consecutively.
+\textsf{chrom} may be sorted using any scheme (such as lexicographic or numeric order), but all \textbf{data line}s with the same~\textsf{chrom} value should occur consecutively.
 For example, the lexicographic order of~\texttt{chr1}, \texttt{chr10}, \texttt{chr11}, \texttt{chr12}, {\ldots}, \texttt{chr2}, \texttt{chr20}, \texttt{chr21}, {\ldots}, \texttt{chr3}, {\ldots}, \texttt{chrX}, \texttt{chrY}, \texttt{chrM} is an acceptable sorting.
 The numeric order of~\texttt{chr1}, \texttt{chr2}, {\ldots}, \texttt{chr21}, \texttt{chr22}, \texttt{chrM}, \texttt{chrX}, \texttt{chrY} is also acceptable.
-Regardless of the chromosome sorting scheme, lines for two features on the same chromosome should not have any lines for features on other chromosomes between them.
+Arbitrary orderings of~\textsf{chrom} are allowed, but regardless of the \textbf{chromosome} sorting scheme, \textbf{data line}s for two \textbf{feature}s on the same \textbf{chromosome} should not have any \textbf{data line}s for \textbf{feature}s on other \textbf{chromosome}s between them.
+Multiple \textbf{feature}s that have the same~\textsf{chrom}, \textsf{chromStart}, and \textsf{chromEnd} can appear in any order.
 
 \subsection{Whitespace}\label{sec:whitespace}
-Though lines may use any kind of whitespace as a delimiter between~\textbf{field}s, a single tab~(\texttt{{\textbackslash}t}) should be used.
+Though \textbf{data line}s may use any kind of horizontal whitespace as a delimiter between~\textbf{field}s, a single tab~(\texttt{{\textbackslash}t}) should be used.
 This is because almost all tools support tabs while some tools do not support other kinds of whitespace.
-Also, whitespace within the~\textsf{name}~\textbf{field} may be used only if the \textbf{field}~delimiter is tab throughout the \textbf{file}.
+Also, spaces within the~\textsf{name}~\textbf{field} may be used only if the \textbf{field}~delimiter is tab throughout the \textbf{file}.
 
 \subsection{Large \acs{BED} files}
 If a~\textbf{file} intended for visualization is over \SI{50}{\mebi\byte} in size, the~\textbf{file} should be converted to~\texttt{bigBed} format, which is an indexed binary format.\footnote{Kent, W.~James et al.
@@ -366,6 +379,20 @@ If a~\textbf{file} intended for visualization is over \SI{50}{\mebi\byte} in siz
 The~\texttt{bedToBigBed} program may perform this conversion.\footnote{``bigBed Track Format.''
   \Ac{UCSC} Genome Browser FAQ, \url{https://genome.ucsc.edu/goldenPath/help/bigBed.html}}
 
+\section{Information supplied out-of-band}
+
+Some information about a \ac{BED} \textbf{file} can only be supplied unambiguously separately from the \textbf{data line}s of the \ac{BED} \textbf{file}.
+This specification does not contain a means for interchanging this information.
+Information that must be supplied out-of-band include:
+
+\begin{itemize}
+    \item Which of the first~4 to 12~\textbf{fields} are standard \ac{BED} \textbf{fields} and which are custom \textbf{field}s.
+    \item The genome assembly that define \textsf{chrom}, \textsf{chromStart}, and \textsf{chromEnd}.
+    \item The semantics of \textbf{fields} such as \textsf{score}, \textsf{itemRgb}, thick vs.~thin positions, and block vs.~non-block positions.
+    \item The definitions of custom \textbf{field}s.
+    \item Whether the \textbf{field separator} is a single tab character.
+\end{itemize}
+
 \section{\acs{UCSC} track files}
 
 Track files are files that contain additional information intended for a visualization tool such as the \ac{UCSC} Genome Browser.\footnote{Haeussler, Maximilian et al.
@@ -373,8 +400,8 @@ Track files are files that contain additional information intended for a visuali
   \emph{Nucleic Acids Research} 47(D1):D853--D858.
   \url{https://doi.org/10.1093/nar/gky1095}}
 Track files contain browser lines and track lines that precede lines from a file format supported by the Genome Browser.\footnote{``Displaying your own annotations in the Genome Browser.'' \ac{UCSC} Genome Browser FAQ, \url{https://genome.ucsc.edu/goldenPath/help/customTrack.html\#lines}}
-Track files are not valid \ac{BED} files --- valid \ac{BED} files must not have any browser or track lines.
-To distinguish between \ac{BED} files and track files, track files should use the file extension~\texttt{.track}.
+Track files are not valid \ac{BED} \textbf{file}s --- valid \ac{BED} \textbf{file}s must not have any browser or track lines.
+To distinguish between \ac{BED} \textbf{file}s and track files, track files should use the file extension~\texttt{.track}.
 
 \section{Acronyms}
 
@@ -388,10 +415,13 @@ To distinguish between \ac{BED} files and track files, track files should use th
   \acro{UCSC}{University of California, Santa Cruz}
 \end{acronym}
 
+\acrodefused{EMBL}{European Molecular Biology Laboratory}
+
 \section{Acknowledgments}
 
 We thank W.~James Kent and the \ac{UCSC} Genome Browser team for creating the \ac{BED} format.
-We thank W.~James Kent and Hiram Clawson~(\ac{UCSC}); Eric Roberts~(Princess Margaret Cancer Centre); John Marshall~(University of Glasgow); Aaron R.~Quinlan and Brent S.~Pedersen~(University of Utah); Ting Wang~(Washington University in St.~Louis); and the \ac{GA4GH} File Formats Task Team for comments on this specification.
+We thank W.~James Kent and Hiram Clawson~(\ac{UCSC}); Eric Roberts~(University Health Network); John Marshall~(University of Glasgow); Aaron R.~Quinlan and Brent S.~Pedersen~(University of Utah); Ting Wang~(Washington University in St.~Louis); Daniel Perrett and Simon Brent (Wellcome Sanger Institute); Jasper Saris (Erasmus Medical Center); Zhenyu Zhang (University of Chicago); Andrew Yates (\ac{EMBL}---European Bioinformatics Institute); and the \ac{GA4GH} File Formats Task Team for comments on this specification.
+
 
 \end{document}
 
