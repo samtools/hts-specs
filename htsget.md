@@ -346,6 +346,7 @@ The server SHOULD respond with an `InvalidInput` error if any parameters other t
 </td></tr>
 </table>
 </td></tr>
+<tr markdown="block"><td>
 
 `fields`  _optional array of strings_
 </td><td>
