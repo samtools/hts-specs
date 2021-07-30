@@ -752,6 +752,44 @@ Example listing of htsget reads API and variants API registrations from a servic
 ]
 ```
 
+# Version history
+
+This appendix lists the significant functionality introduced and changes made in each published version of the htsget protocol.
+
+## 1.3.0 (March 2021)
+{:.no_toc}
+
+Added POST requests for both reads and variants endpoints, allowing data to be queried via the HTTP `POST` method, and defining a JSON request object to be used as the POST payload instead of the corresponding set of htsget query parameters.
+Defined a new `PayloadTooLarge` error type.
+
+<!-- The service-info addition (without POST) existed briefly as an unpublished htsget 1.2.1 version. -->
+Added a `service-info` endpoint and defined an `htsget` service-info response sub-object with `datatype`, `formats`, `fieldsParameterEffective`, and `tagsParametersEffective` optional fields.
+
+Added discussion of registering htsget endpoints in a GA4GH service registry.
+
+## 1.2.0 (May 2019)
+{:.no_toc}
+
+Added a `class=header` query parameter for requesting headers only rather than including reads/variants data records.
+
+Defined response ticket `"class": "header"|"body"` optional field to enable reusing previously downloaded URL data when making repeated requests to the same `<id>` resource.
+
+## 1.1.1 (January 2019)
+{:.no_toc}
+
+Added `referenceName=*` special case for requesting unplaced unmapped reads from a reads endpoint.
+
+## 1.1.0 (June 2018)
+{:.no_toc}
+
+Added the `GET /variants/<id>` endpoint, allowing for querying VCF/BCF variants data.
+
+## 1.0.0 (October 2017)
+{:.no_toc}
+
+The first published version of the htsget protocol, which specified only the `GET /reads/<id>` endpoint.
+BAM/CRAM sequencing data could be queried via the HTTP `GET` method using `format`, `referenceName`/`start`/`end`, `fields`, and `tags`/`notags` query parameters.
+
 
 [CORS]:     http://www.w3.org/TR/cors/
 [Data URI]: https://en.wikipedia.org/wiki/Data_URI_scheme
