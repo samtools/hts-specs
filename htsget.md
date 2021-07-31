@@ -31,7 +31,7 @@ This protocol specification is accompanied by a [corresponding OpenAPI descripti
 
 # Protocol essentials
 
-All API invocations are made to a configurable HTTP(S) endpoint, receive URL-encoded query string parameters, and return JSON output. Successful requests result with HTTP status code 200 and have UTF8-encoded JSON in the response body. The server may provide responses with chunked transfer encoding. The client and server may mutually negotiate HTTP/2 upgrade using the standard mechanism.
+All API invocations are made to a configurable HTTP(S) endpoint, receive either URL-encoded query string parameters (GET) or a JSON request body (POST), and return JSON output. Successful requests result with HTTP status code 200 and have UTF8-encoded JSON in the response body. The server may provide responses with chunked transfer encoding. The client and server may mutually negotiate HTTP/2 upgrade using the standard mechanism.
 
 The JSON response is an object with the single key `htsget` as described in the [Response JSON fields](#response-json-fields) and [Error Response JSON fields](#error-response-json-fields) sections.  This ensures that, apart from whitespace differences, the message always starts with the same prefix.  The presence of this prefix can be used as part of a client's response validation.
 
@@ -292,7 +292,7 @@ As with range filtering, a server may include more fields than explicitly reques
 
 In addition to the GET method, servers may optionally also accept POST requests.
 The main differences to the GET method are that query parameters are encoded in JSON format and it is possible to request data for more than one genomic range.
-The data returned is a JSON "ticket", as described for the GET method.
+The data returned is the same JSON "ticket" as that returned by the GET method, as detailed below.
 
 Htsget POST requests must be "safe" as defined in section 4.2.1 of [RFC 7231], that is they must be essentially read-only.
 
@@ -303,7 +303,7 @@ If an incoming POST request is too large, the server SHOULD reply with a `Payloa
 
 POST and GET requests should use the same URLs.
 
-POST requests MUST NOT use and of the query parameters defined for GET requests on the URL.
+POST requests MUST NOT use any of the query parameters defined for GET requests on the URL.
 If query parameters are present, the server SHOULD reply with an `InvalidInput` error.
 
 ## Request body
@@ -601,7 +601,7 @@ If the ticket contains `class` fields, the client may reuse previously downloade
 
 ### HTTPS data block URLs
 
-1. must have percent-encoded path and query (e.g. javascript encodeURIComponent; python urllib.urlencode)
+1. must have percent-encoded path and query (e.g. JavaScript `encodeURIComponent`; Python `urllib.urlencode`)
 2. must accept GET requests
 3. should provide CORS
 4. should allow multiple request retries, within reason
