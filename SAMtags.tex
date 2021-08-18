@@ -502,7 +502,7 @@ Each modified base listed also has a quality value associated with it.
 Given the unmodified base already has a phred likelihood, this base modification quality should be interpreted as the likelihood of this modification being correct given an assumption the original call is correct.
 
 \begin{description}
-\item[Mm:Z:\tagregex{([ACGTUN][-+]([a-z]+|[0-9]+)(,[0-9]+)*;)*}]
+\item[Mm:Z:\tagregex{([ACGTUN][-+][.?]([a-z]+|[0-9]+)(,[0-9]+)*;)*}]
 \hfill\\
 The first character is the unmodified ``fundamental'' base as reported
 by the sequencing instrument for the top strand.
@@ -510,14 +510,16 @@ It must be one of {\tt A}, {\tt C}, {\tt G}, {\tt T}, {\tt U} (if RNA) or {\tt N
 Note {\tt N} may be used to match any base rather than specifically an {\tt N} call by the sequencing instrument.
 This may be used in situations where the base modification is not a derivation of a standard base type.
 This is followed by either plus or minus indicating the strand the modification was observed on (relative to the original sequenced strand of {\sf SEQ} with plus meaning same orientation),\footnote{Hence a tool that may reverse complement sequences does not need to understand how to manipulate the {\tt Mm} and {\tt Ml} tags.} and one or more base modification codes.
+This is followed by either {\tt .} or {\tt ?} describing how skipped seq bases of the stated base type should be interpreted by downstream tools. 
+When this flag is {\tt .} these bases should be assumed to be unmodified. When it is {\tt ?} there is no information about the modification status of these bases provided.
 This is then followed by a comma separated list of how many unmodified seq bases of the stated base type to skip, stored as a delta to the last and starting with 0 as the first (or next) base, starting from the uncomplemented 5' end of the {\sf SEQ} field.
 This number series is comparable to the numbers in an {\tt MD} tag,
 albeit counting specific base types only and potentially reverse-complemented.
 
-For example {\tt C+m,5,12,0;} tells us there are three
+For example {\tt C+.m,5,12,0;} tells us there are three
 5-Methylcytosine bases on the top strand of {\sf SEQ}.
 The first 5 {\tt C} bases are unmodified and the 6th is modified, as are the 19th (with 12 between the 6th and 19th) and 20th.
-Similarly {\tt G-m,14;} indicates the 15th {\tt G} is a 5-Methylcytosine on the opposite strand (still counting using the top strand base calls from the 5' end).
+Similarly {\tt G-.m,14;} indicates the 15th {\tt G} is a 5-Methylcytosine on the opposite strand (still counting using the top strand base calls from the 5' end).
 When the alignment record is reverse complemented (SAM flag 0x10) these two examples do not change since the tag always refers to the as-sequenced orientation.
 See the test/SAMtags/MM-orient.sam file for examples.
 
@@ -527,13 +529,13 @@ If SAM FLAG 0x10 is set, indicating that SEQ has been reverse complemented from 
 Note it is permitted for the coordinate list to be empty (for example {\tt Mm:Z:C+m;}), which may be used as an explicit indicator that this base modification is not present.
 It is not permitted for coordinates to be beyond the length of the sequence.
 
-When multiple modifications are listed, for example {\tt C+mh,5,12,0;}, it indicates the modification may be any of the stated bases.
+When multiple modifications are listed, for example {\tt C+.mh,5,12,0;}, it indicates the modification may be any of the stated bases.
 The associated confidence values in the {\tt Ml} tag may be used to determine the relative likelihoods between the options.
-The example above is equivalent to {\tt C+m,5,12,0;C+h,5,12,0;}, although this will have a different ordering of confidence values in {\tt Ml}.
-Note ChEBI codes cannot be used in the multi-modification form (such as the {\tt C+mh} example above).
+The example above is equivalent to {\tt C+.m,5,12,0;C+.h,5,12,0;}, although this will have a different ordering of confidence values in {\tt Ml}.
+Note ChEBI codes cannot be used in the multi-modification form (such as the {\tt C+.mh} example above).
 
 If the modification is not one of the standard common types (listed below) it can be specified as a numeric ChEBI code.
-For example {\tt C+76792,57;} is the same as {\tt C+h,57;}.
+For example {\tt C+.76792,57;} is the same as {\tt C+.h,57;}.
 
 An unmodified base of {\tt N} means count any base in {\sf SEQ}, not only those of {\tt N}.
 Thus {\tt N+n,100;} means the 101st base is Xanthosine (n), irrespective of the sequence composition.
