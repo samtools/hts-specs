@@ -61,6 +61,8 @@ NEW =
 diff/%.pdf: %.tex
 	BIBINPUTS=:.. TEXINPUTS=:..:../new latexdiff-vc --pdf --dir diff --force --git --only-changes --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
 
+diff/BEDv1.pdf: BEDv1.tex
+	BIBINPUTS=:.. TEXINPUTS=:..:../new latexdiff-vc --config LATEX=lualatex --pdf --dir diff --force --git --only-changes --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
 
 show-styles:
 	@sed -n '/\\usepackage/s/.*{\(.*\)}$$/\1/p' *.tex | sort | uniq -c
