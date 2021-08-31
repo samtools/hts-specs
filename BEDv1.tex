@@ -110,16 +110,22 @@ This document uses several typographic conventions~(\autoref{tab:typographic-con
   A coordinate system where the first base starts at position~0, and the start of the interval is included but the end is not.
   For example, for a sequence of bases~\texttt{ACTGCG}, the bases given by the interval~[2,~4) are~\texttt{TG}. % chktex 9
 
+\item[\acs{BED} field:]
+  One of the 12~standard~\textbf{field}s defined in this specification.
+  The first 3~\textbf{\acs{BED} field}s are mandatory.
+  The remaining 9~\textbf{\acs{BED} field}s are optional.
+
 \item[\acs{BED}$n$:]
-  A~\textbf{file} with the first $n$~\textbf{field}s of the \ac{BED} format.
-  For example, \textbf{BED3}~means a~\textbf{file} with only the first 3~\textbf{field}s; \textbf{BED12}~means a~\textbf{file} with all 12~\textbf{field}s.
+  A~\textbf{file} with the first $n$~\textbf{\acs{BED} field}s.
+  For example, \textbf{BED3}~means a~\textbf{file} with only the first 3~\textbf{\acs{BED} field}s; \textbf{BED12}~means a~\textbf{file} with all 12~\textbf{\acs{BED} field}s.
 
 \item[\acs{BED}$n$+:]
-  A~\textbf{file} that has the first $n$~\textbf{field}s of the \ac{BED} format, followed by any number of~\textbf{field}s of custom data defined by a user.
+  A~\textbf{file} that has at least the first $n$~\textbf{\acs{BED} field}s, followed by zero or more of the remaining~\textbf{\acs{BED} field}s and zero or more~\textbf{custom field}s.
+  A~\acs{BED}$n$ \textbf{file} also satisfies the definition of a \acs{BED}$n$+ \textbf{file}.
 
 \item[\acs{BED}$n$+$m$:]
-  A~\textbf{file} that has a custom format starting with the first $n$~\textbf{field}s of the \ac{BED} format, followed by $m$~\textbf{field}s of custom data defined by a user.
-  For example, \textbf{BED6+4}~means a~\textbf{file} with the first 6~\textbf{field}s of the \ac{BED} format, followed by 4~user-defined~\textbf{field}s.
+  A~\textbf{file} that has a custom format starting with the first $n$~\textbf{field}s of the \ac{BED} format, followed by $m$~\textbf{custom field}.
+  For example, \textbf{BED6+4}~means a~\textbf{file} with the first 6~\textbf{\acs{BED} field}s, followed by 4~custom~\textbf{field}s.
 
 \item[block:]
   Linear subfeatures within a~\textbf{feature}.
@@ -133,6 +139,10 @@ This document uses several typographic conventions~(\autoref{tab:typographic-con
   The name of each \textbf{chromosome} is often prefixed with~\texttt{chr}.
   Examples of \textbf{chromosome} names include~\texttt{chr1}, \texttt{21}, \texttt{chrX}, \texttt{chrM}, \texttt{chrUn}, \texttt{chr19\_KI270914v1\_alt}, and~\texttt{chrUn\_KI270435v1}.
 
+\item[custom field:]
+  A~\textbf{field} defined by the \textbf{file}~creator.
+  \textbf{Custom field}s occur in each \textbf{line} after any \textbf{\acs{BED} field}s.
+
 \item[feature:]
   A linear region of a~\textbf{chromosome} with specified properties.
   For example, a~\textbf{file}'s~\textbf{feature}s might all be peaks called from ChIP-seq data, or transcript.
@@ -140,13 +150,12 @@ This document uses several typographic conventions~(\autoref{tab:typographic-con
 \item[field:]
   Data stored as non-tab text.
   All~\textbf{field}s are 7-bit US \ac{ASCII} printable characters\footnote{Characters in the range \texttt{{\textbackslash}x20} to \texttt{{\textbackslash}x7e}, therefore not including any control characters}.
-  Only custom \textbf{field}s can be empty, and they can only be empty when a single tab is used as the \textbf{field separator} throughout the \textbf{file}.
 
 \item[field separator:]
   One or more horizontal whitespace characters (space or tab).
-  The \textbf{field} separator must match the \ac{regex}~\texttt{[ {\textbackslash}t]+}.
-  The \textbf{field} separator can vary throughout the \textbf{file}.
-  Some capabilities of the \ac{BED} format, however, are available only when a single tab is used as the \textbf{field} separator throughout the \textbf{file}.
+  The \textbf{field separator} must match the \ac{regex}~\texttt{[ {\textbackslash}t]+}.
+  The \textbf{field separator} can vary throughout the \textbf{file}.
+  Some capabilities of the \ac{BED} format, however, are available only when a single tab is used as the \textbf{field separator} throughout the \textbf{file}.
 
 \item[file:]
   Sequence of one or more~\textbf{line}s.
@@ -154,7 +163,7 @@ This document uses several typographic conventions~(\autoref{tab:typographic-con
 \item[line:]
   String terminated by a~\textbf{line separator}, in one of the following classes.
   Either a~\textbf{data line}, a~\textbf{comment line}, or a~\textbf{blank line}.
-  Discussed more fully in~\autoref{sec:lines}
+  Discussed more fully in~\autoref{sec:lines}.
 
 \item[line separator:]
   Either carriage return~(\texttt{{\textbackslash}r}, equivalent to \texttt{{\textbackslash}x0d}), newline~(\texttt{{\textbackslash}r}, equivalent to \texttt{{\textbackslash}x0a}), or carriage return followed by newline~(\texttt{{\textbackslash}r{\textbackslash}n}, equivalent to \texttt{{\textbackslash}x0d{\textbackslash}x0a}).
@@ -181,10 +190,10 @@ They may appear in any quantity.
 
 \subsection{\acs{BED} fields}
 
-Each~\textbf{data line} contains between~3 and 12~\textbf{field}s delimited by a \textbf{field separator}.
-The first 3~\textbf{field}s are mandatory, and the last 9~\textbf{field}s are optional~(\autoref{tab:fields}).
-In optional~\textbf{field}s, the order is binding---if a \textbf{field} is filled, then all previous~\textbf{field}s must also be filled.
-Any mandatory or optional \textbf{field} included on any \textbf{data line} in the \textbf{file} must not be empty on any other \textbf{data line}.
+Each~\textbf{data line} contains between~3 and 12~\textbf{\acs{BED} field}s delimited by a \textbf{field separator}.
+The first 3~\textbf{\acs{BED} field}s are mandatory, and the last 9~\textbf{\acs{BED} field}s are optional~(\autoref{tab:fields}).
+In optional~\textbf{\acs{BED} field}s, the order is binding---if an optional \textbf{\acs{BED} field} is filled, then all previous~\textbf{\acs{BED} field}s must also be filled.
+Any \textbf{\acs{BED} field} included on any \textbf{data line} in the \textbf{file} must not be empty on any other \textbf{data line}.
 \textbf{BED10} and \textbf{BED11} are prohibited.
 
 \begin{savenotes}
@@ -192,7 +201,7 @@ Any mandatory or optional \textbf{field} included on any \textbf{data line} in t
     \begin{adjustwidth}{-0.5in}{-0.5in}
       \begin{tabularx}{\linewidth}{r l l l L}
         \toprule
-        Col & Field & Type & Regex or range & Brief description \\
+        Col & \acs{BED} Field & Type & Regex or range & Brief description \\
         \midrule
         1
         & \textsf{chrom}
@@ -226,12 +235,12 @@ Any mandatory or optional \textbf{field} included on any \textbf{data line} in t
         \bottomrule
       \end{tabularx}
     \end{adjustwidth}
-    \caption{\textbf{Fields.}}\label{tab:fields}
+    \caption{\textbf{\acs{BED} Fields.}}\label{tab:fields}
   \end{table}
 \end{savenotes}
 
 In a \ac{BED}~\textbf{file}, each~\textbf{data line} must have the same number of~\textbf{field}s.
-The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-based, half-open coordinate system}.
+The positions in \textbf{\acs{BED} field}s are all described in the~\textbf{0-based, half-open coordinate system}.
 
 \subsection{Coordinates}
 \begin{enumerate}
@@ -258,7 +267,7 @@ The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-bas
   \textsf{name} must be~1 to 255~non-tab characters.
   \textsf{name} must not contain whitespace, unless the only \textbf{field separator} is a single tab.
   Multiple \textbf{data line}s may share the same \textsf{name}.
-  In \textbf{BED5+} \textbf{file}s where all \textbf{features} have uninformative \textsf{name}s, dot~(\texttt{.}) may be used as a \textsf{name} on every \textbf{data line}.
+  In \textbf{BED5+} \textbf{file}s where all \textbf{feature}s have uninformative \textsf{name}s, dot~(\texttt{.}) may be used as a \textsf{name} on every \textbf{data line}.
   A visual representation of the \ac{BED} format may display \textsf{name} next to the~\textbf{feature}.
 
 \item \textsf{score}: Integer between~0 and~1000, inclusive.
@@ -321,6 +330,12 @@ The positions in \ac{BED}~\textbf{field}s are all described in the~\textbf{0-bas
   \textsf{blockStarts}~is mandatory in~\textbf{BED12+} \textbf{file}s.
 \end{enumerate}
 
+\subsection{Custom fields}
+
+\textbf{Custom field}s defined by the \textbf{file}~creator may contain any printable 7-bit US \ac{ASCII} character (which includes spaces, but excludes tabs, newlines, and other control characters).
+\textbf{Custom field}s may only be empty or contain whitespace when a single tab is used as the \textbf{field separator} throughout the \textbf{file}.
+This specification does not contain a means for interchanging custom \ac{BED} format definitions.
+
 \section{Examples}
 
 \subsection[title]{Example BED6 file from the \acs{UCSC} Genome Browser FAQ\footnote{``Frequently
@@ -351,7 +366,7 @@ The last~\textbf{block} ends at~\textsf{chromEnd} since the last~\textbf{block} 
 
 \section{Recommended practice for the \acs{BED} format}
 
-\subsection{Mandatory fields}
+\subsection{Mandatory \acs{BED} fields}
 \begin{itemize}
 \item \textsf{chrom}: The name of each~\textbf{chromosome} should also match the names from a reference genome, if applicable.
   For example, in the human genome, the \textbf{chromosome}s may be named~\texttt{chr1} to \texttt{chr22}, \texttt{chrX}, \texttt{chrY}, and~\texttt{chrM}.
@@ -359,7 +374,7 @@ The last~\textbf{block} ends at~\textsf{chromEnd} since the last~\textbf{block} 
   For example, one should not use both~\texttt{17} and~\texttt{chr17} to represent the same~\textbf{chromosome} in the same~\textbf{file}.
 \end{itemize}
 
-\subsection{Optional fields}\label{sec:optional}
+\subsection{Optional \acs{BED} fields}\label{sec:optional}
 \begin{itemize}
 \item \textsf{name}: Names should avoid using the space character even if the only \textbf{field separator} is a single tab character, because parsers may interpret a space as a \textbf{field separator}.
 
@@ -371,12 +386,10 @@ The last~\textbf{block} ends at~\textsf{chromEnd} since the last~\textbf{block} 
 
 \end{itemize}
 
-\subsection{User-defined fields}
+\subsection{Custom fields}
 
-Custom data \textbf{fields} may contain any printable 7-bit US \ac{ASCII} character (which includes spaces, but excludes tabs, newlines, and other control characters).
-Custom data \textbf{fields} can only be empty when a single tab is used as the \textbf{field separator} throughout the \textbf{file}.
-Definitions of a custom \ac{BED} format should restrict the type of each \textbf{field} to the extent possible.
-Each custom \textbf{field} should contain either one of several specified data types~(\autoref{tab:custom-data-types}) or a comma-separated list of values of any type other than String.
+Definitions of a custom \ac{BED} format should restrict the type of each \textbf{custom field} to the extent possible.
+Each \textbf{custom field} should contain either one of several specified data types~(\autoref{tab:custom-data-types}) or a comma-separated list of Integer, Unsigned, or Float.
 
 \begin{savenotes}
   \begin{table}
@@ -388,15 +401,14 @@ Each custom \textbf{field} should contain either one of several specified data t
       Unsigned & Decimal string representation of 64-bit unsigned integer \\
       Float & Decimal string representation of 64-bit floating point number\footnote{\emph{IEEE Standard for Binary Floating-Point Arithmetic.}
               IEEE 754--1985, 1985} \\
-      Character & One character, other than tab \\
-      String & One or more characters, other than tab \\
+      Character & One printable character \\
+      String & One or more printable characters \\
       \bottomrule
     \end{tabularx}
     \caption{\textbf{Custom field data types.}}\label{tab:custom-data-types}
   \end{table}
 \end{savenotes}
 
-This specification does not contain a means for interchanging custom \ac{BED} format definitions.
 The AutoSQL format\footnote{Kent, W.~James.
   (2000) ``AutoSQL.''
   \url{https://hgwdev.gi.ucsc.edu/~kent/exe/doc/autoSql.doc}} provides one method for defining custom \ac{BED} formats in a separate file.
@@ -413,14 +425,14 @@ Multiple \textbf{feature}s that have the same~\textsf{chrom}, \textsf{chromStart
 
 Sorting is recommended because the implementation of downstream operations is easier if features of one chromosome are all grouped together and \textsf{chromStart} is non-decreasing within a chromosome.
 
-For \textbf{BED4+} files, a sorting scheme may also order by optional \textbf{field}s and any custom \textbf{field}s.
+For \textbf{BED4+} files, a sorting scheme may also order by optional \textbf{\acs{BED} field}s and any \textbf{custom field}s.
 A recommendation for how to do this is outside the scope of this version of the specification.
 Total deterministic sorting of \ac{BED} \textbf{file}s can prevent downstream analyses from producing different results depending on sort order.
 
 \subsection{Whitespace}\label{sec:whitespace}
 We recommend that only a single tab~(\texttt{{\textbackslash}t}) be used as \textbf{field separator}.
 This is because almost all tools support tabs while some tools do not support other kinds of whitespace.
-Also, spaces within the~\textsf{name}~\textbf{field} may be used only if the \textbf{field separator} is tab throughout the \textbf{file}.
+Also, spaces within the~\textsf{name}~\textbf{\acs{BED} field} may be used only if the \textbf{field separator} is tab throughout the \textbf{file}.
 
 It would be sensible for future major versions of this specification or overlay formats built on top of this specification to require that only a single tab be used as \textbf{field separator}.
 
@@ -445,10 +457,10 @@ This specification does not contain a means for interchanging this information.
 Information that must be supplied out-of-band include:
 
 \begin{itemize}[noitemsep]
-    \item Which of the first~4 to 12~\textbf{fields} are standard \ac{BED} \textbf{fields} and which are custom \textbf{field}s.
+    \item Which of the first~4 to 12~\textbf{field}s are standard \textbf{\acs{BED} field}s and which are \textbf{custom field}s.
     \item The genome assembly that defines \textsf{chrom}, \textsf{chromStart}, and \textsf{chromEnd}.
-    \item The semantics of \textbf{fields} such as \textsf{score}, \textsf{itemRgb}, thick vs.~thin positions, and block vs.~non-block positions.
-    \item The definitions of custom \textbf{field}s.
+    \item The semantics of \textbf{field}s such as \textsf{score}, \textsf{itemRgb}, thick vs.~thin positions, and block vs.~non-block positions.
+    \item The definitions of \textbf{custom field}s.
     \item Whether the \textbf{field separator} is a single tab character.
 \end{itemize}
 
