@@ -176,7 +176,6 @@ Request data in this format. The allowed values for each type of record are:
 * Variants: VCF (default), BCF.
 
 The server SHOULD reply with an `UnsupportedFormat` error if the requested format is not supported.
-[^a]
 </td></tr>
 <tr markdown="block"><td>
 
@@ -752,18 +751,6 @@ Example listing of htsget reads API and variants API registrations from a servic
    }
 ]
 ```
-
-# Possible future enhancements
-
-* add a mechanism to request reads from more than one ID at a time (e.g. for a trio)
-* allow clients to provide a suggested data block size to the server
-* [dglazer] add a way to request reads in GA4GH binary format [^d] (e.g. fmt=proto)
-
-## Existing clarification suggestions
-{:.no_toc}
-
-[^a]: This should probably be specified as a (comma separated?) list in preference order.  If the client can accept both BAM and CRAM it is useful for it to indicate this and let the server pick whichever format it is most comfortable with.
-[^d]: How will compression work in this case - can we benefit from columnar compression as does Parquet?
 
 
 [CORS]:     http://www.w3.org/TR/cors/
