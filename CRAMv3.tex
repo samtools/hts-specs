@@ -797,12 +797,20 @@ BA & encoding\texttt{<}byte\texttt{>} & bases & bases\tabularnewline
 \hline
 QS & encoding\texttt{<}byte\texttt{>} & quality scores & quality scores\tabularnewline
 \hline
+TC\tnote{d} & N/A & legacy field & to be ignored\tabularnewline
+\hline
+TN\tnote{d} & N/A & legacy field & to be ignored\tabularnewline
 \end{tabular}
 
 \begin{tablenotes}
 \item[a] Note RN this is decoded after MF if the record is detached from the mate and we are attempting to auto-generate read names.
 \item[b] The count is reset for each slice so NF can only refer to a record later within this slice.
 \item[c] TL is followed by decoding the tag values themselves, in order of appearance in the tag dictionary.
+\item[d] TC and TN are legacy data series from CRAM 1.0.
+They have no function in CRAM 3.0 and should not be present.
+However some implementations do output them and decoders must silently skip these fields.
+It is illegal for TC and TN to contain any data values, although there
+may be empty blocks associated with them.
 \end{tablenotes}
 \end{threeparttable}
 
