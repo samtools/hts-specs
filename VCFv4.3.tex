@@ -322,8 +322,8 @@ Fixed fields are:
   In other words, the ALT field must be a symbolic allele, or a breakend replacement string, or match the regular expression \texttt{\^{}([ACGTNacgtn]+|\string\*|\string\.)\$}.
   Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.
   (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
-  \item QUAL --- quality: Phred-scaled quality score for the assertion made in ALT. i.e.\ $-10log_{10}$ prob(call in ALT is wrong).
-  If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant).
+  \item QUAL --- quality: Phred-scaled quality score for the assertion made in ALT. i.e.\ $-10\log_{10}$ prob(call in ALT is wrong).
+  If ALT is `.' (no variant) then this is $-10\log_{10}$ prob(variant), and if ALT is not `.' this is $-10\log_{10}$ prob(no variant).
   If unknown, the MISSING value must be specified. (Float)
   \item FILTER --- filter status: PASS if this position has passed all filters, i.e., a call is made at this position.
   Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g.\ ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples.
@@ -443,7 +443,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   Again, use PASS to indicate that all filters have been passed, a semicolon-separated list of codes for filters that fail, or `.' to indicate that filters have not been applied.
   These values should be described in the meta-information in the same way as FILTERs.
   No whitespace or semicolons permitted.
-  \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
+  \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10\log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
   \item GP (Float): Genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities.
   \item GT (String): Genotype, encoded as allele values separated by either of $/$ or $\mid$.
   The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on.
@@ -457,7 +457,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
 	  \item $\mid$ : genotype phased
 	\end{itemize}
 
-  \item GL (Float): Genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields.
+  \item GL (Float): Genotype likelihoods comprised of comma separated floating point $\log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields.
   In presence of the GT field the same ploidy is expected; without GT field, diploidy is assumed.
 
   \textsc{Genotype Ordering.} \label{genotype-fields:genotype-ordering}
@@ -641,8 +641,8 @@ However, the alternate allele assembly file may contain additional information a
 \normalsize
 These keys are analogous to GT/GQ/GL/GP and are provided for genotyping imprecise events by copy number (either because there is an unknown number of alternate alleles or because the haplotypes cannot be determined).
 CN specifies the integer copy number of the variant in this sample.
-CNQ is encoded as a phred quality $-10log_{10}$ p(copy number genotype call is wrong).
-CNL specifies a list of $log_{10}$ likelihoods for each potential copy number, starting from zero.
+CNQ is encoded as a phred quality $-10\log_{10}$ p(copy number genotype call is wrong).
+CNL specifies a list of $\log_{10}$ likelihoods for each potential copy number, starting from zero.
 CNP is 0 to 1-scaled copy number posterior probabilities (and otherwise defined precisely as the CNL field), intended to store imputed genotype probabilities.
 When possible, GT/GQ/GL/GP should be used instead of (or in addition to) these keys.
 
