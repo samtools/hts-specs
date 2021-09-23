@@ -124,8 +124,11 @@ This document uses several typographic conventions~(\autoref{tab:typographic-con
   A~\acs{BED}$n$ \textbf{file} also satisfies the definition of a \acs{BED}$n$+ \textbf{file}.
 
 \item[\acs{BED}$n$+$m$:]
-  A~\textbf{file} that has a custom format starting with the first $n$~\textbf{field}s of the \ac{BED} format, followed by $m$~\textbf{custom field}.
+  A~\textbf{file} that has a custom format starting with the first $n$~\textbf{field}s of the \ac{BED} format, followed by $m$~\textbf{custom field}s.
   For example, \textbf{BED6+4}~means a~\textbf{file} with the first 6~\textbf{\acs{BED} field}s, followed by 4~custom~\textbf{field}s.
+
+\item[blank line:]
+  A~\textbf{line} consisting entirely of horizontal whitespace.
 
 \item[block:]
   Linear subfeatures within a~\textbf{feature}.
@@ -139,9 +142,15 @@ This document uses several typographic conventions~(\autoref{tab:typographic-con
   The name of each \textbf{chromosome} is often prefixed with~\texttt{chr}.
   Examples of \textbf{chromosome} names include~\texttt{chr1}, \texttt{21}, \texttt{chrX}, \texttt{chrM}, \texttt{chrUn}, \texttt{chr19\_KI270914v1\_alt}, and~\texttt{chrUn\_KI270435v1}.
 
+\item[comment line:]
+  A~\textbf{line} that starts with~\texttt{\#} with no horizontal whitespace beforehand.
+
 \item[custom field:]
   A~\textbf{field} defined by the \textbf{file}~creator.
   \textbf{Custom field}s occur in each \textbf{line} after any \textbf{\acs{BED} field}s.
+
+\item[data line:]
+  A~\textbf{line} that contains \textbf{feature}~data.
 
 \item[feature:]
   A linear region of a~\textbf{chromosome} with specified properties.
@@ -166,7 +175,7 @@ This document uses several typographic conventions~(\autoref{tab:typographic-con
   Discussed more fully in~\autoref{sec:lines}.
 
 \item[line separator:]
-  Either carriage return~(\texttt{{\textbackslash}r}, equivalent to \texttt{{\textbackslash}x0d}), newline~(\texttt{{\textbackslash}r}, equivalent to \texttt{{\textbackslash}x0a}), or carriage return followed by newline~(\texttt{{\textbackslash}r{\textbackslash}n}, equivalent to \texttt{{\textbackslash}x0d{\textbackslash}x0a}).
+  Either carriage return~(\texttt{{\textbackslash}r}, equivalent to \texttt{{\textbackslash}x0d}), newline~(\texttt{{\textbackslash}n}, equivalent to \texttt{{\textbackslash}x0a}), or carriage return followed by newline~(\texttt{{\textbackslash}r{\textbackslash}n}, equivalent to \texttt{{\textbackslash}x0d{\textbackslash}x0a}).
   The same \textbf{line separator} must be used throughout the \textbf{file}.
 \end{description}
 
@@ -174,7 +183,7 @@ This document uses several typographic conventions~(\autoref{tab:typographic-con
 
 \subsubsection{Data lines}
 
-\textbf{Data line}s contain \textbf{feature}~information.
+\textbf{Data line}s contain \textbf{feature}~data.
 A \textbf{data line} is composed of~\textbf{field}s separated by \textbf{field separator}s.
 
 \subsubsection{Comment lines and blank lines}
