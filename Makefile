@@ -39,6 +39,8 @@ LATEXMK  = latexmk $(LATEXMK_ENGINE) $(LATEXMK_FLAGS)
 LATEXMK_ENGINE = --pdf --pdflatex='$(PDFLATEX)'
 LATEXMK_FLAGS  =
 
+LATEXDIFF_ENGINE = --config LATEX=pdflatex
+
 new/%.pdf: %.tex
 	$(LATEXMK) --output-directory=new $<
 
@@ -59,10 +61,10 @@ OLD = HEAD
 NEW =
 
 diff/%.pdf: %.tex
-	BIBINPUTS=:.. TEXINPUTS=:..:../new latexdiff-vc --pdf --dir diff --force --git --only-changes --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
+	BIBINPUTS=:.. TEXINPUTS=:..:../new latexdiff-vc $(LATEXDIFF_ENGINE) --pdf --dir diff --force --git --only-changes --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
 
-diff/BEDv1.pdf: BEDv1.tex
-	BIBINPUTS=:.. TEXINPUTS=:..:../new latexdiff-vc --config LATEX=lualatex --pdf --dir diff --force --git --only-changes --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
+diff/BEDv1.pdf: LATEXDIFF_ENGINE = --config LATEX=lualatex
+
 
 show-styles:
 	@sed -n '/\\usepackage/s/.*{\(.*\)}$$/\1/p' *.tex | sort | uniq -c
