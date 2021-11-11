@@ -45,6 +45,11 @@ These formats are discussed on the [vcftools-spec mailing list][vcfspec-ml].
 
 **[BCFv2_qref.tex]** is a quick reference describing just the layout of data within BCF2 files.
 
+Discrete genomic feature data files
+-----------------------------------
+
+**[BEDv1.tex]** is the canonical specification for the GA4GH Browser Extensible Data (BED) format.
+
 File encryption
 ---------------
 
@@ -72,6 +77,7 @@ Transfer protocols
 [VCFv4.4.draft.tex]:  http://samtools.github.io/hts-specs/VCFv4.4.draft.pdf
 [BCFv1_qref.tex]: http://samtools.github.io/hts-specs/BCFv1_qref.pdf
 [BCFv2_qref.tex]: http://samtools.github.io/hts-specs/BCFv2_qref.pdf
+[BEDv1.tex]:    https://samtools.github.io/hts-specs/BEDv1.pdf
 [crypt4gh.tex]: http://samtools.github.io/hts-specs/crypt4gh.pdf
 [Htsget.md]:    http://samtools.github.io/hts-specs/htsget.html
 [Refget.md]:    https://samtools.github.io/hts-specs/refget.html
