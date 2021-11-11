@@ -5,4 +5,3 @@
 ##PEDIGREE=<ID=SampleID,Name_1=Ancestor_1,Name_2=Ancestor_2,Name_3=Ancestor3>
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
 1	123	.	TC	T	.	.	.
-
