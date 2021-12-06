@@ -25,6 +25,7 @@ Specifications:
 - [VCF v4.2](VCFv4.2.pdf)
 - [VCF v4.3](VCFv4.3.pdf)
 - [VCF v4.4 draft](VCFv4.4.draft.pdf)
+- [BED v1](BEDv1.pdf)
 - [crypt4gh](crypt4gh.pdf)
 - [Htsget](htsget.html)
 - [Refget](refget.html)

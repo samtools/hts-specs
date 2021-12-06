@@ -2,6 +2,7 @@ all: pdf
 
 PDFS =	BCFv1_qref.pdf \
 	BCFv2_qref.pdf \
+	$(if $(CIRCLECI),,BEDv1.pdf) \
 	CRAMv2.1.pdf \
 	CRAMv3.pdf \
 	crypt4gh.pdf \
@@ -19,6 +20,7 @@ pdf: $(PDFS:%=new/%)
 %.pdf: new/%.pdf
 	cp $^ $@
 
+new/BEDv1.pdf    diff/BEDv1.pdf:    BEDv1.tex    new/BEDv1.ver
 new/CRAMv2.1.pdf diff/CRAMv2.1.pdf: CRAMv2.1.tex new/CRAMv2.1.ver
 new/CRAMv3.pdf   diff/CRAMv3.pdf:   CRAMv3.tex   new/CRAMv3.ver
 new/crypt4gh.pdf diff/crypt4gh.pdf: crypt4gh.tex new/crypt4gh.ver
@@ -37,8 +39,12 @@ LATEXMK  = latexmk $(LATEXMK_ENGINE) $(LATEXMK_FLAGS)
 LATEXMK_ENGINE = --pdf --pdflatex='$(PDFLATEX)'
 LATEXMK_FLAGS  =
 
+LATEXDIFF_ENGINE = --config LATEX=pdflatex
+
 new/%.pdf: %.tex
 	$(LATEXMK) --output-directory=new $<
+
+new/BEDv1.pdf: LATEXMK_ENGINE = --lualatex
 
 new/CRAMv2.1.ver new/CRAMv3.ver: img/CRAMFileFormat2-1-fig001.png img/CRAMFileFormat2-1-fig002.png img/CRAMFileFormat2-1-fig003.png img/CRAMFileFormat2-1-fig004.png img/CRAMFileFormat2-1-fig005.png img/CRAMFileFormat2-1-fig006.png img/CRAMFileFormat2-1-fig007.png
 
@@ -55,7 +61,9 @@ OLD = HEAD
 NEW =
 
 diff/%.pdf: %.tex
-	BIBINPUTS=:.. TEXINPUTS=:..:../new latexdiff-vc --pdf --dir diff --force --git --only-changes --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
+	BIBINPUTS=:.. TEXINPUTS=:..:../new latexdiff-vc $(LATEXDIFF_ENGINE) --pdf --dir diff --force --git --only-changes --graphics-markup=none --ignore-warnings --revision $(OLD) $(if $(NEW),--revision $(NEW)) $<
+
+diff/BEDv1.pdf: LATEXDIFF_ENGINE = --config LATEX=lualatex
 
 
 show-styles:
