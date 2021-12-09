@@ -177,7 +177,7 @@ Genotype fields specified in the FORMAT field are described as follows:
 
 Possible Types for FORMAT fields are: Integer, Float, Character, and String (this field is otherwise defined precisely as the INFO field).
 
-\subsubsection{Alternative allele field format}
+\subsubsection{Alternative allele field format} \label{altfield}
 Symbolic alternate alleles are described as follows:
 \begin{verbatim}
 ##ALT=<ID=type,Description="description">
@@ -592,16 +592,9 @@ For precise variants, END is $\mbox{POS} + \mbox{length of REF allele} - 1$, and
 \end{verbatim}
 \normalsize
 \end{samepage}
-This key can be derived from the REF/ALT fields but is useful for filtering.
-The reserved values must be used for the types listed below:
-\begin{itemize}
-  \item DEL: Deletion relative to the reference
-  \item INS: Insertion of novel sequence relative to the reference
-  \item DUP: Region of elevated copy number relative to the reference
-  \item INV: Inversion of reference sequence
-  \item CNV: Copy number variable region (may be both deletion and duplication)
-  \item BND: Breakend
-\end{itemize}
+
+This field has been deprecated due to redundancy with ALT.
+Refer to section \ref{altfield} for the set of valid ALT field symbolic structural variant alleles.
 
 \footnotesize
 \begin{verbatim}
@@ -984,7 +977,6 @@ VCF STRUCTURAL VARIANT EXAMPLE
 ##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
 ##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
 ##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
-##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">
 ##ALT=<ID=DEL,Description="Deletion">
 ##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">
 ##ALT=<ID=DEL:ME:L1,Description="Deletion of L1 element">
@@ -1000,12 +992,12 @@ VCF STRUCTURAL VARIANT EXAMPLE
 ##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
 ##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
 #CHROM POS     ID        REF              ALT          QUAL FILTER INFO                                                               FORMAT       NA00001
-1      2827694 rs2376870 CGTGGATGCGGGGAC  C            .    PASS   SVTYPE=DEL;END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14                 GT:GQ        1/1:14
-2       321682 .         T                <DEL>        6    PASS   SVTYPE=DEL;END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62         GT:GQ        0/1:12
-2     14477084 .         C                <DEL:ME:ALU> 12   PASS   SVTYPE=DEL;END=14477381;SVLEN=-297;CIPOS=-22,18;CIEND=-12,32       GT:GQ        0/1:12
-3      9425916 .         C                <INS:ME:L1>  23   PASS   SVTYPE=INS;END=9425916;SVLEN=6027;CIPOS=-16,22                     GT:GQ        1/1:15
-3     12665100 .         A                <DUP>        14   PASS   SVTYPE=DUP;END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500  GT:GQ:CN:CNQ ./.:0:3:16.2
-4     18665128 .         T                <DUP:TANDEM> 11   PASS   SVTYPE=DUP;END=18665204;SVLEN=76;CIPOS=-10,10;CIEND=-10,10         GT:GQ:CN:CNQ ./.:0:5:8.3
+1      2827694 rs2376870 CGTGGATGCGGGGAC  C            .    PASS   END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14                 GT:GQ        1/1:14
+2       321682 .         T                <DEL>        6    PASS   END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62         GT:GQ        0/1:12
+2     14477084 .         C                <DEL:ME:ALU> 12   PASS   END=14477381;SVLEN=-297;CIPOS=-22,18;CIEND=-12,32       GT:GQ        0/1:12
+3      9425916 .         C                <INS:ME:L1>  23   PASS   END=9425916;SVLEN=6027;CIPOS=-16,22                     GT:GQ        1/1:15
+3     12665100 .         A                <DUP>        14   PASS   END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500  GT:GQ:CN:CNQ ./.:0:3:16.2
+4     18665128 .         T                <DUP:TANDEM> 11   PASS   END=18665204;SVLEN=76;CIPOS=-10,10;CIEND=-10,10         GT:GQ:CN:CNQ ./.:0:5:8.3
 \end{verbatim}
 \end{landscape}
 \pagebreak
@@ -1018,7 +1010,6 @@ An arbitrary rearrangement event can be summarized as a set of novel \textbf{adj
 The two breakends at either end of a novel adjacency are called \textbf{mates}.
 
 There is one line of VCF (i.e.\ one record) for each of the two breakends in a novel adjacency.
-A breakend record is identified with the tag ``SVTYPE=BND'' in the INFO field.
 The REF field of a breakend record indicates a base or sequence s of bases beginning at position POS, as in all VCF records.
 The ALT field of a breakend record indicates a replacement for s.
 This ``breakend replacement'' has three parts:
@@ -1058,12 +1049,12 @@ Notice how the ALT field expresses the orientation of the breakends.
 \vspace{0.3cm}
 \begin{tabular}{ l l l l l l l l }
 \#CHROM &POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$2$ & $321681$ & bnd\_W & G & G$]17$:$198982]$ & $6$ & PASS & SVTYPE=BND \\
-$2$ & $321682$ & bnd\_V & T & $]$13:123456$]$T & 6 & PASS & SVTYPE=BND \\
-$13$ & $123456$ & bnd\_U & C & C$[$2:321682$[$ & 6 & PASS & SVTYPE=BND \\
-$13$ & $123457$ & bnd\_X & A & $[$17:198983$[$A & 6 & PASS & SVTYPE=BND \\
-$17$ & $198982$ & bnd\_Y & A & A$]$2:321681$]$ & 6 & PASS & SVTYPE=BND \\
-$17$ & $198983$ & bnd\_Z & C & $[$13:123457$[$C & 6 & PASS & SVTYPE=BND \\
+$2$ & $321681$ & bnd\_W & G & G$]17$:$198982]$ & $6$ & PASS & . \\
+$2$ & $321682$ & bnd\_V & T & $]$13:123456$]$T & 6 & PASS & . \\
+$13$ & $123456$ & bnd\_U & C & C$[$2:321682$[$ & 6 & PASS & . \\
+$13$ & $123457$ & bnd\_X & A & $[$17:198983$[$A & 6 & PASS & . \\
+$17$ & $198982$ & bnd\_Y & A & A$]$2:321681$]$ & 6 & PASS & . \\
+$17$ & $198983$ & bnd\_Z & C & $[$13:123457$[$C & 6 & PASS & . \\
 \end{tabular}
 
 \subsubsection{Inserted Sequence}
@@ -1080,8 +1071,8 @@ Sometimes, as shown in Figure 2, some bases are inserted between the two breaken
 \footnotesize
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$2$ & $321682$ & bnd\_V & T & $]13:123456]$AGTNNNNNCAT & $6$ & PASS & SVTYPE=BND;MATEID=bnd\_U \\
-$13$ & $123456$ & bnd\_U & C & CAGTNNNNNCA$[2:321682[$ & $6$ & PASS & SVTYPE=BND;MATEID=bnd\_V \\
+$2$ & $321682$ & bnd\_V & T & $]13:123456]$AGTNNNNNCAT & $6$ & PASS & MATEID=bnd\_U \\
+$13$ & $123456$ & bnd\_U & C & CAGTNNNNNCA$[2:321682[$ & $6$ & PASS & MATEID=bnd\_V \\
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1099,8 +1090,8 @@ If the insertion is too long to be conveniently stored in the ALT column, as in 
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$13$ & $123456$ & bnd\_U & C & C$[<$ctg1$>:1[$ & $6$ & PASS & SVTYPE=BND \\
-$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:329]$A & $6$ & PASS & SVTYPE=BND \\
+$13$ & $123456$ & bnd\_U & C & C$[<$ctg1$>:1[$ & $6$ & PASS & . \\
+$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:329]$A & $6$ & PASS & . \\
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1110,7 +1101,7 @@ $13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:329]$A & $6$ & PASS & SVTYPE=BND \\
 \vspace{0.3cm}
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$13$ & $321682$ & INS0 & T & C$<$ctg$1>$ & $6$ & PASS & SVTYPE=INS \\
+$13$ & $321682$ & INS0 & T & C$<$ctg$1>$ & $6$ & PASS & . \\
 \end{tabular}
 \vspace{0.3cm}
 
@@ -1120,8 +1111,8 @@ If only a portion of $<$ctg$1>$, say from position $7$ to position $214$, is ins
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$13$ & $123456$ & bnd\_U & C & C$[<$ctg1$>:7[$ & $6$ & PASS & SVTYPE=BND \\
-$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:214]$A & $6$ & PASS & SVTYPE=BND \\
+$13$ & $123456$ & bnd\_U & C & C$[<$ctg1$>:7[$ & $6$ & PASS & . \\
+$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:214]$A & $6$ & PASS & . \\
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1132,10 +1123,10 @@ If $<$ctg$1>$ is circular and a segment from position 229 to position 45 is inse
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$13$ & $123456$ & bnd\_U & C & C$[<$ctg$1>:229[$ & 6 & PASS & SVTYPE=BND \\
-$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:45]$A & 6 & PASS & SVTYPE=BND \\
-$<$ctg$1>$ & 1 & bnd\_X & A & $]<$ctg$1>:329]$A & 6 & PASS & SVTYPE=BND \\
-$<$ctg$1>$ & 329 & bnd\_Y & T & T$[<$ctg$1>:1[$ & 6 & PASS & SVTYPE=BND \\
+$13$ & $123456$ & bnd\_U & C & C$[<$ctg$1>:229[$ & 6 & PASS & . \\
+$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:45]$A & 6 & PASS & . \\
+$<$ctg$1>$ & 1 & bnd\_X & A & $]<$ctg$1>:329]$A & 6 & PASS & . \\
+$<$ctg$1>$ & 329 & bnd\_Y & T & T$[<$ctg$1>:1[$ & 6 & PASS & . \\
 \end{tabular}
 \normalsize
 
@@ -1151,9 +1142,9 @@ If a breakend has multiple mates such as in Figure 4 (either because of breakend
 \footnotesize
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$2$ & $321682$ & bnd\_V & T & $]13:123456]$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U \\
-$13$ & $123456$ & bnd\_U & C & C$[2:321682[$,C$[17:198983[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V,bnd\_Z \\
-$17$ & $198983$ & bnd\_Z & A & $]13:123456]$A & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U \\
+$2$ & $321682$ & bnd\_V & T & $]13:123456]$T & 6 & PASS & MATEID=bnd\_U \\
+$13$ & $123456$ & bnd\_U & C & C$[2:321682[$,C$[17:198983[$ & 6 & PASS & MATEID=bnd\_V,bnd\_Z \\
+$17$ & $198983$ & bnd\_Z & A & $]13:123456]$A & 6 & PASS & MATEID=bnd\_U \\
 \end{tabular}
 \normalsize
 
@@ -1175,8 +1166,8 @@ A breakend's partner may be explicitly named as in Figure 5:
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
 2 & 321681 & bnd\_W & G & G$[13:123460[$ & 6 & PASS & PARID=bnd\_V;MATEID=bnd\_X \\
 2 & 321682 & bnd\_V & T & $]13:123456]$T & 6 & PASS & PARID=bnd\_W;MATEID=bnd\_U \\
-13 & 123456 & bnd\_U & C & C$[2:321682[$ & 6 & PASS &  PARID=bnd\_X;MATEID=bnd\_V \\
-13 & 123460 & bnd\_X & A & $]2:321681]$A & 6 & PASS &  PARID=bnd\_U;MATEID=bnd\_W \\
+13 & 123456 & bnd\_U & C & C$[2:321682[$ & 6 & PASS & PARID=bnd\_X;MATEID=bnd\_V \\
+13 & 123460 & bnd\_X & A & $]2:321681]$A & 6 & PASS & PARID=bnd\_U;MATEID=bnd\_W \\
 \end{tabular}
 \normalsize
 
@@ -1197,10 +1188,10 @@ the records would look like:
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-1 & 0 & bnd\_X & N & $.[13:123457[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V \\
-1 & 1 & bnd\_Y & T & $]13:123456]$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U \\
-13 & 123456 & bnd\_U & C & C$[1:1[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_Y \\
-13 & 123457 & bnd\_V & A & $]1:0]$A & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X \\
+1 & 0 & bnd\_X & N & $.[13:123457[$ & 6 & PASS & MATEID=bnd\_V \\
+1 & 1 & bnd\_Y & T & $]13:123456]$T & 6 & PASS & MATEID=bnd\_U \\
+13 & 123456 & bnd\_U & C & C$[1:1[$ & 6 & PASS & MATEID=bnd\_Y \\
+13 & 123457 & bnd\_V & A & $]1:0]$A & 6 & PASS & MATEID=bnd\_X \\
 \end{tabular}
 \normalsize
 
@@ -1221,10 +1212,10 @@ would be described as:
 \footnotesize
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-2 & 321681 & bnd\_W & G & G$[13:123457[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X;EVENT=RR0 \\
-2 & 321682 & bnd\_V & T & $]13:123456]$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U;EVENT=RR0 \\
-13 & 123456 & bnd\_U & C & C$[2:321682[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V;EVENT=RR0 \\
-13 & 123457 & bnd\_X & A & $]2:321681]$A & 6 & PASS & SVTYPE=BND;MATEID=bnd\_W;EVENT=RR0 \\
+2 & 321681 & bnd\_W & G & G$[13:123457[$ & 6 & PASS & MATEID=bnd\_X;EVENT=RR0 \\
+2 & 321682 & bnd\_V & T & $]13:123456]$T & 6 & PASS & MATEID=bnd\_U;EVENT=RR0 \\
+13 & 123456 & bnd\_U & C & C$[2:321682[$ & 6 & PASS & MATEID=bnd\_V;EVENT=RR0 \\
+13 & 123457 & bnd\_X & A & $]2:321681]$A & 6 & PASS & MATEID=bnd\_W;EVENT=RR0 \\
 \end{tabular}
 \normalsize
 
@@ -1247,7 +1238,7 @@ Either one uses the short hand notation described previously (recommended for si
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-2 & 321682 & INV0 & T & $<$INV$>$ & 6 & PASS & SVTYPE=INV;END=421681 \\
+2 & 321682 & INV0 & T & $<$INV$>$ & 6 & PASS & END=421681 \\
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1258,10 +1249,10 @@ or one describes the breakends:
 \footnotesize
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U;EVENT=INV0 \\
-2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X;EVENT=INV0 \\
-2 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_W;EVENT=INV0 \\
-2 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V;EVENT=INV0 \\
+2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & MATEID=bnd\_U;EVENT=INV0 \\
+2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & MATEID=bnd\_X;EVENT=INV0 \\
+2 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & MATEID=bnd\_W;EVENT=INV0 \\
+2 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & MATEID=bnd\_V;EVENT=INV0 \\
 \end{tabular}
 \normalsize
 
@@ -1285,8 +1276,8 @@ We therefore place both U and V arbitrarily within the interval of possibility:
 \footnotesize
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-2 & 321681 & bnd\_V & T & T$]13:123462]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U;CIPOS=0,6 \\
-13 & 123456 & bnd\_U & A & A$]2:321687]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V;CIPOS=0,6 \\
+2 & 321681 & bnd\_V & T & T$]13:123462]$ & 6 & PASS & MATEID=bnd\_U;CIPOS=0,6 \\
+13 & 123456 & bnd\_U & A & A$]2:321687]$ & 6 & PASS & MATEID=bnd\_V;CIPOS=0,6 \\
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1300,7 +1291,7 @@ Depending on which positions are chosen for the breakends X and Y, it might not 
 This partner relationship can be specified explicitly with the tag PARID=bnd\_X in the VCF line for breakend V and PARID=bnd\_Y in the VCF line for breakend U, and vice versa.
 
 \subsubsection{Single breakends}
-We allow for the definition of a breakend that is not part of a novel adjacency, also identified by the tag SVTYPE=BND.
+We allow for the definition of a breakend that is not part of a novel adjacency.
 We call these single breakends, because they lack a mate.
 Breakends that are unobserved partners of breakends in observed novel adjacencies are one kind of single breakend.
 For example, if the true situation is known to be either as depicted back in Figure 1, and we only observe the adjacency (U,V), and no adjacencies for W, X, Y, or Z, then we cannot be sure whether we have a simple reciprocal translocation or a more complex 3-break operation.
@@ -1311,10 +1302,10 @@ The 4 lines of VCF representing this situation would be:
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-2 & 321681 & bnd\_W & G & G. & 6 & PASS & SVTYPE=BND \\
-2 & 321682 & bnd\_V & T & $]13:123456]$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U \\
-13 & 123456 & bnd\_U & C & C$[2:321682[$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V \\
-13 & 123457 & bnd\_X & A & .A & 6 & PASS & SVTYPE=BND \\
+2 & 321681 & bnd\_W & G & G. & 6 & PASS & . \\
+2 & 321682 & bnd\_V & T & $]13:123456]$T & 6 & PASS & MATEID=bnd\_U \\
+13 & 123456 & bnd\_U & C & C$[2:321682[$ & 6 & PASS & MATEID=bnd\_V \\
+13 & 123457 & bnd\_X & A & .A & 6 & PASS & . \\
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1329,9 +1320,9 @@ Another possible reason for calling single breakends is an observed but unexplai
 \scriptsize
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-3 & 12665 & bnd\_X & A & .A & 6 & PASS & SVTYPE=BND;CIPOS=-50,50 \\
-3 & 12665 & . & A & $<$DUP$>$ & 14 & PASS & SVTYPE=DUP;END=13686;CIPOS=-50,50;CIEND=-50,50 \\
-3 & 13686 & bnd\_Y & T & T. & 6 & PASS & SVTYPE=BND;CIPOS=-50,50 \\
+3 & 12665 & bnd\_X & A & .A & 6 & PASS & CIPOS=-50,50 \\
+3 & 12665 & . & A & $<$DUP$>$ & 14 & PASS & END=13686;CIPOS=-50,50;CIEND=-50,50 \\
+3 & 13686 & bnd\_Y & T & T. & 6 & PASS & CIPOS=-50,50 \\
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1342,9 +1333,9 @@ Finally, if an insertion is detected but only the first few base-pairs provided 
 \scriptsize
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-3 & 12665 & bnd\_X & A & .TGCA & 6 & PASS & SVTYPE=BND;CIPOS=-50,50 \\
-3 & 12665 & . & A & $<$DUP$>$ & 14 & PASS & SVTYPE=DUP;END=13686;CIPOS=-50,50;CIEND=-50,50 \\
-3 & 13686 & bnd\_Y & T & TCC. & 6 & PASS & SVTYPE=BND;CIPOS=-50,50 \\
+3 & 12665 & bnd\_X & A & .TGCA & 6 & PASS & CIPOS=-50,50 \\
+3 & 12665 & . & A & $<$DUP$>$ & 14 & PASS & END=13686;CIPOS=-50,50;CIEND=-50,50 \\
+3 & 13686 & bnd\_Y & T & TCC. & 6 & PASS & CIPOS=-50,50 \\
 \end{tabular}
 \normalsize
 
@@ -1369,10 +1360,10 @@ Using the example of the inversion just above, the VCF code could become:
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Blood & TissueSample\\
-2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U & GT:DPADJ & 0:32 & $0|1:9,21$ \\
-2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X & GT:DPADJ & 0:29 & $0|1:11,25$ \\
-13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_W & GT:DPADJ & 0:34 & $0|1:10,23$ \\
-13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V & GT:DPADJ & 0:31 & $0|1:8,20$ \\
+2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & MATEID=bnd\_U & GT:DPADJ & 0:32 & $0|1:9,21$ \\
+2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & MATEID=bnd\_X & GT:DPADJ & 0:29 & $0|1:11,25$ \\
+13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & MATEID=bnd\_W & GT:DPADJ & 0:34 & $0|1:10,23$ \\
+13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & MATEID=bnd\_V & GT:DPADJ & 0:31 & $0|1:8,20$ \\
 \end{tabular}
 \end{flushleft}
 \normalsize
@@ -1385,10 +1376,10 @@ However, a more evolved algorithm could attempt actually deconvolving the two ge
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Blood & TumorSample \\
-2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_U & GT:CNADJ & 0:1 & 1:1 \\
-2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & SVTYPE=BND;MATEID=bnd\_X & GT:CNADJ & 0:1 & 1:1 \\
-13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & SVTYPE=BND;MATEID=bnd\_W & GT:CNADJ & 0:1 & 1:1 \\
-13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & SVTYPE=BND;MATEID=bnd\_V & GT:CNADJ & 0:1 & 1:1 \\
+2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & MATEID=bnd\_U & GT:CNADJ & 0:1 & 1:1 \\
+2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & MATEID=bnd\_X & GT:CNADJ & 0:1 & 1:1 \\
+13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & MATEID=bnd\_W & GT:CNADJ & 0:1 & 1:1 \\
+13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & MATEID=bnd\_V & GT:CNADJ & 0:1 & 1:1 \\
 \end{tabular}
 \end{flushleft}
 \normalsize
