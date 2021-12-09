@@ -677,7 +677,37 @@ $MEINFO$ consists of successive quadruplets of records for each ALT allele.
 ##INFO=<ID=DBRIPID,Number=A,Type=String,Description="ID of this element in DBRIP">
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakends">
 ##INFO=<ID=PARID,Number=A,Type=String,Description="ID of partner breakend">
-##INFO=<ID=EVENT,Number=A,Type=String,Description="ID of event associated to breakend">
+##INFO=<ID=EVENT,Number=1,Type=String,Description="ID of associated event">
+##INFO=<ID=EVENTTYPE,Number=1,Type=String,Description="Type of associated event">
+\end{verbatim}
+\normalsize
+
+Whilst simple events such as deletions and duplications can be wholly represented by a single VCF record, complex rearrangements such as chromothripsis result in a large number of breakpoints.
+VCF uses the $EVENT$ field to group such related records together, and $EVENTTYPE$ to classify these events.
+All records with the same $EVENT$ value are considered to be part of the same event.
+
+The following $EVENTTYPE$ values are reserved and should be used when appropriate:
+
+\begin{itemize}
+  \item DEL - Deletion
+  \item DEL:ME - Deletion of mobile element with respect to the reference
+  \item INS - Insertion
+  \item INS:ME - Insertion of mobile element
+  \item DUP - Duplication
+  \item DUP:TANDEM - Tandem duplication
+  \item DUP:DISPERSED - Dispersed duplication
+  \item INV - Inversion
+  \item TRA - Translocation
+  \item TRA:BALANCED - Balanced inter-chromosomal translocation
+  \item TRA:UNBALANCED - Unbalanced inter-chromosomal translocation
+  \item CHROMOTHRIPSIS - Chromothripsis
+  \item CHROMOPLEXY - Chromoplexy
+  \item BFB - breakage fusion bridge
+  \item DOUBLEMINUTE - Double minute
+\end{itemize}
+The sematics of other $EVENTTYPE$ values is implementation-defined.
+\footnotesize
+\begin{verbatim}
 ##INFO=<ID=CILEN,Number=.,Type=Integer,Description="Confidence interval for the SVLEN field">
 \end{verbatim}
 \normalsize
