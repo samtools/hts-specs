@@ -90,6 +90,8 @@ or
   {\tt MD} & Z & String encoding mismatched and deleted reference bases \\
   {\tt MF} & ? & Reserved for backwards compatibility reasons \\
   {\tt MI} & Z & Molecular identifier; a string that uniquely identifies the molecule from which the record was derived \\
+  {\tt ML} & B,C & Base modification probabilities \\
+  {\tt MM} & Z & Base modifications / methylation  \\
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
   {\tt NH} & i & Number of reported alignments that contain the query in the current record \\
   {\tt NM} & i & Edit distance to the reference \\
@@ -471,27 +473,6 @@ Color read sequence on the original strand of the read. The primer base must be 
 Color read quality on the original strand of the read. Same encoding as {\sf QUAL}; same length as {\tt CS}.
 \end{description}
 
-\section{Draft tags}
-
-These are tags which have been proposed and are broadly accepted to
-become standard tags, but a review or probationary period has been
-deemed useful.  They use the locally-defined tag namespace and
-processing software should consider that the tags may have local usage
-for other purposes.
-
-\begin{center}\small
-% This table is sorted alphabetically
-\begin{longtable}{ccp{12.5cm}}
-  \hline
-  {\bf Tag} & {\bf Type} & {\bf Description} \\
-  \hline
-  \endhead
-  {\tt Mm} & Z & Base modifications / methylation  \\
-% {\tt MP} & Z & Base modification qualities \\
-  {\tt Ml} & B,C & Base modification probabilities \\
-\end{longtable}
-\end{center}
-
 \subsection{Base modifications}
 
 Base modifications, including base methylation, are represented as a series of edits from the primary unmodified sequence as originally reported by the sequencing instrument.
@@ -502,14 +483,14 @@ Each modified base prediction listed also has a quality value associated with it
 Given the unmodified base already has a phred likelihood, this base modification quality should be interpreted as the likelihood of this modification being correct given an assumption the original call is correct.
 
 \begin{description}
-\item[Mm:Z:\tagregex{([ACGTUN][-+]([a-z]+|[0-9]+)[.?]?(,[0-9]+)*;)*}]
+\item[MM:Z:\tagregex{([ACGTUN][-+]([a-z]+|[0-9]+)[.?]?(,[0-9]+)*;)*}]
 \hfill\\
 The first character is the unmodified ``fundamental'' base as reported
 by the sequencing instrument for the top strand.
 It must be one of `{\tt A}', `{\tt C}', `{\tt G}', `{\tt T}', `{\tt U}' (if RNA) or `{\tt N}' for anything else, including any IUPAC ambiguity codes in the reported SEQ field.
 Note `{\tt N}' may be used to match any base rather than specifically an `{\tt N}' call by the sequencing instrument.
 This may be used in situations where the base modification is not a derivation of a standard base type.
-This is followed by either plus or minus indicating the strand the modification was observed on (relative to the original sequenced strand of {\sf SEQ} with plus meaning same orientation),\footnote{Hence a tool that may reverse complement sequences does not need to understand how to manipulate the {\tt Mm} and {\tt Ml} tags.} and one or more base modification codes.
+This is followed by either plus or minus indicating the strand the modification was observed on (relative to the original sequenced strand of {\sf SEQ} with plus meaning same orientation),\footnote{Hence a tool that may reverse complement sequences does not need to understand how to manipulate the {\tt MM} and {\tt ML} tags.} and one or more base modification codes.
 Following the base modification codes is an optional `{\tt .}' or `{\tt ?}' describing how skipped seq bases of the stated base type should be interpreted by downstream tools.
 When this flag is `{\tt ?}' there is no information about the modification status of the skipped bases provided.
 When this flag is not present, or it is `{\tt .}', these bases should be assumed to have low probability of modification.\footnote{The decision whether a base is assumed to be unmodified or has a probability explicitly provided is up to the modification calling program. Some programs will elide calls with modification probabilites below a threshold to provide a more compact modification tag.}
@@ -519,7 +500,7 @@ albeit counting specific base types only and potentially reverse-complemented.
 
 For example `{\tt C+m,5,12,0;}' tells us there are three
 potential 5-Methylcytosine bases on the top strand of {\sf SEQ}.
-The first 5 `{\tt C}' bases are unmodified and the 6th, 19th and 20th have modification status indicated by the corresponding probabilities in the {\tt Ml} tag. The 12 cytosines between the 6th and 19th cytosine are unmodified. Modification probabilities for the 17 skipped cytosines are not provided.
+The first 5 `{\tt C}' bases are unmodified and the 6th, 19th and 20th have modification status indicated by the corresponding probabilities in the {\tt ML} tag. The 12 cytosines between the 6th and 19th cytosine are unmodified. Modification probabilities for the 17 skipped cytosines are not provided.
 
 When the `{\tt ?}' flag is present the tag `{\tt C+m?,5,12,0;}' tells us the modification status of the first five 
 cytosine bases is unknown, the sixth cytosine is called (as either modified or unmodified), followed by 12 more unknown cytosines, and the 19th and 20th are called.
@@ -531,12 +512,12 @@ See the test/SAMtags/MM-orient.sam file for examples.
 This permits modifications to be listed on either strand with the rare potential for both strands to have a modification at the same site.
 If SAM FLAG 0x10 is set, indicating that SEQ has been reverse complemented from the sequence observed by the sequencing machine, note that these base modification field values will be in the opposite orientation to SEQ and other derived SAM fields.
 
-Note it is permitted for the coordinate list to be empty (for example `{\tt Mm:Z:C+m;}'), which may be used as an explicit indicator that this base modification is not present.
+Note it is permitted for the coordinate list to be empty (for example `{\tt MM:Z:C+m;}'), which may be used as an explicit indicator that this base modification is not present.
 It is not permitted for coordinates to be beyond the length of the sequence.
 
 When multiple modifications are listed, for example `{\tt C+mh,5,12,0;}', it indicates the modification may be any of the stated bases.
-The associated confidence values in the {\tt Ml} tag may be used to determine the relative likelihoods between the options.
-The example above is equivalent to `{\tt C+m,5,12,0;C+h,5,12,0;}', although this will have a different ordering of confidence values in {\tt Ml}.
+The associated confidence values in the {\tt ML} tag may be used to determine the relative likelihoods between the options.
+The example above is equivalent to `{\tt C+m,5,12,0;C+h,5,12,0;}', although this will have a different ordering of confidence values in {\tt ML}.
 Note ChEBI codes cannot be used in the multi-modification form (such as the `{\tt C+mh}' example above).
 
 If the modification is not one of the standard common types (listed below) it can be specified as a numeric ChEBI code.
@@ -618,27 +599,49 @@ N & N &       & Ambiguity code; any mod & \\
 % For example, a C base that has 95\% chance of being modified with 5mC being three times more likely than 5hmC will encode 5mC with 67.5\% probability ($0.9 * 0.75$ giving phred score 5, ASCII value {\tt \&})and 5hmC with 22.5\% probability ($0.9 * 0.25$ giving phred score 1, ASCII value {\tt "}).
 % This could be represented with ``{\tt MM:Z:C+m,10;C+h,10; MP:Z:" \&}''.
 
-\item[Ml:B:C,\tagvalue{scaled-probabilities}]
+\item[ML:B:C,\tagvalue{scaled-probabilities}]
 \hfill\\
-The optional {\tt Ml} tag lists the probability of each modification listed in the {\tt Mm} tag being correct, in the order that they occur.
+The optional {\tt ML} tag lists the probability of each modification listed in the {\tt MM} tag being correct, in the order that they occur.
 The continuous probability range 0.0 to 1.0 is remapped in equal
 sized portions to the discrete integers 0 to 255 inclusively. Thus the
 probability range corresponding to integer value $N$ is $N/256$ to
 $(N+1)/256$.
 
-The SAM encoding therefore uses a byte array of type `{\tt C}' with the number of elements matching the summation of the number of modifications listed as being present in the {\tt Mm} tag accounting for multi-modifications each having their own probability.
+The SAM encoding therefore uses a byte array of type `{\tt C}' with the number of elements matching the summation of the number of modifications listed as being present in the {\tt MM} tag accounting for multi-modifications each having their own probability.
 
-For example `{\tt Mm:Z:C+m,5,12;C+h,5,12;}' may have an associated tag of `{\tt Ml:B:C,204,89,26,130}'.
+For example `{\tt MM:Z:C+m,5,12;C+h,5,12;}' may have an associated tag of `{\tt ML:B:C,204,89,26,130}'.
 
-If the above is rewritten in the multiple-modification form, the probabilities are interleaved in the order presented, giving `{\tt Mm:Z:C+mh,5,12;  Ml:B:C,204,26,89,130}'.
-Note where several possible modifications are presented at the same site, the {\tt Ml} values represent the absolute probabilities of the modification call being correct and not the relative likelihood between the alternatives.
+If the above is rewritten in the multiple-modification form, the probabilities are interleaved in the order presented, giving `{\tt MM:Z:C+mh,5,12;  ML:B:C,204,26,89,130}'.
+Note where several possible modifications are presented at the same site, the {\tt ML} values represent the absolute probabilities of the modification call being correct and not the relative likelihood between the alternatives.
 These probabilities should not sum to above 1.0 ($\approx 256$ in integer encoding, allowing for some minor rounding errors), but may sum to a lower total with the remainder representing the probability that none of the listed modification types are present.
 In the example used above, the 6th {\tt C} has 80\% chance of being {\tt 5mC}, 10\% chance of being {\tt 5hmC} and 10\% chance of being an unmodified {\tt C}.
 
-{\tt Ml} values for ambiguity codes give the probability that the modification is one of the possible codes compatible with that ambiguity code.
-For example {\tt Mm:Z:C+C,10; Ml:B:C,229} indicates a C call with a probability of 90\% of having some form of unspecified modification.
+{\tt ML} values for ambiguity codes give the probability that the modification is one of the possible codes compatible with that ambiguity code.
+For example {\tt MM:Z:C+C,10; ML:B:C,229} indicates a C call with a probability of 90\% of having some form of unspecified modification.
 
 \end{description}
+
+\section{Draft tags}
+
+These are tags which have been proposed and are broadly accepted to
+become standard tags, but a review or probationary period has been
+deemed useful.  They use the locally-defined tag namespace and
+processing software should consider that the tags may have local usage
+for other purposes.
+
+\vspace*{1em}
+There are currently no tags with draft status.
+
+% \begin{center}\small
+% % This table is sorted alphabetically
+% \begin{longtable}{ccp{12.5cm}}
+%   \hline
+%   {\bf Tag} & {\bf Type} & {\bf Description} \\
+%   {\tt MP} & Z & Base modification qualities \\
+%   \hline
+%   \endhead
+% \end{longtable}
+% \end{center}
 
 
 \section{Locally-defined tags}
@@ -661,6 +664,15 @@ This appendix lists when standard tags were initially defined or significantly c
 
 \setlength{\parindent}{0pt}
 \newcommand*{\gap}{\vspace*{2ex}}
+
+\subsubsection*{February 2022}
+
+Base modification tags changed to use the predefined standard names MM and~ML, as their review period has finished.
+Programs outputting the draft Mm and~Ml tags should be changed to use MM and~ML instead.
+
+\subsubsection*{December 2021}
+
+Amended draft Mm tag to provide hints about the modification status of skipped sequence bases.
 
 \subsubsection*{July 2021}
 Added the Mm and Ml draft tags describing base modifications.
