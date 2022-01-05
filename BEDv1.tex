@@ -426,7 +426,7 @@ The AutoSQL format\footnote{Kent, W.~James.
 \Ac{BED} \textbf{file}s should be sorted by~\textsf{chrom}, then by~\textsf{chromStart} numerically, and finally by~\textsf{chromEnd} numerically.
 \textsf{chrom} may be sorted using any scheme (such as lexicographic or numeric order), but all \textbf{data line}s with the same~\textsf{chrom} value should occur consecutively.
 For example, the lexicographic order of~\texttt{chr1}, \texttt{chr10}, \texttt{chr11}, \texttt{chr12}, {\ldots}, \texttt{chr2}, \texttt{chr20}, \texttt{chr21}, {\ldots}, \texttt{chr3}, {\ldots}, \texttt{chrX}, \texttt{chrY}, \texttt{chrM} is an acceptable sorting.
-This ordering is equivalent to sorting the \textbf{file} using the command \verb|LC\_ALL=C| \verb|sort| \verb|-k 1,1| \verb|-k 2,2n| \verb|-k 3,3n|.
+This ordering is equivalent to sorting the \textbf{file} using the command \verb|LC_ALL=C| \verb|sort| \verb|-k 1,1| \verb|-k 2,2n| \verb|-k 3,3n|.
 The numeric order of~\texttt{chr1}, \texttt{chr2}, {\ldots}, \texttt{chr21}, \texttt{chr22}, \texttt{chrM}, \texttt{chrX}, \texttt{chrY} is also acceptable.
 Arbitrary orderings of~\textsf{chrom} are allowed, but regardless of the \textbf{chromosome} sorting scheme, \textbf{data line}s for two \textbf{feature}s on the same \textbf{chromosome} should not have any \textbf{data line}s for \textbf{feature}s on other \textbf{chromosome}s between them.
 Multiple \textbf{feature}s that have the same~\textsf{chrom}, \textsf{chromStart}, and \textsf{chromEnd} can appear in any order.
