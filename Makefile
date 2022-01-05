@@ -41,7 +41,7 @@ LATEXMK_FLAGS  =
 
 LATEXDIFF_ENGINE = --config LATEX=pdflatex
 
-new/%.pdf: %.tex
+new/%.pdf: %.tex | new
 	$(LATEXMK) --output-directory=new $<
 
 new/BEDv1.pdf: LATEXMK_ENGINE = --lualatex
@@ -50,9 +50,11 @@ new/CRAMv2.1.ver new/CRAMv3.ver: img/CRAMFileFormat2-1-fig001.png img/CRAMFileFo
 
 new/VCFv4.1.ver new/VCFv4.2.ver new/VCFv4.3.ver new/VCFv4.4.draft.ver: img/all_orientations-400x296.png img/derivation-400x267.png img/erosion-400x211.png img/inserted_contig-400x247.png img/inserted_sequence-400x189.png img/inversion-400x95.png img/microhomology-400x248.png img/multiple_mates-400x280.png img/phasing-400x259.png img/reciprocal_rearrangement-400x192.png img/telomere-400x251.png
 
-new/%.ver: %.tex
-	@test -d new || mkdir new
+new/%.ver: %.tex | new
 	scripts/genversion.sh $^ > $@
+
+new:
+	mkdir new
 
 
 diff diffs: $(PDFS:%=diff/%)
