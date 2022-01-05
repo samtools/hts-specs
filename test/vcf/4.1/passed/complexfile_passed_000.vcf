@@ -32,7 +32,7 @@
 ##assembly=ftp://user@host:8080/path/to/file.fastq
 ##PEDIGREE=<Name_0=Something>
 ##PEDIGREE=<Name_0=Something,Name_1=Something-else>
-##pedigreeDB=<ftp://user@host:8080/path/to/pedigreeDB?arg1=db1>
+##pedigreeDB=ftp://user@host:8080/path/to/pedigreeDB?arg1=db1
 ##contig=<ID=1>
 ##contig=<ID=contig_url,URL=ftp://user@host:8080/path/to/contig>
 ##contig=<ID=contig_accession,species="Homo sapiens",accession=GCA_000001405.1>
