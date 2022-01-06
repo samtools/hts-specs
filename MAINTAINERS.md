@@ -85,8 +85,10 @@ So the usual workflow when editing these documents is (for example, when working
 2. When you are ready, commit your _.tex_ source changes (but don't commit any changed PDF files yet).
 
 3. Type `make clean SAMv1.pdf` to regenerate the PDF and copy it to the main directory.
-(Optionally, verify that it contains the correct commit hash for your source changes.)
-Now commit your _.pdf_ changes, separately from any source changes.
+Optionally, verify that it contains the correct commit hash for your source changes.
+(Be sure to build the PDF using the commits on **master**; building the final PDF from a pull request is not recommended as its commits may be further rebased or otherwise amended before they appear on **master**, particularly if web UI merge buttons are used.)
+
+4. Commit your _.pdf_ changes, separately from any source changes.
 
 The _Makefile_ can also generate PDFs highlighting the typeset differences between TeX source versions, invoked by typing `make [OLD=commit [NEW=commit]] diff/SPEC.pdf`.
 By default, this compares the working _SPEC.tex_ file to the checked-out **HEAD**.
