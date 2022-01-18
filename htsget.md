@@ -138,6 +138,8 @@ The JSON response is a "ticket" allowing the caller to obtain the desired data i
 
 The client can request only records overlapping a given genomic range. The response may however contain a superset of the desired results, including all records overlapping the range, and potentially other records not overlapping the range; the client should filter out such extraneous records if necessary. Successful requests with empty result sets still produce a valid response in the requested format (e.g. including header and EOF marker).
 
+The client can also request only read or variant headers. For example, a header request can be used to discover the list of `referenceName` values applicable for a data stream, provided that the data stream contains `@SQ` (reads) or `##contig` (variants) headers.
+
 ## URL parameters
 
 <table>
@@ -193,7 +195,7 @@ If `class` is specified, its value MUST be one of the following:
 `header`
 </td><td>
 
-Request the SAM/CRAM/VCF headers only.
+Request the SAM/CRAM/VCF headers only. The ticket response represents read or variant headers in the format specified by `format`, if present, or in the respective default format.
 
 The server SHOULD respond with an `InvalidInput` error if any other htsget query parameters other than `format` are specified at the same time as `class=header`.
 </td></tr>
