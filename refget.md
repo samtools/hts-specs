@@ -27,10 +27,7 @@ The API has the following features:
 - The checksum algorithm used to derive the sequence identifier shall be a mainstream algorithm available standard across multiple platforms and programming languages.
 - The client may request a sub-sequence, which the server is expected to honour
 - Refget was designed to enable access to nucleotide sequences, however other sequences could be provided via the same mechanism e.g. cDNA, CDS, mRNA or proteins
-
-Explicitly this API does NOT:
-
-- Provide a way to discover identifiers for valid sequences. Clients obtain these via some out of band mechanism
+- Optionally the API provides a retrieval of the sequence and metadata via a unique identifier
 
 ## OpenAPI Description
 
@@ -122,6 +119,12 @@ Services may also implement the older `TRUNC512` representation of a truncated S
 
 A `ga4gh` digest of `ACGT` MUST result in the string `ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2`.
 
+## Unique Identifiers
+Refget optionally allows the use of namespaced identifiers in place of the digest. The identifier must be unique within that refget implementation and prefixed by a namespace for example:
+
+`insdc:CM000663.2`
+
+
 ## CORS
 Cross-origin resource sharing (CORS) is an essential technique used to overcome the same origin content policy seen in browsers. This policy restricts a webpage from making a request to another website and leaking potentially sensitive information. However the same origin policy is a barrier to using open APIs. GA4GH open API implementers should enable CORS to an acceptable level as defined by their internal policy. For any public API implementations should allow requests from any server.
 
@@ -154,7 +157,7 @@ Content-type: text/vnd.ga4gh.refget.v2.0.0+plain
 
 | Parameter | Data Type | Required | Description                                                                                                                                                                                                         |
 |-----------|-----------|----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`      | string    | Yes      | A string specifying an identifier to retrieve sequence for using one of the defined checksum algorithms or a server-specific checksum algorithm.|
+| `id`      | string    | Yes      | A string specifying an identifier uniquely associated with a sequence so that at most one sequence is returned for an id. The id can be a checksum or other unique namespaced identifier supported by the server. |
 
 #### Query parameters
 
@@ -357,6 +360,12 @@ array of enum(strings)
 An array of strings listing the digest algorithms that are supported. Standard values: <code>md5</code>, <code>trunc512</code>, <code>ga4gh</code> (though others may be specified as a non-standard extension).
 </td></tr>
 <tr markdown="block"><td>
+<code>identifier_types</code><br/>
+array of strings
+</td><td>
+An array of strings listing the type identifiers supported. Values used should be the same as the one supported by identifiers.orgs such as <code>insdc</code>, <code>ensembl</code>, <code>refget</code>.
+</td></tr>
+<tr markdown="block"><td>
 <code>subsequence_limit</code><br/>
 int or null
 </td><td>
@@ -400,11 +409,14 @@ GET /sequence/service-info
     "circular_supported": true,
     "subsequence_limit": 0,
     "algorithms": [
-      [
-        "md5",
-        "ga4gh",
-        "trunc512"
-      ]
+      "md5",
+      "ga4gh",
+      "trunc512"
+    ],
+    "identifier_types": [
+      "insdc",
+      "refseq",
+      "ensembl"
     ]
   }
 }

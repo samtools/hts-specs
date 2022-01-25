@@ -221,3 +221,12 @@ components:
                   - md5
                   - ga4gh
                   - trunc512
+              identifier_types:
+                type: array
+                items:
+                  type: string
+                  description: An array of strings listing the type of name space that are supported
+                  example:
+                    - insdc
+                    - refseq
+                    - ensembl
