@@ -223,7 +223,7 @@ The structured \texttt{contig} field must include the ID attribute and can inclu
 the following ones reserved:
 \begin{itemize}
   \item length: the length of the sequence
-  \item md5: MD5 checksum of the sequence as defined in the Sam specification v1\footnote{See Reference MD5 calculation
+  \item md5: MD5 checksum of the sequence as defined in SAM's {\tt @SQ-M5} field\footnote{See Reference MD5 calculation
       section in \href{https://samtools.github.io/hts-specs/SAMv1.pdf}{\tt SAM Format Specification}.} Briefly, the digest
       is calculated excluding all characters outside of the inclusive range 33 (`\char33') to 126 (`\char126')
       and all lowercase characters converted to uppercase. The MD5 digest is calculated as described in
