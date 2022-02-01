@@ -116,13 +116,14 @@ A \emph{structured} meta-information line is similar, but the value is itself a 
 \verb|##|\emph{key}\verb|=<|\emph{key}\verb|=|\emph{value}\verb|,|\emph{key}\verb|=|\emph{value}\verb|,|\emph{key}\verb|=|\emph{value}\verb|,|\ldots\verb|>|
 \end{quote}
 All structured lines require an ID which must be unique within their type, i.e., within all the meta-information lines with the same ``\verb|##|\emph{key}\verb|=|'' prefix.
-For all of the structured lines (\verb|##INFO|, \verb|##FORMAT|, \verb|##FILTER|, etc.), extra fields can be included after the default fields.
+For all of the structured lines (\verb|##INFO|, \verb|##FORMAT|, \verb|##FILTER|, etc.) described in this specification, extra fields can be included after the default fields.
 For example:
 \begin{verbatim}
 ##INFO=<ID=ID,Number=number,Type=type,Description="description",Source="source",Version="128">
 \end{verbatim}
 In the above example, the extra fields of ``Source'' and ``Version'' are provided.
 The values of optional fields must be written as quoted strings, even for numeric values.
+Other structured lines not defined by this specification may also be used; the only default field for such lines is the required \verb|ID| field.
 
 It is recommended in VCF and required in BCF that the header includes tags describing the reference and contigs backing the data contained in the file.
 These tags are based on the SQ field from the SAM spec; all tags are optional (see the VCF example above).
