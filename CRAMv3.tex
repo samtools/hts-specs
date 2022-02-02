@@ -547,13 +547,9 @@ itf8 & reference sequence id & reference sequence identifier  or\linebreak{}
 -2 for multiple reference sequences.\linebreak{}
 All slices in this container must have a reference sequence id matching this value.\tabularnewline
 \hline
-itf8 & starting position on the reference & the alignment start position or\linebreak{}
-0 if the container is multiple-reference
-or contains unmapped unplaced reads\tabularnewline
+itf8 & starting position on the reference & the alignment start position\tabularnewline
 \hline
-itf8 & alignment span & the length of the alignment or\linebreak{}
-0 if the container is multiple-reference
-or contains unmapped unplaced reads\tabularnewline
+itf8 & alignment span & the length of the alignment\tabularnewline
 \hline
 itf8 & number of records & number of records in the container\tabularnewline
 \hline
@@ -574,6 +570,12 @@ int & crc32 & CRC32 hash of the all the preceding bytes in the container.\tabula
 byte[ ] & blocks & The blocks contained within the container.\tabularnewline
 \hline
 \end{tabular}
+
+The alignment start and alignment span values should only be utilised
+during decoding if the container has mapped data aligned to a single
+reference (reference sequence id $>= 0$).  For multi-reference
+containers or those with unmapped data, it is recommended to fill
+these fields with value 0.
 
 \subsection{\textbf{CRAM header container}}
 
@@ -895,13 +897,9 @@ itf8 & reference sequence id & reference sequence identifier or\linebreak{}
 -2 for multiple reference sequences.\linebreak{}
 This value must match that of its enclosing container.\tabularnewline
 \hline
-itf8 & alignment start & the alignment start position.\linebreak{}
-0 if the slice is multiple-reference
-or contains unmapped unplaced reads\tabularnewline
+itf8 & alignment start & the alignment start position\tabularnewline
 \hline
-itf8 & alignment span & the length of the alignment.\linebreak{}
-0 if the slice is multiple-reference
-or contains unmapped unplaced reads\tabularnewline
+itf8 & alignment span & the length of the alignment\tabularnewline
 \hline
 itf8 & number of records & the number of records in the slice\tabularnewline
 \hline
@@ -923,6 +921,12 @@ byte[ ] & optional tags & a series of tag,type,value tuples encoded as
 per BAM auxiliary fields.\tabularnewline
 \hline
 \end{tabular}
+
+The alignment start and alignment span values should only be utilised
+during decoding if the slice has mapped data aligned to a single
+reference (reference sequence id $>= 0$).  For multi-reference slices
+or those with unmapped data, it is recommended to fill these fields
+with value 0.
 
 The optional tags are encoded in the same manner as BAM tags.  I.e. a
 series of binary encoded tags concatenated together where each tag
