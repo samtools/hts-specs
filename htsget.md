@@ -7,6 +7,9 @@ suppress_footer: true
 # Htsget retrieval API spec v1.3.0
 {:.no_toc}
 
+This specification describes the htsget protocol version 1.3.0.
+This printing is version {{site.github.build_revision | truncate: 7, ""}} from the [hts-specs](https://github.com/samtools/hts-specs) repository.
+
 * Do not remove this line (it will not be displayed)
 {:toc}
 
@@ -769,29 +772,33 @@ Added a `service-info` endpoint and defined an `htsget` service-info response su
 
 Added discussion of registering htsget endpoints in a GA4GH service registry.
 
-## 1.2.0 (May 2019)
+## [1.2.0] (May 2019)
 {:.no_toc}
 
 Added a `class=header` query parameter for requesting headers only rather than including reads/variants data records.
 
 Defined response ticket `"class": "header"|"body"` optional field to enable reusing previously downloaded URL data when making repeated requests to the same `<id>` resource.
 
-## 1.1.1 (January 2019)
+## [1.1.1] (January 2019)
 {:.no_toc}
 
 Added `referenceName=*` special case for requesting unplaced unmapped reads from a reads endpoint.
 
-## 1.1.0 (June 2018)
+## [1.1.0] (June 2018)
 {:.no_toc}
 
 Added the `GET /variants/<id>` endpoint, allowing for querying VCF/BCF variants data.
 
-## 1.0.0 (October 2017)
+## [1.0.0] (October 2017)
 {:.no_toc}
 
 The first published version of the htsget protocol, which specified only the `GET /reads/<id>` endpoint.
 BAM/CRAM sequencing data could be queried via the HTTP `GET` method using `format`, `referenceName`/`start`/`end`, `fields`, and `tags`/`notags` query parameters.
 
+[1.0.0]:    https://github.com/samtools/hts-specs/blob/e85981b04ccb509b55e09273907b0657a2e02cc1/htsget.md
+[1.1.0]:    https://github.com/samtools/hts-specs/blob/1fef57fa22a6867707a14a0c9f698038d470f2d3/htsget.md
+[1.1.1]:    https://github.com/samtools/hts-specs/blob/c7731727974a7d9cd305f6ecac1efe83911f2cbb/htsget.md
+[1.2.0]:    https://github.com/samtools/hts-specs/blob/52dfd0fc866fc6a073515dbc1d59eb47485c4964/htsget.md
 
 [CORS]:     http://www.w3.org/TR/cors/
 [Data URI]: https://en.wikipedia.org/wiki/Data_URI_scheme
