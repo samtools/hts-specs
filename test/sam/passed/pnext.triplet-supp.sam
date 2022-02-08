@@ -1,0 +1,11 @@
+@SQ	SN:xx	LN:20
+@SQ	SN:yy	LN:20
+@CO	Validation of FLAG
+@CO	A1 contains a triplet READ1, middle, READ2.
+@CO	Each read has a supplementary alignment
+a1	67	xx	1	1	5M5S	=	6	20	AAAAAAAAAA	**********
+a1	2115	xx	6	1	5S5M	=	6	20	AAAAAAAAAA	**********
+a1	195	xx	6	1	5M5S	=	11	-20	AAAAATTTTT	**********
+a1	2275	xx	11	1	5S5M	=	11	-20	AAAAATTTTT	**********
+a1	147	xx	11	1	5M5S	=	16	-20	TTTTTTTTTT	**********
+a1	2195	xx	16	1	5S5M	=	1	-20	TTTTTTTTTT	**********

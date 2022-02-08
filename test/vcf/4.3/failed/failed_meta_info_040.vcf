@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=INFO VALIDATED Number is not 0
+##INFO=<ID=VALIDATED,Number=1,Type=Flag,Description="Validated by follow-up experiment">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	VALIDATED=0

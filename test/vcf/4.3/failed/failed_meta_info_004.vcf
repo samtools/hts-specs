@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=INFO AA Type is not String
+##INFO=<ID=AA,Number=1,Type=Integer,Description="Ancestral Allele">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	AA=1

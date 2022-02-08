@@ -1,0 +1,6 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=Description contains a linebreak
+##ALT=<ID=DEL,Number=1,Type=String,Description="Description with 
+linebreak">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

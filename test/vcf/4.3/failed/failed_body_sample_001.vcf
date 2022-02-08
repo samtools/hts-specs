@@ -1,0 +1,4 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=Sample allele is out of range
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	HG00096
+1	55388	rs182711216	C	T,G	100	PASS	THETA=0.0102;AA=C	GT:GS:GL	0/3:0.000:-0.18,-0.48,-2.49

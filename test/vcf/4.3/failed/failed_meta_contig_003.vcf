@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=contig ID contains illegal character
+##contig=<ID=1.*,length=123456>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

@@ -1,0 +1,4 @@
+@SQ	SN:long	LN:2147483647
+@CO	Validation of POS.
+m1	0	long	-1	1	1M	*	0	0	C	J
+m2	0	long	-2147483648	1	1M	*	0	0	C	J

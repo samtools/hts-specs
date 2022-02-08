@@ -1,0 +1,4 @@
+@CO	Validation of AUX
+@CO	Type H
+h1	4	*	0	0	*	*	0	0	CAT	QQQ	H0:H:deadbeef	H1:H:DEADBEEF	H2:H:0123456789ABCDEF
+h1	4	*	0	0	*	*	0	0	CAT	QQQ	H0:H:	ZZ:Z:empty	H1:H:

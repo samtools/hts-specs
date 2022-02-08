@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=FORMAT GLE Type is not String
+##FORMAT=<ID=GLE,Number=G,Type=Flag,Description="Genotype likelihoods of heterogeneous ploidy">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

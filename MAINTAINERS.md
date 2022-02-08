@@ -24,15 +24,16 @@ Past CRAM maintainers include Vadim Zalunin.
 
 * Louis Bergelson (@lbergelson)
 * Petr Danecek (@pd3)
-* Jose Miguel Mut Lopez (@jmmut)
+* Kirill Tsukanov (@tskir)
 
-Past VCF/BCF maintainers include Cristina Yenyxe Gonzalez Garcia, Ryan Poplin, and David Roazen.
+Past VCF/BCF maintainers include Cristina Yenyxe Gonzalez Garcia, Jose Miguel Mut Lopez, Ryan Poplin, and David Roazen.
 
 ### Htsget
 
-* Jerome Kelleher (@jeromekelleher)
 * Mike Lin (@mlin)
 * John Marshall (@jmarshall)
+
+Past htsget maintainers include Jerome Kelleher.
 
 ### Refget
 
@@ -45,6 +46,11 @@ Past refget maintainers include Matt Laird.
 
 * Alexander Senf (@AlexanderSenf)
 * Robert Davies (@daviesrob)
+
+### BED
+
+* Michael Hoffman (@michaelmhoffman)
+* Aaron Quinlan (@arq5x)
 
 [ga4gh-ff]:  https://www.ga4gh.org/howwework/workstreams/#lsg
 
@@ -79,8 +85,10 @@ So the usual workflow when editing these documents is (for example, when working
 2. When you are ready, commit your _.tex_ source changes (but don't commit any changed PDF files yet).
 
 3. Type `make clean SAMv1.pdf` to regenerate the PDF and copy it to the main directory.
-(Optionally, verify that it contains the correct commit hash for your source changes.)
-Now commit your _.pdf_ changes, separately from any source changes.
+Optionally, verify that it contains the correct commit hash for your source changes.
+(Be sure to build the PDF using the commits on **master**; building the final PDF from a pull request is not recommended as its commits may be further rebased or otherwise amended before they appear on **master**, particularly if web UI merge buttons are used.)
+
+4. Commit your _.pdf_ changes, separately from any source changes.
 
 The _Makefile_ can also generate PDFs highlighting the typeset differences between TeX source versions, invoked by typing `make [OLD=commit [NEW=commit]] diff/SPEC.pdf`.
 By default, this compares the working _SPEC.tex_ file to the checked-out **HEAD**.
@@ -94,12 +102,15 @@ You may wish to create a file named _GNUmakefile_ (which GNU Make will read in p
 include Makefile
 
 PDFLATEX = texfot pdflatex
+LATEXMK_FLAGS = --silent
+# LATEXMK = scripts/rerun.sh new/$* $(PDFLATEX)
 
 %+test.pdf: new/%.pdf
 	cp $^ $@
 ```
 
-Using `texfot` (where available) hides many of TeX's less interesting log messages.
+Using `texfot` (where available) and/or adding `--silent` to the latexmk invocation hides many of TeX's less interesting log messages.
+Alternatively you can override `$(LATEXMK)` entirely to use the previous _rerun.sh_ script instead of latexmk.
 Adding a rule for individualised PDF filenames allows you to type e.g. `make SAMv1+test.pdf` to generate distinctively-named working PDFs in the main directory.
 If you are working on separate changes in several _hts-specs_ directories at once, using different filenames for each directory helps identify which PDFs you're viewing.
 

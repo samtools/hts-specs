@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=FORMAT PL Number is not G
+##FORMAT=<ID=PL,Number=1,Type=Integer,Description="Phred-scaled genotype likelihoods rounded to the closest integer">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=contig ID contains a comma
+##contig=<ID=1,A,length=123456>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

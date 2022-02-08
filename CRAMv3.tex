@@ -111,7 +111,7 @@ Signed 32-bit integer.
 Signed 64-bit integer. 
 
 \item[Array]\ \newline
-An array of any logical data type: \texttt{<}type\texttt{>}[ ] 
+An array of any logical data type: array\texttt{<}type\texttt{>}
 \end{description}
 
 % \begin{tabular}{ll}
@@ -214,9 +214,13 @@ number of bytes used to encode a single value. To do so 64 bits are required and
 this can be done with 9 byte at most with the first byte consisting of just 1s 
 or 0xFF value. 
 
-\item[{Array ([ ])}]\ \newline
-Array length is written first as integer (itf8), followed by the elements of the 
-array. 
+\item[{Array (array\texttt{<}type\texttt{>})}]\ \newline
+A variable sized array with an explicitly written dimension.
+Array length is written first as integer (itf8), followed by the elements of the array.
+
+Implicit or fixed-size arrays are also used, written as \textit{type}\texttt{[ ]} or \textit{type}\texttt{[4]} (for example).
+These have no explicit dimension included in the file format and instead rely on the specification itself to document the array size.
+
 
 \item[{Encoding}]\ \newline
 Encoding is a data type that specifies how data series have been compressed. Encodings 
@@ -301,7 +305,7 @@ external data blocks with data series\tabularnewline
 \hline
 Deprecated (GOLOMB) & 2 & int offset, int M & Golomb coding\tabularnewline
 \hline
-HUFFMAN & 3 & int array, int array & coding with int/byte values\tabularnewline
+HUFFMAN & 3 & array\texttt{<}int\texttt{>}, array\texttt{<}int\texttt{>} & coding with int/byte values\tabularnewline
 \hline
 BYTE\_ARRAY\_LEN & 4 & encoding\texttt{<}int\texttt{>} array length, encoding\texttt{<}byte\texttt{>} 
 bytes & coding of byte arrays with array length\tabularnewline
@@ -559,7 +563,7 @@ ltf8 & bases & number of read bases\tabularnewline
 \hline
 itf8 & number of blocks & the total number of blocks in this container\tabularnewline
 \hline
-itf8[ ] & landmarks & the locations of slices in this container as byte offsets from the end of 
+array\texttt{<}itf8\texttt{>} & landmarks & the locations of slices in this container as byte offsets from the end of
 this container header, used for random access indexing.
 The landmark count must equal the slice count.\linebreak{}
 Since the block before the first slice is the compression header,
@@ -707,8 +711,7 @@ the data completely\tabularnewline
 \hline
 SM & byte[5] & substitution matrix & substitution matrix\tabularnewline
 \hline
-TD & byte[ ] & tag ids dictionary & a list of lists of tag ids, see tag encoding 
-section\tabularnewline
+TD & array\texttt{<}byte\texttt{>} & tag ids dictionary & a list of lists of tag ids, see tag encoding section\tabularnewline
 \hline
 \end{tabular}
 
@@ -794,12 +797,20 @@ BA & encoding\texttt{<}byte\texttt{>} & bases & bases\tabularnewline
 \hline
 QS & encoding\texttt{<}byte\texttt{>} & quality scores & quality scores\tabularnewline
 \hline
+TC\tnote{d} & N/A & legacy field & to be ignored\tabularnewline
+\hline
+TN\tnote{d} & N/A & legacy field & to be ignored\tabularnewline
 \end{tabular}
 
 \begin{tablenotes}
 \item[a] Note RN this is decoded after MF if the record is detached from the mate and we are attempting to auto-generate read names.
 \item[b] The count is reset for each slice so NF can only refer to a record later within this slice.
 \item[c] TL is followed by decoding the tag values themselves, in order of appearance in the tag dictionary.
+\item[d] TC and TN are legacy data series from CRAM 1.0.
+They have no function in CRAM 3.0 and should not be present.
+However some implementations do output them and decoders must silently skip these fields.
+It is illegal for TC and TN to contain any data values, although there
+may be empty blocks associated with them.
 \end{tablenotes}
 \end{threeparttable}
 
@@ -908,7 +919,7 @@ boundaries.  If this slice has reference sequence id of -1 (unmapped) or -2 (mul
 the MD5 should be 16 bytes of \textbackslash{}0. For embedded references, the MD5
 can either be all-zeros or the MD5 of the embedded sequence.\tabularnewline
 \hline
-byte[] & optional tags & a series of tag,type,value tuples encoded as
+byte[ ] & optional tags & a series of tag,type,value tuples encoded as
 per BAM auxiliary fields.\tabularnewline
 \hline
 \end{tabular}
@@ -1183,7 +1194,7 @@ Note however some of these flags can be derived during decode, so may be omitted
 0x10 &  & SEQ being reverse complemented\tabularnewline
 \hline
 0x20 & calculated\tnote{b}\ \ or stored in the mate's info & SEQ of the next segment in the
-template being reversed\tabularnewline
+template being reverse complemented\tabularnewline
 \hline
 0x40 &  & the first segment in the template\tnote{c}\tabularnewline
 \hline
@@ -1317,7 +1328,7 @@ In this situation the record will be marked as detached (see the CF data series)
 \hline
 \textbf{Data series type} & \textbf{Data series name} & \textbf{Field} & \textbf{Description}\tabularnewline
 \hline
-byte[] & RN & read names & read names\tabularnewline
+byte[ ] & RN & read names & read names\tabularnewline
 \hline
 \end{tabular}
 
@@ -1385,7 +1396,7 @@ The following bit flags are defined:
 0x1 & mate negative strand bit & the bit is set if the mate is on the negative
 strand\tabularnewline
 \hline
-0x2 & mate mapped bit & the bit is set if the mate is mapped\tabularnewline
+0x2 & mate unmapped bit & the bit is set if the mate is unmapped\tabularnewline
 \hline
 \end{tabular}
 
@@ -1951,7 +1962,7 @@ Note in contrast to this, quality values are known to be the same length as the 
 
 \subsubsection*{BYTE\_ARRAY\_LEN: codec ID 4}
 
-Can encode types \textit{Byte[]}.
+Can encode types \textit{Byte[ ]}.
 
 Byte arrays are captured length-first, meaning that the length of every array element is written using an additional encoding.
 For example this could be a HUFFMAN encoding or another EXTERNAL block.
@@ -2001,7 +2012,7 @@ For example, the bytes specifying a BYTE\_ARRAY\_LEN encoding, including the cod
 
 \subsubsection*{BYTE\_ARRAY\_STOP: codec ID 5}
 
-Can encode types \textit{Byte[]}.
+Can encode types \textit{Byte[ ]}.
 
 Byte arrays are captured as a sequence of bytes terminated by a special stop byte.
 The data returned does not include the stop byte itself.
@@ -2402,9 +2413,9 @@ int & compressed size & the size in bytes of frequency table and compressed blob
 \hline
 int & data size & raw or uncompressed data size in bytes\tabularnewline
 \hline
-byte[] & frequency table & byte frequencies of input data written using RLE\tabularnewline
+byte[ ] & frequency table & byte frequencies of input data written using RLE\tabularnewline
 \hline
-byte[] & compressed blob & compressed data\tabularnewline
+byte[ ] & compressed blob & compressed data\tabularnewline
 \hline
 \end{tabular}
 
@@ -2966,5 +2977,112 @@ Space estimate is $10\,000\,000 \times 2 \bits \approx 2.4 \MB$. Data
 could be written into three containers: $1\MB + 1\MB + 0.4\MB$.
 
 \newpage
+
+\subsection{CRAM History}
+
+\subsubsection*{Pre-CRAM: 2010}
+
+The primary concepts and ideas of CRAM stem from work at the European
+Bioinformatics Institute in 2010 and 2011, published in:
+
+\begin{quote}\small
+Markus Hsi-Yang Fritz,
+Rasko Leinonen, Guy Cochrane, and Ewan Birney,
+\textbf{Efficient storage of high throughput DNA sequencing data using reference-based compression},
+{\sl Genome Res.}~2011~21: 734--740;
+\href{http://dx.doi.org/doi:10.1101/gr.114819.110}{doi:10.1101/gr.114819.110};
+{\sc pmid:}21245279.
+\end{quote}
+
+\subsubsection*{CRAM 0.x: 2011}
+
+Vadim Zalunin implemented the ideas in the paper, now named CRAM, in
+the Java CRAMtools package.  This included versions from 0.3 to 0.86\footnote{\url{https://github.com/vadimzalunin/crammer/releases}}.
+
+\subsubsection*{CRAM 1.0: 2012}
+
+The first official launch of the CRAM specification, in the Java
+CRAMtools package\footnote{\url{https://github.com/enasequence/cramtools}}
+
+This was publicised at \url{https://github.com/enasequence/cramtools}.
+
+\subsubsection*{CRAM 2.0: 2013}
+
+Reimplementing CRAM in C
+\footnote{Staden IO\_Lib 1.13.0 and later HTSlib 0.2.0} exposed a number of issues with the
+1.0 specification and disparities between the specification text and
+the Java implementation.  CRAM 2.0 unified implementation with
+specification.
+
+Other changes included:
+
+\begin{itemize}
+\item Support for multiple references per container, to permit storage
+of highly fragmented assemblies.
+
+\item Soft-clips and inserted bases moved to their own separate
+data-series instead of sharing one.
+
+\item Slice headers contain meta-data tracking the number of records
+and bases.
+
+\item Corrected the BF (bam flag) data series to match the BAM
+specification.
+
+\item Improved encoding of auxiliary tags.
+\end{itemize}
+
+\subsubsection*{CRAM 2.1: 2014}
+
+This is the first version to appear in HTSJDK (version 1.127), ported
+from the Java CRAMtools package.
+
+\begin{itemize}
+\item EOF blocks are added in order to spot truncated files.
+\end{itemize}
+
+\subsubsection*{CRAM 3.0: 2014}
+
+Primarily this is an optimisation of size and speed.
+
+\begin{itemize}
+\item Inclusion of LZMA compression library.
+\item Inclusion of the custom rANS Order-0 and Order-1 entropy encoders.
+\item Checksums added to all file format structures to ensure data integrity.
+\end{itemize}
+
+\newpage
+
+\subsection{\textbf{Contributors and Acknowledgements}}
+
+\begin{itemize}
+\item
+Markus Fritz, Rasko Leinonen, Guy Cochrane and Ewan Birney (EBI):
+Initial ideas behind CRAM.
+
+\item Vadim Zalunin (EBI):
+Initial JAVA implementation of CRAM and previous maintainer of CRAM specification.
+
+\item James Bonfield (Sanger Institute):
+Initial C implementation of CRAM and current maintainer of CRAM
+specification.
+
+\item Joel Thibault (Broad Institute):
+previous maintainer of CRAM specification.
+
+\item Chris Norman (Broad Institute):
+previous maintainer of CRAM specification and worked on
+the HTSJDK implementation.
+
+\item Robert Buels (UC Berkeley): First JavaScript implementation of CRAM
+
+\item Michael Macias (St Jude Children's Research Hospital): First Rust implementation of CRAM
+
+\item Other specification contributors include: John Marshall, Rishi Nag,
+Kenta Sato, Artem Tarasov and Jason Travis.
+
+\item Plus a big thank you to everyone who has raised GitHub issues
+and/or helped us improve the specification in other ways.
+\end{itemize}
 
 \end{document}

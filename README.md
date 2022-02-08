@@ -1,10 +1,14 @@
 SAM/BAM and related specifications
 ==================================
 
+These documents are maintained by the Large Scale Genomics work stream of the Global Alliance for Genomics & Health ([GA4GH][GA4GH.org]).
+Information on GA4GH procedures and how to get involved is [available here][LSG-wiki].
+Lists of contributors and acknowledgements can generally be found in each individual specification document.
+
 Links **in bold** point to the corresponding PDFs on this repository's [GitHub Pages website][hts-specs].
 
 Please request improvements or report errors using this repository, but see also [the list of maintainers](MAINTAINERS.md) if you need to contact them directly.
-
+See the [build instructions](MAINTAINERS.md#generating-pdf-specification-documents) for an explanation of how to generate the PDF documents from their source text.
 
 Alignment data files
 --------------------
@@ -14,7 +18,7 @@ Alignment data files
 These formats are discussed on the [samtools-devel mailing list][samdev-ml].
 
 **[CRAMv3.tex]** is the canonical specification for the CRAM format, while **[CRAMv2.1.tex]** describes its now-obsolete predecessor.
-Further details can be found at [ENA's CRAM toolkit page][ena-cram].
+Further details can be found at [ENA's CRAM toolkit page][ena-cram] and [GA4GH's CRAM page][ga4gh-cram].
 CRAM discussions can also be found on the [samtools-devel mailing list][samdev-ml].
 
 The **[tabix.tex]** and **[CSIv1.tex]** quick references summarize more recent index formats: the tabix tool indexes generic textual genome position-sorted files, while CSI is [htslib]'s successor to the BAI index format.
@@ -34,11 +38,17 @@ Variant calling data files
 --------------------------
 
 **[VCFv4.3.tex]** is the canonical specification for the Variant Call Format and its textual (VCF) and binary (BCF) encodings, while **[VCFv4.1.tex]** and **[VCFv4.2.tex]** describe their predecessors.
+**[VCFv4.4.draft.tex]** is a working draft of the upcoming version of VCF format and is under active revision.
 These formats are discussed on the [vcftools-spec mailing list][vcfspec-ml].
 
 **[BCFv1_qref.tex]** summarizes the obsolete BCF1 format historically produced by [samtools].  This format is no longer recommended for use, as it has been superseded by the more widely-implemented BCF2.
 
 **[BCFv2_qref.tex]** is a quick reference describing just the layout of data within BCF2 files.
+
+Discrete genomic feature data files
+-----------------------------------
+
+**[BEDv1.tex]** is the canonical specification for the GA4GH Browser Extensible Data (BED) format.
 
 File encryption
 ---------------
@@ -52,6 +62,9 @@ Transfer protocols
 
 **[Refget.md]** enables access to reference sequences using an identifier derived from the sequence itself.
 
+[GA4GH.org]:    https://www.ga4gh.org/
+[LSG-wiki]:     https://github.com/ga4gh/large-scale-genomics-wiki/wiki
+
 [SAMv1.tex]:    http://samtools.github.io/hts-specs/SAMv1.pdf
 [SAMtags.tex]:  http://samtools.github.io/hts-specs/SAMtags.pdf
 [CRAMv2.1.tex]: http://samtools.github.io/hts-specs/CRAMv2.1.pdf
@@ -61,13 +74,16 @@ Transfer protocols
 [VCFv4.1.tex]:  http://samtools.github.io/hts-specs/VCFv4.1.pdf
 [VCFv4.2.tex]:  http://samtools.github.io/hts-specs/VCFv4.2.pdf
 [VCFv4.3.tex]:  http://samtools.github.io/hts-specs/VCFv4.3.pdf
+[VCFv4.4.draft.tex]:  http://samtools.github.io/hts-specs/VCFv4.4.draft.pdf
 [BCFv1_qref.tex]: http://samtools.github.io/hts-specs/BCFv1_qref.pdf
 [BCFv2_qref.tex]: http://samtools.github.io/hts-specs/BCFv2_qref.pdf
+[BEDv1.tex]:    https://samtools.github.io/hts-specs/BEDv1.pdf
 [crypt4gh.tex]: http://samtools.github.io/hts-specs/crypt4gh.pdf
 [Htsget.md]:    http://samtools.github.io/hts-specs/htsget.html
 [Refget.md]:    https://samtools.github.io/hts-specs/refget.html
 
 [ena-cram]:   http://www.ebi.ac.uk/ena/about/cram_toolkit
+[ga4gh-cram]: https://www.ga4gh.org/cram/
 [htslib]:     https://github.com/samtools/htslib
 [samtools]:   https://github.com/samtools/samtools
 [hts-specs]:  http://samtools.github.io/hts-specs/

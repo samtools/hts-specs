@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=INFO MQ0 Type is not Integer
+##INFO=<ID=MQ0,Number=1,Type=Float,Description="Number of MAPQ == 0 reads">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	MQ0=0.2

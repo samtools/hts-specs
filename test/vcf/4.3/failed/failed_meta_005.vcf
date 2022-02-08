@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=Non-valid meta entry key
+30NFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

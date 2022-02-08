@@ -41,7 +41,7 @@ var text=`Changed PDFs as of ${ls.stdout.toString().trim()}:`
 text += fs.readdirSync("diff")
 	.filter(s=>s.match(".pdf$"))
 	.map(s=>s.replace(".pdf",""))
-	.map(file => addLink(file)).join(",")+".";
+	.map(file => addLink(file)).join(",")+". This link will expire in 30 days";
 
 console.log(text)
 bot.comment(process.env.GH_AUTH_TOKEN, text)

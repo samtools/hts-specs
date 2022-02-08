@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=Meta-data entry is not a key-value pair
+##assembly=ftp://8080:8080/not-valid/host/to/file.fastq
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

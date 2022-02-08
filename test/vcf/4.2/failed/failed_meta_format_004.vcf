@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=FORMAT DP Type is not Integer
+##FORMAT=<ID=DP,Number=1,Type=String,Description="Read depth">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

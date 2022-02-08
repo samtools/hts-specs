@@ -7,7 +7,7 @@ title: HTS format specifications
 {% capture readme %}{% include_relative README.md %}{% endcapture %}
 {% assign readme_lines = readme | split: newline %}
 
-{% for line in readme_lines limit: 2 %}
+{% for line in readme_lines limit: 6 %}
 {{line}}{% endfor %}
 
 <div class="sidebar lowered">
@@ -20,17 +20,18 @@ Specifications:
 - [BCF v1](BCFv1_qref.pdf)
 - [BCF v2.1](BCFv2_qref.pdf)
 - [CSI v1](CSIv1.pdf)
-- [CSI v2 (draft)](CSIv2.pdf)
 - [Tabix](tabix.pdf)
 - [VCF v4.1](VCFv4.1.pdf)
 - [VCF v4.2](VCFv4.2.pdf)
 - [VCF v4.3](VCFv4.3.pdf)
+- [VCF v4.4 draft](VCFv4.4.draft.pdf)
+- [BED v1](BEDv1.pdf)
 - [crypt4gh](crypt4gh.pdf)
 - [Htsget](htsget.html)
 - [Refget](refget.html)
 </div>
 <div class="mainbar">
-{% for line in readme_lines offset: 8 %}
+{% for line in readme_lines offset: 12 %}
 {{line}}{% endfor %}
 </div>
 <div class="clear"></div>

@@ -1,0 +1,5 @@
+@SQ	SN:CHROMOSOME_I	LN:1009800
+@CO	CIGAR: empty seq
+empty1	16	CHROMOSOME_I	51	1	*	*	0	0	*	*
+empty2	16	CHROMOSOME_I	51	1	0M	*	0	0	*	*
+empty3	16	CHROMOSOME_I	51	1	100D	*	0	0	*	*

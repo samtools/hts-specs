@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=ALT Description must be surrounded by double quotes
+##ALT=<ID=DEL,Number=1,Type=String,Description=Deletion>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

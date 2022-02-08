@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=Incorrect order of FORMAT fields
+##FORMAT=<Number=1,Type=Integer,Description="Raw read depth",ID=DP>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

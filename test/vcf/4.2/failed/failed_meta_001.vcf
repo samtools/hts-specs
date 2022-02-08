@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+##CauseOfFailure=Description contains non-escaped quotes
+##ALT=<ID=DEL,Number=1,Type=String,Description="Description with "non-escaped quote">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

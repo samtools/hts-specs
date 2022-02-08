@@ -1,0 +1,2 @@
+@SQ	SN:foo	LN:100	DS:duplicate-tag	LN:200
+@CO	Tags may not appear more than once in a single header line

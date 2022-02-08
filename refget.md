@@ -4,7 +4,11 @@ title: refget protocol
 suppress_footer: true
 ---
 
+<<<<<<< HEAD
 # Refget API Specification v2.0.0
+=======
+# Refget API Specification v1.0.1
+>>>>>>> master
 {:.no_toc}
 
 * Do not remove this line (it will not be displayed)
@@ -31,7 +35,11 @@ The API has the following features:
 
 ## OpenAPI Description
 
+<<<<<<< HEAD
 An OpenAPI description of this specification is available and [describes the 2.0.0 version](pub/refget-openapi.yaml). OpenAPI is a language independent way of describing REST services and is compatible with a number of [third party tools](http://openapi.tools/).
+=======
+An OpenAPI description of this specification is available and [describes the 1.0.1 version](pub/refget-openapi.yaml). OpenAPI is a language independent way of describing REST services and is compatible with a number of [third party tools](http://openapi.tools/). (Note: if there are differences between this text and the OpenAPI description, this specification text is definitive.)
+>>>>>>> master
 
 ## Compliance
 
@@ -54,24 +62,40 @@ Range headers are the preferred method for clients making sub-sequence requests,
 Requests MAY include an Accept header specifying the protocol version they are using:
 
 ```
+<<<<<<< HEAD
 Accept: text/vnd.ga4gh.refget.v2.0.0+plain
+=======
+Accept: text/vnd.ga4gh.refget.v1.0.1+plain
+>>>>>>> master
 ```
 
-Responses from the server MUST include a Content-Type header containing the encoding for the invoked method and protocol version:
+Responses from the server MUST include a Content-Type header. A plain text (`text/plain`) response MAY include the encoding for the invoked method and protocol version. The refget protocol reserves `text/plain` for the transfer of sequence data. A JSON response MUST include the encoding for the invoked method and protocol version for example:
 
 ```
+<<<<<<< HEAD
 Content-Type: text/vnd.ga4gh.refget.v2.0.0+plain; charset=us-ascii
+=======
+Content-Type: application/vnd.ga4gh.refget.v1.0.1+json; charset=us-ascii
+>>>>>>> master
 ```
 
 ## Internet Media Types Handling
 
 When responding to a request a server MUST use the fully specified media type for that endpoint. When determining if a request is well-formed, a server MUST allow a internet type to degrade like so
 
+<<<<<<< HEAD
 - `text/vnd.ga4gh.refget.v2.0.0+plain; charset=us-ascii`
   - `text/vnd.ga4gh.refget.v2.0.0+plain`
   - `text/plain`
 - `application/vnd.ga4gh.refget.v2.0.0+json; charset=us-ascii`
   - `application/vnd.ga4gh.refget.v2.0.0+json`
+=======
+- `text/vnd.ga4gh.refget.v1.0.1+plain; charset=us-ascii`
+  - `text/vnd.ga4gh.refget.v1.0.1+plain`
+  - `text/plain`
+- `application/vnd.ga4gh.refget.v1.0.1+json; charset=us-ascii`
+  - `application/vnd.ga4gh.refget.v1.0.1+json`
+>>>>>>> master
   - `application/json`
 
 ## Errors
@@ -150,7 +174,11 @@ A server may support circular chromosomes as a reference sequence, but this is n
 Unless negotiated with the client and allowed by the server, the default encoding for this method is:
 
 ```
+<<<<<<< HEAD
 Content-type: text/vnd.ga4gh.refget.v2.0.0+plain
+=======
+Content-type: text/vnd.ga4gh.refget.v1.0.1+plain
+>>>>>>> master
 ```
 
 #### URL parameters
@@ -171,7 +199,11 @@ Content-type: text/vnd.ga4gh.refget.v2.0.0+plain
 | Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `Range`   | string                  | Optional | Range header as specified in [RFC 7233](https://tools.ietf.org/html/rfc7233#section-3.1), however only a single byte range per GET request is supported by the specification. The byte range of the sequence to return, 0-based inclusive of start and end bytes specified. The server MUST respond with a `Bad Request` error if both a Range header and start or end query parameters are specified. The server MUST respond with a `Bad Request` error if one or more ranges are out of bounds of the sequence.                                                                                                                     |
+<<<<<<< HEAD
 | `Accept`    | string                  | Optional | The formatting of the returned sequence, defaults to `text/vnd.ga4gh.refget.v2.0.0+plain` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+=======
+| `Accept`    | string                  | Optional | The formatting of the returned sequence, defaults to `text/vnd.ga4gh.refget.v1.0.1+plain` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+>>>>>>> master
 
 #### Response
 
@@ -213,7 +245,11 @@ Due to the possibility of multiple checksum algorithms being supported by a serv
 Unless negotiated with the client and allowed by the server, the default encoding for this method is:
 
 ```
+<<<<<<< HEAD
 Content-type: application/vnd.ga4gh.refget.v2.0.0+json
+=======
+Content-type: application/vnd.ga4gh.refget.v1.0.1+json
+>>>>>>> master
 ```
 
 #### URL parameters
@@ -226,7 +262,11 @@ Content-type: application/vnd.ga4gh.refget.v2.0.0+json
 
 | Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+<<<<<<< HEAD
 | `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v2.0.0+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+=======
+| `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v1.0.1+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+>>>>>>> master
 
 #### Response
 
@@ -328,14 +368,22 @@ Return configuration information about this server implementation. See the [serv
 Unless negotiated with the client and allowed by the server, the default encoding for this method is:
 
 ```
+<<<<<<< HEAD
 Content-type: application/vnd.ga4gh.refget.v2.0.0+json
+=======
+Content-type: application/vnd.ga4gh.refget.v1.0.1+json
+>>>>>>> master
 ```
 
 #### Request parameters
 
 | Parameter | Data Type               | Required | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 |-----------|-------------------------|----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+<<<<<<< HEAD
 | `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v2.0.0+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+=======
+| `Accept`  | string                  | Optional | The formatting of the returned metadata, defaults to `application/vnd.ga4gh.refget.v1.0.1+json` if not specified. A server MAY support other formatting of the sequence.The server SHOULD respond with an `Not Acceptable` error if the client requests a format not supported by the server.                                                                                                                                                                                                                                                                                                                 |
+>>>>>>> master
 
 #### Response
 The server shall return a document detailing specifications of the service implementation. A JSON encoded response shall have the following fields in addition to those specified by service-info:
@@ -557,6 +605,7 @@ The specification makes no attempt to enforce a strict naming authority across i
 | `UCSC` | UCSC | Used for an identifier assigned by UCSC Genome group |
 | `Ensembl` | Ensembl | Used for an identifier assigned by the Ensembl project |
 | `RefSeq` | RefSeq | Used for an identifier assigned by the RefSeq group |
+<<<<<<< HEAD
 | `TRUNC512` | Refget | The old checksum algorithm based on SHA-512 used in v1.0.0 of refget |
 | `ga4gh` | Refget | ga4gh identifier, which are prefixed by the term `ga4gh:SQ.`. This is the preferred naming |
 
@@ -567,3 +616,12 @@ The specification makes no attempt to enforce a strict naming authority across i
 - Replace refget's v1 service-info implementation with GA4GH discovery's definition of service-info
 - Move code examples out into a Python notebook and a Perl script
 - Replace TRUNC512 with ga4gh identifier as the default SHA-512 based hash identifier (support still available for TRUNC512)
+=======
+| `vmc` | VMC | Used for when an identifier is a VMC compatible digest (as described above) |
+
+## Appendix 2 - Changes
+
+### v1.0.1
+
+- `plain/text` responses no longer need to specify a VND. `application/json` responses continue to need to do this.
+>>>>>>> master

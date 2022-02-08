@@ -1,0 +1,8 @@
+##fileformat=VCFv4.1
+##INFO=<ID=ID1,Number=1,Type=Integer,Description="Regular description">
+##INFO=<ID=ID2,Number=2,Type=Float,Description="Info field with \"escaped quotes\"">
+##INFO=<ID=ID3,Number=A,Type=Flag,Description="">
+##INFO=<ID=ID4,Number=G,Type=Character,Description="Regular description">
+##INFO=<ID=ID5,Number=.,Type=String,Description="">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

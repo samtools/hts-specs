@@ -1,0 +1,7 @@
+@CO	Validation of AUX
+@CO	Type f
+I	4	*	0	0	*	*	0	0	CAT	QQQ	F0:f:-1	F1:f:0	F2:f:1	F3:f:9.9e-19	F4:f:-9.9E-19	F5:f:9.9E+19	F6:f:-9.9e+19	F7:f:-9.9E19
+I	4	*	0	0	*	*	0	0	CAT	QQQ	F0:f:0	F1:f:-0	F2:f:+0
+I	4	*	0	0	*	*	0	0	CAT	QQQ	F0:f:09	F1:f:-009e+0	F2:f:+00009e-0
+I	4	*	0	0	*	*	0	0	CAT	QQQ	F0:f:00.1	F1:f:.1	F2:f:-00.1	F3:f:-.1
+I	4	*	0	0	*	*	0	0	CAT	QQQ	F0:f:1.175494351E-38	f0:f:1.175494351E-38	F1:f:3.402823466E+38	F1:f:-3.402823466E+38

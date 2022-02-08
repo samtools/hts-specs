@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##pedigreeDB=<ftp://www.ebi.ac.uk:8080/valid/host/to/file.db>
+##pedigreeDB=<http://123.0.1.2:8080/valid/host/to/file.db>
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	.

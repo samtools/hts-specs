@@ -1,0 +1,5 @@
+##fileformat=VCFv4.3
+##CauseOfFailure=INFO SOMATIC Number is not 0
+##INFO=<ID=SOMATIC,Number=1,Type=Flag,Description="Somatic mutation (for cancer genomics)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	123	.	TC	T	.	.	SOMATIC=0

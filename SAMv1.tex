@@ -36,6 +36,8 @@
 \newcommand*{\cclass}[1]{{\rm\sf :#1:}}
 \newcommand*{\caret}{\textsuperscript{$\wedge$}}
 
+\newcommand*{\memlimited}{\textcolor{gray}{\footnotesize\it limited}}
+
 \begin{document}
 
 \input{SAMv1.ver}
@@ -215,6 +217,8 @@ is a two-character string that defines the format and content of {\tt VALUE}.
 Thus header lines match {\tt
   /\char94@(HD|SQ|RG|PG)(\char92t[A-Za-z][A-Za-z0-9]:[
   -\char126]+)+\$/} or {\tt /\char94@CO\char92t.*/}.
+Within each (non-{\tt @CO}) header line, no field tag may appear more than
+once and the order in which the fields appear is not significant.
 
 The following table describes the header record types that may be used
 and their predefined tags.
@@ -242,7 +246,7 @@ meanings can be avoided.}
   \endfirsthead
   \cline{1-3}
   \endhead
-  \multicolumn{2}{|l}{\tt @HD} & The header line. The first line if present. \\\cline{2-3}
+  \multicolumn{2}{|l}{\tt @HD} & File-level metadata. Optional. If present, there must be only one {\tt @HD} line and it must be the first line of the file. \\\cline{2-3}
   & {\tt VN}* & Format version. \emph{Accepted format}: {\tt /\char94[0-9]+\char92.[0-9]+\$/}.\\\cline{2-3}
   & {\tt SO} & Sorting order of alignments. \emph{Valid values}: {\tt unknown} (default), {\tt
     unsorted}, {\tt queryname} and {\tt coordinate}. For coordinate sort, the major sort
@@ -257,12 +261,12 @@ meanings can be avoided.}
     are grouped together but the file is not necessarily sorted overall.
     \emph{Valid values}: {\tt none} (default), {\tt query} (alignments are
     grouped by {\sf QNAME}), and {\tt reference} (alignments are grouped by
-    {\sf RNAME}/{\sf POS}).\\\cline{1-3}
+    {\sf RNAME}/{\sf POS}).\\\cline{2-3}
   & {\tt SS} & Sub-sorting order of alignments. Valid values are of the form \emph{sort-order}{\tt :}\emph{sub-sort}, where \emph{sort-order} is the same value stored in the {\tt SO} tag and \emph{sub-sort} is an implementation-dependent colon-separated string further describing the sort order, but with some predefined terms defined in Section~\ref{sec:sub-sort}.
     For example, if an algorithm relies on a {\tt coordinate} sort that, at each coordinate, is further sorted by query name then the header could contain {\tt @HD SO:coordinate SS:coordinate:queryname}.%
 \footnote{The repetition of \emph{sort-order} enables a limited form of validation.
 For example, {\tt @HD SO:queryname SS:coordinate:TLEN} would indicate that the data has been re-sorted (by query name) by a non-{\tt SS}-aware tool and the {\tt SS} field should be ignored.}
-    If the primary sort is not one of the predefined primary sort orders, then {\tt unsorted} should be used and the subsort is effectively the major sort.
+    If the primary sort is not one of the predefined primary sort orders, then {\tt unsorted} should be used and the sub-sort is effectively the major sort.
     For example, if sorted by an auxiliary tag {\tt MI} then by coordinate then the header could contain {\tt @HD SO:unsorted SS:unsorted:MI:coordinate}.
     \newline
     \emph{Regular expression}: {\tt (coordinate|queryname|unsorted)(:[\verb"A-Za-z0-9_-"]+)+}\\\cline{1-3}
@@ -313,9 +317,9 @@ The {\tt TP} field is often omitted, which implies linear.}\\\cline{2-3}
   & {\tt PG} & Programs used for processing the read group.\\\cline{2-3}
   & {\tt PI} & Predicted median insert size.\\\cline{2-3}
   & {\tt PL} & Platform/technology used to produce the reads. \emph{Valid values}:
-  {\tt CAPILLARY}, {\tt LS454}, {\tt ILLUMINA}, {\tt SOLID}, {\tt HELICOS}, {\tt IONTORRENT}, {\tt ONT}, and {\tt PACBIO}.\\\cline{2-3}
-  & {\tt PM} & Platform model. Free-form text providing further details of the
-  platform/technology used.\\\cline{2-3}
+  {\tt CAPILLARY}, {\tt DNBSEQ} (MGI/BGI), {\tt HELICOS}, {\tt ILLUMINA}, {\tt IONTORRENT}, {\tt LS454}, {\tt ONT} (Oxford Nanopore), {\tt PACBIO} (Pacific Biosciences), and {\tt SOLID}.
+  This field should be omitted when the technology is not in this list (though the {\tt PM} field may still be present in this case) or is unknown.\\\cline{2-3}
+  & {\tt PM} & Platform model. Free-form text providing further details of the platform/technology used.\\\cline{2-3}
   & {\tt PU} & Platform unit (e.g., flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
   & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @PG} & Program. \\\cline{2-3}
@@ -435,8 +439,8 @@ For segments that have been mapped to the reverse strand, the recorded {\sf SEQ}
 	multiple alignment lines, when its alignment is chimeric or when multiple
 	mappings are given.
 \item {\sf FLAG}: Combination of bitwise FLAGs.\footnote{The manipulation of
-bitwise flags is described at \href{http://en.wikipedia.org/wiki/Flag\_field}
-{Wikipedia (see ``Flag field'')} and elsewhere.}
+bitwise flags is described at \href{http://en.wikipedia.org/wiki/Bit\_field}
+{Wikipedia (see ``Bit field'')} and elsewhere.}
 Each bit is explained in the following table:
   \begin{center}\small
   \begin{tabular}{rrl}
@@ -560,8 +564,9 @@ Each bit is explained in the following table:
   0 when the information is unavailable. This field equals {\sf POS} at the primary line of
   the next read. If {\sf PNEXT} is 0, no assumptions can be made on
   {\sf RNEXT} and bit 0x20.
-\item {\sf TLEN}: signed observed Template LENgth. If all segments are
-  mapped to the same reference sequence, the absolute value of TLEN
+\item {\sf TLEN}: signed observed Template LENgth.
+  For primary reads where the primary alignments of all reads in the template
+  are mapped to the same reference sequence, the absolute value of TLEN
   equals the distance between the mapped end of the template and the
   mapped start of the template, inclusively (i.e., $\mbox{end}-\mbox{start}+1$).%
   \footnote{Thus a segment
@@ -639,8 +644,9 @@ Each bit is explained in the following table:
 \subsection{The alignment section: optional fields}\label{sec:alnaux}
 All optional fields follow the {\tt TAG:TYPE:VALUE} format
 where {\tt TAG} is a two-character string that matches {\tt /[A-Za-z][A-Za-z0-9]/}.
-Each {\tt TAG} can only appear once in one alignment line. A {\tt TAG}
-containing lowercase letters are reserved for end users.
+Within each alignment line, no {\tt TAG} may appear more than once
+and the order in which the optional fields appear is not significant.
+A {\tt TAG} containing lowercase letters is reserved for end users.
 In an optional field, {\tt TYPE} is a single case-sensitive letter which
 defines the format of {\tt VALUE}:
 \begin{center}\small
@@ -910,7 +916,7 @@ standard-compliant extensions:
 \begin{enumerate}
 \item The {\sf F.EXTRA} bit in the header is set to indicate that extra
   fields are present.
-\item The extra field used by BGZF uses the two subfield ID values 66 and 67 (ascii `BC').
+\item The extra field used by BGZF uses the two subfield ID values 66 and 67 (ASCII `BC').
 \item The length of the BGZF extra field payload (field {\sf LEN} in the
   gzip specification) is 2 (two bytes of payload).
 \item The payload of the BGZF extra field is a 16-bit unsigned integer
@@ -1027,15 +1033,16 @@ underlined word in uppercase denotes a field in the SAM format.
   \cline{1-6}
   \multicolumn{3}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf magic} & BAM magic string & {\tt char[4]} & {\tt BAM\char92 1}\\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf l\_text} & Length of the header text, including any {\tt NUL} padding & {\tt int32\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf l\_text} & Length of the header text, including any {\tt NUL} padding & {\tt uint32\_t} & $< 2^{31}$ \\\cline{1-6}
   \multicolumn{3}{|l|}{\sf text} & Plain header text in SAM; not necessarily {\tt NUL}-terminated & {\tt char[{\sf l\_text}]} & \\\cline{1-6}
-  \multicolumn{3}{|l|}{\sf n\_ref} & \# reference sequences & {\tt int32\_t} & \\\cline{1-6}
+  % Pedantically this should be <= but we restrict |refs| by one so n_ref fits in a signed 32-bit int.
+  \multicolumn{3}{|l|}{\sf n\_ref} & \# reference sequences & {\tt uint32\_t} & $< 2^{31}$ \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of reference information (n=n\_ref)}} \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf l\_name} & Length of the reference name plus 1 (including {\tt NUL}) & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_name} & Length of the reference name plus 1 (including {\tt NUL}) & {\tt uint32\_t} & \memlimited \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf name} & Reference sequence name; {\tt NUL}-terminated & {\tt char[{\sf l\_name}]} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt int32\_t} & \\\cline{1-6}
+  & \multicolumn{2}{l|}{\sf l\_ref} & Length of the reference sequence & {\tt uint32\_t} & $< 2^{31}$ \\\cline{1-6}
   \multicolumn{6}{|c|}{\textcolor{gray}{\it List of alignments (until the end of the file)}} \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf block\_size} & Total length of the alignment record, excluding this field & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf block\_size} & Total length of the alignment record, excluding this field & {\tt uint32\_t} & \memlimited \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf refID} & Reference sequence ID, $-1\leq{\sf refID}<{\sf n\_ref}$; -1 for a read without a mapping position & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf pos} & 0-based leftmost coordinate ($=\underline{\sf POS}-1$)& {\tt int32\_t} & [-1]\\\cline{2-6}
   & \multicolumn{2}{l|}{\sf l\_read\_name} & Length of {\sf read\_name} below ($={\sf length}(\underline{\sf QNAME})+1$) & {\tt uint8\_t} & \\\cline{2-6}
@@ -1043,7 +1050,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf bin} & BAI index bin, see Section~\ref{sec:bin-field}  & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf n\_cigar\_op} & Number of operations in \underline{\sf CIGAR}, see Section~\ref{sec:ncigar} & {\tt uint16\_t} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf flag} & Bitwise flags (= \underline{\sf FLAG})\footnotemark\ & {\tt uint16\_t} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt int32\_t} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf l\_seq} & Length of \underline{\sf SEQ} & {\tt uint32\_t} & \memlimited \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_refID} & Ref-ID of the next segment ($-1\le{\sf next\_refID}<{\sf n\_ref}$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
@@ -1064,16 +1071,24 @@ should be written as zero and ignored on reading by current software.}
 \stepcounter{footnote}
 \footnotetext{For backward compatibility, an absent {\sf QNAME} (represented as `{\tt *}' in SAM) is stored as a C string {\tt "*\char92 0"}.}
 
+\noindent
+Most length and count fields described as {\tt uint32\_t} have additional constraints on their range:
+$\mbox{\sf l\_text} < 2^{31}$ due to implementation limits;
+$\mbox{\sf n\_ref} < 2^{31}$ because {\sf refID} and {\sf next\_refID} are signed;
+$\mbox{\sf l\_ref} < 2^{31}$ because {\sf tlen} is signed;
+those marked ``\textit{limited}'' are limited by available memory and the practical size of the data represented well before they are limited by, e.g., Java's signed 32-bit integer maximum array size.
+
 \subsubsection{BIN field calculation}\label{sec:bin-field}
 {\sf BIN} is calculated using the {\sf reg2bin()} function in
 Section~\ref{sec:code}.
-For mapped reads this uses {\sf POS-1} (i.e.,~0-based left position) and the
+For mapped reads this uses $\mbox{\sf POS}-1$ (i.e.,~0-based left position) and the
 alignment end point using the alignment length from the {\sf CIGAR} string.
-For unmapped reads (e.g.,~paired end reads where only one part is mapped, see
-Section~\ref{sec:recommended-practice}) the alignment is treated as
-being length one.
+For unmapped reads (e.g.,~paired-end reads where only one part is mapped, see
+Section~\ref{sec:recommended-practice}) and reads whose {\sf CIGAR} strings
+consume no reference bases at all, the alignment is treated as
+being of length one.
 Note unmapped reads with {\sf POS} $0$ (which becomes $-1$ in BAM) therefore
-use {\sf reg2bin(-1, 0)} which is $4680$.
+use $\mbox{\sf reg2bin}(-1, 0)$ which is computed as $4680$.
 
 \subsubsection{N\_CIGAR\_OP field}\label{sec:ncigar}
 With 16 bits, {\sf n\_cigar\_op} can keep at most 65535 CIGAR
@@ -1147,9 +1162,10 @@ than `{\tt H}' fields.}
 
 \newcommand*{\arraytagfield}[3]{\tagfield{B}{\bytebox{1}{\tt #1}\bytebox{4}{\em count}\byteboxvector{#2}{#3}}}
 
+\begin{samepage}
 The representation of a `{\tt B}' array field starts with a sub-type character
-similar to the numeric field types above and an {\tt int32\_t} \emph{count}
-giving the number of elements in the array.
+similar to the numeric field types above and a \emph{count} ({\tt uint32\_t}, but
+limited by memory and {\sf block\_size}) giving the number of elements in the array.
 The array elements follow, encoded as binary integers or IEEE floats sized
 according to the sub-type:
 \begin{center}\small\byteboxsetup\begin{tabular}{l}
@@ -1161,6 +1177,7 @@ according to the sub-type:
 \arraytagfield{I}{4}{uint32\_t} \\
 \arraytagfield{f}{4}{float}
 \end{tabular}\end{center}
+\end{samepage}
 
 \pagebreak
 
@@ -1213,7 +1230,7 @@ calls in average.
 
 In the BAI format, each bin may span $2^{29}$, $2^{26}$, $2^{23}$, $2^{20}$,
 $2^{17}$ or $2^{14}$ bp. Bin 0 spans a 512Mbp region, bins 1--8 span 64Mbp,
-9--72 8Mbp, 73--584 1Mbp, 585--4680 128Kbp, and bins 4681--37448 span 16Kbp
+9--72 8Mbp, 73--584 1Mbp, 585--4680 128kbp, and bins 4681--37448 span 16kbp
 regions.  This implies that this index format does not support reference
 chromosome sequences longer than $2^{29}-1$.
 
@@ -1271,29 +1288,31 @@ saved.
 
 \subsection{The BAI index format for BAM files}
 \begin{table}[ht]
-{\small
+\centering\small
 \begin{tabular}{|l|l|l|l|l|l|r|}
   \cline{1-7}
   \multicolumn{4}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-7}
   \multicolumn{4}{|l|}{\sf magic} & Magic string & {\tt char[4]} & {\tt BAI\char92 1}\\\cline{1-7}
-  \multicolumn{4}{|l|}{\sf n\_ref} & \# reference sequences & {\tt int32\_t} & \\\cline{1-7}
+  \multicolumn{4}{|l|}{\sf n\_ref} & \# reference sequences & {\tt uint32\_t} & $< 2^{31}$ \\\cline{1-7}
   \multicolumn{7}{|c|}{\textcolor{gray}{\it List of indices (n=n\_ref)}} \\\cline{2-7}
-  & \multicolumn{3}{l|}{\sf n\_bin} & \# distinct bins (for the binning index) & {\tt int32\_t} & \\\cline{2-7}
+  & \multicolumn{3}{l|}{\sf n\_bin} & \# distinct bins (for the binning index) & {\tt uint32\_t} & $\le 37451$ \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of distinct bins (n=n\_bin)}} \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf bin} & Distinct bin & {\tt uint32\_t} & \\\cline{3-7}
-  & & \multicolumn{2}{l|}{\sf n\_chunk} & \# chunks & {\tt int32\_t} & \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf bin} & Distinct bin & {\tt uint32\_t} & $\le 37450$ \\\cline{3-7}
+  & & \multicolumn{2}{l|}{\sf n\_chunk} & \# chunks & {\tt uint32\_t} & \memlimited\footnotemark \\\cline{3-7}
   & & \multicolumn{5}{c|}{\textcolor{gray}{\it List of chunks (n=n\_chunk)}} \\\cline{4-7}
   & & & {\sf chunk\_beg} & (Virtual) file offset of the start of the chunk & {\tt uint64\_t} & \\\cline{4-7}
   & & & {\sf chunk\_end} & (Virtual) file offset of the end of the chunk & {\tt uint64\_t} & \\\cline{2-7}
-  & \multicolumn{3}{l|}{\sf n\_intv} & \# 16kbp intervals (for the linear index) & {\tt int32\_t} & \\\cline{2-7}
+  & \multicolumn{3}{l|}{\sf n\_intv} & \# 16kbp intervals (for the linear index) & {\tt uint32\_t} & $\le 2^{17}$ \\\cline{2-7}
   & \multicolumn{6}{c|}{\textcolor{gray}{\it List of intervals (n=n\_intv)}} \\\cline{3-7}
   & & \multicolumn{2}{l|}{\sf ioffset} & (Virtual) file offset of the first alignment in the interval & {\tt uint64\_t} & \\\cline{1-7}
   \multicolumn{4}{|l|}{{\sf n\_no\_coor} (optional)} & Number of unplaced unmapped reads ({\sf RNAME} *) & {\tt uint64\_t} & \\\cline{1-7}
-\end{tabular}}
+\end{tabular}
 \end{table}
 
+\footnotetext{The number of chunks in a single bin is effectively limited by available memory and in any case is typically a maximum of some thousands.}
+
 The index file may optionally contain additional metadata providing a summary
-of the number of mapped and unmapped read-segments per reference sequence,
+of the number of mapped and placed unmapped read-segments per reference sequence,
 and of any unplaced unmapped read-segments.\footnote{By \emph{placed unmapped
 read} we mean a read that is unmapped according to its {\sf FLAG} but whose
 {\sf RNAME} and~{\sf POS} fields are filled in, thus ``placing'' it on a
@@ -1313,19 +1332,31 @@ compatible with real bins and their chunks:
 \begin{tabular}{|l|l|l|r|}
   \hline
   {\sf bin} & Magic bin number & {\tt uint32\_t} & 37450 \\\hline
-  {\sf n\_chunk} & \# chunks & {\tt int32\_t} & 2 \\\hline
-  {\sf unmapped\_beg} & (Virtual) file offset of the start of placed unmapped reads & {\tt uint64\_t} & \\\hline
-  {\sf unmapped\_end} & (Virtual) file offset of the end of placed unmapped reads & {\tt uint64\_t} & \\\hline
+  {\sf n\_chunk} & \# chunks & {\tt uint32\_t} & 2 \\\hline
+  {\sf ref\_beg} & (Virtual) file offset of the start of reads placed on this reference& {\tt uint64\_t} & \\\hline
+  {\sf ref\_end} & (Virtual) file offset of the end of reads placed on this reference& {\tt uint64\_t} & \\\hline
   {\sf n\_mapped} & Number of mapped read-segments for this reference & {\tt uint64\_t} & \\\hline
   {\sf n\_unmapped} & Number of unmapped read-segments for this reference & {\tt uint64\_t} & \\\hline
 \end{tabular}
 \end{table}
+
+\noindent
+The {\sf ref\_beg}/{\sf ref\_end} fields locate the first and last reads on this reference sequence, whether they are mapped or placed unmapped.
+Thus they are equal to the minimum {\sf chunk\_beg} and maximum {\sf chunk\_end} respectively.
 
 \subsection{C source code for computing bin number and overlapping bins}\label{sec:code}
 The following functions compute bin numbers and overlaps for a BAI-style
 binning scheme with $6$~levels and a minimum bin size of $2^{14}$~bp.
 See the CSI specification for generalisations of these functions designed for
 binning schemes with arbitrary depth and sizes.
+
+When these functions are called with regions representing unplaced
+unmapped reads, e.g., $\mbox{\sf reg2bin}(-1, 0)$, they involve operations
+such as \verb|(-1)>>14| which are undefined or implementation-defined in
+some programming languages.
+They must be implemented as if these operations use the common
+two's-complement semantics: $\mbox{\sf reg2bin}(-1, 0) = 4680$ and
+$\mbox{\sf reg2bins}(-1, 0, \ldots)$ returns $[\,0, 0, 8, 72, 584, 4680\,]$.
 
 {\small
 \begin{verbatim}
@@ -1411,6 +1442,11 @@ at \url{https://github.com/samtools/hts-specs}.}
 \subsection*{1.6: 28 November 2017 to current}
 
 \begin{itemize}
+\item Clarify that header field tags must be distinct within each line, and that the ordering of both header fields and alignment optional fields is not significant. (Jun 2021)
+\item Clarify the meaning of TLEN when secondary alignments are present. (May 2021)
+\item Bin calculation changed for alignment records whose CIGAR strings consume no reference bases: like unmapped records, they are considered to have length one (rather than zero). (Jan 2021)
+\item Correct the description of index pseudo-bins, which previously stated that {\sf ref\_beg}/{\sf ref\_end}, then named {\sf unmapped\_beg}/{\sf unmapped\_end}, include only placed unmapped reads. (Jul 2020)
+\item Add {\tt DNBSEQ} to the list of {\tt @RG PL} header tag values. (Apr 2020)
 \item Add {\tt @SQ TP} circular/linear topology header tag. (May 2019)
 \item\textbf{Restricted the allowable punctuation characters in reference sequence names} (in {\tt @SQ SN}, {\sf RNAME}, etc).
 The sets of characters allowed in {\tt @SQ SN} and {\tt @SQ AN} are now identical, which enlarges the previous {\tt AN} set. (Jan 2019)
