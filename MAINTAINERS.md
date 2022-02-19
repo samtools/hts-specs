@@ -9,9 +9,8 @@ The current maintainers are listed below.
 
 * James Bonfield (@jkbonfield)
 * John Marshall (@jmarshall)
-* Yossi Farjoun (@yfarjoun)
 
-Past SAM/BAM maintainers include Jay Carey, Tim Fennell, and Nils Homer.
+Past SAM/BAM maintainers include Jay Carey, Yossi Farjoun, Tim Fennell, and Nils Homer.
 
 ### CRAM
 
@@ -23,10 +22,10 @@ Past CRAM maintainers include Vadim Zalunin.
 ### VCF/BCF
 
 * Louis Bergelson (@lbergelson)
-* Petr Danecek (@pd3)
+* Daniel Cameron (@d-cameron)
 * Kirill Tsukanov (@tskir)
 
-Past VCF/BCF maintainers include Cristina Yenyxe Gonzalez Garcia, Jose Miguel Mut Lopez, Ryan Poplin, and David Roazen.
+Past VCF/BCF maintainers include Petr Danecek, Cristina Yenyxe Gonzalez Garcia, Jose Miguel Mut Lopez, Ryan Poplin, and David Roazen.
 
 ### Htsget
 
