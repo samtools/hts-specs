@@ -339,6 +339,8 @@ Molecular Identifier.
 A unique ID within the SAM file for the source molecule from which this read is derived. 
 All reads with the same {\tt MI} tag represent the group of reads derived from the same source molecule. 
 
+In the case that strand of the source molecule can be identified for this read, the convention is to append to the ID either {\tt /1} and {\tt /2}, or {\tt /A} and {\tt /B}, to identify the top strand and bottom strand of the source molecule.
+
 \item[OX:Z:\tagvalue{sequence+}] 
 Raw (uncorrected) unique molecular identifier bases, with any quality scores (optionally) stored in the {\tt BZ} tag. 
 In the case of multiple unique molecular identifiers (e.g., one on each end of the template) the recommended implementation concatenates all the barcodes with a hyphen (`{\tt -}') between the different barcodes.
