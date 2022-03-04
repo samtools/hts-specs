@@ -320,7 +320,7 @@ GET /sequence/6aef897c3d6ff0c78aff06ac189178dd/metadata
 
 ### Method: Fetch information on the service
 
-`GET /sequence/service-info`
+`GET /service-info`
 
 Return configuration information about this server implementation. See the [service-info specification page](https://github.com/ga4gh-discovery/ga4gh-service-info) for more information.
 
@@ -384,7 +384,7 @@ Array of strings listing the versions of this API supported by the server.
 #### Example JSON request
 
 ```
-GET /sequence/service-info
+GET /service-info
 
 {
   "id": "org.ga4gh.refget",

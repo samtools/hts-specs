@@ -19,7 +19,7 @@ tags:
   - name: Other
     description: Additional services
 paths:
-  /sequence/service-info:
+  /service-info:
     get:
       summary: Retrieve a summary of features this API deployment supports
       operationId: serviceInfo
