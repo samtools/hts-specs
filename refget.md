@@ -571,4 +571,12 @@ The specification makes no attempt to enforce a strict naming authority across i
 
 ### v1.0.1
 
+[Specification link](https://github.com/samtools/hts-specs/blob/fde0b700d7d1aeb4d40cc27c820965a6f365f650/refget.md)
+
 - `plain/text` responses no longer need to specify a VND. `application/json` responses continue to need to do this.
+
+### v1.0.0
+
+[Specification link](https://github.com/samtools/hts-specs/blob/f7947e7554f289a9bf0027be93be4145b97243a2/refget.md)
+
+- First release of the specification
