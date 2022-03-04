@@ -159,7 +159,7 @@ components:
             ga4gh:
               type: string
               description: >-
-                A ga4gh identifier used to identify the sequence. This is a SHA-512 base64 url encoded
+                A ga4gh identifier used to identify the sequence. This is a base64url-encoded encoded
                 string taking the 1st 24bits from the SHA-512 digest (sha512t24u). This is the preferred method
                 of representing the SHA-512 sequence digest.
               example: ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2
@@ -220,7 +220,6 @@ components:
                   example:
                   - md5
                   - ga4gh
-                  - trunc512
               identifier_types:
                 type: array
                 items:

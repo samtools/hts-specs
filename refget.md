@@ -100,7 +100,7 @@ Authorization: Bearer [access_token]
 The policies and processes used to perform user authentication and authorization, and the means through which access tokens are issued, are beyond the scope of this API specification. GA4GH recommends the use of the OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for authentication and authorization.
 
 ## Checksum calculation
-The supported checksum algorithms are `MD5` (a 32 character HEX string) and a SHA-512 based system called `ga4gh` (a base64 URL-safe string, see later for details). Servers MUST support sequence retrieval by one or more of these algorithms, and are encouraged to support all to maximize interoperability. An older algorithm called `TRUNC512` existed in version 1.0.0 of refget but is now deprecated in favour of the GA4GH sequence checksum string. It is possible to translate between the `ga4gh` and `TRUNC512` systems however `TRUNC512` usage SHOULD be discouraged.
+The recommended checksum algorithms are `MD5` (a 32 character HEX string) and a SHA-512 based system called `ga4gh` (a base64 URL-safe string, see later for details). Servers MUST support sequence retrieval by one or more of these algorithms, and are encouraged to support all to maximize interoperability. An older algorithm called `TRUNC512` existed in version 1.0.0 of refget but is now deprecated in favour of the GA4GH sequence checksum string. It is possible to translate between the `ga4gh` and `TRUNC512` systems however `TRUNC512` usage SHOULD be discouraged.
 
 To provide CRAM Reference Registry compatibility an implementation must support MD5.
 
@@ -512,7 +512,7 @@ Considering the requirements of the three systems the specification designers fe
 
 MD5 provides adequate protection against hash collisions occurring from sequences. However the consequence of a sequence derived hash collision appearing would be catastrophic as two or more sequences with different content would report to be the same entity.
 
-The VRS, Variation Representation Specification, is a complementary GA4GH effort to model genomic variation based on deviations from a reference sequence. Part of their work was to explore hashing algorithms. We have adopted the [checksum algorithm from VRS v1](https://vr-spec.readthedocs.io/), based around the SHA-512 algorithm.
+The VRS, Variation Representation Specification, is a complementary GA4GH effort to model genomic variation based on deviations from a reference sequence. Part of their work was to explore hashing algorithms. We have adopted the [checksum algorithm from VRS v1](https://vrs.ga4gh.org/en/1.0/impl-guide/computed_identifiers.html#truncated-digest-sha512t24u), based around the SHA-512 algorithm.
 
 The algorithm performs a SHA-512 digest of a sequence and creates a base64url encoding of the first 24 bytes of the digest. Analysis performed by VRS suggests this should be sufficient to avoid message collisions (see the VRS documentation for more details). Should a message collision occur within this scheme then the number of bytes retained from the SHA-512 checksum will be increased.
 
