@@ -7,14 +7,6 @@ use warnings;
 use Digest::SHA qw/sha512_hex sha512/;
 use MIME::Base64 qw/encode_base64url decode_base64url/;
 
-sub trunc512_digest {
-  my ($sequence, $digest_size) = @_;
-  $digest_size //= 24;
-  my $digest = sha512_hex($sequence);
-  my $substring = substr($digest, 0, $digest_size*2);
-  return $substring;
-}
-
 sub ga4gh_digest {
   my ($sequence, $digest_size) = @_;
   $digest_size //= 24;
@@ -23,6 +15,14 @@ sub ga4gh_digest {
   }
   my $digest = sha512($sequence);
   return _ga4gh_bytes($digest, $digest_size);
+}
+
+sub trunc512_digest {
+  my ($sequence, $digest_size) = @_;
+  $digest_size //= 24;
+  my $digest = sha512_hex($sequence);
+  my $substring = substr($digest, 0, $digest_size*2);
+  return $substring;
 }
 
 sub _ga4gh_bytes {
@@ -37,7 +37,6 @@ sub ga4gh_to_trunc512 {
   my ($ga4gh) = @_;
   my ($base64) = $ga4gh =~ /ga4gh:SQ.(.+)/;
   my $digest = unpack("H*", decode_base64url($base64));
-  warn $digest;
   return $digest;
 }
 
@@ -48,20 +47,21 @@ sub trunc512_to_ga4gh {
   return _ga4gh_bytes($digest, $digest_length);
 }
 
-print trunc512_digest('ACGT'), "\n";
-# 68a178f7c740c5c240aa67ba41843b119d3bf9f8b0f0ac36
-
-print trunc512_digest('ACGT', 26), "\n";
-# 68a178f7c740c5c240aa67ba41843b119d3bf9f8b0f0ac36cf70
-
-print ga4gh_digest('ACGT'), "\n";
+print 'GA4GH identifier: ', ga4gh_digest('ACGT'), "\n";
 # ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2
 
-print ga4gh_to_trunc512(ga4gh_digest('ACGT')), "\n";
+print 'TRUNC512: ', trunc512_digest('ACGT'), "\n";
 # 68a178f7c740c5c240aa67ba41843b119d3bf9f8b0f0ac36
 
-print trunc512_to_ga4gh(trunc512_digest('ACGT')), "\n";
+print "\n";
+
+print 'Convert TRUNC512 to GA4GH ', trunc512_to_ga4gh(trunc512_digest('ACGT')), "\n";
 # ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2
 
-print ga4gh_digest('ACGT'), "\n";
+print 'Convert from GA4GH to TRUNC512 ', ga4gh_to_trunc512(ga4gh_digest('ACGT')), "\n";
+# 68a178f7c740c5c240aa67ba41843b119d3bf9f8b0f0ac36
+
+print "\n";
+
+print 'Digest of an empty sequence ', ga4gh_digest(''), "\n";
 # ga4gh:SQ.z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXc
