@@ -1633,7 +1633,7 @@ be followed by 4 more bytes representing substitutions for reference bases C, G,
     \State \Call{DecodeFeature}{}
   \EndFor
   \State $mapping\_quality\gets$ \Call{ReadItem}{MQ, Integer} 
-  \If{$container\_pmap.preserve\_quality\_scores$}
+  \If{$CF$ AND $1$}\Comment{Quality stored as an array}
     \For{$i\gets 1 \algorithmicto read\_length$}
       \State $quality\_score\gets$ \Call{ReadItem}{QS, Integer} 
     \EndFor
@@ -1695,7 +1695,7 @@ byte[read length] & QS & quality scores & the base qualities, if preserved\tabul
   \For{$i\gets 1 \algorithmicto read\_length$}
     \State $base\gets$ \Call{ReadItem}{BA, Byte}
   \EndFor
-  \If{$container\_pmap.preserve\_quality\_scores$}
+  \If{$CF$ AND $1$}\Comment{Quality stored as an array}
     \For{$i\gets 1 \algorithmicto read\_length$}
       \State $quality\_score\gets$ \Call{ReadItem}{QS, Byte}
     \EndFor
