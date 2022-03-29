@@ -77,14 +77,15 @@ When responding to a request a server MUST use the fully specified media type fo
 ## Errors
 The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when an error condition is detected. In the case of transient server errors (e.g., 503 and other 5xx status codes), the client SHOULD implement appropriate retry logic. For example, if a client sends an alphanumeric string for a parameter that is specified as unsigned integer the server MUST reply with `Bad Request`.
 
-| Error type             | HTTP status code | Description                                                                                          |
-|------------------------|------------------|------------------------------------------------------------------------------------------------------|
-| `Bad Request`            | 400              | Cannot process due to malformed request, the requested parameters do not adhere to the specification |
-| `Unauthorized`           | 401              | Authorization provided is invalid                                                                    |
-| `Not Found`              | 404              | The resource requested was not found                                                                 |
-| `Not Acceptable`         | 406              | The requested  formatting is not supported by the server                                     |
-| `Range Not Satisfiable`  | 416              | The Range request cannot be satisfied                                                                |
-| `Not Implemented`        | 501              | The specified request is not supported by the server                                                 |
+|  Error type             | HTTP status code | Description                                                                                          |
+|-------------------------|------------------|------------------------------------------------------------------------------------------------------|
+| `Bad Request`           | 400              | Cannot process due to malformed request, the requested parameters do not adhere to the specification |
+| `Unauthorized`          | 401              | Authorization provided is invalid                                                                    |
+| `Not Found`             | 404              | The resource requested was not found                                                                 |
+| `Not Acceptable`        | 406              | The requested formatting is not supported by the server                                              |
+| `Conflict`              | 409              | The document requested cannot be uniquely resolved from the provided identifier                      |
+| `Range Not Satisfiable` | 416              | The Range request cannot be satisfied                                                                |
+| `Not Implemented`       | 501              | The specified request is not supported by the server                                                 |
 
 ## Security
 Reference sequence as defined in this specification is publicly accessible without restrictions. However the refget API retrieval mechanism can be used to retrieve potentially sensitive genomic data and is dependent on the implementation. Effective security measures are essential to protect the integrity and confidentiality of these data.
@@ -120,10 +121,13 @@ Services may also implement the older `TRUNC512` representation of a truncated S
 A `ga4gh` digest of `ACGT` MUST result in the string `ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2`.
 
 ## Unique Identifiers
-Refget optionally allows the use of namespaced identifiers in place of the digest. The identifier must be unique within that refget implementation and prefixed by a namespace for example to form a CURIE for example:
+Refget optionally allows the use of namespaced identifiers in place of the digest. The identifier prefixed by a namespace to form a CURIE for example:
 
 `insdc:CM000663.2`
 
+It is recommended that each namespaced identifier be unique within the refget implementation but if it does not resolve to a single sequence the server must respond with either:
+ - code 300: `multiple choices` providing a list of identifiers or sequence digests that correspond to the request
+ - code 409: `conflict` indicating a conflict that cannot be resolved.
 
 ## CORS
 Cross-origin resource sharing (CORS) is an essential technique used to overcome the same origin content policy seen in browsers. This policy restricts a webpage from making a request to another website and leaking potentially sensitive information. However the same origin policy is a barrier to using open APIs. GA4GH open API implementers should enable CORS to an acceptable level as defined by their internal policy. For any public API implementations should allow requests from any server.
