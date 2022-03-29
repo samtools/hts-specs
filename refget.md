@@ -367,7 +367,7 @@ An array of strings listing the digest algorithms that are supported. Standard v
 <code>identifier_types</code><br/>
 array of strings
 </td><td>
-An array of strings listing the type identifiers supported. Values used should be the same as the one supported by identifiers.orgs such as <code>insdc</code>, <code>ensembl</code>, <code>refget</code>.
+An array of strings listing the type identifiers supported. Values used should be the same as the one supported by [identifiers.org](https://registry.identifiers.org/registry) such as <code>insdc</code>, <code>ensembl</code>, <code>refget</code>.
 </td></tr>
 <tr markdown="block"><td>
 <code>subsequence_limit</code><br/>
@@ -553,17 +553,17 @@ The following people have contributed to the design of this specification.
 
 ## Appendix 1 - Naming Authorities
 
-The specification makes no attempt to enforce a strict naming authority across implementations due to their potential heterogenous nature. However we do encourage implementors to reuse naming authority strings where possible. See below for more information about our recommended set of names.
+The specification makes no attempt to enforce a strict naming authority across implementations due to their potential heterogenous nature. However we do encourage implementors to reuse naming authority strings where possible following nomenclature from [identifiers.org](https://registry.identifiers.org/registry). See below for examples of recommended names.
 
-| String | Authority | Description | Status |
-|--------|-----------|-------------|--------|
-| `INSDC` | INSDC | Used for any identifier held in an INSDC resource (GenBank, ENA, DDBJ) | Active |
-| `UCSC` | UCSC | Used for an identifier assigned by UCSC Genome group | Active |
-| `Ensembl` | Ensembl | Used for an identifier assigned by the Ensembl project | Active |
-| `RefSeq` | RefSeq | Used for an identifier assigned by the RefSeq group | Active |
-| `TRUNC512` | Refget | The old checksum algorithm based on SHA-512 used in v1.0.0 of refget | Deprecated |
-| `ga4gh` | Refget | ga4gh identifier, which are prefixed by the term `ga4gh:SQ.`. This is the preferred naming | Active |
-| `vmc` | VMC | Used for when an identifier is a VMC compatible digest | Deprecated |
+| String     | Authority | Description | Status |
+|------------|-----------|-------------|--------|
+| `insdc`    | INSDC | Used for any identifier held in an INSDC resource (GenBank, ENA, DDBJ) | Active |
+| `ucsc`     | UCSC | Used for an identifier assigned by UCSC Genome group | Active |
+| `ensembl`  | Ensembl | Used for an identifier assigned by the Ensembl project | Active |
+| `refSeq`   | RefSeq | Used for an identifier assigned by the RefSeq group | Active |
+| `trunc512` | Refget | The old checksum algorithm based on SHA-512 used in v1.0.0 of refget | Deprecated |
+| `ga4gh`    | Refget | ga4gh identifier, which are prefixed by the term `ga4gh:SQ.`. This is the preferred naming | Active |
+| `vmc`      | VMC | Used for when an identifier is a VMC compatible digest | Deprecated |
 
 ## Appendix 2 - Changes
 
@@ -572,6 +572,8 @@ The specification makes no attempt to enforce a strict naming authority across i
 - Replace refget's v1 service-info implementation with GA4GH discovery's definition of service-info
 - Move code examples out into a Python notebook and a Perl script
 - Replace TRUNC512 with ga4gh identifier as the default SHA-512 based hash identifier (support still available for TRUNC512)
+- Optional support for namespaced identifiers to resolve sequence and metadata
+- Lower cased recommended naming authority strings
 
 ### v1.0.1
 
