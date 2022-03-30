@@ -514,7 +514,7 @@ MD5 provides adequate protection against hash collisions occurring from sequence
 
 The VRS, Variation Representation Specification, is a complementary GA4GH effort to model genomic variation based on deviations from a reference sequence. Part of their work was to explore hashing algorithms. We have adopted the [checksum algorithm from VRS v1](https://vrs.ga4gh.org/en/1.0/impl-guide/computed_identifiers.html#truncated-digest-sha512t24u), based around the SHA-512 algorithm.
 
-The algorithm performs a SHA-512 digest of a sequence and creates a base64url encoding ([using RFC 4648](https://datatracker.ietf.org/doc/html/rfc4648#section-5)) of the first 24 bytes of the digest. Analysis performed by VRS suggests this should be sufficient to avoid message collisions (see the VRS documentation for more details). Should a message collision occur within this scheme then the number of bytes retained from the SHA-512 checksum will be increased.
+The algorithm performs a SHA-512 digest of a sequence and creates a base64url encoding ([as defined in RFC 4648](https://datatracker.ietf.org/doc/html/rfc4648#section-5)) of the first 24 bytes of the digest. Analysis performed by VRS suggests this should be sufficient to avoid message collisions (see the VRS documentation for more details). Should a message collision occur within this scheme then the number of bytes retained from the SHA-512 checksum will be increased.
 
 ### Checksum Identifier Identification
 
