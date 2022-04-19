@@ -353,14 +353,19 @@ Fixed fields are:
 \begin{longtable}[c]{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | p{10.3cm} | }
 	\hline
 	Key		& Number	& Type		& Description \\ \hline
+  \endfirsthead
+	\multicolumn{4}{l}{\small\emph{\ldots Continued from previous page}} \\[0.7ex]
+	\hline
+	Key		& Number	& Type		& Description \\ \hline
   \endhead
-    \hline
-    \multicolumn{4}{l}{} \\
-    \caption{\label{table:reserved-info}Reserved INFO keys (continued on next page)}
+	\hline
+	\multicolumn{4}{r}{\small\emph{Continued on next page\ldots}} \\
+	\caption[]{Reserved INFO keys}
   \endfoot
-    \hline
-    \multicolumn{4}{l}{} \\
-    \caption{Reserved INFO keys (continued from previous page)}
+	\hline
+	\multicolumn{4}{l}{} \\
+	\caption{Reserved INFO keys}
+	\label{table:reserved-info}
   \endlastfoot
 	AA		& 1		& String	& Ancestral allele \\
 	AC		& A		& Integer	& Allele count in genotypes, for each ALT allele, in the same order as listed  \\
@@ -415,11 +420,20 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
 \begin{longtable}[c]{ | p{2.5cm} | p{1.5cm} | p{1.5cm} | p{10.3cm} | }
       \hline
       Field		& Number	& Type		& Description \\ \hline
+  \endfirsthead
+      \multicolumn{4}{l}{\small\emph{\ldots Continued from previous page}} \\[0.7ex]
+      \hline
+      Field		& Number	& Type		& Description \\ \hline
   \endhead
       \hline
-      \multicolumn{4}{l}{} \\
-      \caption{\label{table:reserved-genotypes}Reserved genotype keys}
+      \multicolumn{4}{r}{\small\emph{Continued on next page\ldots}} \\
+      \caption[]{Reserved genotype keys}
   \endfoot
+      \hline
+      \multicolumn{4}{l}{} \\
+      \caption{Reserved genotype keys}
+      \label{table:reserved-genotypes}
+  \endlastfoot
       AD		& R		& Integer	& Read depth for each allele \\
       ADF		& R		& Integer	& Read depth for each allele on the forward strand \\
       ADR		& R		& Integer	& Read depth for each allele on the reverse strand \\
