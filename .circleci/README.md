@@ -1,3 +1,5 @@
+[The CircleCI web hook has been deactivated in favour of GitHub Actions. This legacy infrastructure will be removed once that has bedded in.]
+
 We use [circle-ci](https://circleci.com/gh/samtools/hts-specs) to build the pdfs and highlight the differences for each pull-request. This is done at several steps.
 
 1. Circle-ci runs `make` and copies the pdfs and log files to an "artifacts" directory for that build.

@@ -1,0 +1,47 @@
+name: Handle PDF pull request
+
+on:
+  pull_request:
+    paths: '*.tex'
+
+jobs:
+  LaTeX:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Identify changed LaTeX documents
+        env:
+          pr_number: ${{ github.event.number }}
+          base_sha: ${{ github.event.pull_request.base.sha }}
+          head_sha: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mergebase_sha=$(git merge-base $base_sha $head_sha)
+          echo "mergebase_sha=$mergebase_sha" >> $GITHUB_ENV
+          changed=$(git diff-tree --name-only --merge-base $base_sha $head_sha -- '*.tex' | tr '\n' ' ')
+          echo "changed=$changed" >> $GITHUB_ENV
+          echo "pdfs=$(ls -1 $changed | sed 's,^,new/,;s,tex$,pdf,' | tr '\n' ' ')" >> $GITHUB_ENV
+          echo "diffs=$(ls -1 $changed | sed 's,^,diff/,;s,tex$,pdf,' | tr '\n' ' ')" >> $GITHUB_ENV
+
+          echo "pr_number=$pr_number" > environ.txt
+          echo "base_sha=$base_sha" >> environ.txt
+          echo "head_sha=$head_sha" >> environ.txt
+          echo "mergebase_sha=$mergebase_sha" >> environ.txt
+
+      - name: Run LaTeX
+        uses: ./.github/actions/texlive
+        if:   ${{ env.changed }}
+        with:
+          run: make ${{ env.pdfs }} && make -k OLD=$mergebase_sha NEW=HEAD ${{ env.diffs }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: pdf
+          retention-days: 1
+          if-no-files-found: ignore
+          path: |
+            environ.txt
+            new/*.pdf
+            diff/*.pdf

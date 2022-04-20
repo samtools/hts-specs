@@ -1,0 +1,74 @@
+name: Add PR comment
+
+on:
+  workflow_run:
+    workflows: ["Handle PDF pull request"]
+    types: [completed]
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run_id: ${{ github.event.workflow_run.id }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download artifacts
+        run: |
+          gh run download --dir artifact --name pdf $run_id
+          cat artifact/environ.txt >> $GITHUB_ENV
+
+      - name: Check out preview ref
+        run: |
+          git fetch --depth=1 origin refs/preview/$pr_number:pr || git fetch --depth=1 origin $base_sha:pr
+          git switch pr
+          rm -rf new diff
+          mv artifact/new artifact/diff .
+
+      - name: Compose comment
+        shell: python
+        env:
+          view_url: https://cdn.jsdelivr.net/gh/${{ github.repository }}@<SHA>
+        run: |
+          import os
+
+          head_sha = os.environ['head_sha']
+          view_url = os.environ['view_url']
+
+          files = []
+          links = []
+          for pdf in sorted(os.listdir("new")):
+              new_pdf = os.path.join("new", pdf)
+              diff_pdf = os.path.join("diff", pdf)
+
+              text = f"[{os.path.splitext(pdf)[0]}]({view_url}/{new_pdf})"
+              files.append(new_pdf)
+              if os.path.exists(diff_pdf):
+                  text += f" ([diff]({view_url}/{diff_pdf}))"
+                  files.append(diff_pdf)
+              links.append(text)
+
+          with open(os.environ['GITHUB_ENV'], 'a') as outf:
+              files_text = " ".join(files)
+              print(f"pdf_files={files_text}", file=outf)
+
+              links_text = ", ".join(links)
+              print(f"comment=Changed PDFs as of {head_sha}: {links_text}.", file=outf)
+
+      - name: Update preview ref
+        env:
+          GIT_AUTHOR_NAME: hts-specs bot
+          GIT_COMMITTER_NAME: hts-specs bot
+          EMAIL: hts-specs-bot@broadinstitute.org
+        run: |
+          git add -f $pdf_files
+          git commit --allow-empty -m "PDFs for PR #$pr_number as of $head_sha"
+          git push origin pr:refs/preview/$pr_number
+
+      - name: Add PR comment
+        shell: bash
+        run: |
+          gh pr comment --body "${comment//<SHA>/$(git rev-parse pr)}" $pr_number

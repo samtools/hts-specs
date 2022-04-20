@@ -1,0 +1,15 @@
+name: texlive
+description: Run commands in a TeXLive docker image
+
+inputs:
+  run:
+    description: Commands to be executed
+    required: true
+
+runs:
+  using: docker
+  image: docker://texlive/texlive:latest
+  entrypoint: /bin/sh
+  args:
+    - -c
+    - ${{ inputs.run }}

@@ -1,0 +1,19 @@
+name: Tidy up PDF pull request
+
+on:
+  pull_request_target:
+    paths: '*.tex'
+    types: [closed]
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      pr_number: ${{ github.event.number }}
+
+    steps:
+      - name: Remove preview ref
+        continue-on-error: true
+        run: |
+          gh api --method DELETE repos/$GITHUB_REPOSITORY/git/refs/preview/$pr_number
