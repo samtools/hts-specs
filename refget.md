@@ -560,7 +560,7 @@ The specification makes no attempt to enforce a strict naming authority across i
 | `insdc`    | INSDC | Used for any identifier held in an INSDC resource (GenBank, ENA, DDBJ) | Active |
 | `ucsc`     | UCSC | Used for an identifier assigned by UCSC Genome group | Active |
 | `ensembl`  | Ensembl | Used for an identifier assigned by the Ensembl project | Active |
-| `refSeq`   | RefSeq | Used for an identifier assigned by the RefSeq group | Active |
+| `refseq`   | RefSeq | Used for an identifier assigned by the RefSeq group | Active |
 | `trunc512` | Refget | The old checksum algorithm based on SHA-512 used in v1.0.0 of refget | Deprecated |
 | `ga4gh`    | Refget | ga4gh identifier, which are prefixed by the term `ga4gh:SQ.`. This is the preferred naming | Active |
 | `vmc`      | VMC | Used for when an identifier is a VMC compatible digest | Deprecated |
