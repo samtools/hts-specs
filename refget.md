@@ -367,7 +367,7 @@ An array of strings listing the digest algorithms that are supported. Standard v
 <code>identifier_types</code><br/>
 array of strings
 </td><td>
-An array of strings listing the type identifiers supported. Values used should be the same as the one supported by [identifiers.org](https://registry.identifiers.org/registry) such as <code>insdc</code>, <code>ensembl</code>, <code>refget</code>.
+An array of strings listing the type identifiers supported. Values used should be the same as the one supported by [identifiers.org](https://registry.identifiers.org/registry) such as <code>insdc</code>, <code>ensembl</code>, <code>refseq</code>.
 </td></tr>
 <tr markdown="block"><td>
 <code>subsequence_limit</code><br/>
