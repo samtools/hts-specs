@@ -635,7 +635,7 @@ SVLEN is defined for $INS$, $DUP$, $INV$, and $DEL$ symbolic alleles as the numb
 SVLEN is defined for $CNV$ symbolic alleles as the length of the segment over which the copy number variant is defined.
 The missing value $.$ should be used for all other ALT allele, including ALT alleles using breakend notation.
 
-Note that for structural variant symbolic allele $POS$ corresponds, 
+Note that for structural variant symbolic allele $POS$ corresponds to the based immediately preceding the variant.
 
 \footnotesize
 \begin{verbatim}
@@ -665,7 +665,7 @@ For symbolic structural variants, the first in the pair must not be greater than
 For all other alleles, both should be the missing value $.$.
 For example, $CIEND=-5,5,.,.$ indicates a 5bp confidence interval in each direction around the end position for the first ALT allele, and no $CIEND$ is defined for the second alt allele.
 
-If $CIEND$ is missing, $CIEND$ is assumed to match $CIPOS$.
+If $CIEND$ is missing, it is assumed to match $CIPOS$.
 
 \footnotesize
 \begin{verbatim}
@@ -708,10 +708,10 @@ $MEINFO$ consists of successive quadruplets of records for each ALT allele.
 ##INFO=<ID=DGVID,Number=A,Type=String,Description="ID of this element in Database of Genomic Variation">
 ##INFO=<ID=DBVARID,Number=A,Type=String,Description="ID of this element in DBVAR">
 ##INFO=<ID=DBRIPID,Number=A,Type=String,Description="ID of this element in DBRIP">
-##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakends">
+##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend">
 ##INFO=<ID=PARID,Number=A,Type=String,Description="ID of partner breakend">
-##INFO=<ID=EVENT,Number=1,Type=String,Description="ID of associated event">
-##INFO=<ID=EVENTTYPE,Number=1,Type=String,Description="Type of associated event">
+##INFO=<ID=EVENT,Number=A,Type=String,Description="ID of associated event">
+##INFO=<ID=EVENTTYPE,Number=A,Type=String,Description="Type of associated event">
 \end{verbatim}
 \normalsize
 
@@ -750,11 +750,9 @@ $CILEN$ consists of successive pairs of records indicating the lower and upper b
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=DP,Number=A,Type=Integer,Description="Read Depth of segment containing breakend">
-##INFO=<ID=DPADJ,Number=A,Type=Integer,Description="Read Depth of adjacency">
-##INFO=<ID=CN,Number=A,Type=Integer,Description="Copy number of segment containing breakend">
-##INFO=<ID=CNADJ,Number=A,Type=Integer,Description="Copy number of adjacency">
-##INFO=<ID=CICN,Number=.,Type=Integer,Description="Confidence interval around copy number for the segment">
+##INFO=<ID=DP,Number=A,Type=Integer,Description="Total read Depth at variant (breakend) position">
+##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of CNV/breakpoint">
+##INFO=<ID=CICN,Number=.,Type=Integer,Description="Confidence interval around copy number">
 \end{verbatim}
 \normalsize
 
@@ -763,17 +761,7 @@ $CICN$ consists of successive pairs of records indicating the lower and upper co
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=CICNADJ,Number=.,Type=Integer,Description="Confidence interval around copy number for the adjacency">
-\end{verbatim}
-\normalsize
-
-If present, the number of entries must be twice the number of ALT alleles.
-$CICNADJ$ consists of successive pairs of records indicating the lower and upper copy number bounds.
-
-\footnotesize
-\begin{verbatim}
-##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J,
-DJ for abundance, adjacency and both respectively.">
+##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively.">
 \end{verbatim}
 \normalsize
 
@@ -812,7 +800,10 @@ Rules of applying SVCLAIM field are different depending on symbolic allele type:
 
 If all alleles contain the missing value ``.'', the SVCLAIM field can be omitted.
 
-Note that the scope of SVCLAIM is the single ALT allele taken in isolation. Complex events such as a cut and paste transposition of a mobile element result in multiple interrelated copy number and breakpoint claims. These records should be linked using EVENT/EVENTTYPE, with the SVCLAIM field on each record specifying the claim of that individual allele record. That is, a J claim must not be made on a CNV record even if the corresponding start/end breakpoints are known, and a DJ claim on a DEL or DUP is a claim of a simple, isolated deletion or tandem duplication.
+Note that the scope of SVCLAIM is the single ALT allele taken in isolation.
+Complex events such as a cut and paste transposition of a mobile element result in multiple interrelated copy number and breakpoint claims.
+These records should be linked using EVENT/EVENTTYPE, with the SVCLAIM field on each record specifying the claim of that individual allele record.
+That is, a J claim must not be made on a CNV record even if the corresponding start/end breakpoints are known, and a DJ claim on a DEL or DUP is a claim of a simple, isolated deletion or tandem duplication.
 
 \section{FORMAT keys used for structural variants}
 \label{sv-format-keys}
