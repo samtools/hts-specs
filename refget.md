@@ -77,14 +77,15 @@ When responding to a request a server MUST use the fully specified media type fo
 ## Errors
 The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when an error condition is detected. In the case of transient server errors (e.g., 503 and other 5xx status codes), the client SHOULD implement appropriate retry logic. For example, if a client sends an alphanumeric string for a parameter that is specified as unsigned integer the server MUST reply with `Bad Request`.
 
-| Error type             | HTTP status code | Description                                                                                          |
-|------------------------|------------------|------------------------------------------------------------------------------------------------------|
-| `Bad Request`            | 400              | Cannot process due to malformed request, the requested parameters do not adhere to the specification |
-| `Unauthorized`           | 401              | Authorization provided is invalid                                                                    |
-| `Not Found`              | 404              | The resource requested was not found                                                                 |
-| `Not Acceptable`         | 406              | The requested  formatting is not supported by the server                                     |
-| `Range Not Satisfiable`  | 416              | The Range request cannot be satisfied                                                                |
-| `Not Implemented`        | 501              | The specified request is not supported by the server                                                 |
+|  Error type             | HTTP status code | Description                                                                                          |
+|-------------------------|------------------|------------------------------------------------------------------------------------------------------|
+| `Bad Request`           | 400              | Cannot process due to malformed request, the requested parameters do not adhere to the specification |
+| `Unauthorized`          | 401              | Authorization provided is invalid                                                                    |
+| `Not Found`             | 404              | The resource requested was not found                                                                 |
+| `Not Acceptable`        | 406              | The requested formatting is not supported by the server                                              |
+| `Conflict`              | 409              | The document requested cannot be uniquely resolved from the provided identifier                      |
+| `Range Not Satisfiable` | 416              | The Range request cannot be satisfied                                                                |
+| `Not Implemented`       | 501              | The specified request is not supported by the server                                                 |
 
 ## Security
 Reference sequence as defined in this specification is publicly accessible without restrictions. However the refget API retrieval mechanism can be used to retrieve potentially sensitive genomic data and is dependent on the implementation. Effective security measures are essential to protect the integrity and confidentiality of these data.
@@ -120,10 +121,13 @@ Services may also implement the older `TRUNC512` representation of a truncated S
 A `ga4gh` digest of `ACGT` MUST result in the string `ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2`.
 
 ## Unique Identifiers
-Refget optionally allows the use of namespaced identifiers in place of the digest. The identifier must be unique within that refget implementation and prefixed by a namespace for example to form a CURIE for example:
+Refget optionally allows the use of namespaced identifiers in place of the digest. The identifier prefixed by a namespace to form a CURIE for example:
 
 `insdc:CM000663.2`
 
+It is recommended that each namespaced identifier be unique within the refget implementation but if it does not resolve to a single sequence the server must respond with either:
+ - code 300: `multiple choices` providing a list of identifiers or sequence digests that correspond to the request
+ - code 409: `conflict` indicating a conflict that cannot be resolved.
 
 ## CORS
 Cross-origin resource sharing (CORS) is an essential technique used to overcome the same origin content policy seen in browsers. This policy restricts a webpage from making a request to another website and leaking potentially sensitive information. However the same origin policy is a barrier to using open APIs. GA4GH open API implementers should enable CORS to an acceptable level as defined by their internal policy. For any public API implementations should allow requests from any server.
@@ -363,7 +367,7 @@ An array of strings listing the digest algorithms that are supported. Standard v
 <code>identifier_types</code><br/>
 array of strings
 </td><td>
-An array of strings listing the type identifiers supported. Values used should be the same as the one supported by identifiers.orgs such as <code>insdc</code>, <code>ensembl</code>, <code>refget</code>.
+An array of strings listing the type identifiers supported. Values used should be the same as the one supported by [identifiers.org](https://registry.identifiers.org/registry) such as <code>insdc</code>, <code>ensembl</code>, <code>refseq</code>.
 </td></tr>
 <tr markdown="block"><td>
 <code>subsequence_limit</code><br/>
@@ -549,17 +553,17 @@ The following people have contributed to the design of this specification.
 
 ## Appendix 1 - Naming Authorities
 
-The specification makes no attempt to enforce a strict naming authority across implementations due to their potential heterogenous nature. However we do encourage implementors to reuse naming authority strings where possible. See below for more information about our recommended set of names.
+The specification makes no attempt to enforce a strict naming authority across implementations due to their potential heterogenous nature. However we do encourage implementors to reuse naming authority strings where possible following nomenclature from [identifiers.org](https://registry.identifiers.org/registry). See below for examples of recommended names.
 
-| String | Authority | Description | Status |
-|--------|-----------|-------------|--------|
-| `INSDC` | INSDC | Used for any identifier held in an INSDC resource (GenBank, ENA, DDBJ) | Active |
-| `UCSC` | UCSC | Used for an identifier assigned by UCSC Genome group | Active |
-| `Ensembl` | Ensembl | Used for an identifier assigned by the Ensembl project | Active |
-| `RefSeq` | RefSeq | Used for an identifier assigned by the RefSeq group | Active |
-| `TRUNC512` | Refget | The old checksum algorithm based on SHA-512 used in v1.0.0 of refget | Deprecated |
-| `ga4gh` | Refget | ga4gh identifier, which are prefixed by the term `ga4gh:SQ.`. This is the preferred naming | Active |
-| `vmc` | VMC | Used for when an identifier is a VMC compatible digest | Deprecated |
+| String     | Authority | Description | Status |
+|------------|-----------|-------------|--------|
+| `insdc`    | INSDC | Used for any identifier held in an INSDC resource (GenBank, ENA, DDBJ) | Active |
+| `ucsc`     | UCSC | Used for an identifier assigned by UCSC Genome group | Active |
+| `ensembl`  | Ensembl | Used for an identifier assigned by the Ensembl project | Active |
+| `refseq`   | RefSeq | Used for an identifier assigned by the RefSeq group | Active |
+| `trunc512` | Refget | The old checksum algorithm based on SHA-512 used in v1.0.0 of refget | Deprecated |
+| `ga4gh`    | Refget | ga4gh identifier, which are prefixed by the term `ga4gh:SQ.`. This is the preferred naming | Active |
+| `vmc`      | VMC | Used for when an identifier is a VMC compatible digest | Deprecated |
 
 ## Appendix 2 - Changes
 
@@ -568,6 +572,8 @@ The specification makes no attempt to enforce a strict naming authority across i
 - Replace refget's v1 service-info implementation with GA4GH discovery's definition of service-info
 - Move code examples out into a Python notebook and a Perl script
 - Replace TRUNC512 with ga4gh identifier as the default SHA-512 based hash identifier (support still available for TRUNC512)
+- Optional support for namespaced identifiers to resolve sequence and metadata
+- Lower cased recommended naming authority strings
 
 ### v1.0.1
 
