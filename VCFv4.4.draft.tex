@@ -1011,12 +1011,13 @@ $2$ & \verb|a t c G C G C G a| & following the G base is an insertion of 2 bases
 \subsection{Encoding Structural Variants}
 The following page contains examples of structural variants encoded in VCF, showing in order:
 \begin{enumerate}
-  \item A precise deletion with known breakpoint, a one base micro-homology, and a sample that is homozygous for the deletion.
-  \item An imprecise deletion of approximately 205 bp.
-  \item An imprecise deletion of an ALU element relative to the reference.
-  \item An imprecise insertion of an L1 element relative to the reference.
-  \item An imprecise duplication of approximately 21Kb. The sample genotype is copy number 3 (one extra copy of the duplicated sequence).
-  \item An imprecise tandem duplication of 76bp. The sample genotype is copy number 5 (but the two haplotypes are not known).
+  \item A simple deletion
+  \item The same deletion in symbolic notation
+  \item The same deletion split into constituent breakpoint and copy number records
+  \item A poly A expansion
+  \item The same poly A expansion represented as a duplication
+  \item An insertion with both length and position imprecise
+  \item A single breakend
 \end{enumerate}
 
 \pagebreak
@@ -1025,38 +1026,32 @@ The following page contains examples of structural variants encoded in VCF, show
 \begin{verbatim}
 VCF STRUCTURAL VARIANT EXAMPLE
 
-##fileformat=VCFv
-##fileDate=20100501
-##reference=1000GenomesPilot-NCBI36
-##assembly=ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/sv/breakpoint_assemblies.fasta
-##INFO=<ID=BKPTID,Number=.,Type=String,Description="ID of the assembled alternate allele in the assembly file">
-##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
-##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
-##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
-##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
-##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
-##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
-##ALT=<ID=DEL,Description="Deletion">
-##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">
-##ALT=<ID=DEL:ME:L1,Description="Deletion of L1 element">
+##fileformat=VCFv4.4
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=INS,Description="Insertion">
 ##ALT=<ID=DUP,Description="Duplication">
 ##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
-##ALT=<ID=INS,Description="Insertion of novel sequence">
-##ALT=<ID=INS:ME:ALU,Description="Insertion of ALU element">
-##ALT=<ID=INS:ME:L1,Description="Insertion of L1 element">
-##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=DEL,Description="Deletion">
 ##ALT=<ID=CNV,Description="Copy number variable region">
+##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend">
+##INFO=<ID=EVENT,Number=A,Type=String,Description="ID of associated event">
+##INFO=<ID=EVENTTYPE,Number=A,Type=String,Description="Type of associated event">
+##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of CNV/breakpoint">
+##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively.">
+##contig=<ID=chrA,length=1000000>
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-##FORMAT=<ID=GQ,Number=1,Type=Integer,Description="Genotype quality">
-##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">
-##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality for imprecise events">
-#CHROM POS     ID        REF              ALT          QUAL FILTER INFO                                                               FORMAT       NA00001
-1      2827694 rs2376870 CGTGGATGCGGGGAC  C            .    PASS   END=2827708;HOMLEN=1;HOMSEQ=G;SVLEN=-14                 GT:GQ        1/1:14
-2       321682 .         T                <DEL>        6    PASS   END=321887;SVLEN=-205;CIPOS=-56,20;CIEND=-10,62         GT:GQ        0/1:12
-2     14477084 .         C                <DEL:ME:ALU> 12   PASS   END=14477381;SVLEN=-297;CIPOS=-22,18;CIEND=-12,32       GT:GQ        0/1:12
-3      9425916 .         C                <INS:ME:L1>  23   PASS   END=9425916;SVLEN=6027;CIPOS=-16,22                     GT:GQ        1/1:15
-3     12665100 .         A                <DUP>        14   PASS   END=12686200;SVLEN=21100;CIPOS=-500,500;CIEND=-500,500  GT:GQ:CN:CNQ ./.:0:3:16.2
-4     18665128 .         T                <DUP:TANDEM> 11   PASS   END=18665204;SVLEN=76;CIPOS=-10,10;CIEND=-10,10         GT:GQ:CN:CNQ ./.:0:5:8.3
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number">
+##custom_header_field_containing_chr_seq=ATGCGAAAAAAATGT
+#CHROM POS ID   REF ALT       QUAL FILTER INFO                                      FORMAT sample
+chrA   2   .    TGC T         .    .      EVENT=DEL_seq                                 GT    0/1
+chrA   2   .    T   <DEL>     .    .      SVLEN=2;SVCLAIM=DJ;EVENT=DEL_symbolic         GT    0/1
+chrA   2 delbp1 T   T[chrA:5[ .    .      MATEID=delbp2;EVENT=DEL_split_bp_cn           GT    0/1
+chrA   2 delbp2 A   ]chrA:2]A .    .      MATEID=delbp1;EVENT=DEL_split_bp_cn           GT    0/1
+chrA   2   .    T   <DEL>     .    .      SVLEN=2;SVCLAIM=D;EVENT=DEL_split_bp_cn       GT    0/1
+chrA   5   .    G   GAAA      .    .      EVENT=homology_seq                            GT    1/1
+chrA   5   .    G   <DUP>     .    .      SVLEN=3;CIPOS=0,5;EVENT=homology_dup          GT    0/1
+chrA   14  .    T   <INS>     .    .      IMPRECISE;SVLEN=100;CILEN=-50,50;CIPOS=-10,10 GT    0/1
+chrA   14  .    G   .CCCCCCG  .    .      EVENT=single_breakend                         GT    0/1
 \end{verbatim}
 \end{landscape}
 \pagebreak
