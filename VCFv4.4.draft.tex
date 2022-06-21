@@ -2252,9 +2252,10 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \subsection{Changes between VCFv4.4 and VCFv4.3}
 
 \begin{itemize}
-\item Clarify how to add multiple SV per record by making the number of value in reserved SV INFO fields dependent on the number of ALT
+\item Clarify how to add multiple SV per record by making the number of value in reserved SV INFO fields dependent on the number of ALT. However END is still Number=1 even with multiple variant per record.
 \item Deprecate SVTYPE INFO field preferring the use of symbolic alleles in the ALT field
 \item Define new reserved INFO field EVENT, EVENTTYPE and SVCLAIM
+\item Redefined INFO field SVLEN to be always positive
 \end{itemize}
 
 \subsection{Changes to VCFv4.3}
@@ -2313,6 +2314,7 @@ Therefore, also \#\#PEDIGREE newly requires a unique ID.
 \subsection{Changes between VCFv4.1 and VCFv4.2}
 \begin{itemize}
 \item In the HEADER the INFO definition allow additional field after the 4 first mandatory fields
+\item INFO fields definition can use Number=R to specify one per allele including the reference.
 \item Allow star allele in the ALT for describing upstream deletion
 \end{itemize}
 
