@@ -525,7 +525,7 @@ The example shows in order:
 
 An arbitrary rearrangement event can be summarized as a set of novel \textbf{adjacencies}. Each adjacency ties together $2$ \textbf{breakends}. The two breakends at either end of a novel adjacency are called \textbf{mates}.
 
-There is one line of VCF (i.e.\ one record) for each of the two breakends in a novel adjacency. A breakend record is identified with the tag ``SYTYPE=BND'' in the INFO field. The REF field of a breakend record indicates a base or sequence s of bases beginning at position POS, as in all VCF records. The ALT field of a breakend record indicates a replacement for s. This ``breakend replacement'' has three parts:
+There is one line of VCF (i.e.\ one record) for each of the two breakends in a novel adjacency. A breakend record is identified with the tag ``SVTYPE=BND'' in the INFO field. The REF field of a breakend record indicates a base or sequence s of bases beginning at position POS, as in all VCF records. The ALT field of a breakend record indicates a replacement for s. This ``breakend replacement'' has three parts:
 \begin{enumerate}
   \item The string t that replaces places s. The string t may be an extended version of s if some novel bases are inserted during the formation of the novel adjacency.
   \item The position p of the mate breakend, indicated by a string of the form ``chr:pos''. This is the location of the first mapped base in the piece being joined at this novel adjacency.
