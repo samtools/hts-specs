@@ -300,7 +300,7 @@ The Cell Barcode can help identify when reads come from different cells in a ``s
 The \emph{UMI} is intended to identify the (single- or double-stranded) molecule at the time that the barcode was introduced.
 This can be used to inform duplicate marking and make consensus calling in ultra-deep sequencing.
 In some experimental setups opposite strands of the same double-stranded DNA molecule get related barcodes to differentiate from which strand of the double-stranded DNA molecule each read was observed.
-In this case, the {\\t MI} tag can store not only the unique molecular identifier but also group reads that observe the top and bottom genomic strands respectively.
+In this case, the {\tt MI} tag can store not only the unique molecular identifier but also group reads that observe the top and bottom genomic strands respectively.
 These templates can also be considered duplicates even though technically they may have different UMIs.
 Additionally, the UMI can be used to (informatically) link reads that were generated from the same long molecule, enabling long-range phasing and better informed mapping.
 Finally, multiple UMIs can be added by a protocol, possibly at different time-points, which means that specific knowledge of the protocol may be needed in order to analyze the resulting data correctly.
@@ -340,7 +340,7 @@ Molecular Identifier.
 A unique ID within the SAM file for the source molecule from which this read is derived. 
 All reads with the same {\tt MI} tag represent the group of reads derived from the same source molecule.
 
-The MI tag value may end with a {\tt $/[^/]$} suffix indicating that it is one of several related barcodes\footnote{For example, {\tt MI:Z:mol1/A} and {\tt MI:Z:mol1/B} could be used to identify read pairs from the opposite strands of a duplex source molecule, where the {\tt MI:Z:mol1/A} are by convention the "top (genomic) strand" reads and have 5' unclipped position of read one (of the pair) less than or equal to the 5' unclipped position of read two (of the pair).  Then tools can find either the group of reads derived from that source molecule (those with the trimmed MI value {\tt mol1}) or the groups of reads derived from each strand of that duplex source molecule (those with the full MI value {\tt mol1/A}, or {\tt mol1/B} respectively).}.  Where appropriate, tools may wish to omit these suffixes when determining a read's source molecule.
+The MI tag value may end with a \verb"/[^/]" suffix indicating that it is one of several related barcodes.\footnote{For example, {\tt MI:Z:mol1/A} and {\tt MI:Z:mol1/B} could be used to identify read pairs from the opposite strands of a duplex source molecule, where the {\tt MI:Z:mol1/A} are by convention the "top (genomic) strand" reads and have 5' unclipped position of read one (of the pair) less than or equal to the 5' unclipped position of read two (of the pair).  Then tools can find either the group of reads derived from that source molecule (those with the trimmed MI value {\tt mol1}) or the groups of reads derived from each strand of that duplex source molecule (those with the full MI value {\tt mol1/A}, or {\tt mol1/B} respectively).}  Where appropriate, tools may wish to omit these suffixes when determining a read's source molecule.
 
 \item[OX:Z:\tagvalue{sequence+}] 
 Raw (uncorrected) unique molecular identifier bases, with any quality scores (optionally) stored in the {\tt BZ} tag. 
