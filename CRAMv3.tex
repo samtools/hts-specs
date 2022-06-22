@@ -561,7 +561,7 @@ itf8 & number of blocks & the total number of blocks in this container\tabularne
 \hline
 array\texttt{<}itf8\texttt{>} & landmarks & the locations of slices in this container as byte offsets from the end of
 this container header, used for random access indexing.
-The landmark count must equal the slice count.\linebreak{}
+For sequence data containers, the landmark count must equal the slice count.\linebreak{}
 Since the block before the first slice is the compression header,
 landmarks[0] is equal to the byte length of the compression header.\tabularnewline
 \hline
@@ -571,11 +571,18 @@ byte[ ] & blocks & The blocks contained within the container.\tabularnewline
 \hline
 \end{tabular}
 
-The alignment start and alignment span values should only be utilised
-during decoding if the container has mapped data aligned to a single
-reference (reference sequence id $>= 0$).  For multi-reference
-containers or those with unmapped data, it is recommended to fill
-these fields with value 0.
+In the initial CRAM header container, the reference sequence id,
+starting position on the reference, and alignment span fields must be
+ignored when reading. The landmarks array is optional for the CRAM
+header, but if it exists it should point to block offsets instead of
+slices, with the first block containing the textual header.
+
+In data containers specifying unmapped reads or multiple reference
+sequences (i.e. reference sequence id $< 0$), the starting position on
+the reference and alignment span fields must be ignored when
+reading. When writing, it is recommended to set each of these ignored
+fields to the value 0.
+
 
 \subsection{\textbf{CRAM header container}}
 
@@ -589,6 +596,10 @@ is required for the SAM header text by optionally padding the container with a s
 raw block consisting of all zeroes. This can be used to subsequently expand the header
 container in place, such as when updating @SQ records, while preserving the absolute
 offsets of all subsequent containers.
+
+The landmarks field of the container header structure may be used to
+indicate the offsets of the blocks used in the header container.
+These may optionally be omitted by specifying an array size of zero.
 
 \section{\textbf{Block structure}}
 
@@ -682,7 +693,7 @@ with them; in this case the values from these data series will be interleaved.
 
 The SAM header is stored in a single block within the first container. 
 
-The following constraints apply to the SAM header: 
+The following constraints apply to the SAM header text: 
 
 \begin{itemize}
 \item The SQ:MD5 checksum is required unless the reference sequence has been embedded 
