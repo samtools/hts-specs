@@ -324,7 +324,7 @@ GET /sequence/6aef897c3d6ff0c78aff06ac189178dd/metadata
 
 ### Method: Fetch information on the service
 
-`GET /service-info`
+`GET /sequence/service-info`
 
 Return configuration information about this server implementation. See the [service-info specification page](https://github.com/ga4gh-discovery/ga4gh-service-info) for more information.
 
