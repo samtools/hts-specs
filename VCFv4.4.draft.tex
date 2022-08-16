@@ -80,6 +80,7 @@ The microsatellite calls are unphased.
 The character encoding of VCF files is UTF-8.
 UTF-8 is a multi-byte character encoding that is a strict superset of 7-bit ASCII and has the property that none of the bytes in any multi-byte characters are 7-bit ASCII bytes.
 As a result, most software that processes VCF files does not have to be aware of the possible presence of multi-byte UTF-8 characters.
+VCF files must not contain a byte order mark.
 Note that non-printable characters U+0000--U+0008, U+000B--U+000C, U+000E--U+001F are disallowed.
 Line separators must be CR+LF or LF and they are allowed only as line separators at end of line.
 Some characters have a special meaning when they appear (such as field delimiters `\verb|;|' in INFO or `\verb|:|' FORMAT fields), and for any other meaning they must be represented with the capitalized percent encoding:
