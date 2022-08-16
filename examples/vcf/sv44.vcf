@@ -17,8 +17,8 @@
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample
 chrA	2	.	TGC	T	.	.	EVENT=DEL_seq	GT	0/1
 chrA	2	.	T	<DEL>	.	.	SVLEN=2;SVCLAIM=DJ;EVENT=DEL_symbolic	GT	0/1
-chrA	2	delbp1	T[chrA:5[	.	.	MATEID=delbp2;EVENT=DEL_split_bp_cn	GT	0/1
-chrA	2	delbp2	]chrA:2]A	.	.	MATEID=delbp1;EVENT=DEL_split_bp_cn	GT	0/1
+chrA	2	delbp1	T	T[chrA:5[	.	.	MATEID=delbp2;EVENT=DEL_split_bp_cn	GT	0/1
+chrA	2	delbp2	A	]chrA:2]A	.	.	MATEID=delbp1;EVENT=DEL_split_bp_cn	GT	0/1
 chrA	2	.	T	<DEL>	.	.	SVLEN=2;SVCLAIM=D;EVENT=DEL_split_bp_cn	GT	0/1
 chrA	5	.	G	GAAA	.	.	EVENT=homology_seq	GT	1/1
 chrA	5	.	G	<DUP>	.	.	SVLEN=3;CIPOS=0,5;EVENT=homology_dup	GT	1/1
