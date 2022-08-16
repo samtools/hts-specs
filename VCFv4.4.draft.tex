@@ -322,7 +322,7 @@ Fixed fields are:
 
   \item ALT --- alternate base(s): Comma-separated list of alternate non-reference alleles.
   These alleles do not have to be called in any of the samples.
-  Options are base Strings made up of the bases A,C,G,T,N (case insensitive, nonzero length) or the `*' symbol (allele missing due to overlapping deletion) or a MISSING value `.' (no variant) or an angle-bracketed ID String (``$<$ID$>$'') or the unspecified allele ``$<$*$>$'' as described in Section \ref{unspecified-allele} or a breakend replacement string as described in Section \ref{Breakends}.
+  Each allele in this list must be one of: a non-empty String of bases (A,C,G,T,N; case insensitive); the `*' symbol (allele missing due to overlapping deletion); the MISSING value `.' (no variant); an angle-bracketed ID String (``$<$ID$>$''); the unspecified allele ``$<$*$>$'' as described in Section \ref{unspecified-allele}; or a breakend replacement string as described in Section \ref{Breakends}.
   If there are no alternative alleles, then the MISSING value must be used.
   Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.
   (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
