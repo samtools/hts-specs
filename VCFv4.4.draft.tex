@@ -322,7 +322,7 @@ Fixed fields are:
 
   \item ALT --- alternate base(s): Comma-separated list of alternate non-reference alleles.
   These alleles do not have to be called in any of the samples.
-  Options are base Strings made up of the bases A,C,G,T,N (case insensitive, non-zero length) or the `*' symbol (allele missing due to overlapping deletion) or a MISSING value `.' (no variant) or an angle-bracketed ID String (``$<$ID$>$'') or a breakend replacement string as described in Section \ref{Breakends}.
+  Options are base Strings made up of the bases A,C,G,T,N (case insensitive, nonzero length) or the `*' symbol (allele missing due to overlapping deletion) or a MISSING value `.' (no variant) or an angle-bracketed ID String (``$<$ID$>$'') or the unspecified allele ``$<$*$>$'' as described in Section \ref{unspecified-allele} or a breakend replacement string as described in Section \ref{Breakends}.
   If there are no alternative alleles, then the MISSING value must be used.
   Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.
   (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
@@ -1549,6 +1549,7 @@ Haplotype quality & 30 & 40 & 40 \\
 
 \pagebreak
 \subsection{Representing unspecified alleles and REF-only blocks (gVCF)}
+\label{unspecified-allele}
 In order to report sequencing data evidence for both variant and non-variant positions in the genome, the VCF specification allows to represent blocks of reference-only calls in a single record using the END INFO tag, an idea originally introduced by the gVCF file format\footnote{\url{https://help.basespace.illumina.com/articles/descriptive/gvcf-files/}}.
 
 The convention adopted here is to represent reference evidence as likelihoods against an unknown alternate allele represented as $<$*$>$.
