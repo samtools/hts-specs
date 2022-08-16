@@ -322,7 +322,7 @@ Fixed fields are:
 
   \item ALT --- alternate base(s): Comma-separated list of alternate non-reference alleles.
   These alleles do not have to be called in any of the samples.
-  Each allele in this list must be one of: a non-empty String of bases (A,C,G,T,N; case insensitive); the `*' symbol (allele missing due to overlapping deletion); the MISSING value `.' (no variant); an angle-bracketed ID String (``$<$ID$>$''); the unspecified allele ``$<$*$>$'' as described in Section \ref{unspecified-allele}; or a breakend replacement string as described in Section \ref{Breakends}.
+  Each allele in this list must be one of: a non-empty String of bases (A,C,G,T,N; case insensitive); the `*' symbol (allele missing due to overlapping deletion); the MISSING value `.' (no variant); an angle-bracketed ID String (``$<$ID$>$''); the unspecified allele ``$<$*$>$'' as described in Section \ref{unspecified-allele}; or a breakend replacement string as described in Section \ref{SingleBreakends}.
   If there are no alternative alleles, then the MISSING value must be used.
   Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.
   (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
@@ -1334,6 +1334,7 @@ Depending on which positions are chosen for the breakends X and Y, it might not 
 This partner relationship can be specified explicitly with the tag PARID=bnd\_X in the VCF line for breakend V and PARID=bnd\_Y in the VCF line for breakend U, and vice versa.
 
 \subsubsection{Single breakends}
+\label{SingleBreakends}
 We allow for the definition of a breakend that is not part of a novel adjacency.
 We call these single breakends, because they lack a mate.
 Breakends that are unobserved partners of breakends in observed novel adjacencies are one kind of single breakend.
