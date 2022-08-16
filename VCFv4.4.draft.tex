@@ -338,8 +338,8 @@ Fixed fields are:
   If there are no alternative alleles, then the MISSING value must be used.
   Tools processing VCF files are not required to preserve case in the allele String, except for IDs, which are case sensitive.
   (String; no whitespace, commas, or angle-brackets are permitted in the ID String itself)
-  \item QUAL --- quality: Phred-scaled quality score for the assertion made in ALT. i.e.\ $-10log_{10}$ prob(call in ALT is wrong).
-  If ALT is `.' (no variant) then this is $-10log_{10}$ prob(variant), and if ALT is not `.' this is $-10log_{10}$ prob(no variant).
+  \item QUAL --- quality: Phred-scaled quality score for the assertion made in ALT. i.e.\ $-10\log_{10}$ prob(call in ALT is wrong).
+  If ALT is `.' (no variant) then this is $-10\log_{10}$ prob(variant), and if ALT is not `.' this is $-10\log_{10}$ prob(no variant).
   If unknown, the MISSING value must be specified. (Float)
   \item FILTER --- filter status: PASS if this position has passed all filters, i.e., a call is made at this position.
   Otherwise, if the site has not passed all filters, a semicolon-separated list of codes for filters that fail. e.g.\ ``q10;s50'' might indicate that at this site the quality is below 10 and the number of samples with data is below 50\% of the total number of samples.
@@ -457,9 +457,9 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GT		& 1		& String	& Genotype \\
       HQ		& 2		& Integer	& Haplotype quality \\
       MQ		& 1		& Integer	& RMS mapping quality \\
-      PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
-      PP		& G		& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
-      PQ		& 1		& Integer	& Phasing quality \\
+      PL		& G		& Integer	& $-10\log_{10}$-scaled genotype likelihoods rounded to the closest integer \\
+      PP		& G		& Integer	& $-10\log_{10}$-scaled genotype posterior probabilities rounded to the closest integer \\
+      PQ		& 1		& Integer	& Phred-scaled phasing quality \\
       PS		& 1		& Integer	& Phase set \\
 \end{longtable}
 
@@ -473,7 +473,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   Again, use PASS to indicate that all filters have been passed, a semicolon-separated list of codes for filters that fail, or `.' to indicate that filters have not been applied.
   These values should be described in the meta-information in the same way as FILTERs.
   No whitespace or semicolons permitted.
-  \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
+  \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10\log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
   \item GP (Float): Genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities.
   \item GT (String): Genotype, encoded as allele values separated by either of $/$ or $\mid$.
   The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on.
@@ -487,7 +487,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
 	  \item $\mid$ : genotype phased
 	\end{itemize}
 
-  \item GL (Float): Genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields.
+  \item GL (Float): Genotype likelihoods comprised of comma separated floating point $\log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields.
   In presence of the GT field the same ploidy is expected; without GT field, diploidy is assumed.
 
   \textsc{Genotype Ordering.} \label{genotype-fields:genotype-ordering}
@@ -545,8 +545,8 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
 
   \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
   \item MQ (Integer): RMS mapping quality, similar to the version in the INFO field.
-  \item PL (Integer): The phred-scaled genotype likelihoods rounded to the closest integer, and otherwise defined in the same way as the GL field.
-  \item PP (Integer): The phred-scaled genotype posterior probabilities rounded to the closest integer, and otherwise defined in the same way as the GP field.
+  \item PL (Integer): The $-10\log_{10}$-scaled genotype likelihoods rounded to the closest integer, and otherwise defined in the same way as the GL field.
+  \item PP (Integer): The $-10\log_{10}$-scaled genotype posterior probabilities rounded to the closest integer, and otherwise defined in the same way as the GP field.
   \item PQ (Integer): Phasing quality, the phred-scaled probability that alleles are ordered incorrectly in a heterozygote (against all other members in the phase set).
   We note that we have not yet included the specific measure for precisely defining ``phasing quality''; our intention for now is simply to reserve the PQ tag for future use as a measure of phasing quality.
   \item PS (non-negative 32-bit Integer): Phase set, defined as a set of phased genotypes to which this genotype belongs.
@@ -574,13 +574,14 @@ Several tag names follow conventions indicating how their values are represented
 \begin{itemize}
     \item The `L' suffix means \emph{likelihood} as log-likelihood in the sampling distribution, $\log_{10} \Pr(\mathrm{Data}|\mathrm{Model})$.
     Likelihoods are represented as $\log_{10}$ scale, thus they are negative numbers (e.g.\ GL, CNL).
-    The likelihood can be also represented in some cases as phred-scale in a separate tag (e.g.\ PL).
+    In some cases the likelihood may also be represented using a positive value in a separate tag (e.g.\ PL) using the $-10 \log_{10}(probability\_of\_being\_correct)$ scale.
+    In this case they may also be normalised so the most likely event has a score of 0.
 
     \item The `P' suffix means \emph{probability} as linear-scale probability in the posterior distribution, which is $\Pr(\mathrm{Model}|\mathrm{Data})$. Examples are GP, CNP.
 
     \item The `Q' suffix means \emph{quality} as log-complementary-phred-scale posterior probability, $-10 \log_{10} \Pr(\mathrm{Data}|\mathrm{Model})$, where the model is the most likely genotype that appears in the GT field.
     Examples are GQ, CNQ.
-    The fixed site-level QUAL field follows the same convention (represented as a phred-scaled number).
+    The fixed site-level QUAL field follows the same convention (represented as a phred-scaled number with $QUAL = -10 \log_{10}(probability\_of\_being\_incorrect)$).
 \end{itemize}
 
 
@@ -821,8 +822,8 @@ Note that the scope of SVCLAIM is the single ALT allele taken in isolation. Comp
 \normalsize
 These keys are analogous to GT/GQ/GL/GP and are provided for genotyping imprecise events by copy number (either because there is an unknown number of alternate alleles or because the haplotypes cannot be determined).
 CN specifies the integer copy number of the variant in this sample.
-CNQ is encoded as a phred quality $-10log_{10}$ p(copy number genotype call is wrong).
-CNL specifies a list of $log_{10}$ likelihoods for each potential copy number, starting from zero.
+CNQ is encoded as a phred quality $-10\log_{10}$ p(copy number genotype call is wrong).
+CNL specifies a list of $\log_{10}$ likelihoods for each potential copy number, starting from zero.
 CNP is 0 to 1-scaled copy number posterior probabilities (and otherwise defined precisely as the CNL field), intended to store imputed genotype probabilities.
 When possible, GT/GQ/GL/GP should be used instead of (or in addition to) these keys.
 
@@ -2274,6 +2275,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \subsection{Changes to VCFv4.3}
 
 \begin{itemize}
+\item Clarify distinction between Phred ($-10\log_{10}(p\_of\_incorrect)$) and $-10\log_{10}(p\_of\_correct)$.
 \item More strict language: ``should'' replaced with ``must'' where appropriate
 \item Tables with Type and Number definitions for INFO and FORMAT reserved keys
 
