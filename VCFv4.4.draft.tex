@@ -608,7 +608,7 @@ If a precise ALT allele is present in a record with the $IMPRECISE$ flag, $CIPOS
 $END$ position of the longest variant described in this record.
 
 For record containing no symbolic alleles, END is $\mbox{POS} + \mbox{length of REF allele} - 1$.
-For records containing symbolic structural variant alleles, END is $\mbox{POS} + $\mbox${SVLEN}$.
+For records containing symbolic structural variant alleles, END is $\mbox{POS} + \mbox{SVLEN}$.
 For records containing the $<$*$>$ symbolic allele, END corresponds to the last reference call position.
 
 Due to the potential for loss of information, no VCF record can contain both the $<$*$>$ symbolic allele and a symbolic structural variant allele.
