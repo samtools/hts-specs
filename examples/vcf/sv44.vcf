@@ -1,0 +1,26 @@
+##fileformat=VCFv4.4
+##ALT=<ID=INV,Description="Inversion">
+##ALT=<ID=INS,Description="Insertion">
+##ALT=<ID=DUP,Description="Duplication">
+##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
+##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=CNV,Description="Copy number variable region">
+##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend">
+##INFO=<ID=EVENT,Number=A,Type=String,Description="ID of associated event">
+##INFO=<ID=EVENTTYPE,Number=A,Type=String,Description="Type of associated event">
+##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of CNV/breakpoint">
+##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively.">
+##contig=<ID=chrA,length=1000000>
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number">
+##custom_header_field_containing_chr_seq=ATGCGAAAAAAATGT
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample
+chrA	2	.	TGC	T	.	.	EVENT=DEL_seq	GT	0/1
+chrA	2	.	T	<DEL>	.	.	SVLEN=2;SVCLAIM=DJ;EVENT=DEL_symbolic	GT	0/1
+chrA	2	delbp1	T	T[chrA:5[	.	.	MATEID=delbp2;EVENT=DEL_split_bp_cn	GT	0/1
+chrA	2	delbp2	A	]chrA:2]A	.	.	MATEID=delbp1;EVENT=DEL_split_bp_cn	GT	0/1
+chrA	2	.	T	<DEL>	.	.	SVLEN=2;SVCLAIM=D;EVENT=DEL_split_bp_cn	GT	0/1
+chrA	5	.	G	GAAA	.	.	EVENT=homology_seq	GT	1/1
+chrA	5	.	G	<DUP>	.	.	SVLEN=3;CIPOS=0,5;EVENT=homology_dup	GT	1/1
+chrA	14	.	T	<INS>	.	.	IMPRECISE;SVLEN=100;CILEN=-50,50;CIPOS=-10,10	GT	0/1
+chrA	14	.	G	.CCCCCCG	.	.	EVENT=single_breakend	GT	0/1
