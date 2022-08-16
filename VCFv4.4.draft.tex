@@ -127,10 +127,10 @@ Meta-information lines can be in any order with the exception of `fileformat` wh
 
 \subsubsection{File format}
 A single `fileformat' line is always required, must be the first line in the file, and details the VCF format version number.
-For VCF version , this line is:
+For VCF version 4.4, this line is:
 
 \begin{verbatim}
-##fileformat=VCFv
+##fileformat=VCFv4.4
 \end{verbatim}
 
 
@@ -1010,8 +1010,7 @@ The following page contains examples of structural variants encoded in VCF, show
 \begin{verbatim}
 VCF STRUCTURAL VARIANT EXAMPLE
 
-##fileformat=VCFv
-##fileDate=20100501
+##fileformat=VCFv4.4
 ##reference=1000GenomesPilot-NCBI36
 ##assembly=ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/sv/breakpoint_assemblies.fasta
 ##INFO=<ID=BKPTID,Number=.,Type=String,Description="ID of the assembled alternate allele in the assembly file">
@@ -2251,8 +2250,12 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \section{List of changes}
 
 \subsection{Changes between VCFv4.4 and VCFv4.3}
+
 \begin{itemize}
-\item Started new Draft Spec
+\item Clarify how to add multiple SV per record by making the number of value in reserved SV INFO fields dependent on the number of ALT. However END is still Number=1 even with multiple variant per record.
+\item Deprecate SVTYPE INFO field preferring the use of symbolic alleles in the ALT field
+\item Define new reserved INFO field EVENT, EVENTTYPE and SVCLAIM
+\item Redefined INFO field SVLEN to be always positive
 \end{itemize}
 
 \subsection{Changes to VCFv4.3}
@@ -2306,6 +2309,13 @@ Therefore, also \#\#PEDIGREE newly requires a unique ID.
 \item Clarified that except the END\_OF\_VECTOR byte, no other negative values are allowed in the GT array 
 \item String vectors in BCF do not need to start with comma, as the number of values is indicated already in the definition of the tag in the header.
 \item The implicit filter PASS was described inconsistently throughout BCFv2.1: It is encoded as the first entry in the dictionary, not the last.
+\end{itemize}
+
+\subsection{Changes between VCFv4.1 and VCFv4.2}
+\begin{itemize}
+\item In the HEADER the INFO definition allow additional field after the 4 first mandatory fields
+\item INFO fields definition can use Number=R to specify one per allele including the reference.
+\item Allow star allele in the ALT for describing upstream deletion
 \end{itemize}
 
 \end{document}
