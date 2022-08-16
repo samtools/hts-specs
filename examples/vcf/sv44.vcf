@@ -8,11 +8,9 @@
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend">
 ##INFO=<ID=EVENT,Number=A,Type=String,Description="ID of associated event">
 ##INFO=<ID=EVENTTYPE,Number=A,Type=String,Description="Type of associated event">
-##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of CNV/breakpoint">
 ##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively.">
 ##contig=<ID=chrA,length=1000000>
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number">
 ##custom_header_field_containing_chr_seq=ATGCGAAAAAAATGT
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	sample
 chrA	2	.	TGC	T	.	.	EVENT=DEL_seq	GT	0/1

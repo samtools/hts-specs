@@ -651,7 +651,7 @@ For backwards compatibility, a missing SVLEN should be inferred from the $END$ f
 
 For backwards compatibility, the absolute value of SVLEN should be taken and a negative SVLEN should be treated as positive values.
 
-Note that for structural variant symbolic allele $POS$ corresponds to the based immediately preceding the variant.
+Note that for structural variant symbolic alleles, $POS$ corresponds to the based immediately preceding the variant.
 
 \footnotesize
 \begin{verbatim}
@@ -766,9 +766,9 @@ $CILEN$ consists of successive pairs of records indicating the lower and upper b
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=DP,Number=A,Type=Integer,Description="Total read Depth at variant (breakend) position">
+##INFO=<ID=DP,Number=A,Type=Integer,Description="Total read depth at variant (breakend) position">
 ##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of CNV/breakpoint">
-##INFO=<ID=CICN,Number=.,Type=Integer,Description="Confidence interval around copy number">
+##INFO=<ID=CICN,Number=.,Type=Float,Description="Confidence interval around copy number">
 \end{verbatim}
 \normalsize
 
@@ -825,7 +825,7 @@ That is, a J claim must not be made on a CNV record even if the corresponding st
 \label{sv-format-keys}
 \footnotesize
 \begin{verbatim}
-##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number">
+##FORMAT=<ID=CN,Number=1,Type=Float,Description="Copy number">
 ##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality">
 ##FORMAT=<ID=CNL,Number=G,Type=Float,Description="Copy number genotype likelihood">
 ##FORMAT=<ID=CNP,Number=G,Type=Float,Description="Copy number posterior probabilities">
@@ -1037,46 +1037,20 @@ The following page contains examples of structural variants encoded in VCF, show
 \begin{verbatim}
 VCF STRUCTURAL VARIANT EXAMPLE
 
-<<<<<<< .mine
-##fileformat=VCFv4.4
-##reference=1000GenomesPilot-NCBI36
-##assembly=ftp://ftp-trace.ncbi.nih.gov/1000genomes/ftp/release/sv/breakpoint_assemblies.fasta
-##INFO=<ID=BKPTID,Number=.,Type=String,Description="ID of the assembled alternate allele in the assembly file">
-##INFO=<ID=CIEND,Number=2,Type=Integer,Description="Confidence interval around END for imprecise variants">
-##INFO=<ID=CIPOS,Number=2,Type=Integer,Description="Confidence interval around POS for imprecise variants">
-##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">
-##INFO=<ID=HOMLEN,Number=.,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
-##INFO=<ID=HOMSEQ,Number=.,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
-##INFO=<ID=SVLEN,Number=.,Type=Integer,Description="Difference in length between REF and ALT alleles">
-##ALT=<ID=DEL,Description="Deletion">
-##ALT=<ID=DEL:ME:ALU,Description="Deletion of ALU element">
-##ALT=<ID=DEL:ME:L1,Description="Deletion of L1 element">
-=======
 ##fileformat=VCFv4.4
 ##ALT=<ID=INV,Description="Inversion">
 ##ALT=<ID=INS,Description="Insertion">
-
-
-
-
-
-
-
-
-
-
->>>>>>> .theirs
 ##ALT=<ID=DUP,Description="Duplication">
 ##ALT=<ID=DUP:TANDEM,Description="Tandem Duplication">
 ##ALT=<ID=DEL,Description="Deletion">
+##ALT=<ID=CNV,Description="Copy number variable region">
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend">
 ##INFO=<ID=EVENT,Number=A,Type=String,Description="ID of associated event">
 ##INFO=<ID=EVENTTYPE,Number=A,Type=String,Description="Type of associated event">
+##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of CNV/breakpoint">
 ##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively.">
 ##contig=<ID=chrA,length=1000000>
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
-##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number">
-##custom_header_field_containing_chr_seq=ATGCGAAAAAAATGT
 #CHROM POS ID   REF ALT       QUAL FILTER INFO                                      FORMAT sample
 chrA   2   .    TGC T         .    .      EVENT=DEL_seq                                 GT    0/1
 chrA   2   .    T   <DEL>     .    .      SVLEN=2;SVCLAIM=DJ;EVENT=DEL_symbolic         GT    0/1
