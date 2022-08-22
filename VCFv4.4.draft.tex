@@ -106,24 +106,38 @@ Flag, Character, and String.
 For the Integer type, the values from $-2^{31}$ to $-2^{31}+7$ cannot be stored in the binary version and therefore are disallowed in both VCF and BCF, see \ref{BcfTypeEncoding}.
 
 \subsection{Meta-information lines}
-File meta-information is included after the \#\# string and must be key=value pairs.
-Meta-information lines are optional, but if they are present then they must be completely well-formed.
-Note that BCF, the binary counterpart of VCF, requires that all entries are present.
-It is recommended to include meta-information lines describing the entries used in the body of the VCF file.
+File meta-information lines start with ``\verb|##|'' and must appear first in the VCF file, before the header line (section~\ref{header-line}) and data record lines (section~\ref{data-lines}).
+They may be either \emph{unstructured} or \emph{structured}.
 
-All structured lines that have their value enclosed within ``$<>$'' require an ID which must be unique within their type.
-For all of the structured lines (\#\#INFO, \#\#FORMAT, \#\#FILTER, etc.), extra fields can be included after the default fields.
+An \emph{unstructured} meta-information line consists of a~\emph{key} (denoting the type of meta-information recorded) and a~\emph{value} (which may not be empty and must not start with a `\verb|<|' character), separated by an `\verb|=|' character:
+\begin{quote}
+\verb|##|\emph{key}\verb|=|\emph{value}
+\end{quote}
+Several unstructured meta-information lines are defined in this specification, notably \verb|##fileformat|.
+Others not defined by this specification, e.g.\ \verb|##fileDate| and \verb|##source|, are commonly found in VCF files.
+These typically have meanings that are obvious, or they are immaterial for processing the file, or both.
+
+A \emph{structured} meta-information line is similar, but the value is itself a comma-separated list of key=value pairs, enclosed within `\verb|<|' and `\verb|>|' characters:
+\begin{quote}
+\verb|##|\emph{key}\verb|=<|\emph{key}\verb|=|\emph{value}\verb|,|\emph{key}\verb|=|\emph{value}\verb|,|\emph{key}\verb|=|\emph{value}\verb|,|\ldots\verb|>|
+\end{quote}
+All structured lines require an ID which must be unique within their type, i.e., within all the meta-information lines with the same ``\verb|##|\emph{key}\verb|=|'' prefix.
+For all of the structured lines (\verb|##INFO|, \verb|##FORMAT|, \verb|##FILTER|, etc.) described in this specification, extra fields can be included after the default fields.
 For example:
 \begin{verbatim}
-##INFO=<ID=ID,Number=number,Type=type,Description="description",Source="description",Version="128">
+##INFO=<ID=ID,Number=number,Type=type,Description="description",Source="source",Version="128">
 \end{verbatim}
 In the above example, the extra fields of ``Source'' and ``Version'' are provided.
-Optional fields must be stored as strings even for numeric values.
+The values of optional fields must be written as quoted strings, even for numeric values.
+Other structured lines not defined by this specification may also be used; the only default field for such lines is the required \verb|ID| field.
 
 It is recommended in VCF and required in BCF that the header includes tags describing the reference and contigs backing the data contained in the file.
 These tags are based on the SQ field from the SAM spec; all tags are optional (see the VCF example above).
 
-Meta-information lines can be in any order with the exception of `fileformat` which must come first.
+Meta-information lines are optional, but if they are present then they must be completely well-formed.
+Other than \verb|##fileformat|, they may appear in any order.
+Note that BCF, the binary counterpart of VCF, requires that all entries are present.
+It is recommended to include meta-information lines describing the entries used in the body of the VCF file.
 
 
 \subsubsection{File format}
@@ -1499,7 +1513,7 @@ The PEDIGREE lines would look like:
 Alternately, if data on the genomes is compiled in a database, a simple pointer can be provided:
 
 \begin{verbatim}
-##pedigreeDB=<url>
+##pedigreeDB=URL
 \end{verbatim}
 
 \begin{samepage}
