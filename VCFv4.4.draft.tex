@@ -413,8 +413,10 @@ Fixed fields are:
 \item END: End reference position (1-based), indicating the variant spans positions POS--END on reference/contig CHROM.
 Normally this is the position of the last base in the REF allele, so it can be derived from POS and the length of REF, and no END INFO field is needed.
 However when symbolic alleles are used, e.g.\ in gVCF or structural variants, an explicit END INFO field provides variant span information that is otherwise unknown.
+If a record containing a symbolic structural variant allele does not have an END field, it must be computed from the SVLEN field as per Section \ref{sv-info-keys}.
 
 This field is used to compute BCF's {\tt rlen} field (see~\ref{BcfSiteEncoding}) and is important when indexing VCF/BCF files to enable random access and querying by position.
+
 \end{itemize}
 
 \subsubsection{Genotype fields}
@@ -1738,7 +1740,7 @@ CHROM     & int32\_t  & Given as an offset into the mandatory contig dictionary 
 POS       & int32\_t  & 0-based leftmost coordinate \\ \hline
 rlen      & int32\_t  & Length of the record as projected onto the reference sequence.
                         Must be the length of the REF allele or the declared length of a symbolic allele
-                        respecting the END attribute \\ \hline
+                        respecting the SVLEN/END attributes \\ \hline
 QUAL      & float     & Variant quality; 0x7F800001 for a missing value \\ \hline
 n\_info   & uint16\_t & The number of INFO fields in this record \\ \hline
 n\_allele & uint16\_t & The number of REF+ALT alleles in this record \\ \hline
