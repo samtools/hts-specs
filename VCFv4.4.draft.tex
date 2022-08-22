@@ -125,7 +125,7 @@ All structured lines require an ID which must be unique within their type, i.e.,
 For all of the structured lines (\verb|##INFO|, \verb|##FORMAT|, \verb|##FILTER|, etc.) described in this specification, extra fields can be included after the default fields.
 For example:
 \begin{verbatim}
-##INFO=<ID=ID,Number=number,Type=type,Description="description",Source="source",Version="128">
+##INFO=<ID=ALLELEID,Number=A,Type=String,Description="Allele ID",Source="ClinVar",Version="20220804">
 \end{verbatim}
 In the above example, the extra fields of ``Source'' and ``Version'' are provided.
 The values of optional fields must be written as quoted strings, even for numeric values.
@@ -303,6 +303,7 @@ It is possible to record relationships between genomes using the following synta
 
 
 \subsection{Header line syntax}
+\label{header-line}
 The header line names the 8 fixed, mandatory columns. These columns are as follows:
 \begin{center}
        \#CHROM
