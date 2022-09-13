@@ -67,8 +67,16 @@ This specification is for version 1.6 of the SAM and BAM formats.  Each SAM and
 BAM file may optionally specify the version being used via the
 {\tt @HD VN} tag. For full version history see Appendix~\ref{sec:history}. 
 
-Unless explicitly specified elsewhere, all fields are encoded using 7-bit US-ASCII \footnote{Charset ANSI\_X3.4-1968 as defined in RFC1345.} in using the POSIX / C locale.
-Regular expressions listed use the POSIX / IEEE Std 1003.1 extended syntax.
+SAM file contents are 7-bit US-ASCII, except for certain field values as individually specified which may contain other Unicode characters encoded in UTF-8.
+Alternatively and equivalently, SAM files are encoded in UTF-8 but non-ASCII characters are permitted only within certain field values as explicitly specified in the descriptions of those fields.%
+\footnote{Hence in particular SAM files must not begin with a byte order mark~(BOM) and lines of text are delimited by ASCII line terminator characters only.
+% Unicode identifies VT and FF as line break characters as well, but no one uses them in SAM.
+In addition to the local platform's text file line termination conventions, implementations may wish to support \textsc{lf} and \textsc{cr\>lf} for interoperability with other platforms.}
+
+Where it makes a difference, SAM file contents should be read and written using the POSIX\,/\,C locale.
+For example, floating-point values in SAM always use `{\tt .}' for the decimal-point character.
+
+The regular expressions in this specification are written using the POSIX\,/\,IEEE Std 1003.1 extended syntax.
 
 \subsection{An example}\label{sec:example}
 Suppose we have the following alignment with bases in lowercase
