@@ -1292,6 +1292,7 @@ $17$ & $198983$ & bnd\_Z & A & $]13:123456]$A & 6 & PASS & MATEID=bnd\_U \\
 \normalsize
 
 \subsubsection{Explicit partners}
+\label{explicit-partners}
 Two breakends which are connected in the reference genome but disconnected in the variants are called partners.
 Each breakend only has one partner, typically one basepair left or right.
 However, it is not uncommon to observe loss of a few basepairs during the rearrangement.
@@ -1455,7 +1456,7 @@ The 4 lines of VCF representing this situation would be:
 
 On the other hand, if we know a simple reciprocal translocation has occurred as in Figure 7, then even if we have no evidence for the (W,X) adjacency, for accounting purposes an adjacency between W and X may also be recorded in the VCF file.
 These two breakends W and X can still be crossed-referenced as mates.
-The 4 VCF records describing this situation would look exactly as below, but perhaps with a special quality or filter value for the breakends W and X.
+The 4 VCF records describing this situation would look exactly as in section \ref{explicit-partners}, but perhaps with a special quality or filter value for the breakends W and X.
 
 Another possible reason for calling single breakends is an observed but unexplained change in copy number along a chromosome.
 
