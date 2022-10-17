@@ -7,9 +7,13 @@
 ##ALT=<ID=CNV,Description="Copy number variable region">
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend">
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the longest variant described in this record">
+##INFO=<ID=CIPOS,Number=.,Type=Integer,Description="Confidence interval around POS for symbolic structural variants">
+##INFO=<ID=SVLEN,Number=A,Type=Integer,Description="Length of structural variant">
+##INFO=<ID=CILEN,Number=.,Type=Integer,Description="Confidence interval for the SVLEN field">
 ##INFO=<ID=EVENT,Number=A,Type=String,Description="ID of associated event">
 ##INFO=<ID=EVENTTYPE,Number=A,Type=String,Description="Type of associated event">
 ##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively.">
+##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
 ##contig=<ID=chrA,length=1000000>
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##custom_header_field_containing_chr_seq=ATGCGAAAAAAATGT
