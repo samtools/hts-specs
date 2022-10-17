@@ -2294,7 +2294,7 @@ That's quite a lot of information encoded in only 96 bytes!
 These raw binary records may be subsequently encoded into BGZF blocks following the BGZF compression format, section 3 of the SAM format specification.
 BCF2 records can be raw, though, in cases where the decoding/encoding costs of bgzipping the data make it reasonable to process the data uncompressed, such as streaming BCF2s through pipes with samtools and bcftools.
 Here the files should be still compressed with BGZF but with compression 0.
-Note that currently the GATK generates raw BCF2 files (not BGZF compression at all) but this will change in the near future.
+Implementations should perform BGZF encoding and must support the reading of both raw and BGZF encoded BCF2 files.
 
 BCF2 files are expected to be indexed through the same index scheme, section~4 as BAM files and other block-compressed files with BGZF.
 
