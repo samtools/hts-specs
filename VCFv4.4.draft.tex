@@ -898,24 +898,24 @@ That is, a J claim must not be made on a CNV record even if the corresponding st
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=RN,Number=A,Type=Integer,Description="Number of repeat sequences in this allele.">
+##INFO=<ID=RN,Number=A,Type=Integer,Description="Total number of repeat sequences in this allele.">
 \end{verbatim}
 \normalsize
 
 Used by $<$CNV:TR$>$ tandem repeat alleles to encode the number of repeat sequences.
-This field determines the number of values encoded in the RS, RS, RB, CIRB, RC and CIRC fields.
-The length of the RS, RS, RB, CIRB, RC and CIRC must match the sum of all RN values for the record.
-For the purposes of determining RS, RS, RB, CIRB, RC and CIRC lengths, the missing value ``.'' should be treated as 0.
-If this field is missing, the RN for each $<$CNV:TR$>$ allele is assumed to be 1.
+This field determines the number of values encoded in the RUS, RUL, RB, CIRB, RUC and CIRUC fields for each allele.
+The length of these fields must match the sum of all RN values for the record.
+For the purposes of determining RUS, RUL, RB, CIRB, RUC and CIRUC lengths, the missing value ``.'' should be treated as 0.
+If this field is missing, the RN for each $<$CNV:TR$>$ allele is assumed to be 1 and 0 otherwise.
 
 See section \ref{tandem-repeats} for further details.
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=RS,Number=.,Type=String,Description="Repeat sequence">
-##INFO=<ID=RL,Number=.,Type=Integer,Description="Repeat length">
-##INFO=<ID=RC,Number=.,Type=Float,Description="Count of repeats in multiples of RS/RL">
-##INFO=<ID=RB,Number=.,Type=Integer,Description="Repeat bases. Total allelic length of the RS/RL repeat motif length in bp">
+##INFO=<ID=RUS,Number=.,Type=String,Description="Repeat unit sequence of the corresponding repeat sequence">
+##INFO=<ID=RUL,Number=.,Type=Integer,Description="Repeat unit length of the corresponding repeat sequence">
+##INFO=<ID=RUC,Number=.,Type=Float,Description="Repeat unit count of corresponding repeat sequence">
+##INFO=<ID=RB,Number=.,Type=Integer,Description="Total number of bases in the corresponding repeat sequence">
 \end{verbatim}
 \normalsize
 
@@ -924,47 +924,51 @@ Conceptually, these fields each contain a list of values for each ALT allele.
 The length of these inner lists are determined by the RN field for that ALT allele and the length must match the sum of RN for the record.
 These fields contain the flattened and concatentated list contents in the same order as either corresponding ALT allele.
 
-Each $<$CNV:TR$>$ allele encodes a sequence of one or more tandemly duplicated repeat sequences.
-RS encodes the repeat sequence of each repeat unit within each repeat sequence.
-Equivalently, RL encodes the length of each repeat unit within each repeat sequence.
-RC encodes the number of tandem duplications of the repeat units defined by the corresponding RS/RL field.
-RB encodes the total length of the tandemly duplicated repeat units defined by the corresponding RS/RL field.
+Each $<$CNV:TR$>$ allele consistents of $RN$ repeat sequences each containing $RUC$ repeat units with sequence $RUS$.
 
-For example, if a $<$CNV:TR$>$ repeat haplotype is $(CAG)_{10}(TG)_{7}(CAGG)_{3}$, the RN for that ALT allele would be 3, the RS $CAG,TG,CAGG$, the RL $3,2,4$, the RC $10,7,3$ and the RB $30,14,12$.
+For example, if a $<$CNV:TR$>$ allele sequence is $(CAG)_{10}(TG)_{7}(CAGG)_{3}$, the RN for that ALT allele would be 3, the RUS $CAG,TG,CAGG$, the RUL $3,2,4$, the RUC $10,7,3$ and the RB $30,14,12$.
 
-If both RS and RL are present and not missing, the length of each RS entry must match the corresponding RL.
-If both RC and RB are present and not missing, RB should approximately equal RL*RC but is not required to match exactly.
-If RS is present but RL is not, RL should be inferred to be equal to the length of the corresponding RS.
+RUS may contain only IUPAC nucleotide codes (ambiguous bases are allowed) or the missing value (`.').
+If both RUS and RUL are present and not missing, the length of each RUS entry must match the corresponding RUL.
+If both RUC and RB are present and not missing, RB should approximately equal RUL*RUC but is not required to match exactly.
+If RUS is present but RUL is not, RUL should be inferred to be equal to the length of the corresponding RUS.
 
 See section \ref{tandem-repeats} for an example and further details.
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=CIRC,Number=.,Type=Float,Description="Confidence interval around RC">
+##INFO=<ID=CIRUC,Number=.,Type=Float,Description="Confidence interval around RUC">
 ##INFO=<ID=CIRB,Number=.,Type=Integer,Description="Confidence interval around RB">
 
 \end{verbatim}
 \normalsize
 
-Confidence interval around RC and RB respectively.
-The length of these fields fields must be twice that of their corresponding fields.
+Confidence interval around RUC and RB respectively.
+The length of these fields must be twice that of their corresponding fields.
+CIRUC/CIRB must not be non-missing for any alleles with no corresponding RUC/RB value.
+
 These fields are defined in the same manner as $CIPOS$ and contain the difference between the lower and upper confidence interval bounds and the value of the corresponding field.
 The lower bound must be less than or equal to zero and the upper bound must be greater than or equal to zero.
-If the lower bound is the missing value ``.'', is assumed to be 0 and if the upper bound is the missing value ``.'', it is assumed to be unbounded estimate.
+If the lower bound is the missing value ``.'', is assumed to be 0 and if the upper bound is the missing value ``.'', it is assumed to be an unbounded estimate.
 That is, the length of repeat has been determined to be at least a certain length but a reasonable limit of total length of the repeat could not be determined.
+
+See section \ref{tandem-repeats} for an example and further details.
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=RUL,Number=.,Type=Integer,Description="Length of each repeat unit">
+##INFO=<ID=RUB,Number=.,Type=Integer,Description="Number of bases in each individual repeat unit">
 \end{verbatim}
 \normalsize
 
 This field encodes the length of each repeat unit for situations where the length of each repeat unit varies greatly.
-If this field is present, RC must also be present and must contain only integer values.
-This field uses the same list-of-list encoding as RS/RL/RC/RB but contains a list for each RC entry, the length of which is determined by the corresponding integer RC value.
-This field contains the length of each individual repeat unit for each RC entry.
+If this field is present, RUC must also be present and must contain only integer values.
+This field uses the same list-of-list encoding as RUS/RUL/RUC/RB but contains a list for each RC entry, the length of which is determined by the corresponding integer RUC value.
+This field contains the length of each individual repeat unit for each RUC entry.
+If RUB is missing or not specified, The $RUB$ for each individual repeat unit is considered to be equal to the $RUL$ for the corresponding repeat sequence.
 
 For the vast majority of tandem repeats, this field can be omitted and is only required in complex situations such as when a VNTR contains one or more variable length STRs.
+
+See section \ref{tandem-repeats} for an example and further details.
 
 \section{FORMAT keys used for structural variants}
 \label{sv-format-keys}
@@ -1697,12 +1701,34 @@ Example records are given below:
 \subsection{Representing tandem repeats}
 \label{tandem-repeats}
 
-The repetative nature of both Short Tandem Repeats (STRs) and Variable Number Tandem Repeats (VNTRs) makes identifying variants in these regions difficult.
+The repetitive nature of both Short Tandem Repeats (STRs) and Variable Number Tandem Repeats (VNTRs) makes identifying variants in these regions difficult.
 As a result, specialised techniques have been developed to estimate the length and composition of these regions.
-These imprecise variants are represented in VCF as $<$CNV:TR$>$ copy number variants with the RN, RS, RL, RB, RC and RUL INFO fields encoding the nature of the repeat expansion/contraction.
+Many of these techniques result in imprecise variant calls which cannot be unambiguously represented with non-symbolic alleles.
+To accommodate such variant calls, a the $<$CNV:TR$>$ symbolic allele can be used.
 
-The following is an example of how to represent an STR in VCF using both the $<$CNV:TR$>$ notation, and precisely using phased variants.
-In this example, the reference genome contains a $(CAG)_{10}$ repeat at positions 101 to 130 inclusive, the first allele expands this to $(CAG)_{30}$ and the second allele is missing a $G$ from the 6th repeat unit $(CAG)_{5}(CA)_{1}(CAG)_{4}$:
+In general, tandem repeats can be represented in one or both of two complementary representation.
+When the exact sequence is known, the variant can be represented as a non-symbolic ALT allele.
+The variant can be represented either as a single VCF record containing the entire sequence in the ALT field, or over multiple phased records.
+When the exact sequence is not known, or when reporting tandem repeat 'summary' information, the variant can be represented as a $<$CNV:TR$>$ copy number variants with the RN, RS, RL, RB, RC and RUL INFO fields encoding the nature of the repeat expansion/contraction.
+The allele sequence of a $<$CNV:TR$>$ record consists of the one or more repeat sequences each of which consist of a single repeat unit repeated one or more times.
+That is, $<$CNV:TR$>$ records can encode multiple different repeat motifs in a single allele but do not support "nested" repeats.
+
+Figure 11 outlines the field encoding for a STR locus with alleles of sequence $CAGCAGCAGTTGTTG$ ($(CAG)_{4}(TTG)_{2}$), and $CACACA$ ($(CA)_{2}$).
+$RN=2,1$ indicates that the first allele has two repeat sequences and the second allele one.
+RUS, RUL, and RUC fields encode the repeat unit sequence, length, and count within each repeat sequence.
+RB encodes the length of each repeat sequence.
+For loci whether the repeat length variable (such as VNTRs containing STRs), RUB encodes the length of each individual repeat unit which, in this example, is unnecessary since they all match their corresponding RUL.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=4in,height=2.58in]{img/tandem_repeat_notation.png}
+	\caption{$<$CNV:TR$>$ Tandem Repeats}
+\end{figure}
+
+
+A tandem repeat allele can be described by both a $<$CNV:TR$>$ 'summary' record as well as non-symbolic records.
+When possible, these records should be phased with their corresponding $<$CNV:TR$>$ record as outlined in the following example.
+In the following example, the reference genome contains a $(CAG)_{10}$ repeat at positions 101 to 130 inclusive, the first allele expands this to $(CAG)_{30}$ and the second allele is missing a $G$ from the 6th repeat unit $(CAG)_{5}(CA)_{1}(CAG)_{4}$:
 
 \pagebreak
 \footnotesize
@@ -1711,20 +1737,20 @@ In this example, the reference genome contains a $(CAG)_{10}$ repeat at position
 ##fileformat=VCFv4.4
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the longest variant described in this record">
 ##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of allele">
-##INFO=<ID=RN,Number=A,Type=Integer,Description="Number of repeat sequences in this allele.">
-##INFO=<ID=RS,Number=.,Type=String,Description="Repeat sequence">
-##INFO=<ID=RL,Number=.,Type=Integer,Description="Repeat length">
-##INFO=<ID=RC,Number=.,Type=Float,Description="Count of repeats in multiples of RS/RL">
-##INFO=<ID=RB,Number=.,Type=Integer,Description="Repeat bases. Total allelic length of the RS/RL repeat motif length in 
-##INFO=<ID=CIRC,Number=.,Type=Float,Description="Confidence interval around RC">
+##INFO=<ID=RN,Number=A,Type=Integer,Description="Total number of repeat sequences in this allele.">
+##INFO=<ID=RUS,Number=.,Type=String,Description="Repeat unit sequence of the corresponding repeat sequence">
+##INFO=<ID=RUL,Number=.,Type=Integer,Description="Repeat unit length of the corresponding repeat sequence">
+##INFO=<ID=RUC,Number=.,Type=Float,Description="Repeat unit count of corresponding repeat sequence">
+##INFO=<ID=RB,Number=.,Type=Integer,Description="Total number of bases in the corresponding repeat sequence">
+##INFO=<ID=CIRUC,Number=.,Type=Float,Description="Confidence interval around RUC">
 ##INFO=<ID=CIRB,Number=.,Type=Integer,Description="Confidence interval around RB">
-##INFO=<ID=RUL,Number=.,Type=Integer,Description="Length of each repeat unit">
+##INFO=<ID=RUB,Number=.,Type=Integer,Description="Number of bases in each individual repeat unit">
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##FORMAT=<ID=PS,Number=1,Type=Integer,Description="Phase set">
 ##FORMAT=<ID=CN,Number=1,Type=Float,Description="Copy number">
 ##ALT=<ID=CNV:TR,Description="Tandem repeat determined based on DNA abundance.">
 #CHROM POS ID REF ALT QUAL FILTER INFO FORMAT sample
-chr1 100 cnv_notation T <CNV:TR>,<CNV:TR> . . END=130;SVLEN=30,30;CN=3,0.9666;RS=CAG,CAG,CA,CAG;RN=1,3;RB=90,15,2,12  GT:PS:CN 1|2:100:3.9666
+chr1 100 cnv_notation T <CNV:TR>,<CNV:TR> . . END=130;SVLEN=30,30;CN=3,0.9666;RUS=CAG,CAG,CA,CAG;RN=1,3;RB=90,15,2,12  GT:PS:CN 1|2:100:3.9666
 chr1 117 precise_alt2 AG A . . GT:PS 0|1:100
 chr1 130 precise_alt1 G GCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAG . . GT:PS 1|0:100
 \end{verbatim}
@@ -1734,23 +1760,62 @@ chr1 130 precise_alt1 G GCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGC
 
 Note the following:
 \begin{itemize}
-    \item As with all symbolic structural variant alleles, the POS of the $<$CNV:TR$>$ record is the base immediately preceding the tandem repeat sequence
+    \item As with all symbolic structural variant alleles, the POS of the $<$CNV:TR$>$ record is the base immediately preceding the tandem repeat
     \item The SVLEN of the $<$CNV:TR$>$ allele of a novel (with respect to the reference) tandem repeat should be 1.
-    \item The POS of the $<$CNV:TR$>$ allele of a novel (with respect to the reference) tandem repeat should be the base immediately preceding the tandem repeat sequence.
+    \item The POS of the $<$CNV:TR$>$ allele of a novel (with respect to the reference) tandem repeat should be the base immediately preceding the inserted tandem repeat sequence.
     \item Both a $<$CNV:TR$>$ and one or more non-symoblic records encoding the tandem repeat can be present.
     \item $<$CNV:TR$>$ and the non-symoblic records encoding the tandem repeat should be phased if possible.
-    \item When both $<$CNV:TR$>$ and the equivalent non-symoblic records are present, the $<$CNV:TR$>$ should approximately encode the sequence but is not required to encode the sequence exactly (for example, SNVs and indels may be omitted in the $<$CNV:TR$>$ record).
+    \item When both $<$CNV:TR$>$ and the equivalent non-symoblic records are present, the $<$CNV:TR$>$ should approximately encode the sequence but is not required to encode the sequence exactly.
+	For example, SNVs and indels may be omitted in the $<$CNV:TR$>$ record.
     \item Variant callers which do not report allele-specific tandem repeats should use a single $<$CNV:TR$>$ ALT allele and the missing genotype for the GT field (for example, $./.$ if diploid).
     \item The INFO and FORMAT CN fields should be present for $<$CNV:TR$>$ records (as they are $<$CNV$>$ records) and, when present, must correspond to the sample allelic length divided by the reference allelic length.
-Note that CN FORMAT field represents the overall copy number and the INFO CN the allele-specific copy number.
-    \item When benchmarking tandem repeats, the $<$CNV:TR$>$ interval provides a region over which a set of (preferably phased) non-symoblic records can be compared against for length and sequence composition.
-    \item RN encodes the number of records for each allele in the RS,RL,RC,RB fields
-Conceptually, this a mechanism to encode a list-of-list with flat list format used in VCF.
-    \item STRs should use RS and omit RL (as it is redundant when RS is present), whereas VNTRs should use RL to ensure the VCF records are not excessively large.
+	Note that CN FORMAT field represents the overall copy number and the INFO CN the allele-specific copy number.
+    \item When benchmarking tandem repeats, the $<$CNV:TR$>$ interval provides a region over which a set of (preferably phased) non-symbolic records can be compared against for length and sequence composition.
+    \item RN encodes the number of records for each allele in the RUS, RUL, RUC, RB fields.
+	Conceptually, this a mechanism to encode a list-of-list with flat list format used in VCF.
+    \item STRs should use RUS, whereas VNTRs should use RUL to ensure the VCF records are not excessively large.
+    \item RUL should be omitted when RUS is present (as it is redundant when RS is present).
+    \item RUS or RUL must be specified for each $<$CNV:TR$>$.
     \item support for multiple levels of repeat nesting (such as STRs within VNTRs) is limited to the RUL repeat unit length field which allows the overall length of each top-level repeat unit to be encoded.
     \item The POS and END of $<$CNV:TR$>$ records should match the STR/VNTR reference catalog sizes for catalog-based callers.
+    \item Variant normalisation has limited utility in regions of low complexity as almost identical haplotypes can have very different normalised representations.
 \end{itemize}
 
+In some cases, it is desirable to report the full repeat sequence of all alleles at a given repeat locus in a single VCF records.
+There are no restrictions on doing so and in the above example, instead of reporting $precise_alt1$ and $precise_alt2$, the variants can be represented directly in a single record with a $REF$ of $CAGCAGCAGCAGCAGCAGCAGCAGCAGCAG$ and an $ALT$ of $CAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAG$,$CAGCAGCAGCAGCAGCACAGCAGCAGCAG$.
+
+
+When the length or number of repeat units in a repeat sequence cannot be determined precisely, CIRB and/or CIRUC can be used to define the bounds.
+For example, if the total number of $CAG$ repeats at the above locus was at least 50 ($(CAG)_{50-}$) and the mostly likely number of repeats was 65, then the $<$CNV:TR$>$ could be encoded as follows:
+
+\footnotesize
+\begin{verbatim}
+chr1 100 . T <CNV:TR> . . END=120;SVLEN=30;CN=0.35;RUS=CAG;RUC=65;CIRUC=-15,. GT ./.
+\end{verbatim}
+\normalsize
+
+Note that:
+\begin{itemize}
+	\item RN was omitted as it is only required if at least one $<$CNV:TR$>$ allele has RN greater than 1.
+	\item The confidence interval bounds are relative to the nominal value.
+	\item A missing upper bouns indicates the maximum length is not known.
+\end{itemize}
+
+Exactly representing nested repeats results in the loss of some repeat information when representing with a $<$CNV:TR$>$ record.
+For repeats such as $((ACCGGC)_{4}(ACCAGT))_{3-5}$, summarising the repeat structure in a $<$CNV:TR$>$ record requires either unrolling the inner repeats, or treating each outer repeat as a separate repeat sequence (the full repeat structure can be stroed in a caller-specific non-standard INFO field).
+For many VNTRs, the critical information to retain is the length of each repeat unit.
+This length information can be encoded in the RUB field.
+For example, a 10,000bp VNTRs domain repeated 5 times, each repeat 500bp longer than the previous can be encoded as follows:
+
+\footnotesize
+\begin{verbatim}
+chr1 1000000 . T <CNV:TR> . . END=20000;SVLEN=20000;CN=1.25;RUL=10000;RUC=5;RUB=10000,10500,11000,11500,12000 GT ./.
+\end{verbatim}
+\normalsize
+
+
+	
+	
 \pagebreak
 \section{BCF specification}
 
