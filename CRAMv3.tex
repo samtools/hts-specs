@@ -586,10 +586,10 @@ fields to the value 0.
 
 \subsection{\textbf{CRAM header container}}
 
-The first container in a CRAM file contains a textual header in a single block, optionally
-gzip compressed. This text header currently matches the SAM header specification. Only
-gzip is allowed as compression method for this block. The CRAM header container does not
-include a compression header block.
+The first container in a CRAM file contains a textual header in a single block, optionally gzip compressed.
+This text header currently matches the SAM header specification.
+If compressed, only gzip is allowed as compression method for this block.
+The CRAM header container does not include a compression header block.
 
 It is recommended to reserve 50\% more space in the CRAM header container than
 is required for the SAM header text by optionally padding the container with a second
