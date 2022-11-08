@@ -530,6 +530,7 @@ improvements for unsorted data.
 \end {itemize}
 
 \section{\textbf{Container header structure}}
+\label{sec:container}
 
 The file definition is followed by one or more containers with the following header 
 structure where the container content is stored in the `blocks' field:
@@ -585,23 +586,16 @@ fields to the value 0.
 
 
 \subsection{\textbf{CRAM header container}}
+\label{subsec:cram-header-container}
 
-The first container in a CRAM file contains a textual header in a single block, optionally gzip compressed.
-This text header currently matches the SAM header specification.
-If compressed, only gzip is allowed as compression method for this block.
-The CRAM header container does not include a compression header block.
-
-It is recommended to reserve 50\% more space in the CRAM header container than
-is required for the SAM header text by optionally padding the container with a second
-raw block consisting of all zeroes. This can be used to subsequently expand the header
-container in place, such as when updating @SQ records, while preserving the absolute
-offsets of all subsequent containers.
+The first container in a CRAM file contains a textual header in one or more blocks.  See section~\ref{subsec:header-block} for more details on the layout of data within these blocks and constraints applied to the contents of the SAM header.
 
 The landmarks field of the container header structure may be used to
 indicate the offsets of the blocks used in the header container.
 These may optionally be omitted by specifying an array size of zero.
 
 \section{\textbf{Block structure}}
+\label{sec:block}
 
 Containers consist of one or more blocks. Block compression is applied independently 
 and in addition to any encodings used to compress data within the block. The block 
@@ -689,9 +683,17 @@ is stored. Please note that external blocks can have multiple data series associ
 with them; in this case the values from these data series will be interleaved. 
 
 
-\subsection{\textbf{CRAM header block}}
+\subsection{\textbf{CRAM header block(s)}}
+\label{subsec:header-block}
 
-The SAM header is stored in a single block within the first container. 
+The SAM header is stored in the first block of the CRAM header container (see section~\ref{subsec:cram-header-container}).
+This block may be uncompressed or gzip compressed only.
+This block is followed by zero or more uncompressed expansion blocks.
+If present, these permit in-place editing of the CRAM header, allowing it to grow or shrink with a compensatory size change applied to the subsequence expansion block, avoiding the need to rewrite the remainder of the file.
+The contents of any expansion blocks should be zero bytes (nul characters).
+
+The format of the initial SAM header block is a 32-bit little-endian integer holding the length of the text of the SAM header, minus nul-termination bytes, followed by the text itself.
+Although 32-bit, the maximum permitted value is $2^{31}$, and all lengths must be positive.
 
 The following constraints apply to the SAM header text: 
 
