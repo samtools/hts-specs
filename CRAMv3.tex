@@ -633,6 +633,12 @@ byte[4] & CRC32 & CRC32 hash value for all preceding bytes in the block\tabularn
 
 * Note on raw method: both compressed and raw sizes must be set to the same value.
 
+Empty blocks may occur in the files.
+Blocks with a raw (uncompressed) size of zero are treated as empty,
+irrespective of their ``method'' byte.  This is equivalent to
+interpreting them as having method zero (raw) and compressed size of
+zero.
+
 \subsection{\textbf{Block content types}}
 
 CRAM has the following block content types:
