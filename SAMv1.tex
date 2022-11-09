@@ -330,7 +330,8 @@ The {\tt TP} field is often omitted, which implies linear.}\\\cline{2-3}
   & {\tt PI} & Predicted median insert size, rounded to the nearest integer.\\\cline{2-3}
   & {\tt PL} & Platform/technology used to produce the reads. \emph{Valid values}:
   {\tt CAPILLARY}, {\tt DNBSEQ} (MGI/BGI), {\tt ELEMENT}, {\tt HELICOS}, {\tt ILLUMINA}, {\tt IONTORRENT}, {\tt LS454}, {\tt ONT} (Oxford Nanopore), {\tt PACBIO} (Pacific Biosciences), {\tt SINGULAR}, {\tt SOLID}, and {\tt ULTIMA}.
-  This field should be omitted when the technology is not in this list (though the {\tt PM} field may still be present in this case) or is unknown.\\\cline{2-3}
+  This field should be omitted when the technology is not in this list (though the {\tt PM} field may still be present in this case) or is unknown.
+  The values should be written as described in uppercase, however due to the existance of public data with lowercase values tools should also accept lowercase when decoding.\\\cline{2-3}
   & {\tt PM} & Platform model. Free-form text providing further details of the platform/technology used.\\\cline{2-3}
   & {\tt PU} & Platform unit (e.g., flowcell-barcode.lane for Illumina or slide for SOLiD). Unique identifier.\\\cline{2-3}
   & {\tt SM} & Sample. Use pool name where a pool is being sequenced.\\\cline{1-3}
