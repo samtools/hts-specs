@@ -1713,7 +1713,7 @@ When the exact sequence is not known, or when reporting tandem repeat 'summary' 
 The allele sequence of a $<$CNV:TR$>$ record consists of the one or more repeat sequences each of which consist of a single repeat unit repeated one or more times.
 That is, $<$CNV:TR$>$ records can encode multiple different repeat motifs in a single allele but do not support "nested" repeats.
 
-Figure 11 outlines the field encoding for a STR locus with alleles of sequence $CAGCAGCAGTTGTTG$ ($(CAG)_{4}(TTG)_{2}$), and $CACACA$ ($(CA)_{2}$).
+Figure 11 outlines the field encoding for a STR locus with alleles of sequence $CAGCAGCAGTTGTTG$ ($(CAG)_{4}(TTG)_{2}$), and $CACACA$ ($(CA)_{3}$).
 $RN=2,1$ indicates that the first allele has two repeat sequences and the second allele one.
 RUS, RUL, and RUC fields encode the repeat unit sequence, length, and count within each repeat sequence.
 RB encodes the length of each repeat sequence.
@@ -1736,6 +1736,7 @@ In the following example, the reference genome contains a $(CAG)_{10}$ repeat at
 \begin{verbatim}
 ##fileformat=VCFv4.4
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the longest variant described in this record">
+##INFO=<ID=SVLEN,Number=A,Type=Integer,Description="Length of structural variant">
 ##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of allele">
 ##INFO=<ID=RN,Number=A,Type=Integer,Description="Total number of repeat sequences in this allele.">
 ##INFO=<ID=RUS,Number=.,Type=String,Description="Repeat unit sequence of the corresponding repeat sequence">
@@ -1761,6 +1762,8 @@ chr1 130 precise_alt1 G GCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGC
 Note the following:
 \begin{itemize}
     \item As with all symbolic structural variant alleles, the POS of the $<$CNV:TR$>$ record is the base immediately preceding the tandem repeat
+    \item The SVLEN of the $<$CNV:TR$>$ is the length of the reference allele.
+    It is not the length of the $<$CNV:TR$>$ allele.
     \item The SVLEN of the $<$CNV:TR$>$ allele of a novel (with respect to the reference) tandem repeat should be 1.
     \item The POS of the $<$CNV:TR$>$ allele of a novel (with respect to the reference) tandem repeat should be the base immediately preceding the inserted tandem repeat sequence.
     \item Both a $<$CNV:TR$>$ and one or more non-symoblic records encoding the tandem repeat can be present.
