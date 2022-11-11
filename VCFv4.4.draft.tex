@@ -205,7 +205,7 @@ ALT meta-information lines are structured lines with require fields of ID and De
 
 \noindent \textbf{Structural Variants} \newline
 In symbolic alternate alleles for structural variants, the ID field indicates the type of structural variant, and can be a colon-separated list of types and subtypes.
-ID values are case sensitive strings and must not contain whitespace, commas or angle brackets.
+ID values are case sensitive strings and must not contain whitespace, commas or angle brackets (See \ref{fixed-fields}.\ref{fixed-fields-alt})
 The first level type must be one of the following:
 \begin{itemize}
   \item DEL Region of lowered copy number relative to the reference, or a deletion breakpoint
@@ -332,6 +332,7 @@ The last data line must end with a line separator.
 In all cases, missing values are specified with a dot (`.').
 
 \subsubsection{Fixed fields}
+\label{fixed-fields}
 There are 8 fixed fields per record.
 Fixed fields are:
 
@@ -360,6 +361,7 @@ Fixed fields are:
   If the reference sequence contains IUPAC ambiguity codes not allowed by this specification (such as R = A/G), the ambiguous reference base must be reduced to a concrete base by using the one that is first alphabetically (thus R as a reference base is converted to A in VCF.)
 
   \item ALT --- alternate base(s): Comma-separated list of alternate non-reference alleles.
+  \label{fixed-fields-alt}
   These alleles do not have to be called in any of the samples.
   Each allele in this list must be one of: a non-empty String of bases (A,C,G,T,N; case insensitive); the `*' symbol (allele missing due to overlapping deletion); the MISSING value `.' (no variant); an angle-bracketed ID String (``$<$ID$>$''); the unspecified allele ``$<$*$>$'' as described in Section \ref{unspecified-allele}; or a breakend replacement string as described in Section \ref{Breakends}.
   If there are no alternative alleles, then the MISSING value must be used.
