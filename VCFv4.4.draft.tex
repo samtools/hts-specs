@@ -843,7 +843,6 @@ $CILEN$ consists of successive pairs of records indicating the lower and upper b
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=DP,Number=A,Type=Integer,Description="Total read depth at variant (breakend) position">
 ##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of CNV/breakpoint">
 ##INFO=<ID=CICN,Number=.,Type=Float,Description="Confidence interval around copy number">
 \end{verbatim}
@@ -2509,7 +2508,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \item Conceptually separated variant detection and interpretation.
 \item Added EVENTTYPE/EVENT to enable the multiple records encoding complex genomic rearrangements to be grouped together.
 \item Added polyploid partial phasing support (e.g. GT $|0|0/1/2$). GT now defined as a prefix notation with the first phasing indicator optional.
-\item Redefined $Number=$ for SVLEN, CIPOS, CIEND, HOMLEN, HOMSEQ, BKPTID, MEINFO, METRANS, DGVID, DBVARID, DBRIPID, MATEID, PARID, EVENT, DP, CN, CICN to support multiple symbolic alleles.
+\item Redefined $Number=$ for SVLEN, CIPOS, CIEND, HOMLEN, HOMSEQ, BKPTID, MEINFO, METRANS, DGVID, DBVARID, DBRIPID, MATEID, PARID, EVENT, CN, CICN to support multiple symbolic alleles.
 \item Redefined END as the end position of the longest ALT allele. Note that END remains $Number=1$.
 \item Redefined SVLEN to always be positive.
 \item Redefined SVLEN, END and BCF rlen to support both $<*>$ and symbolic structural variant alleles in the same record.
@@ -2519,6 +2518,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \item Clarified that symbolic and breakpoint notation ALT alleles are case sensitive.
 \item Deprecated SVTYPE, DPADJ, CNADJ, CICNADJ
 \item Disallowed BND ALT records (these should use breakpoint notation anyway)
+\item Removed definition of DP from Section 3 as it was already defined in Section 1.6.1.8.
 \item Deprecated bundles in favour of PSL-based phasing.
 \item Updated SV examples.
 \item BCF parsers should perform BGZF encoding and must support both raw and BGZF encoded files.
