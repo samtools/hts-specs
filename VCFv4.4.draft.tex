@@ -2503,11 +2503,25 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \subsection{Changes between VCFv4.4 and VCFv4.3}
 
 \begin{itemize}
-\item Clarify how to add multiple SV per record by making the number of value in reserved SV INFO fields dependent on the number of ALT. However END is still Number=1 even with multiple variant per record.
-\item Deprecate SVTYPE INFO field preferring the use of symbolic alleles in the ALT field
-\item Define new reserved INFO field EVENT, EVENTTYPE and SVCLAIM
-\item Redefined INFO field SVLEN to be always positive
-\item Added Phase-Set List (PSL \& PSO \& PSQ) and allele-specific phasing notation (in GT)
+\item Added tandem repeat support ($<$CNV:TR$>$, RN, RUS, RUL, RB, CIRB, RUC, CIRUC, RUB)
+\item Added support for phasing and derivate chromosome reconstruction in the presence of SVs (PSL, PSO, PSQ)
+\item Added SVCLAIM to disambiguate copy number based $<$DEL$>$ and $<$DUP$>$ variants from breakpoint based ones.
+\item Conceptually separated variant detection and interpretation.
+\item Added EVENTTYPE/EVENT to enable the multiple records encoding complex genomic rearrangements to be grouped together.
+\item Added polyploid partial phasing support (e.g. GT $|0|0/1/2$). GT now defined as a prefix notation with the first phasing indicator optional.
+\item Redefined $Number=$ for SVLEN, CIPOS, CIEND, HOMLEN, HOMSEQ, BKPTID, MEINFO, METRANS, DGVID, DBVARID, DBRIPID, MATEID, PARID, EVENT, DP, CN, CICN to support multiple symbolic alleles.
+\item Redefined END as the end position of the longest ALT allele. Note that END remains $Number=1$.
+\item Redefined SVLEN to always be positive.
+\item Redefined SVLEN, END and BCF rlen to support both $<*>$ and symbolic structural variant alleles in the same record.
+\item Number, Type and Description required only for INFO meta-information lines
+\item Clarified CIPOS should be used to define micro-homology bounds
+\item Clarified INFO lines field ordering
+\item Clarified that symbolic and breakpoint notation ALT alleles are case sensitive.
+\item Deprecated SVTYPE, DPADJ, CNADJ, CICNADJ
+\item Disallowed BND ALT records (these should use breakpoint notation anyway)
+\item Deprecated bundles in favour of PSL-based phasing.
+\item Updated SV examples.
+\item BCF parsers should perform BGZF encoding and must support both raw and BGZF encoded files.
 \end{itemize}
 
 \subsection{Changes to VCFv4.3}
