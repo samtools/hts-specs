@@ -511,16 +511,16 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
   \item GP (Float): Genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities.
   \item GT (String): Genotype, encoded as allele value preceded by either of $/$ or $\mid$ depending on whether that allele is considered phased. 
-    The first separator may be omitted and is implicitly defined as $/$ if any separator are $/$ and $\mid$ otherwise.
+    The first phasing indicator may be omitted and is implicitly defined as $/$ if any phasing indicators are $/$ and $\mid$ otherwise.
     The allele values are 0 for the reference allele (what is in the REF field), 1 for the first allele listed in ALT, 2 for the second allele list in ALT and so on.
     For diploid calls examples could be $0/1$, $1\mid0$, $/0/1$, or $1/2$, etc.
     Haploid calls, e.g.\ on Y, male non-pseudoautosomal X, or mitochondria, should be indicated by having only one allele value.
     A triploid call might look like $0/0/1$, and a partially phased triploid call could be $|0/1/2$ to indicate that the first allele is phased with another variant in the VCF.
     If a call cannot be made for a sample at a given locus, `$.$' must be specified for each missing allele in the {\tt GT} field (for example `$./.$' for a diploid genotype and `$.$' for haploid genotype).
-    The meanings of the separators are as follows (see the {\tt PS} and {\tt PSL} fields below for more details on incorporating phasing information into the genotypes):
+    The meanings of the phasing indicators are as follows (see the {\tt PS} and {\tt PSL} fields below for more details on incorporating phasing information into the genotypes):
     \begin{itemize}
-      \item $/$ : preceding allele is unphased
-      \item $\mid$ : preceding allele is phased (according to the phase-set indicated in {\tt PS} or {\tt PSL})
+      \item $/$ : allele is unphased
+      \item $\mid$ : allele is phased (according to the phase-set indicated in {\tt PS} or {\tt PSL})
     \end{itemize}
 
   \item GL (Float): Genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields.
