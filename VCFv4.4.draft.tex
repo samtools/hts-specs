@@ -212,7 +212,7 @@ The first level type must be one of the following:
   \item INS Insertion of novel sequence relative to the reference
   \item DUP Region of elevated copy number relative to the reference, or a tandem duplication breakpoint
   \item INV Inversion of reference sequence
-  \item CNV Copy number variable region (may be both deletion and duplication)
+  \item CNV Region of uniform copy number (may be deletion, duplication or copy number neutral)
 \end{itemize}
 
 The CNV symbolic allele should not be used when a more specific one (e.g. DEL, CNV:TR) can be applied.
@@ -522,6 +522,9 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       \item $/$ : allele is unphased
       \item $\mid$ : allele is phased (according to the phase-set indicated in {\tt PS} or {\tt PSL})
     \end{itemize}
+
+    For symbolic structural variant alleles, GT=0 indicates the absence of any of the ALT symbolic structural variants defined in the record.
+    Implementer should note that merging a VCF record containing only symbolic structural variant ALT alleles with a record containing other alleles will result a change of the meaning of the GT=0 haplotypes from the record containing only symbolic SVs.
 
   \item GL (Float): Genotype likelihoods comprised of comma separated floating point $log_{10}$-scaled likelihoods for all possible genotypes given the set of alleles defined in the REF and ALT fields.
   In presence of the GT field the same ploidy is expected; without GT field, diploidy is assumed.
@@ -979,6 +982,7 @@ See section \ref{tandem-repeats} for an example and further details.
 \footnotesize
 \begin{verbatim}
 ##FORMAT=<ID=CN,Number=1,Type=Float,Description="Copy number">
+##FORMAT=<ID=CICN,Number=2,Type=Float,Description="Confidence interval around copy number">
 ##FORMAT=<ID=CNQ,Number=1,Type=Float,Description="Copy number genotype quality">
 ##FORMAT=<ID=CNL,Number=G,Type=Float,Description="Copy number genotype likelihood">
 ##FORMAT=<ID=CNP,Number=G,Type=Float,Description="Copy number posterior probabilities">
@@ -987,8 +991,9 @@ See section \ref{tandem-repeats} for an example and further details.
 ##FORMAT=<ID=AHAP,Number=1,Type=Integer,Description="Unique identifier of ancestral haplotype">
 \end{verbatim}
 \normalsize
-These keys are analogous to GT/GQ/GL/GP and are provided for genotyping imprecise variants by copy number (either because there is an unknown number of alternate alleles or because the haplotypes cannot be determined).
-CN specifies the integer copy number of the variant in this sample.
+CN specifies the total copy number over the region defined in the $<$CNV$>$, $<$DEL$>$, $<$DUP$>$ alleles.
+When CN is present, all $<$CNV$>$, $<$DEL$>$ and $<$DUP$>$ alleles must have the same SVLEN.
+CNQ, CNL, and CNP are analogous to GQ/GL/GP fields.
 CNQ is encoded as a phred quality $-10log_{10}$ p(copy number genotype call is wrong).
 CNL specifies a list of $log_{10}$ likelihoods for each potential copy number, starting from zero.
 CNP is 0 to 1-scaled copy number posterior probabilities (and otherwise defined precisely as the CNL field), intended to store imputed genotype probabilities.
@@ -1312,18 +1317,18 @@ If the insertion is too long to be conveniently stored in the ALT column, as in 
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$13$ & $123456$ & bnd\_U & C & C$[<$ctg1$>:1[$ & $6$ & PASS & . \\
-$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:329]$A & $6$ & PASS & . \\
+$13$ & $123456$ & bnd\_U & C & C$[<$ctg1$>:1[$ & $6$ & PASS & MATEID=bnd\_V \\
+$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:329]$A & $6$ & PASS & MATEID=bnd\_U \\
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
 
-\textbf{Note}: In the special case of the complete insertion of a sequence between two base pairs, it is recommended to use the shorthand notation described above:
+\textbf{Note}: In the special case of the complete insertion of a sequence between two base pairs, it is recommended to use the shorthand notation described below:
 
 \vspace{0.3cm}
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$13$ & $321682$ & INS0 & T & C$<$ctg$1>$ & $6$ & PASS & . \\
+$13$ & $123456$ & INS0 & C & $<$ctg$1>$ & $6$ & PASS & . \\
 \end{tabular}
 \vspace{0.3cm}
 
@@ -1333,8 +1338,8 @@ If only a portion of $<$ctg$1>$, say from position $7$ to position $214$, is ins
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$13$ & $123456$ & bnd\_U & C & C$[<$ctg1$>:7[$ & $6$ & PASS & . \\
-$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:214]$A & $6$ & PASS & . \\
+$13$ & $123456$ & bnd\_U & C & C$[<$ctg1$>:7[$ & $6$ & PASS & MATEID=bnd\_U \\
+$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:214]$A & $6$ & PASS & MATEID=bnd\_V \\
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1345,10 +1350,10 @@ If $<$ctg$1>$ is circular and a segment from position 229 to position 45 is inse
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-$13$ & $123456$ & bnd\_U & C & C$[<$ctg$1>:229[$ & 6 & PASS & . \\
-$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:45]$A & 6 & PASS & . \\
-$<$ctg$1>$ & 1 & bnd\_X & A & $]<$ctg$1>:329]$A & 6 & PASS & . \\
-$<$ctg$1>$ & 329 & bnd\_Y & T & T$[<$ctg$1>:1[$ & 6 & PASS & . \\
+$13$ & $123456$ & bnd\_U & C & C$[<$ctg$1>:229[$ & 6 & PASS & MATEID=bnd\_U;EVENT=INS0  \\
+$13$ & $123457$ & bnd\_V & A & $]<$ctg$1>:45]$A & 6 & PASS & MATEID=bnd\_V;EVENT=INS0 \\
+$<$ctg$1>$ & 1 & bnd\_X & A & $]<$ctg$1>:329]$A & 6 & PASS & MATEID=bnd\_Y;EVENT=INS0 \\
+$<$ctg$1>$ & 329 & bnd\_Y & T & T$[<$ctg$1>:1[$ & 6 & PASS & MATEID=bnd\_C;EVENT=INS0 \\
 \end{tabular}
 \normalsize
 
@@ -1700,6 +1705,40 @@ Example records are given below:
 \end{tabular}
 \end{flushleft}
 \normalsize
+
+
+\pagebreak
+\subsection{Representing copy number variation}
+\label{cnv}
+
+To encode copy number variation, VCF uses $<$CNV$>$, $<$DEL$>$ and $<$DUP$>$ symbolic structural variant alleles, CN INFO and FORMAT fields.
+
+Allele specific copy number is specified through a $<$CNV$>$ ALT allele for each distinct allelic copy number.
+POS and INFO SVLEN specify the genomic interval over which the copy number is defined.
+As with all symbolic structural variants, the starting position of the interval is the base immediately after POS.
+For example, a region on chr1 from position 101 to 300 (both inclusive) with allele-specific copy numbers of 1 and 2 can be represented as follows:
+
+\footnotesize
+\begin{verbatim}
+	chr1 100 . T <CNV>,<CNV> . . END=130;SVLEN=30,30;CN=1,2 GT:CN 1/2:3
+\end{verbatim}
+\normalsize
+
+All $<$CNV$>$ alleles in the same VCF record should have the same SVLEN.
+To eliminate ambiguity in variant interpretation when GT=0, all copy number haplotypes should be explicitly specified with $<$CNV$>$ alleles, even when copy number is 1.
+
+If only total copy number is known, the copy number of the segment should be defined with a single $<$CNV$>$ ALT allele with a missing INFO CN field.
+In the above example this corresponds to the following:
+
+\footnotesize
+\begin{verbatim}
+	chr1 100 . T <CNV> . . END=130;SVLEN=30 GT:CN ./.:3
+\end{verbatim}
+\normalsize
+
+The granularity of copy number representation is explicitly not defined in these specifications.
+Copy number segmentation can be base-pair accurate with even 1bp changes deletions resulting in new copy number segments, be at a highly granular megabase level of resolution, or anywhere in between.
+When the bounds of a copy number segment is not known precisely, this should be encoded in the CIPOS and CILEN INFO fields.
 
 \pagebreak
 \subsection{Representing tandem repeats}
