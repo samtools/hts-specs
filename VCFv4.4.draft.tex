@@ -353,7 +353,7 @@ Fixed fields are:
   \item REF --- reference base(s): Each base must be one of A,C,G,T,N (case insensitive).
   Multiple bases are permitted.
   The value in the POS field refers to the position of the first base in the String.
-  For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the event (which must be reflected in the POS field), unless the event occurs at position 1 on the contig in which case it must include the base after the event; \pagebreak[1] this padding base is not required (although it is permitted) for e.g.\ complex substitutions or other events where all alleles have at least one base represented in their Strings.
+  For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the variant (which must be reflected in the POS field), unless the variant occurs at position 1 on the contig in which case it must include the base after the variant; \pagebreak[1] this padding base is not required (although it is permitted) for e.g.\ complex substitutions or other variants where all alleles have at least one base represented in their Strings.
   If any of the ALT alleles is a symbolic allele (an angle-bracketed ID String ``$<$ID$>$'') then the padding base is required and POS denotes the coordinate of the base preceding the polymorphism.
   The exception to this is the $<$*$>$ symbolic alleles for which the reference call interval includes the POS base.
   Tools processing VCF files are not required to preserve case in the REF allele Strings. (String, Required).
@@ -674,7 +674,7 @@ The empty string should be used to encode missing values in lists of strings.
 \end{verbatim}
 \normalsize
 
-Indicates that this record contains an imprecise structural variant $ALT$ allele. ALT alleles missing $CIPOS$ are to be interpreted as imprecise events with an unspecified confidence interval.
+Indicates that this record contains an imprecise structural variant $ALT$ allele. ALT alleles missing $CIPOS$ are to be interpreted as imprecise variants with an unspecified confidence interval.
 
 If a precise ALT allele is present in a record with the $IMPRECISE$ flag, $CIPOS$ must be explicitly set for that allele, even if it is `0,0`.
 
@@ -762,12 +762,12 @@ If $CIEND$ is missing, it is assumed to match $CIPOS$.
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=HOMLEN,Number=A,Type=Integer,Description="Length of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=HOMLEN,Number=A,Type=Integer,Description="Length of base pair identical micro-homology at breakpoints">
 \end{verbatim}
 \normalsize
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=HOMSEQ,Number=A,Type=String,Description="Sequence of base pair identical micro-homology at event breakpoints">
+##INFO=<ID=HOMSEQ,Number=A,Type=String,Description="Sequence of base pair identical micro-homology at breakpoints">
 \end{verbatim}
 \normalsize
 \footnotesize
@@ -860,10 +860,10 @@ $CICN$ consists of successive pairs of records indicating the lower and upper co
 This field disambiguates the claim being made by DEL and DUP structural variants.
 
 The distinction between different claim types is made necessary by the fact that many structural variants affect both the overall abundance of a region and its adjacency structure, but often only one of those effects is being directly observed.
-It is important to specify which one, because if this is not done, other events in a genome may make the call ambiguous.
+It is important to specify which one, because if this is not done, other variants in a genome may make the call ambiguous.
 
 For example, a ``conventional'' deletion usually both decreases the DNA abundance of a region and creates an adjacency between two sequence locations, which are the breakpoints of that deletion.
-However, if a deletion or duplication is accompanied by a compensatory event elsewhere in the genome, it may only cause changes in the adjacency structure, but not the overall copy number.
+However, if a deletion or duplication is accompanied by a compensatory variant elsewhere in the genome, it may only cause changes in the adjacency structure, but not the overall copy number.
 On the contrary, combinations of certain complex events in a genome may cause the overall copy number decrease, but not the linear excision of a sequence fragment.
 
 A copy number based duplication call does not make any claims on where the duplicated region is in the genome.
@@ -984,7 +984,7 @@ See section \ref{tandem-repeats} for an example and further details.
 ##FORMAT=<ID=AHAP,Number=1,Type=Integer,Description="Unique identifier of ancestral haplotype">
 \end{verbatim}
 \normalsize
-These keys are analogous to GT/GQ/GL/GP and are provided for genotyping imprecise events by copy number (either because there is an unknown number of alternate alleles or because the haplotypes cannot be determined).
+These keys are analogous to GT/GQ/GL/GP and are provided for genotyping imprecise variants by copy number (either because there is an unknown number of alternate alleles or because the haplotypes cannot be determined).
 CN specifies the integer copy number of the variant in this sample.
 CNQ is encoded as a phred quality $-10log_{10}$ p(copy number genotype call is wrong).
 CNL specifies a list of $log_{10}$ likelihoods for each potential copy number, starting from zero.
@@ -1225,7 +1225,7 @@ chrA   14  .    G   .CCCCCCG  .    .      EVENT=single_breakend                 
 \subsection{Specifying complex rearrangements with breakends}
 \label{Breakends}
 
-An arbitrary rearrangement event can be summarized as a set of novel \textbf{adjacencies}. Each adjacency ties together $2$ \textbf{breakends}.
+An arbitrary rearrangement can be summarized as a set of novel \textbf{adjacencies}. Each adjacency ties together $2$ \textbf{breakends}.
 The two breakends at either end of a novel adjacency are called \textbf{mates}.
 
 There is one line of VCF (i.e.\ one record) for each of the two breakends in a novel adjacency.
