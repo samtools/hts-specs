@@ -832,8 +832,8 @@ The following $EVENTTYPE$ values are reserved and should be used when appropriat
   \item DOUBLEMINUTE - Double minute
 \end{itemize}
 The sematics of other $EVENTTYPE$ values is implementation-defined.
-The use of $EVENT$ is not restricted to structural variation and can also be used associated SNVs and indel.
-Such linking of small variants is useful for scenarios such as kataegis or variant position ambiguity in segmentally duplicated regions.
+The use of $EVENT$ is not restricted to structural variation and can also be used to associate non-symbolic alleles.
+Such linking is useful for scenarios such as kataegis or when there is variant position ambiguity in segmentally duplicated regions.
 
 \footnotesize
 \begin{verbatim}
@@ -856,7 +856,7 @@ $CICN$ consists of successive pairs of records indicating the lower and upper co
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively.">
+##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively">
 \end{verbatim}
 \normalsize
 
@@ -902,7 +902,7 @@ That is, a J claim must not be made on a CNV record even if the corresponding st
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=RN,Number=A,Type=Integer,Description="Total number of repeat sequences in this allele.">
+##INFO=<ID=RN,Number=A,Type=Integer,Description="Total number of repeat sequences in this allele">
 \end{verbatim}
 \normalsize
 
@@ -1206,7 +1206,7 @@ VCF STRUCTURAL VARIANT EXAMPLE
 ##INFO=<ID=EVENT,Number=A,Type=String,Description="ID of associated event">
 ##INFO=<ID=EVENTTYPE,Number=A,Type=String,Description="Type of associated event">
 ##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of CNV/breakpoint">
-##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively.">
+##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively">
 ##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">
 ##contig=<ID=chrA,length=1000000>
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
@@ -1742,7 +1742,7 @@ In the following example, the reference genome contains a $(CAG)_{10}$ repeat at
 ##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the longest variant described in this record">
 ##INFO=<ID=SVLEN,Number=A,Type=Integer,Description="Length of structural variant">
 ##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of allele">
-##INFO=<ID=RN,Number=A,Type=Integer,Description="Total number of repeat sequences in this allele.">
+##INFO=<ID=RN,Number=A,Type=Integer,Description="Total number of repeat sequences in this allele">
 ##INFO=<ID=RUS,Number=.,Type=String,Description="Repeat unit sequence of the corresponding repeat sequence">
 ##INFO=<ID=RUL,Number=.,Type=Integer,Description="Repeat unit length of the corresponding repeat sequence">
 ##INFO=<ID=RUC,Number=.,Type=Float,Description="Repeat unit count of corresponding repeat sequence">
@@ -1753,7 +1753,7 @@ In the following example, the reference genome contains a $(CAG)_{10}$ repeat at
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 ##FORMAT=<ID=PS,Number=1,Type=Integer,Description="Phase set">
 ##FORMAT=<ID=CN,Number=1,Type=Float,Description="Copy number">
-##ALT=<ID=CNV:TR,Description="Tandem repeat determined based on DNA abundance.">
+##ALT=<ID=CNV:TR,Description="Tandem repeat determined based on DNA abundance">
 #CHROM POS ID REF ALT QUAL FILTER INFO FORMAT sample
 chr1 100 cnv_notation T <CNV:TR>,<CNV:TR> . . END=130;SVLEN=30,30;CN=3,0.9666;RUS=CAG,CAG,CA,CAG;RN=1,3;RB=90,15,2,12  GT:PS:CN 1|2:100:3.9666
 chr1 117 precise_alt2 AG A . . GT:PS 0|1:100
