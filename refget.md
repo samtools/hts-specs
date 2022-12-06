@@ -194,7 +194,7 @@ If a start and/or end query parameter are specified the server should include a 
 
 If the identifier is not known by the server, a 404 status code and `NotFound` error shall be returned.
 
-#### Example text request
+#### Example text request and response
 
 The following response has been cut for brevity.
 
@@ -258,12 +258,6 @@ string
   ga4gh identifier, if the server does not support ga4gh the value will be <code>null</code>.
 </td></tr>
 <tr markdown="block"><td>
-<code>TRUNC512</code><br/>
-string
-</td><td>
-  TRUNC512 checksum, if the server does not support TRUNC512 the value will be <code>null</code>.
-</td></tr>
-<tr markdown="block"><td>
 <code>length</code><br/>
 int
 </td><td>
@@ -297,7 +291,7 @@ On success and the query identifier being known to the server, a 200 status code
 
 If the identifier is not known by the server, a 404 status code shall be returned.
 
-#### Example JSON request
+#### Example JSON request and response
 
 ```
 GET /sequence/6aef897c3d6ff0c78aff06ac189178dd/metadata
@@ -306,16 +300,15 @@ GET /sequence/6aef897c3d6ff0c78aff06ac189178dd/metadata
   "metadata" : {
     "md5" : "6aef897c3d6ff0c78aff06ac189178dd",
     "ga4gh": "ga4gh:SQ.Ya6Rs7DHhDeg7YaOSg1EoNi3U_nQ9SvO",
-    "trunc512": "61ae91b3b0c78437a0ed868e4a0d44a0d8b753f9d0f52bce",
     "length": 248956422,
     "aliases" : [
       {
         "alias": "CM000663.2",
-        "naming_authority" : "INSDC"
+        "naming_authority" : "insdc"
       },
       {
         "alias": "chr1",
-        "naming_authority" : "UCSC"
+        "naming_authority" : "ucsc"
       }
     ]
   }
@@ -375,17 +368,11 @@ int or null
 </td><td>
 An integer giving the maximum length of sequence which may be requested using start and/or end query parameters. May be <code>null</code> if the server has imposed no limit.
 </td></tr>
-<tr markdown="block"><td>
-<code>supported_api_versions</code><br/>
-array of strings
-</td><td>
-Array of strings listing the versions of this API supported by the server.
-</td></tr>
 </table>
 </td></tr>
 </table>
 
-#### Example JSON request
+#### Example JSON request and response
 
 ```
 GET /service-info
@@ -548,6 +535,7 @@ The following people have contributed to the design of this specification.
 - Somesh Chaturvedi
 - Rishi Nag
 - Reece Hart
+- Timothe Cezard
 
 # Appendix
 
