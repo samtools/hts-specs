@@ -1713,8 +1713,8 @@ To accommodate such variant calls, a the $<$CNV:TR$>$ symbolic allele can be use
 In general, tandem repeats can be represented in one or both of two complementary representations.
 When the exact sequence is known, the variant can be represented as a non-symbolic ALT allele.
 The variant can be represented either as a single VCF record containing the entire sequence in the ALT field, or over multiple phased records.
-When the exact sequence is not known, or when reporting tandem repeat 'summary' information, the variant can be represented as a $<$CNV:TR$>$ copy number variants with the RN, RS, RL, RB, RC and RUL INFO fields encoding the nature of the repeat expansion/contraction.
-The allele sequence of a $<$CNV:TR$>$ record consists of the one or more repeat sequences each of which consist of a single repeat unit repeated one or more times.
+When the exact sequence is not known, or when reporting tandem repeat 'summary' information, the variant can be represented as $<$CNV:TR$>$ copy number variants with the RN, RS, RL, RB, RC and RUL INFO fields encoding the nature of the repeat expansion/contraction.
+The allele sequence of a $<$CNV:TR$>$ record consists of the one or more repeat sequences, each of which consist of a single repeat unit repeated one or more times.
 That is, $<$CNV:TR$>$ records can encode multiple different repeat motifs in a single allele but do not support "nested" repeats.
 
 Figure 11 outlines the field encoding for a STR locus with alleles of sequence $CAGCAGCAGTTGTTG$ ($(CAG)_{4}(TTG)_{2}$), and $CACACA$ ($(CA)_{3}$).
