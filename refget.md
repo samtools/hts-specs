@@ -571,7 +571,7 @@ Key to generating reproducible checksums is the normalisation algorithm applied 
 - VMC
   - VMC requires sequence to be a string of IUPAC codes for either nucelotide or protein sequence
 
-Considering the requirements of the three systems the specification designers felt it was sufficient to restrict input to the inclusive range `65` (`0x41`/`A`) to `90` (`0x5A`/`Z`). Changes to this normalisation algorthim would require a new checksum identifier to be used.
+Considering the requirements of the three systems the specification designers felt it was sufficient to restrict input to the inclusive range `65` (`0x41`/`A`) to `90` (`0x5A`/`Z`). Changes to this normalisation algorithm would require a new checksum identifier to be used.
 
 ### Checksum Choice
 
