@@ -694,7 +694,7 @@ The encodings used for different tags are stored in a map. The map has integer
 keys composed of the two letter tag abbreviation followed by the tag type as defined 
 in the SAM specification, for example `OQZ' for `OQ:Z'. The three bytes form a 
 big endian integer and are written as ITF8. For example, 3-byte representation 
-of OQ:Z is \{0x4F, 0x51, 0x5A\} and these bytes are intepreted as the integer 0x004F515A. 
+of OQ:Z is \{0x4F, 0x51, 0x5A\} and these bytes are interpreted as the integer 0x004F515A.
 The integer is finally written as ITF8.
 
 \begin{tabular}{|l|l|l|>{\raggedright}p{160pt}|}
@@ -1640,7 +1640,7 @@ the values are captured\tabularnewline
 
 \subsubsection*{BYTE\_ARRAY\_STOP }
 
-Byte arrays are captured as a sequence of bytes teminated by a special stop byteFor 
+Byte arrays are captured as a sequence of bytes terminated by a special stop byteFor
 example this could be a golomb encoding. The parameter for BYTE\_ARRAY\_STOP are 
 listed below:
 

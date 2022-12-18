@@ -850,7 +850,7 @@ For example the TD for tag lists X1:i BC:Z SA:Z and X1:i BC:Z may be encoded as 
 The encodings used for different tags are stored in a map.
 The key is 3 bytes formed from the BAM tag id and type code, matching the TD dictionary described above.
 Unlike the Data Series Encoding Map, the key is stored in the map as an ITF8 encoded integer, constructed using $(char1<<16) + (char2<<8) + type$.
-For example, the 3-byte representation of OQ:Z is \{0x4F, 0x51, 0x5A\} and these bytes are intepreted as the integer key 0x004F515A, leading to an ITF8 byte stream \{0xE0, 0x4F, 0x51, 0x5A\}.
+For example, the 3-byte representation of OQ:Z is \{0x4F, 0x51, 0x5A\} and these bytes are interpreted as the integer key 0x004F515A, leading to an ITF8 byte stream \{0xE0, 0x4F, 0x51, 0x5A\}.
 
 \begin{tabular}{|l|l|l|>{\raggedright}p{160pt}|}
 \hline
