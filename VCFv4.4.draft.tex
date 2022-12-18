@@ -355,7 +355,7 @@ Fixed fields are:
   The value in the POS field refers to the position of the first base in the String.
   For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the variant (which must be reflected in the POS field), unless the variant occurs at position 1 on the contig in which case it must include the base after the variant; this padding base is not required (although it is permitted) e.g. for complex substitutions or other variants where all alleles have at least one base represented in their Strings.
   If any of the ALT alleles is a symbolic allele (an angle-bracketed ID String ``$<$ID$>$'') then the padding base is required and POS denotes the coordinate of the base preceding the polymorphism.
-  The exception to this is the $<$*$>$ symbolic alleles for which the reference call interval includes the POS base.
+  The exception to this is the $<$*$>$ symbolic allele for which the reference call interval includes the POS base.
   Tools processing VCF files are not required to preserve case in the REF allele Strings. (String, Required).
 
   If the reference sequence contains IUPAC ambiguity codes not allowed by this specification (such as R = A/G), the ambiguous reference base must be reduced to a concrete base by using the one that is first alphabetically (thus R as a reference base is converted to A in VCF.)
