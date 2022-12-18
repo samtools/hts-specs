@@ -1819,7 +1819,7 @@ Note that:
 \end{itemize}
 
 Exactly representing nested repeats results in the loss of some repeat information when representing with a $<$CNV:TR$>$ record.
-For repeats such as $((ACCGGC)_{4}(ACCAGT))_{3-5}$, summarising the repeat structure in a $<$CNV:TR$>$ record requires either unrolling the inner repeats, or treating each outer repeat as a separate repeat sequence (the full repeat structure can be stroed in a caller-specific non-standard INFO field).
+For repeats such as $((ACCGGC)_{4}(ACCAGT))_{3-5}$, summarising the repeat structure in a $<$CNV:TR$>$ record requires either unrolling the inner repeats, or treating each outer repeat as a separate repeat sequence (the full repeat structure can be stored in a caller-specific non-standard INFO field).
 For many VNTRs, the critical information to retain is the length of each repeat unit.
 This length information can be encoded in the RUB field.
 For example, a 10,000bp VNTRs domain repeated 5 times, each repeat 500bp longer than the previous can be encoded as follows:
