@@ -135,7 +135,7 @@ It is recommended in VCF and required in BCF that the header includes tags descr
 These tags are based on the SQ field from the SAM spec; all tags are optional (see the VCF example above).
 
 To aid human readability, the order of fields should be ID, Number, Type, Description, then any optional fields.
-Implementation must not rely on the order of the fields within structured lines and are not required to preserve field ordering.
+Implementations must not rely on the order of the fields within structured lines and are not required to preserve field ordering.
 
 Meta-information lines are optional, but if they are present then they must be completely well-formed.
 Other than \verb|##fileformat|, they may appear in any order.
