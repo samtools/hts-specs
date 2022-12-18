@@ -1770,9 +1770,9 @@ Note the following:
     It is not the length of the $<$CNV:TR$>$ allele.
     \item The SVLEN of the $<$CNV:TR$>$ allele of a novel (with respect to the reference) tandem repeat should be 1.
     \item The POS of the $<$CNV:TR$>$ allele of a novel (with respect to the reference) tandem repeat should be the base immediately preceding the inserted tandem repeat sequence.
-    \item Both a $<$CNV:TR$>$ and one or more non-symoblic records encoding the tandem repeat can be present.
-    \item $<$CNV:TR$>$ and the non-symoblic records encoding the tandem repeat should be phased if possible.
-    \item When both $<$CNV:TR$>$ and the equivalent non-symoblic records are present, the $<$CNV:TR$>$ should approximately encode the sequence but is not required to encode the sequence exactly.
+    \item Both a $<$CNV:TR$>$ and one or more non-symbolic records encoding the tandem repeat can be present.
+    \item $<$CNV:TR$>$ and the non-symbolic records encoding the tandem repeat should be phased if possible.
+    \item When both $<$CNV:TR$>$ and the equivalent non-symbolic records are present, the $<$CNV:TR$>$ should approximately encode the sequence but is not required to encode the sequence exactly.
 	For example, SNVs and indels may be omitted in the $<$CNV:TR$>$ record.
     \item Variant callers which do not report allele-specific tandem repeats should use a single $<$CNV:TR$>$ ALT allele and the missing genotype for the GT field (for example, $./.$ if diploid).
     \item The INFO and FORMAT CN fields should be present for $<$CNV:TR$>$ records (as they are $<$CNV$>$ records) and, when present, must correspond to the sample allelic length divided by the reference allelic length.
