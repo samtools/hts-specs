@@ -607,12 +607,12 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \end{tabular}
   
   \item PSO (List of integers): List of phase set ordinals.
-  For each phase-set name, defines the order in which variants are encountered when traversing a derivate chromosome.
+  For each phase-set name, defines the order in which variants are encountered when traversing a derivative chromosome.
   The missing value '$.$' should be used when the corresponding PSO value is missing.
   For each phase-set name, PSO should be defined if any allele with that phase-set name on any record is symbolic structural variant or in breakpoint notation.
   Variants in breakpoint notation must have the same PSL and PSO on both records.
   
-  Without explicitly specifying the derivate chromosome traversal order, multiple derivate chromosome reconstructions are possible.
+  Without explicitly specifying the derivative chromosome traversal order, multiple derivative chromosome reconstructions are possible.
   Take for example this tandem duplication in a triploid organism with SNVs (ID/QUAL/FILTER columns removed for clarity):
   
   \vspace{0.5em}
@@ -829,7 +829,7 @@ The following $EVENTTYPE$ values are reserved and should be used when appropriat
   \item BFB - breakage fusion bridge
   \item DOUBLEMINUTE - Double minute
 \end{itemize}
-The sematics of other $EVENTTYPE$ values is implementation-defined.
+The semantics of other $EVENTTYPE$ values is implementation-defined.
 The use of $EVENT$ is not restricted to structural variation and can also be used to associate non-symbolic alleles.
 Such linking is useful for scenarios such as kataegis or when there is variant position ambiguity in segmentally duplicated regions.
 
@@ -2555,7 +2555,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \item Added tandem repeat support ($<$CNV:TR$>$, RN, RUS, RUL, RB, CIRB, RUC, CIRUC, RUB)
 \item Redefined INFO CN as allele-specific copy number and FORMAT CN as total copy number.
 \item Redefined INFO and FORMAT CN to support non-integer copy numbers.
-\item Added support for phasing and derivate chromosome reconstruction in the presence of SVs (PSL, PSO, PSQ)
+\item Added support for phasing and derivative chromosome reconstruction in the presence of SVs (PSL, PSO, PSQ)
 \item Added SVCLAIM to disambiguate copy number based $<$DEL$>$ and $<$DUP$>$ variants from breakpoint based ones.
 \item Conceptually separated variant detection and interpretation.
 \item Added EVENTTYPE/EVENT to enable the multiple records encoding complex genomic rearrangements to be grouped together.
