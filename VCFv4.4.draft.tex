@@ -153,7 +153,7 @@ For VCF version 4.4, this line is:
 
 
 \subsubsection{Information field format}
-INFO meta-information lines are structured lines with require fields of ID, Number, Type, and Description, and Source and Version recommended optional fields:
+INFO meta-information lines are structured lines with required fields ID, Number, Type, and Description, and recommended optional fields Source and Version:
 
 \begin{verbatim}
 ##INFO=<ID=ID,Number=number,Type=type,Description="description",Source="source",Version="version">
@@ -180,14 +180,14 @@ Double-quote character must be escaped with backslash $\backslash$ and backslash
 Source and Version values likewise must be surrounded by double-quotes and specify the annotation source (case-insensitive, e.g.\ \verb|"dbsnp"|) and exact version (e.g.\ \verb|"138"|), respectively for computational use.
 
 \subsubsection{Filter field format}
-FILTER meta-information lines are structured lines with require fields of ID and Description that define the possible content of the FILTER column in the VCF records:
+FILTER meta-information lines are structured lines with required fields ID and Description that define the possible content of the FILTER column in the VCF records:
 
 \begin{verbatim}
 ##FILTER=<ID=ID,Description="description">
 \end{verbatim}
 
 \subsubsection{Individual format field format}
-FORMAT meta-information lines are structured lines with require fields of ID, Number, Type, and Description that define the possible content of the per-sample/genotype columns in the VCF records:
+FORMAT meta-information lines are structured lines with required fields ID, Number, Type, and Description that define the possible content of the per-sample/genotype columns in the VCF records:
 
 \begin{verbatim}
 ##FORMAT=<ID=ID,Number=number,Type=type,Description="description">
