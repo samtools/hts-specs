@@ -926,9 +926,9 @@ See section \ref{tandem-repeats} for further details.
 Used by $<$CNV:TR$>$ tandem repeat alleles to encode information about the nature of the tandem repeats contained for ALT alleles.
 Conceptually, these fields each contain a list of values for each ALT allele.
 The length of these inner lists are determined by the RN field for that ALT allele and the length must match the sum of RN for the record.
-These fields contain the flattened and concatentated list contents in the same order as either corresponding ALT allele.
+These fields contain the flattened and concatenated list contents in the same order as either corresponding ALT allele.
 
-Each $<$CNV:TR$>$ allele consistents of $RN$ repeat sequences each containing $RUC$ repeat units with sequence $RUS$.
+Each $<$CNV:TR$>$ allele consists of $RN$ repeat sequences each containing $RUC$ repeat units with sequence $RUS$.
 
 For example, if a $<$CNV:TR$>$ allele sequence is $(CAG)_{10}(TG)_{7}(CAGG)_{3}$, the RN for that ALT allele would be 3, the RUS $CAG,TG,CAGG$, the RUL $3,2,4$, the RUC $10,7,3$ and the RB $30,14,12$.
 
