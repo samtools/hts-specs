@@ -494,7 +494,7 @@ This is followed by either plus or minus indicating the strand the modification 
 
 Following the base modification codes is a recommended but optional `{\tt .}' or `{\tt ?}' describing how skipped seq bases of the stated base type should be interpreted by downstream tools.
 When this flag is `{\tt ?}' there is no information about the modification status of the skipped bases provided.
-When this flag is not present, or it is `{\tt .}', these bases should be assumed to have low probability of modification.\footnote{The decision whether a base is assumed to be unmodified or has a probability explicitly provided is up to the modification calling program. Some programs will elide calls with modification probabilites below a threshold to provide a more compact modification tag.}
+When this flag is not present, or it is `{\tt .}', these bases should be assumed to have low probability of modification.\footnote{The decision whether a base is assumed to be unmodified or has a probability explicitly provided is up to the modification calling program. Some programs will elide calls with modification probabilities below a threshold to provide a more compact modification tag.}
 
 This is then followed by a comma separated list of how many seq bases of the stated base type to skip, stored as a delta to the last and starting with 0 as the first (or next) base, starting from the uncomplemented 5' end of the {\sf SEQ} field.
 This number series is comparable to the numbers in an {\tt MD} tag,
