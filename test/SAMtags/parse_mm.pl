@@ -73,7 +73,7 @@ while (<>) {
 
 	my $i = 0; # I^{th} bosition in sequence
 	foreach my $delta (split(",", $pos)) {
-	    # Skip $delta occurences of $base
+	    # Skip $delta occurrences of $base
 	    do {
 		$delta-- if ($base eq "N" || $base eq $seq[$i]);
 		$i++;

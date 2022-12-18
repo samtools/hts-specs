@@ -2,7 +2,7 @@ Mm and Ml auxiliary tags
 ========================
 
 The purpose of these test files is to test parsing of the Mm and Ml
-tags.  These succint Mm and Ml tags are present in the .sam files,
+tags.  These succinct Mm and Ml tags are present in the .sam files,
 with a more human readable expanded form in the .txt files.
 Developers should check whether their implementation is able to
 convert between the two forms.

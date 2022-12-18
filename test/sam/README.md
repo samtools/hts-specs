@@ -234,7 +234,7 @@ CIGAR
 - Reads entirely consisting of insertions (no bases on ref)
   - At pos 1; every base is prior to start of ref
 - Neighbouring matching ops, eg 1D1D, 10M10M
-- (Cicular genomes?  needs more work.)
+- (Circular genomes?  needs more work.)
 - Very large CIGAR strings (BAM has a 64K limit so tools that parse
   SAM into in-memory BAM may fail).
 
@@ -403,7 +403,7 @@ Aux
   - General syntax
   - Other types (including case change variants of above; I, z, etc)
   - Aux tag not 2 chars
-  - Aux tag occuring multiple times
+  - Aux tag occurring multiple times
 
 
 Todo
