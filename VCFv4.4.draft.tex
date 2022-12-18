@@ -1789,8 +1789,18 @@ Note the following:
 \end{itemize}
 
 In some cases, it is desirable to report the full repeat sequence of all alleles at a given repeat locus in a single VCF records.
-There are no restrictions on doing so and in the above example, instead of reporting $precise_alt1$ and $precise_alt2$, the variants can be represented directly in a single record with a $REF$ of $CAGCAGCAGCAGCAGCAGCAGCAGCAGCAG$ and an $ALT$ of $CAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAG$,$CAGCAGCAGCAGCAGCACAGCAGCAGCAG$.
-
+There are no restrictions on doing so and in the above example, instead of reporting $precise\_alt1$ and $precise\_alt2$, the variants can be represented directly in a single record with a $REF$ of:
+\scriptsize
+\begin{verbatim}
+CAGCAGCAGCAGCAGCAGCAGCAGCAGCAG
+\end{verbatim}
+\normalsize
+and an $ALT$ of:
+\scriptsize
+\begin{verbatim}
+CAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAG,CAGCAGCAGCAGCAGCACAGCAGCAGCAG
+\end{verbatim}
+\normalsize
 
 When the length or number of repeat units in a repeat sequence cannot be determined precisely, CIRB and/or CIRUC can be used to define the bounds.
 For example, if the total number of $CAG$ repeats at the above locus was at least 50 ($(CAG)_{50-}$) and the mostly likely number of repeats was 65, then the $<$CNV:TR$>$ could be encoded as follows:
