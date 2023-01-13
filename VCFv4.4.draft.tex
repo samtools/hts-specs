@@ -1701,6 +1701,11 @@ Example records are given below:
 \end{flushleft}
 \normalsize
 
+\subsection{Selective genotype fields in many-sample VCF}
+In VCF data representing SNPs and small indels jointly discovered and genotyped across a population, typically the vast majority of genotype fields are homozygous for the reference allele (0/0). When these GT entries are accompanied by the full array of quality-control FORMAT fields supporting variant genotypes (e.g. AD, SB, PL), the resulting file size may grow disproportionately to the practical utility of these fields.
+
+To ameliorate this, joint variant calling tools may opt to order FORMAT fields so that most of them can be omitted in most entries (invoking the previous clause, ``Trailing [FORMAT] fields can be dropped, with the exception of the GT field''). For example, the FORMAT fields might be ordered {\tt GT:DP:AD:SB:PL} so that entries lacking significant evidence of variation may write GT and DP only (e.g. {\tt 0/0:32}). DP might furthermore be binned in some way, to improve compressibility. Tools consuming many-sample VCF files should accommodate this convention.
+
 \pagebreak
 \subsection{Representing tandem repeats}
 \label{tandem-repeats}
