@@ -992,7 +992,7 @@ See section \ref{tandem-repeats} for an example and further details.
 \end{verbatim}
 \normalsize
 CN specifies the total copy number over the region defined in the $<$CNV$>$, $<$DEL$>$, $<$DUP$>$ alleles.
-When CN is present, all $<$CNV$>$, $<$DEL$>$ and $<$DUP$>$ alleles must have the same SVLEN.
+When FORMAT CN is present, all $<$CNV$>$, $<$DEL$>$ and $<$DUP$>$ alleles must have the same SVLEN.
 CNQ, CNL, and CNP are analogous to GQ/GL/GP fields.
 CNQ is encoded as a phred quality $-10log_{10}$ p(copy number genotype call is wrong).
 CNL specifies a list of $log_{10}$ likelihoods for each potential copy number, starting from zero.
@@ -1714,9 +1714,11 @@ Example records are given below:
 To encode copy number variation, VCF uses $<$CNV$>$, $<$DEL$>$ and $<$DUP$>$ symbolic structural variant alleles, CN INFO and FORMAT fields.
 
 Allele specific copy number is specified through a $<$CNV$>$ ALT allele for each distinct allelic copy number.
+INFO CN defines the allele specific copy number with FORMAT CN defining the overall copy number for that sample.
 POS and INFO SVLEN specify the genomic interval over which the copy number is defined.
+$<$DEL$>$ and $<$DUP$>$ copy number (SVCLAIM=D) alleles should be treated as $<$CNV$>$ alleles that implicitly define INFO CN=0 and INFO CICN=2,. respectively.
 As with all symbolic structural variants, the starting position of the interval is the base immediately after POS.
-For example, a region on chr1 from position 101 to 300 (both inclusive) with allele-specific copy numbers of 1 and 2 can be represented as follows:
+For example, a region on chr1 from position 101 to 130 (both inclusive) with allele-specific copy numbers of 1 and 2 can be represented as follows:
 
 \footnotesize
 \begin{verbatim}
@@ -1725,14 +1727,15 @@ For example, a region on chr1 from position 101 to 300 (both inclusive) with all
 \normalsize
 
 All $<$CNV$>$ alleles in the same VCF record should have the same SVLEN.
-To eliminate ambiguity in variant interpretation when GT=0, all copy number haplotypes should be explicitly specified with $<$CNV$>$ alleles, even when copy number is 1.
+To eliminate genotype ambiguity, copy number ALT alleles should not be mixed with other ALT alleles.
+When only copy number ALT alleles are present in a VCF record, GT=0 is equivalent to a $<$CNV$>$ ALT allele with INFO CN of 1 and should be treated identically.
 
 If only total copy number is known, the copy number of the segment should be defined with a single $<$CNV$>$ ALT allele with a missing INFO CN field.
 In the above example this corresponds to the following:
 
 \footnotesize
 \begin{verbatim}
-	chr1 100 . T <CNV> . . END=130;SVLEN=30 GT:CN ./.:3
+	chr1 100 . T <CNV> . . END=130;SVLEN=30 GT:CN .:3
 \end{verbatim}
 \normalsize
 
