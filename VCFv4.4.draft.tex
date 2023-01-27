@@ -135,7 +135,7 @@ It is recommended in VCF and required in BCF that the header includes tags descr
 These tags are based on the SQ field from the SAM spec; all tags are optional (see the VCF example above).
 
 To aid human readability, the order of fields should be ID, Number, Type, Description, then any optional fields.
-Implementation must not rely on the order of the fields within structured lines and are not required to preserve field ordering.
+Implementations must not rely on the order of the fields within structured lines and are not required to preserve field ordering.
 
 Meta-information lines are optional, but if they are present then they must be completely well-formed.
 Other than \verb|##fileformat|, they may appear in any order.
@@ -153,7 +153,7 @@ For VCF version 4.4, this line is:
 
 
 \subsubsection{Information field format}
-INFO meta-information lines are structured lines with require fields of ID, Number, Type, and Description, and Source and Version recommended optional fields:
+INFO meta-information lines are structured lines with required fields ID, Number, Type, and Description, and recommended optional fields Source and Version:
 
 \begin{verbatim}
 ##INFO=<ID=ID,Number=number,Type=type,Description="description",Source="source",Version="version">
@@ -180,14 +180,14 @@ Double-quote character must be escaped with backslash $\backslash$ and backslash
 Source and Version values likewise must be surrounded by double-quotes and specify the annotation source (case-insensitive, e.g.\ \verb|"dbsnp"|) and exact version (e.g.\ \verb|"138"|), respectively for computational use.
 
 \subsubsection{Filter field format}
-FILTER meta-information lines are structured lines with require fields of ID and Description that define the possible content of the FILTER column in the VCF records:
+FILTER meta-information lines are structured lines with required fields ID and Description that define the possible content of the FILTER column in the VCF records:
 
 \begin{verbatim}
 ##FILTER=<ID=ID,Description="description">
 \end{verbatim}
 
 \subsubsection{Individual format field format}
-FORMAT meta-information lines are structured lines with require fields of ID, Number, Type, and Description that define the possible content of the per-sample/genotype columns in the VCF records:
+FORMAT meta-information lines are structured lines with required fields ID, Number, Type, and Description that define the possible content of the per-sample/genotype columns in the VCF records:
 
 \begin{verbatim}
 ##FORMAT=<ID=ID,Number=number,Type=type,Description="description">
@@ -249,7 +249,7 @@ The URL field specifies the location of a fasta file containing breakpoint assem
 \subsubsection{Contig field format}
 \label{sec-contig-field}
 It is recommended for VCF, and required for BCF, that the header includes tags describing the contigs referred to in the file.
-The structured \texttt{contig} field must include the ID attribute and can includes additional optional attributes with
+The structured \texttt{contig} field must include the ID attribute and can include additional optional attributes with
 the following ones reserved:
 \begin{itemize}
   \item length: the length of the sequence
@@ -264,7 +264,7 @@ the following ones reserved:
 For example:
 {\scriptsize
 \begin{verbatim}
-##contig=<ID=ctg1,length=81195210,URL=ftp://somewhere.org/assembly.fa,md5=f126cdf8a6e0c7f379d618ff66beb2da,...>
+##contig=<ID=ctg1,length=81195210,URL=ftp://somewhere.example/assembly.fa,md5=f126cdf8a6e0c7f379d618ff66beb2da,...>
 \end{verbatim}
 }
 \noindent
@@ -353,9 +353,9 @@ Fixed fields are:
   \item REF --- reference base(s): Each base must be one of A,C,G,T,N (case insensitive).
   Multiple bases are permitted.
   The value in the POS field refers to the position of the first base in the String.
-  For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the variant (which must be reflected in the POS field), unless the variant occurs at position 1 on the contig in which case it must include the base after the variant; \pagebreak[1] this padding base is not required (although it is permitted) for e.g.\ complex substitutions or other variants where all alleles have at least one base represented in their Strings.
+  For simple insertions and deletions in which either the REF or one of the ALT alleles would otherwise be null/empty, the REF and ALT Strings must include the base before the variant (which must be reflected in the POS field), unless the variant occurs at position 1 on the contig in which case it must include the base after the variant; this padding base is not required (although it is permitted) e.g. for complex substitutions or other variants where all alleles have at least one base represented in their Strings.
   If any of the ALT alleles is a symbolic allele (an angle-bracketed ID String ``$<$ID$>$'') then the padding base is required and POS denotes the coordinate of the base preceding the polymorphism.
-  The exception to this is the $<$*$>$ symbolic alleles for which the reference call interval includes the POS base.
+  The exception to this is the $<$*$>$ symbolic allele for which the reference call interval includes the POS base.
   Tools processing VCF files are not required to preserve case in the REF allele Strings. (String, Required).
 
   If the reference sequence contains IUPAC ambiguity codes not allowed by this specification (such as R = A/G), the ambiguous reference base must be reduced to a concrete base by using the one that is first alphabetically (thus R as a reference base is converted to A in VCF.)
@@ -628,7 +628,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
     chr1 & $30$ & G & T & . & GT:PSL:PSO & \tt{/0/0|0|1:.,chr1*10*1:.,.,2,5} \\
   \end{tabular}
   
-  Without defining PSO, would be ambiguous as to which copy of the duplicated region the SNVs occur on.
+  Without defining PSO, it would be ambiguous as to which copy of the duplicated region the SNVs occur on.
   In this example, the presence of the PSO field clarifies that the SNVs are cis phased with the duplication, the first SNV occurs on the first copy of the duplicated region, and second SNV on the second copy.
   
   \item PSQ (List of integers): The list of PQs, one for each phase set in PSL (encoded like PQ). 
@@ -701,7 +701,7 @@ $<$*$>$ symbolic allele: the last reference call position.
 
 END must be present for all records containing the $<$*$>$ symbolic allele and, for backwards compatibility, should be present for records containing any symbolic structural variant alleles.
 
-To prevent loss of information, any VCF record containing the $<$*$>$ symbolic allele, must have END set to the last reference call position of the $<$*$>$ symbolic allele.
+To prevent loss of information, any VCF record containing the $<$*$>$ symbolic allele must have END set to the last reference call position of the $<$*$>$ symbolic allele.
 When a record contains both the $<$*$>$ symbolic allele, the END position of the longest allele should be used as the record end position for indexing purposes.
   
 \footnotesize
@@ -725,7 +725,7 @@ One value for each ALT allele.
 SVLEN must be specified for symbolic structural variant alleles.
 SVLEN is defined for $INS$, $DUP$, $INV$, and $DEL$ symbolic alleles as the number of the inserted, duplicated, inverted, and deleted bases respectively.
 SVLEN is defined for $CNV$ symbolic alleles as the length of the segment over which the copy number variant is defined.
-The missing value $.$ should be used for all other ALT allele, including ALT alleles using breakend notation.
+The missing value $.$ should be used for all other ALT alleles, including ALT alleles using breakend notation.
 
 For backwards compatibility, a missing SVLEN should be inferred from the $END$ field of VCF records whose $ALT$ field contains a single symbolic allele.
 
@@ -797,7 +797,7 @@ $MEINFO$ consists of successive quadruplets of records for each ALT allele.
 \normalsize
 
 If present, the number of entries must be four (4) times the number of ALT alleles.
-$MEINFO$ consists of successive quadruplets of records for each ALT allele.
+$METRANS$ consists of successive quadruplets of records for each ALT allele.
 
 \footnotesize
 \begin{verbatim}
@@ -929,9 +929,9 @@ See section \ref{tandem-repeats} for further details.
 Used by $<$CNV:TR$>$ tandem repeat alleles to encode information about the nature of the tandem repeats contained for ALT alleles.
 Conceptually, these fields each contain a list of values for each ALT allele.
 The length of these inner lists are determined by the RN field for that ALT allele and the length must match the sum of RN for the record.
-These fields contain the flattened and concatentated list contents in the same order as either corresponding ALT allele.
+These fields contain the flattened and concatenated list contents in the same order as either corresponding ALT allele.
 
-Each $<$CNV:TR$>$ allele consistents of $RN$ repeat sequences each containing $RUC$ repeat units with sequence $RUS$.
+Each $<$CNV:TR$>$ allele consists of $RN$ repeat sequences each containing $RUC$ repeat units with sequence $RUS$.
 
 For example, if a $<$CNV:TR$>$ allele sequence is $(CAG)_{10}(TG)_{7}(CAGG)_{3}$, the RN for that ALT allele would be 3, the RUS $CAG,TG,CAGG$, the RUL $3,2,4$, the RUC $10,7,3$ and the RB $30,14,12$.
 
@@ -971,7 +971,7 @@ This field encodes the length of each repeat unit for situations where the lengt
 If this field is present, RUC must also be present and must contain only integer values.
 This field uses the same list-of-list encoding as RUS/RUL/RUC/RB but contains a list for each RC entry, the length of which is determined by the corresponding integer RUC value.
 This field contains the length of each individual repeat unit for each RUC entry.
-If RUB is missing or not specified, The $RUB$ for each individual repeat unit is considered to be equal to the $RUL$ for the corresponding repeat sequence.
+If RUB is missing or not specified, the $RUB$ for each individual repeat unit is considered to be equal to the $RUL$ for the corresponding repeat sequence.
 
 For the vast majority of tandem repeats, this field can be omitted and is only required in complex situations such as when a VNTR contains one or more variable length STRs.
 
@@ -1752,11 +1752,11 @@ As a result, specialised techniques have been developed to estimate the length a
 Many of these techniques result in imprecise variant calls which cannot be unambiguously represented with non-symbolic alleles.
 To accommodate such variant calls, a the $<$CNV:TR$>$ symbolic allele can be used.
 
-In general, tandem repeats can be represented in one or both of two complementary representation.
+In general, tandem repeats can be represented in one or both of two complementary representations.
 When the exact sequence is known, the variant can be represented as a non-symbolic ALT allele.
 The variant can be represented either as a single VCF record containing the entire sequence in the ALT field, or over multiple phased records.
-When the exact sequence is not known, or when reporting tandem repeat 'summary' information, the variant can be represented as a $<$CNV:TR$>$ copy number variants with the RN, RS, RL, RB, RC and RUL INFO fields encoding the nature of the repeat expansion/contraction.
-The allele sequence of a $<$CNV:TR$>$ record consists of the one or more repeat sequences each of which consist of a single repeat unit repeated one or more times.
+When the exact sequence is not known, or when reporting tandem repeat 'summary' information, the variant can be represented as $<$CNV:TR$>$ copy number variants with the RN, RS, RL, RB, RC and RUL INFO fields encoding the nature of the repeat expansion/contraction.
+The allele sequence of a $<$CNV:TR$>$ record consists of the one or more repeat sequences, each of which consist of a single repeat unit repeated one or more times.
 That is, $<$CNV:TR$>$ records can encode multiple different repeat motifs in a single allele but do not support "nested" repeats.
 
 Figure 11 outlines the field encoding for a STR locus with alleles of sequence $CAGCAGCAGTTGTTG$ ($(CAG)_{4}(TTG)_{2}$), and $CACACA$ ($(CA)_{3}$).
@@ -1812,9 +1812,9 @@ Note the following:
     It is not the length of the $<$CNV:TR$>$ allele.
     \item The SVLEN of the $<$CNV:TR$>$ allele of a novel (with respect to the reference) tandem repeat should be 1.
     \item The POS of the $<$CNV:TR$>$ allele of a novel (with respect to the reference) tandem repeat should be the base immediately preceding the inserted tandem repeat sequence.
-    \item Both a $<$CNV:TR$>$ and one or more non-symoblic records encoding the tandem repeat can be present.
-    \item $<$CNV:TR$>$ and the non-symoblic records encoding the tandem repeat should be phased if possible.
-    \item When both $<$CNV:TR$>$ and the equivalent non-symoblic records are present, the $<$CNV:TR$>$ should approximately encode the sequence but is not required to encode the sequence exactly.
+    \item Both a $<$CNV:TR$>$ and one or more non-symbolic records encoding the tandem repeat can be present.
+    \item $<$CNV:TR$>$ and the non-symbolic records encoding the tandem repeat should be phased if possible.
+    \item When both $<$CNV:TR$>$ and the equivalent non-symbolic records are present, the $<$CNV:TR$>$ should approximately encode the sequence but is not required to encode the sequence exactly.
 	For example, SNVs and indels may be omitted in the $<$CNV:TR$>$ record.
     \item Variant callers which do not report allele-specific tandem repeats should use a single $<$CNV:TR$>$ ALT allele and the missing genotype for the GT field (for example, $./.$ if diploid).
     \item The INFO and FORMAT CN fields should be present for $<$CNV:TR$>$ records (as they are $<$CNV$>$ records) and, when present, must correspond to the sample allelic length divided by the reference allelic length.
@@ -1825,14 +1825,24 @@ Note the following:
     \item STRs should use RUS, whereas VNTRs should use RUL to ensure the VCF records are not excessively large.
     \item RUL should be omitted when RUS is present (as it is redundant when RS is present).
     \item RUS or RUL must be specified for each $<$CNV:TR$>$.
-    \item support for multiple levels of repeat nesting (such as STRs within VNTRs) is limited to the RUL repeat unit length field which allows the overall length of each top-level repeat unit to be encoded.
+    \item Support for multiple levels of repeat nesting (such as STRs within VNTRs) is limited to the RUL repeat unit length field which allows the overall length of each top-level repeat unit to be encoded.
     \item The POS and END of $<$CNV:TR$>$ records should match the STR/VNTR reference catalog sizes for catalog-based callers.
     \item Variant normalisation has limited utility in regions of low complexity as almost identical haplotypes can have very different normalised representations.
 \end{itemize}
 
 In some cases, it is desirable to report the full repeat sequence of all alleles at a given repeat locus in a single VCF records.
-There are no restrictions on doing so and in the above example, instead of reporting $precise_alt1$ and $precise_alt2$, the variants can be represented directly in a single record with a $REF$ of $CAGCAGCAGCAGCAGCAGCAGCAGCAGCAG$ and an $ALT$ of $CAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAG$,$CAGCAGCAGCAGCAGCACAGCAGCAGCAG$.
-
+There are no restrictions on doing so and in the above example, instead of reporting $precise\_alt1$ and $precise\_alt2$, the variants can be represented directly in a single record with a $REF$ of:
+\scriptsize
+\begin{verbatim}
+CAGCAGCAGCAGCAGCAGCAGCAGCAGCAG
+\end{verbatim}
+\normalsize
+and an $ALT$ of:
+\scriptsize
+\begin{verbatim}
+CAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAG,CAGCAGCAGCAGCAGCACAGCAGCAGCAG
+\end{verbatim}
+\normalsize
 
 When the length or number of repeat units in a repeat sequence cannot be determined precisely, CIRB and/or CIRUC can be used to define the bounds.
 For example, if the total number of $CAG$ repeats at the above locus was at least 50 ($(CAG)_{50-}$) and the mostly likely number of repeats was 65, then the $<$CNV:TR$>$ could be encoded as follows:
@@ -1847,11 +1857,11 @@ Note that:
 \begin{itemize}
 	\item RN was omitted as it is only required if at least one $<$CNV:TR$>$ allele has RN greater than 1.
 	\item The confidence interval bounds are relative to the nominal value.
-	\item A missing upper bouns indicates the maximum length is not known.
+	\item A missing upper bound indicates the maximum length is not known.
 \end{itemize}
 
 Exactly representing nested repeats results in the loss of some repeat information when representing with a $<$CNV:TR$>$ record.
-For repeats such as $((ACCGGC)_{4}(ACCAGT))_{3-5}$, summarising the repeat structure in a $<$CNV:TR$>$ record requires either unrolling the inner repeats, or treating each outer repeat as a separate repeat sequence (the full repeat structure can be stroed in a caller-specific non-standard INFO field).
+For repeats such as $((ACCGGC)_{4}(ACCAGT))_{3-5}$, summarising the repeat structure in a $<$CNV:TR$>$ record requires either unrolling the inner repeats, or treating each outer repeat as a separate repeat sequence (the full repeat structure can be stored in a caller-specific non-standard INFO field).
 For many VNTRs, the critical information to retain is the length of each repeat unit.
 This length information can be encoded in the RUB field.
 For example, a 10,000bp VNTRs domain repeated 5 times, each repeat 500bp longer than the previous can be encoded as follows:
@@ -2006,7 +2016,7 @@ l\_indiv  & uint32\_t & Data length of FORMAT and individual genotype fields \\ 
 CHROM     & int32\_t  & Given as an offset into the mandatory contig dictionary \\ \hline
 POS       & int32\_t  & 0-based leftmost coordinate \\ \hline
 rlen      & int32\_t  & Length of the record as projected onto the reference sequence.
-                        Must be the maxmimum of the length of the REF allele and the length
+                        Must be the maximum of the length of the REF allele and the lengths
                         inferred from the SVLEN/END of any symbolic alleles \\ \hline
 QUAL      & float     & Variant quality; 0x7F800001 for a missing value \\ \hline
 n\_info   & uint16\_t & The number of INFO fields in this record \\ \hline
