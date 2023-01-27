@@ -2553,6 +2553,8 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 
 \begin{itemize}
 \item Added tandem repeat support ($<$CNV:TR$>$, RN, RUS, RUL, RB, CIRB, RUC, CIRUC, RUB)
+\item Redefined INFO CN as allele-specific copy number and FORMAT CN as total copy number.
+\item Redefined INFO and FORMAT CN to support non-integer copy numbers.
 \item Added support for phasing and derivate chromosome reconstruction in the presence of SVs (PSL, PSO, PSQ)
 \item Added SVCLAIM to disambiguate copy number based $<$DEL$>$ and $<$DUP$>$ variants from breakpoint based ones.
 \item Conceptually separated variant detection and interpretation.
@@ -2560,7 +2562,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \item Added polyploid partial phasing support (e.g. GT $|0|0/1/2$). GT now defined as a prefix notation with the first phasing indicator optional.
 \item Redefined $Number=$ for SVLEN, CIPOS, CIEND, HOMLEN, HOMSEQ, BKPTID, MEINFO, METRANS, DGVID, DBVARID, DBRIPID, MATEID, PARID, EVENT, CN, CICN to support multiple symbolic alleles.
 \item Redefined END as the end position of the longest ALT allele. Note that END remains $Number=1$.
-\item Redefined SVLEN to always be positive.
+\item Redefined SVLEN to always be positive and be meaningful for INV variants.
 \item Redefined SVLEN, END and BCF rlen to support both $<*>$ and symbolic structural variant alleles in the same record.
 \item Number, Type and Description required only for INFO meta-information lines
 \item Clarified CIPOS should be used to define micro-homology bounds
