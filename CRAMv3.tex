@@ -960,6 +960,22 @@ reference (reference sequence id $>= 0$).  For multi-reference slices
 or those with unmapped data, it is recommended to fill these fields
 with value 0.
 
+MD5sums should not be validated if the stored checksum is all-zero.
+Embedded references should follow the same capitalisation and
+alphabetical rules as applied to external references prior to MD5sum
+calculations. If an embedded reference is used, it is not a
+requirement that it exactly matches the reference used for sequence
+alignments.  For example, it may contain ``N'' bases where coverage is
+absent or it could have different base calls for SNP variants.  Hence
+when embedded sequences are used, the MD5sum refers to the checksum of
+the embedded sequence and should not be validated against any external
+reference files.
+
+Note where an embedded reference differs to the original reference
+used for alignment, the MD and NM tags may need to be stored verbatim
+for records where the respective embedded and external reference
+substrings differ.
+
 The optional tags are encoded in the same manner as BAM tags.  I.e. a
 series of binary encoded tags concatenated together where each tag
 consists of a 2 byte key (matching [A-Za-z][A-Za-z0-9]) followed by a
