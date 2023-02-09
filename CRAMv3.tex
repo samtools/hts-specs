@@ -1322,6 +1322,17 @@ The sequence data itself is in one of two encoding formats depending on whether 
 \EndProcedure
 \end{algorithmic}
 
+This pseudocode is not meant to be a fully implementable programming
+language, but to act as an algorithmic guide to the order and
+structure of CRAM decoding.
+
+The \textsc{ReadItem} function referred above takes two arguments; the
+data series name and the data type used by the Encoding.  It will use
+the codec specified in the Container Compression Header to retrieve
+the next value from that data series.  Note there is only one
+permitted data type per data series, so the second argument is
+redundant and is included only as an aide-m\'emoire.
+
 \subsection{\textbf{CRAM positional data}}
 \label{subsec:positions}
 
