@@ -34,7 +34,8 @@ jobs:
         uses: ./.github/actions/texlive
         if:   ${{ env.changed }}
         with:
-          run: make ${{ env.pdfs }} && make -k OLD=$mergebase_sha NEW=HEAD ${{ env.diffs }}
+          run1: make ${{ env.pdfs }}
+          run2: -make -k OLD=$mergebase_sha NEW=HEAD ${{ env.diffs }}
 
       - uses: actions/upload-artifact@v3
         with:

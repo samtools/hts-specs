@@ -11,7 +11,13 @@ git config --global --add safe.directory "$GITHUB_WORKSPACE" || exit
 
 for cmd
 do
+    mode=
+    case "$cmd" in
+    -*) mode=" (ignoring errors)"
+        cmd="${cmd#-}"
+    esac
+
     echo
-    echo "[command]$cmd"
-    eval "$cmd" || exit
+    echo "[command]$cmd$mode"
+    eval "$cmd" || test -n "$mode" || exit
 done

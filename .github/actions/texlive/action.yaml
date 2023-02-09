@@ -2,13 +2,16 @@ name: texlive
 description: Run commands in a TeXLive docker image
 
 inputs:
-  run:
-    description: Commands to be executed
+  run1:
+    description: Commands to be executed first
     required: true
+  run2:
+    description: Commands to be executed second
 
 runs:
   using: docker
   image: docker://texlive/texlive:latest
   entrypoint: .github/actions/texlive/run.sh
   args:
-    - ${{ inputs.run }}
+    - ${{ inputs.run1 }}
+    - ${{ inputs.run2 }}
