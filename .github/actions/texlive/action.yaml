@@ -9,7 +9,6 @@ inputs:
 runs:
   using: docker
   image: docker://texlive/texlive:latest
-  entrypoint: /bin/sh
+  entrypoint: .github/actions/texlive/run.sh
   args:
-    - -c
     - ${{ inputs.run }}
