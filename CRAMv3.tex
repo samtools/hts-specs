@@ -1629,55 +1629,95 @@ Hard clip & H (0x48) & int & HC & number of hard clipped bases, SAM operator H\t
 \hline
 \end{tabular}
 
+Note for compatibility with BAM, all base comparisons should be done
+in a case-insensitive manner, and all bases written to SC, IN and BA
+data series should be in upper-case.
+
 \subsubsection*{Base substitution codes (BS data series)}
 
-A base substitution is defined as a change from one nucleotide base (reference base) to
-another (read base), including N as an unknown or missing base. There are 5 possible reference
-bases (ACGTN), with 4 possible substitutions for each base, and 20 substitutions in total.
-The codes for all possible substitutions are stored in a substitution matrix. To restore a
-base, one would use the reference base and the substitution code, resolving the base via lookup
-in the substitution matrix.
+A base substitution is defined as a change from one nucleotide base
+(reference base) to another (read base), including N as an unknown or
+missing base. There are 5 supported reference bases (ACGTN), with 4
+possible substitutions for each base.  Any other base type, such as an
+ambiguity code, must be written verbatim using the BA data series.
+
+The codes for all possible substitutions are stored in a
+two-dimensional substitution matrix, indexed by reference base
+(A,C,G,T,N) and BS code (0--3), with each matrix element holding the
+modified base.
 
 \subsubsection*{Substitution Matrix Format}
 
-Each of the 4 possible substitutions for a given reference base is assigned a 2-bit integer
-code (see below) with a value ranging from 0 to 3 inclusive. The 4 2-bit codes are packed
-into a single byte, high 2-bits first, for each base ACGTN (minus the reference base itself).
-The entire substitution matrix is written as 5 such bytes, one for each reference base, also
-in the order ACGTN.
+There are 5 possible base types supported by the BS data series, A, C,
+G, T and N.  Hence for any reference base there are 4 possible
+substitutions.  Each of these substitution possibilities are numbered
+0 to 3, in the order shown above (omitting the reference base type).
+Therefore the full list of substitution codes for a specific reference
+base is 4 2-bit numbers (0--3) in the order shown above, minus the
+reference base itself.  These are packed into a single byte with the
+high 2-bits first.
+
+For example for reference base C we would record the BS numerical
+values for substituting C with A, G, T and N respectively.  If we wish
+A=1, G=0, T=2 and N=3 then we would store binary 01 00 10 11, or hex 0x4B.
+
+The full substitution matrix is 5 bytes, each storing the 4 BS codes
+for reference base A, C, G, T and N respectively.
+
+A complete matrix that maps C/G together and A/T together may look like this:
+
+\begin{tabular}{l|lllll}
+& \multicolumn{4}{c}{\textbf{Seq. base}}\\
+\textbf{Ref. base} & \textbf{A} & \textbf{C} & \textbf{G} & \textbf{T} & \textbf{N} \\
+\hline
+A & - & 1 & 2 & 0 & 3 \\
+C & 1 & - & 0 & 2 & 3 \\
+G & 2 & 0 & - & 1 & 3 \\
+T & 0 & 2 & 1 & - & 3 \\
+N & 0 & 1 & 2 & 3 & - \\
+\end{tabular}
+
+\vskip10pt
+This would be encoded as
+
+\begin{tabular}{llllll}
+binary & \texttt{01 10 00 11}, & \texttt{01 00 10 11}, & \texttt{10 00 01 11},  & \texttt{00 10 01 11}, & \texttt{00 01 10 11}\\
+or hex & \texttt{0x63}, & \texttt{0x4b},& \texttt{0x87}, & \texttt{0x27} &\texttt{0x1b}.\\
+\end{tabular}
+
+\vskip10pt
+
+To decode, we would use the following lookup table, showing the same data as above with codes sorted into 0, 1, 2, 3 order.
+
+\begin{tabular}{l|llll}
+& \multicolumn{4}{c}{\textbf{BS Code}}\\
+\textbf{Ref. base} & \textbf{0} & \textbf{1} & \textbf{2} & \textbf{3} \\
+\hline
+A & T & C & G & N\\
+C & G & A & T & N\\
+G & C & T & A & N\\
+T & A & G & C & N\\
+N & A & C & G & T
+\end{tabular}
+
 
 \subsubsection*{Substitution Code Assignment}
 
-To assign the susbtitution code for a given reference base/read base, the substitutions for
-each reference base may optionally be sorted by their frequencies, in descending order, with
-same-frequency ties broken using the fixed order ACGTN. Although sorting by substitution
-frequency is not required by the CRAM format, assigning substitution codes based on frequency
-maximizes compression by ensuring that the most frequent substitutions use the shortest possible
-codes.
+There is no strict requirement on using a specific substitution
+matrix, nor that it be optimal.  However one strategy may be to ensure
+the most common substitution is always given code 0, the next most
+common is code 1, and so on.  This means the distribution of BS values
+will be skewed towards lower values, which helps improve compression
+over more uniformly distributed frequencies.
 
 For example, let us assume the following substitution frequencies for base A: 
 
-AC: 15\%
-
-AG: 25\%
-
-AT: 55\%
-
+AC: 15\%\\
+AG: 25\%\\
+AT: 55\%\\
 AN: 5\%
 
-Then the substitution codes are: 
-
-AC: 2
-
-AG: 1
-
-AT: 0
-
-AN: 3
-
-The first byte of the substitution matrix entry for reference base A is written as a single byte,
-with the codes in the order CGTN: 10 01 00 11 = 147 decimal, or 0x93 in this case. This will then
-be followed by 4 more bytes representing substitutions for reference bases C, G, T and N.
+Then the substitution codes are T=0, G=1, C=2, N=3.
 
 \subsubsection*{Decode mapped read pseudocode}
 
