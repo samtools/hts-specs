@@ -103,8 +103,6 @@ The policies and processes used to perform user authentication and authorization
 ## Checksum calculation
 The recommended checksum algorithms are `MD5` (a 32 character HEX string) and a SHA-512 based system called `ga4gh` (a base64 URL-safe string, see later for details). Servers MUST support sequence retrieval by one or more of these algorithms, and are encouraged to support all to maximize interoperability. An older algorithm called `TRUNC512` existed in version 1.0.0 of refget but is now deprecated in favour of the GA4GH sequence checksum string. It is possible to translate between the `ga4gh` and `TRUNC512` systems however `TRUNC512` usage SHOULD be discouraged.
 
-To provide CRAM Reference Registry compatibility an implementation must support MD5.
-
 When calculating the checksum for a sequence, all non-base symbols (\n, spaces, etc) must be removed and then uppercase the rest. The allowed alphabet for checksum calculation is uppercase ASCII (`0x41`-`0x5A` or `A-Z`).
 
 Resulting hexadecimal checksum strings shall be considered case insensitive. 0xa is equivalent to 0xA.
@@ -114,11 +112,16 @@ The refget checksum algorithm is called `ga4gh`. It is based and derived from wo
 
 - SHA-512 digest of a sanitised sequence
 - A base64 url encoding of the first 24 bytes of that digest
-- The addition of `ga4gh:SQ.` to the string
+- The addition of `SQ.` to the string
 
 Services may also implement the older `TRUNC512` representation of a truncated SHA-512 digest and is compatible with the above `ga4gh` string. See later in this specification for implementation details of the TRUNC512 algorithm and conversion between `ga4gh` and `TRUNC512`.
 
-A `ga4gh` digest of `ACGT` MUST result in the string `ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2`.
+A `ga4gh` digest of `ACGT` MUST result in the string `SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2`.
+
+## Namespace of the checksums
+
+The requested checksum can optionally be prefixed with a namespace describing the type of algorithm being used.
+For example using md5 `md5:6aef897c3d6ff0c78aff06ac189178dd` and `6aef897c3d6ff0c78aff06ac189178dd` should return the same sequence and using ga4gh `ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2` and `SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2` should also return the same sequence.
 
 ## Unique Identifiers
 Refget optionally allows the use of namespaced identifiers in place of the digest. The identifier prefixed by a namespace to form a CURIE for example:
@@ -299,7 +302,7 @@ GET /sequence/6aef897c3d6ff0c78aff06ac189178dd/metadata
 {
   "metadata" : {
     "md5" : "6aef897c3d6ff0c78aff06ac189178dd",
-    "ga4gh": "ga4gh:SQ.Ya6Rs7DHhDeg7YaOSg1EoNi3U_nQ9SvO",
+    "ga4gh": "SQ.Ya6Rs7DHhDeg7YaOSg1EoNi3U_nQ9SvO",
     "length": 248956422,
     "aliases" : [
       {
@@ -509,7 +512,7 @@ The algorithm performs a SHA-512 digest of a sequence and creates a `base64url` 
 
 ### Checksum Identifier Identification
 
-When a checksum identifier is given to an implementation, it is the server's responsibility to compute what kind of identifier (`MD5`, `ga4gh` or `TRUNC512`) has been given. `MD5` and `TRUNC512` can be deduced based on length; 32 and 48 characters long respectively. `ga4gh` identifiers can be detected by searching for the string `ga4gh:SQ.`. Should refget officially support alternative checksum based identifiers we will describe the mechanisms to resolve their identification in future versions.
+When a checksum identifier is given to an implementation, it is the server's responsibility to compute what kind of identifier (`MD5`, `ga4gh` or `TRUNC512`) has been given. If provided, the namespace prefix should be used to figure it out. Otherwise `MD5` and `TRUNC512` can be deduced based on length; 32 and 48 characters long respectively. `ga4gh` identifiers can be detected by searching for the string `SQ.`. Should refget officially support alternative checksum based identifiers we will describe the mechanisms to resolve their identification in future versions.
 
 ## Possible Future API Enhancements
 
@@ -550,7 +553,7 @@ The specification makes no attempt to enforce a strict naming authority across i
 | `ensembl`  | Ensembl | Used for an identifier assigned by the Ensembl project | Active |
 | `refseq`   | RefSeq | Used for an identifier assigned by the RefSeq group | Active |
 | `trunc512` | Refget | The old checksum algorithm based on SHA-512 used in v1.0.0 of refget | Deprecated |
-| `ga4gh`    | Refget | ga4gh identifier, which are prefixed by the term `ga4gh:SQ.`. This is the preferred naming | Active |
+| `ga4gh`    | Refget | ga4gh identifier, which are prefixed by the term `SQ.`. This is the preferred naming | Active |
 | `vmc`      | VMC | Used for when an identifier is a VMC compatible digest | Deprecated |
 
 ## Appendix 2 - Changes
@@ -560,6 +563,7 @@ The specification makes no attempt to enforce a strict naming authority across i
 - Replace refget's v1 service-info implementation with GA4GH discovery's definition of service-info
 - Move code examples out into a Python notebook and a Perl script
 - Replace TRUNC512 with ga4gh identifier as the default SHA-512 based hash identifier (support still available for TRUNC512)
+- All checksums can be requested namespaced with their algorythm
 - Optional support for namespaced identifiers to resolve sequence and metadata
 - Lower cased recommended naming authority strings
 
