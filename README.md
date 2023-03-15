@@ -69,6 +69,7 @@ Transfer protocols
 [SAMtags.tex]:  http://samtools.github.io/hts-specs/SAMtags.pdf
 [CRAMv2.1.tex]: http://samtools.github.io/hts-specs/CRAMv2.1.pdf
 [CRAMv3.tex]:   http://samtools.github.io/hts-specs/CRAMv3.pdf
+[CRAMcodecs.tex]: http://samtools.github.io/hts-specs/CRAMcodecs.pdf
 [CSIv1.tex]:    http://samtools.github.io/hts-specs/CSIv1.pdf
 [tabix.tex]:    http://samtools.github.io/hts-specs/tabix.pdf
 [VCFv4.1.tex]:  http://samtools.github.io/hts-specs/VCFv4.1.pdf
