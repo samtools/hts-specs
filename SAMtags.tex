@@ -96,6 +96,7 @@ or
   {\tt MI} & Z & Molecular identifier; a string that uniquely identifies the molecule from which the record was derived \\
   {\tt ML} & B,C & Base modification probabilities \\
   {\tt MM} & Z & Base modifications / methylation  \\
+  {\tt MN} & i & Length of sequence at the time {\tt MM} and {\tt ML} were produced \\
   {\tt MQ} & i & Mapping quality of the mate/next segment \\
   {\tt NH} & i & Number of reported alignments that contain the query in the current record \\
   {\tt NM} & i & Edit distance to the reference \\
@@ -625,6 +626,17 @@ In the example used above, the 6th {\tt C} has 80\% chance of being {\tt 5mC}, 1
 {\tt ML} values for ambiguity codes give the probability that the modification is one of the possible codes compatible with that ambiguity code.
 For example {\tt MM:Z:C+C,10; ML:B:C,229} indicates a C call with a probability of 90\% of having some form of unspecified modification.
 
+\item[MN:i:\tagvalue{length}]
+\hfill\\
+The length of the {\sf SEQ} field at the time the {\tt MM} value was last written.
+
+Some processing of aligned data, such as the use of hard-clipping tools, may alter {\sf SEQ} sequence data.
+If the sequence is shortened in this manner then the base offsets in {\tt MM} and {\tt ML} become invalid unless they are also updated accordingly.
+
+Some hard-clipping tools will update {\tt MM}/{\tt ML} but others do not, so the {\tt MN} tag offers a simple sanity check.
+Software that wishes to validate {\tt MM} should compare the length of the {\sf SEQ} field with the contents of the {\tt MN} tag---if they differ, the {\tt MM}~and {\tt ML}~values should be considered out-of-date.
+The tag is optional, but recommended, and if it is absent then there is an implicit assumption that the {\tt MM} data is valid unless evidence implies otherwise (e.g., by having coordinates beyond the end of the sequence).
+
 \end{description}
 
 \section{Draft tags}
@@ -670,6 +682,10 @@ This appendix lists when standard tags were initially defined or significantly c
 
 \setlength{\parindent}{0pt}
 \newcommand*{\gap}{\vspace*{2ex}}
+
+\subsubsection*{September 2024}
+
+Added the MN tag for validating base modification tag consistency.
 
 \subsubsection*{February 2022}
 
