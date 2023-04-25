@@ -551,9 +551,11 @@ The specification makes no attempt to enforce a strict naming authority across i
 | `insdc`    | INSDC | Used for any identifier held in an INSDC resource (GenBank, ENA, DDBJ) | Active |
 | `ucsc`     | UCSC | Used for an identifier assigned by UCSC Genome group | Active |
 | `ensembl`  | Ensembl | Used for an identifier assigned by the Ensembl project | Active |
+| `md5`  | MD5 | Prefix used to describe digests which have gone through the MD5 algorithm | Active |
 | `refseq`   | RefSeq | Used for an identifier assigned by the RefSeq group | Active |
 | `trunc512` | Refget | The old checksum algorithm based on SHA-512 used in v1.0.0 of refget | Deprecated |
 | `ga4gh`    | Refget | ga4gh identifier, which are prefixed by the term `SQ.`. This is the preferred naming | Active |
+| `md5`    | Refget | md5 checksum of the sequence. | Active |
 | `vmc`      | VMC | Used for when an identifier is a VMC compatible digest | Deprecated |
 
 ## Appendix 2 - Changes
@@ -563,7 +565,7 @@ The specification makes no attempt to enforce a strict naming authority across i
 - Replace refget's v1 service-info implementation with GA4GH discovery's definition of service-info
 - Move code examples out into a Python notebook and a Perl script
 - Replace TRUNC512 with ga4gh identifier as the default SHA-512 based hash identifier (support still available for TRUNC512)
-- All checksums can be requested namespaced with their algorythm
+- All checksums can be requested namespaced with their algorithm
 - Optional support for namespaced identifiers to resolve sequence and metadata
 - Lower cased recommended naming authority strings
 
