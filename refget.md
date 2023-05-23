@@ -100,6 +100,10 @@ Authorization: Bearer [access_token]
 
 The policies and processes used to perform user authentication and authorization, and the means through which access tokens are issued, are beyond the scope of this API specification. GA4GH recommends the use of the OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for authentication and authorization.
 
+## Using refget for private sequences
+
+The refget specification enables sharing reference sequences publicly without restruction. It is possible to share private sequences using a refget server locally or behind adequate protection, such as that described previously, the specification does not explore these possibilities and leave these responsibilities to implementers.
+
 ## Checksum calculation
 The recommended checksum algorithms are `MD5` (a 32 character HEX string) and a SHA-512 based system called `ga4gh` (a base64 URL-safe string, see later for details). Servers MUST support sequence retrieval by one or more of these algorithms, and are encouraged to support all to maximize interoperability. An older algorithm called `TRUNC512` existed in version 1.0.0 of refget but is now deprecated in favour of the GA4GH sequence checksum string. It is possible to translate between the `ga4gh` and `TRUNC512` systems however `TRUNC512` usage SHOULD be discouraged.
 
