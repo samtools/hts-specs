@@ -1583,10 +1583,10 @@ Using the example of the inversion just above, the VCF code could become:
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Blood & TissueSample\\
-2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & MATEID=bnd\_U & GT:DPADJ & 0:32 & $0|1:9,21$ \\
-2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & MATEID=bnd\_X & GT:DPADJ & 0:29 & $0|1:11,25$ \\
-13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & MATEID=bnd\_W & GT:DPADJ & 0:34 & $0|1:10,23$ \\
-13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & MATEID=bnd\_V & GT:DPADJ & 0:31 & $0|1:8,20$ \\
+2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & MATEID=bnd\_U & GT:AD & 0:32,0 & $0|1:9,21$ \\
+2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & MATEID=bnd\_X & GT:AD & 0:29,0 & $0|1:11,25$ \\
+13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & MATEID=bnd\_W & GT:AD & 0:34,0 & $0|1:10,23$ \\
+13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & MATEID=bnd\_V & GT:AD & 0:31,0 & $0|1:8,20$ \\
 \end{tabular}
 \end{flushleft}
 \normalsize
@@ -1599,10 +1599,10 @@ However, a more evolved algorithm could attempt actually deconvolving the two ge
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Blood & TumorSample \\
-2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & MATEID=bnd\_U & GT:CNADJ & 0:1 & 1:1 \\
-2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & MATEID=bnd\_X & GT:CNADJ & 0:1 & 1:1 \\
-13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & MATEID=bnd\_W & GT:CNADJ & 0:1 & 1:1 \\
-13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & MATEID=bnd\_V & GT:CNADJ & 0:1 & 1:1 \\
+2 & 321681 & bnd\_W & G & G$]2:421681]$ & 6 & PASS & MATEID=bnd\_U & GT:CN & 0:1 & 1:1 \\
+2 & 321682 & bnd\_V & T & $[2:421682[$T & 6 & PASS & MATEID=bnd\_X & GT:CN & 0:1 & 1:1 \\
+13 & 421681 & bnd\_U & A & A$]2:321681]$ & 6 & PASS & MATEID=bnd\_W & GT:CN & 0:1 & 1:1 \\
+13 & 421682 & bnd\_X & C & $[2:321682[$C & 6 & PASS & MATEID=bnd\_V & GT:CN & 0:1 & 1:1 \\
 \end{tabular}
 \end{flushleft}
 \normalsize
