@@ -88,7 +88,7 @@ The server MUST respond with an appropriate HTTP status code (4xx or 5xx) when a
 | `Not Implemented`       | 501              | The specified request is not supported by the server                                                 |
 
 ## Security
-Reference sequence as defined in this specification is publicly accessible without restrictions. However the refget API retrieval mechanism can be used to retrieve potentially sensitive genomic data and is dependent on the implementation. Effective security measures are essential to protect the integrity and confidentiality of these data.
+Reference sequence as defined in this specification is publicly accessible without restrictions. Adapting the implementation to retrieve private/potentially sensitive genomic data is not a good use of the protocol. In any circumstances, no personal data should be shared without proper data security measures.
 
 Sensitive information transmitted on public networks, such as access tokens and human genomic data, MUST be protected using Transport Level Security (TLS) version 1.2 or later, as specified in [RFC 5246](https://tools.ietf.org/html/rfc5246).
 
@@ -99,10 +99,6 @@ Authorization: Bearer [access_token]
 ```
 
 The policies and processes used to perform user authentication and authorization, and the means through which access tokens are issued, are beyond the scope of this API specification. GA4GH recommends the use of the OAuth 2.0 framework ([RFC 6749](https://tools.ietf.org/html/rfc6749)) for authentication and authorization.
-
-## Using refget for private sequences
-
-The refget specification enables sharing reference sequences publicly without restruction. It is possible to share private sequences using a refget server locally or behind adequate protection, such as that described previously, the specification does not explore these possibilities and leave these responsibilities to implementers.
 
 ## Checksum calculation
 The recommended checksum algorithms are `MD5` (a 32 character HEX string) and a SHA-512 based system called `ga4gh` (a base64 URL-safe string, see later for details). Servers MUST support sequence retrieval by one or more of these algorithms, and are encouraged to support all to maximize interoperability. An older algorithm called `TRUNC512` existed in version 1.0.0 of refget but is now deprecated in favour of the GA4GH sequence checksum string. It is possible to translate between the `ga4gh` and `TRUNC512` systems however `TRUNC512` usage SHOULD be discouraged.
