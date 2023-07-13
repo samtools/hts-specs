@@ -539,6 +539,7 @@ The following people have contributed to the design of this specification.
 - Rishi Nag
 - Reece Hart
 - Timothe Cezard
+- Reggan Thomas
 
 # Appendix
 
