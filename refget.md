@@ -237,7 +237,7 @@ Content-type: application/vnd.ga4gh.refget.v2.0.0+json
 
 #### Response
 
-The server shall return a list of all identifiers the server knows for the given identifier along with associated metadata. The server MAY return the query identifier in the list of identifiers.
+The server shall return a list of all identifiers for algorithms the server knows and the given identifier along with associated metadata. Identifiers provided by naming authorities should be provided in the `aliases` property. The server MAY return the query identifier in the list of identifiers.
 
 A JSON encoded response shall have the following fields:
 
@@ -369,7 +369,7 @@ An array of strings listing the type identifiers supported. Values used should b
 <code>subsequence_limit</code><br/>
 int or null
 </td><td>
-An integer giving the maximum length of sequence which may be requested using start and/or end query parameters. May be <code>null</code> if the server has imposed no limit.
+An integer giving the maximum length of sequence which may be requested using <code>start</code> and/or <code>end</code> query parameters or <code>Range</code> header. <code>null</code> values or values lower than 1 or mean the server has no imposed limit.
 </td></tr>
 </table>
 </td></tr>
