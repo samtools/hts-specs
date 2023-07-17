@@ -5,7 +5,7 @@ info:
   description: >-
     System for retrieving sequence and metadata concerning a reference sequence
     object by hash identifiers
-  version: '1.0.1'
+  version: '2.0.0'
   title: refget API
   contact:
     name: GA4GH Security Notifications
@@ -16,34 +16,22 @@ tags:
     description: Services linked to retrieving metadata from an identifier
   - name: Sequence
     description: Services linked to fetching sequence from an identifier
-  - name: Services
-    description: Housekeeping services
+  - name: Other
+    description: Additional services
 paths:
-  /sequence/service-info/:
+  /sequence/service-info:
     get:
       summary: Retrieve a summary of features this API deployment supports
       operationId: serviceInfo
       tags:
-        - Services
+        - Other
       responses:
         '200':
           description: Display of all known configurations for a service deployment
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ServiceInfo'
-        '415':
-          $ref: '#/components/responses/BadFormat'
-  /ping:
-    get:
-      summary: Return a ping text indicating the service is up
-      description: An endpoint that is meant to return a simple response and a 2XX success code
-      operationId: ping
-      tags:
-        - Services
-      responses:
-        '200':
-          description: Display a ping message
+                $ref: '#/components/schemas/RefgetServiceInfo'
         '415':
           $ref: '#/components/responses/BadFormat'
   '/sequence/{id}':
@@ -166,8 +154,16 @@ components:
               type: string
               description: >-
                 Truncated, to 48 characters, SHA-512 checksum of the reference
-                sequence encoded as a HEX string
+                sequence encoded as a HEX string. No longer a preferred serialisation of the SHA-512
               example: 959cb1883fc1ca9ae1394ceb475a356ead1ecceff5824ae7
+            ga4gh:
+              type: string
+              description: >-
+                A ga4gh identifier used to identify the sequence. This is a  
+                [base64url](defined in RFC4648 §5) representation of the 1st 24 bytes from a
+                SHA-512 digest of normalised sequence. This is the preferred method of 
+                representing the SHA-512 sequence digest.
+              example: ga4gh:SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2
             length:
               type: integer
               format: int64
@@ -195,33 +191,42 @@ components:
       required:
         - alias
         - naming_authority
-    ServiceInfo:
-      type: object
-      description: Describes the capabilities of an API implementation
-      properties:
-        supported_api_versions:
-          type: array
-          items:
-            type: string
-            description: Supported versions by this API
-            example: 0.2.0
-        circular_supported:
-          type: boolean
-          description: Indicates if the service supports circular location queries
-        subsequence_limit:
-          type: integer
-          format: int64
-          nullable: true
-          description: Maximum length of sequence which may be requested using start and/or end query parameters
-        algorithms:
-          type: array
-          items:
-            type: string
-            description: An array of strings listing the digest algorithms that are supported
-            example:
-              - md5
-              - trunc512
-      required:
-        - supported_api_versions
-        - circular_supported
-        - algorithms
+    RefgetServiceInfo:
+      allOf:
+      - '$ref': https://raw.githubusercontent.com/ga4gh-discovery/ga4gh-service-info/develop/service-info.yaml#/components/schemas/Service
+      - type: object
+        description: Extended capabilities of refget service-info response object
+        required:
+          - refget
+        properties:
+          refget:
+            type: object
+            required:
+              - circular_supported
+              - algorithms
+            properties:
+              circular_supported:
+                type: boolean
+                description: Indicates if the service supports circular location queries
+              subsequence_limit:
+                type: integer
+                format: int64
+                nullable: true
+                description: Maximum length of sequence which may be requested using start and/or end query parameters
+              algorithms:
+                type: array
+                items:
+                  type: string
+                  description: An array of strings listing the digest algorithms that are supported
+                  example:
+                  - md5
+                  - ga4gh
+              identifier_types:
+                type: array
+                items:
+                  type: string
+                  description: An array of strings listing the type of name space that are supported
+                  example:
+                    - insdc
+                    - refseq
+                    - ensembl
