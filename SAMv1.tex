@@ -38,6 +38,10 @@
 
 \newcommand*{\memlimited}{\textcolor{gray}{\footnotesize\it limited}}
 
+% Use as, e.g., \cigarops{MID} to produce M/I/D with the operators in \tt
+\newcommand*{\cigarops}[1]{\cigaropsAux#1*}
+\def\cigaropsAux#1#2*{{\tt #1}\if\relax\detokenize{#2}\relax\else/\cigaropsAux#2*\fi}
+
 \begin{document}
 
 \input{SAMv1.ver}
@@ -423,7 +427,7 @@ The following table gives an overview of these mandatory fields in the SAM forma
   3 & {\sf RNAME} & String & {\tt \verb"\*"|\rnameRegexp} & Reference sequence NAME\footnotemark \\
   4 & {\sf POS} & Int & $[0,\,2^{31}-1]$ & 1-based leftmost mapping POSition \\
   5 & {\sf MAPQ} & Int & $[0,\,2^8-1]$ & MAPping Quality \\
-  6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHPX=])+} & CIGAR string \\
+  6 & {\sf CIGAR} & String & {\tt \char92*|([0-9]+[MIDNSHP=X])+} & CIGAR string \\
   7 & {\sf RNEXT} & String & {\tt \verb"\*"|=|\rnameRegexp} & Reference name of the mate/next read \\
   8 & {\sf PNEXT} & Int & $[0,\,2^{31}-1]$ & Position of the mate/next read \\
   9 & {\sf TLEN} & Int & $[-2^{31}+1,\,2^{31}-1]$ & observed Template LENgth \\
@@ -554,7 +558,7 @@ Each bit is explained in the following table:
   \item For mRNA-to-genome alignment, an {\tt N} operation represents an
     intron. For other types of alignments, the interpretation of {\tt N}
     is not defined.
-  \item Sum of lengths of the {\tt M/I/S/=/X} operations shall equal
+  \item Sum of lengths of the \cigarops{MIS=X} operations shall equal
     the length of {\sf SEQ}.
   \end{itemize}
 \item {\sf RNEXT}: Reference sequence name of the primary alignment of the NEXT read in the
@@ -638,7 +642,7 @@ Each bit is explained in the following table:
 
 \item {\sf SEQ}: segment SEQuence. This field can be a `*' when the
   sequence is not stored. If not a `*', the length of the sequence must
-  equal the sum of lengths of {\tt M/I/S/=/X} operations in {\sf CIGAR}.
+  equal the sum of lengths of \cigarops{MIS=X} operations in {\sf CIGAR}.
   An `=' denotes the base is identical to the reference base. No
   assumptions can be made on the letter cases.
 \item {\sf QUAL}: ASCII of base QUALity plus 33 (same as the quality
@@ -725,7 +729,7 @@ specific software package for it to function properly.
     identical to its mate.
   \item If all segments in a template are unmapped, their {\sf RNAME}
     should be set as `*' and {\sf POS} as 0.
-  \item If {\sf POS} plus the sum of lengths of {\tt M/=/X/D/N}
+  \item If {\sf POS} plus the sum of lengths of \cigarops{M=XDN}
     operations in {\sf CIGAR} exceeds the length specified in the {\tt
       LN} field of the {\tt @SQ} header line (if exists) with an SN
     equal to {\sf RNAME}, the alignment should be unmapped, unless the
@@ -757,7 +761,7 @@ specific software package for it to function properly.
 Mappings that cross the coordinate `join' in circular reference sequences (i.e., those whose {\tt @SQ} headers specify {\tt TP:circular}) may be represented as follows:
   \begin{enumerate}[label=\arabic*]
   \item (Preferred)
-As usual {\sf POS} should be between 1 and the {\tt @SQ} header's {\tt LN} value, but {\sf POS} plus the sum of the lengths of {\tt M/=/X/D/N} {\sf CIGAR} operations may exceed {\tt LN}.
+As usual {\sf POS} should be between 1 and the {\tt @SQ} header's {\tt LN} value, but {\sf POS} plus the sum of the lengths of \cigarops{M=XDN} {\sf CIGAR} operations may exceed {\tt LN}.
 Coordinates greater than~{\tt LN} are interpreted by subtracting {\tt LN} so that bases at $\texttt{LN}+1, \texttt{LN}+2, \texttt{LN}+3, \ldots$ are considered to be mapped at positions $1,2,3,\ldots$; thus each (1-based) position $p$ is interpreted as $((p-1)\bmod\texttt{LN})+1$.%
 \footnote{The impact of this representation on indexing and random access is yet to be explored by implementations.}
 
@@ -1063,7 +1067,7 @@ underlined word in uppercase denotes a field in the SAM format.
   & \multicolumn{2}{l|}{\sf next\_pos} & 0-based leftmost pos of the next segment ($=\underline{\sf PNEXT}-1$) & {\tt int32\_t} & [-1] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf tlen} & Template length ($=\underline{\sf TLEN}$) & {\tt int32\_t} & [0] \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf read\_name} & Read name, {\tt NUL}-terminated (\underline{\sf QNAME} with trailing `{\tt\verb"\0"}')\footnotemark & {\tt char[{\sf l\_read\_name}]} & \\\cline{2-6}
-  & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP\char61X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf cigar} & CIGAR: {\tt {\sf op\_len}\char60\char60 4\char124{\sf op}}. `{\tt MIDNSHP=X}'$\to$`012345678' & {\tt uint32\_t[{\sf n\_cigar\_op}]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf seq} & 4-bit encoded read: `{\tt =ACMGRSVTWYHKDBN}'$\to[0,15]$. See Section~\ref{sec:seq} & {\tt uint8\_t[({\sf l\_seq}+1)/2]} & \\\cline{2-6}
   & \multicolumn{2}{l|}{\sf qual} & Phred-scaled base qualities. See Section~\ref{sec:seq} & {\tt char[{\sf l\_seq}]} & \\\cline{2-6}
   & \multicolumn{5}{c|}{\textcolor{gray}{\it List of auxiliary data (until the end of the alignment block)}} \\\cline{3-6}
@@ -1513,6 +1517,7 @@ We recommend that implementations validating reference sequence names do so usin
 \begin{itemize}
 \item Add {\tt RG PG} header field. (Nov 2010)
 \item Add BAM description and index sections. (Nov 2010)
+\item \textbf{Add `{\tt =}' and `{\tt X}' CIGAR operations.} (July 2010)
 \item \textbf{Removal of FLAG letters.} (July 2010)
 \item The {\tt SM} header field, previously mandatory for {\tt @RG}, is now
 optional. (July 2010)
