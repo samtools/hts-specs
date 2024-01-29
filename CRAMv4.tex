@@ -888,7 +888,7 @@ features in each record\tabularnewline
 FC & encoding\texttt{<}byte\texttt{>} & read features codes & see separate section\tabularnewline
 \hline
 FP & encoding\texttt{<}int\texttt{>} & in-read positions & positions of the read
-features\tabularnewline
+features; a positive delta to the last position (starting with zero)\tabularnewline
 \hline
 DL & encoding\texttt{<}int\texttt{>} & deletion lengths & base-pair deletion lengths\tabularnewline
 \hline
@@ -1444,6 +1444,9 @@ Note it is permitted for decoders to choose to auto-generate MD and NM tags even
 Read features are used to store read details that are expressed using read coordinates 
 (e.g. base differences respective to the reference sequence). The read feature 
 records start with the number of read features followed by the read features themselves.
+Each read feature has the position encoded as the distance since the
+last feature position, or the absolute position (i.e. delta vs zero)
+for the first feature.
 Finally the single mapping quality and per-base quality scores are stored.
 
 \begin{threeparttable}[t]
@@ -1568,6 +1571,7 @@ be followed by 4 more bytes representing substitutions for reference bases C, G,
 \begin{algorithmic}[1]
 \Procedure{DecodeMappedRead}{}
   \State $feature\_number\gets$ \Call{ReadItem}{FN, Integer} 
+  \State $last\_feature\_position\gets 0$
   \For{$i\gets 1 \algorithmicto feature\_number$}
     \State \Call{DecodeFeature}{}
   \EndFor
@@ -1588,7 +1592,8 @@ be followed by 4 more bytes representing substitutions for reference bases C, G,
 \Procedure{DecodeFeature}{}
     \settowidth{\maxwidth}{feature\_position\ }
     \State \algalign{feature\_code}{\gets}       \Call{ReadItem}{FC, Integer} 
-    \State \algalign{feature\_position}{\gets}   \Call{ReadItem}{FP, Integer} 
+    \State \algalign{feature\_position}{\gets}   \Call{ReadItem}{FP, Integer} $+\ last\_feature\_position$
+    \State $last\_feature\_position\gets feature\_position$
     \settowidth{\maxwidth}{substitution\_code\ }
     \If{$feature\_code = $`B'}
       \State \algalign{base}{\gets}              \Call{ReadItem}{BA, Byte}
