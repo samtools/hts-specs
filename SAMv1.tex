@@ -75,7 +75,7 @@ SAM file contents are 7-bit US-ASCII, except for certain field values as individ
 Alternatively and equivalently, SAM files are encoded in UTF-8 but non-ASCII characters are permitted only within certain field values as explicitly specified in the descriptions of those fields.%
 \footnote{Hence in particular SAM files must not begin with a byte order mark~(BOM) and lines of text are delimited by ASCII line terminator characters only.
 % Unicode identifies VT and FF as line break characters as well, but no one uses them in SAM.
-In addition to the local platform's text file line termination conventions, implementations may wish to support \textsc{lf} and \textsc{cr\>lf} for interoperability with other platforms.}
+In addition to the local platform's text file line termination conventions, implementations may wish to support \textsc{lf} and \textsc{cr\,lf} for interoperability with other platforms.}
 
 Where it makes a difference, SAM file contents should be read and written using the POSIX\,/\,C locale.
 For example, floating-point values in SAM always use `{\tt .}' for the decimal-point character.
