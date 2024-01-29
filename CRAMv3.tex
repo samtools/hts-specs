@@ -803,7 +803,7 @@ features in each record\tabularnewline
 FC & encoding\texttt{<}byte\texttt{>} & read features codes & see separate section\tabularnewline
 \hline
 FP & encoding\texttt{<}int\texttt{>} & in-read positions & positions of the read
-features\tabularnewline
+features; a positive delta to the last position (starting with zero)\tabularnewline
 \hline
 DL & encoding\texttt{<}int\texttt{>} & deletion lengths & base-pair deletion lengths\tabularnewline
 \hline
@@ -1571,6 +1571,9 @@ If this is deemed important, the only recourse is to store all MD and NM verbati
 Read features are used to store read details that are expressed using read coordinates 
 (e.g. base differences respective to the reference sequence). The read feature 
 records start with the number of read features followed by the read features themselves.
+Each read feature has the position encoded as the distance since the
+last feature position, or the absolute position (i.e. delta vs zero)
+for the first feature.
 Finally the single mapping quality and per-base quality scores are stored.
 
 \begin{threeparttable}[t]
@@ -1580,7 +1583,7 @@ Finally the single mapping quality and per-base quality scores are stored.
 \hline
 int & FN & number of read features & the number of read features\tabularnewline
 \hline
-int & FP & in-read-position\tnote{a} & position of the read feature\tabularnewline 
+int & FP & in-read-position\tnote{a} & delta-position of the read feature\tabularnewline 
 \hline
 byte & FC & read feature code\tnote{a} & See feature codes below\tabularnewline
 \hline
@@ -1735,6 +1738,7 @@ Then the substitution codes are T=0, G=1, C=2, N=3.
 \begin{algorithmic}[1]
 \Procedure{DecodeMappedRead}{}
   \State $feature\_number\gets$ \Call{ReadItem}{FN, Integer} 
+  \State $last\_feature\_position\gets 0$
   \For{$i\gets 1 \algorithmicto feature\_number$}
     \State \Call{DecodeFeature}{}
   \EndFor
@@ -1749,7 +1753,8 @@ Then the substitution codes are T=0, G=1, C=2, N=3.
 \Procedure{DecodeFeature}{}
     \settowidth{\maxwidth}{feature\_position\ }
     \State \algalign{feature\_code}{\gets}       \Call{ReadItem}{FC, Integer} 
-    \State \algalign{feature\_position}{\gets}   \Call{ReadItem}{FP, Integer} 
+    \State \algalign{feature\_position}{\gets}   \Call{ReadItem}{FP, Integer} $+\ last\_feature\_position$
+    \State $last\_feature\_position\gets feature\_position$
     \settowidth{\maxwidth}{substitution\_code\ }
     \If{$feature\_code = $`B'}
       \State \algalign{base}{\gets}              \Call{ReadItem}{BA, Byte}
