@@ -651,6 +651,10 @@ Each bit is explained in the following table:
     wrong}\}$. This field can be a `*' when quality is not stored. If
   not a `*', {\sf SEQ} must not be a `*' and the length of the quality string
   ought to equal the length of {\sf SEQ}.
+  \footnote{There is a small ambiguity with a sequence exactly one
+    base-pair long having quality 9.  This is ASCII `*' so it could be
+    interpreted as either QUAL 9 or as quality unavailable.  Given
+    this ambiguity, we recommend interpreting it as unavailable.}
 \end{enumerate}
 
 \subsection{The alignment section: optional fields}\label{sec:alnaux}
