@@ -14,7 +14,8 @@ PDFS =	BCFv1_qref.pdf \
 	VCFv4.1.pdf \
 	VCFv4.2.pdf \
 	VCFv4.3.pdf \
-	VCFv4.4.pdf
+	VCFv4.4.pdf \
+	VCFv4.5.draft.pdf
 
 pdf: $(PDFS:%=new/%)
 
@@ -31,6 +32,7 @@ new/VCFv4.1.pdf    diff/VCFv4.1.pdf:    VCFv4.1.tex    new/VCFv4.1.ver
 new/VCFv4.2.pdf    diff/VCFv4.2.pdf:    VCFv4.2.tex    new/VCFv4.2.ver
 new/VCFv4.3.pdf    diff/VCFv4.3.pdf:    VCFv4.3.tex    new/VCFv4.3.ver
 new/VCFv4.4.pdf    diff/VCFv4.4.pdf:    VCFv4.4.tex    new/VCFv4.4.ver
+new/VCFv4.5.draft.pdf  diff/VCFv4.5.draft.pdf:  VCFv4.5.draft.tex  new/VCFv4.5.draft.ver
 new/CRAMcodecs.pdf diff/CRAMcodecs.pdf: CRAMcodecs.tex new/CRAMcodecs.ver
 
 # Set LATEXMK to "scripts/rerun.sh new/$* $(PDFLATEX)" to use the previous
