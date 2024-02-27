@@ -441,6 +441,7 @@ If genotype information is present, then the same types of data must be present 
 First a FORMAT field is given specifying the data types and order (colon-separated FORMAT keys matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate keys are not allowed).
 This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format.
 The first key must always be the genotype (GT) if it is present.
+If LGT key is present, it must be after GT (if also present) and before all others.
 There are no required keys.
 Additional Genotype keys can be defined in the meta-information, however, software support for them is not guaranteed.
 
@@ -482,10 +483,10 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GQ		& 1		& Integer	& Conditional genotype quality \\
       GT		& 1		& String	& Genotype \\
       HQ		& 2		& Integer	& Haplotype quality \\
-      LAA		& .		& Integer	& Strictly increasing, 1-based indices into ALT, indicating which alternate alleles are relevant (local) for the current sample \\
-      LAD		& .		& Integer	& Read depth for the reference and each of the local alternate alleles listed in LAA \\
+      LAA		& .		& Integer	& Strictly increasing indices into REF and ALT, indicating which alternate alleles are relevant (local) for the current sample \\
+      LAD		& .		& Integer	& Read depth for each of the local alternate alleles listed in LAA \\
       LGT		& .		& String 	& Genotype against the local alleles \\
-      LPL		& .		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer for genotypes that involve the reference and the local alternative alleles listed in LAA \\
+      LPL		& .		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer for genotypes that involve the local alternative alleles listed in LAA \\
       MQ		& 1		& Integer	& RMS mapping quality \\
       PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
       PP		& G		& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
@@ -582,17 +583,17 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
     \end{itemize}
 
   \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
-  \item LAA is a sorted list of $n$ distinct integers, where $1 \le n \le \left|\mathrm{ALT}\right|$, giving the (1-based) indices within ALT of the alleles that are observed in the sample.
+  \item LAA is a sorted list of $n$ distinct integers, where $0 \le n \le \left|\mathrm{ALT}\right|$, giving the indices of the alleles that are observed in the sample.
   In callsets with many samples, sites may grow to include numerous alternate alleles at the same POS.
   Usually, few of these alleles are actually observed in any one sample, but each genotype must supply fields like PL and AD for all of the alleles---a very inefficient representation as PL's size is quadratic in the allele count.
   Similarly, in rare sites, which can be the bulk of the sites, the vast majority of the samples are reference.
   To prevent this growth in VCF size, one can choose to specify the genotype, allele depth and the genotype likelihood against a subset of ``Local Alleles''.
-  LAA is the strictly increasing, 1-based index into ALT, pointing out the alternative alleles that are actually in-play for that sample.
+  LAA is the strictly increasing index into REF and ALT, pointing out the alleles that are actually in-play for that sample.
+  0 indicates the REF allele and should always be included with the subsequence values being 1-based indexes into ALT.
   LAD is the depth of the local alleles,
-  LPL is subset of the PL array that pertains to the alleles that are REF or referred to by LAA,
+  LPL is subset of the PL array that pertains to the alleles that are referred to by LAA,
   LGT is the genotype but referencing the local alleles rather than the global ones.
-  It is implicit that REF is part of any ``local'' context, and it always has index 0, even if the genotype is compound HET.
-  For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LAA=[2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
+  For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LAA=[0,2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
   In this case LGT=0/1 means that the sample is G/C.
   GQ is still the genotype quality, even when the genotype is given against the local alleles.
   Note that reordering might be required and care need to be taken to reorder LAD and LPL appropriately.
@@ -602,17 +603,17 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   	POS &REF&  ALT&FORMAT&sample\\
   	1&G&A,C,T,\textless*\textgreater& LAA:LGT:LAD:LPL&  2,4:1/1:20,30,10:90,80,0,100,110,120\\
   	1&G&A,C,T,\textless*\textgreater& GT:AD:PL&  2/2:20,.,30,.,10:90,.,.,80,.,0,.,.,.,.,100,.,110,.,120\\
-  	2&A&C,G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 3:0/1:15,25:40,0,80\\
+  	2&A&C,G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 0,3:0/1:15,25:40,0,80\\
   	2&A&C,G,T,\textless*\textgreater& GT:AD:PL&0/3:15,.,.,25,.:40,.,.,.,.,.,0,.,.,80,.,.,.,.\\
-  	3&C&G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 4:0/0:30,1:0,30,80\\
+  	3&C&G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 0,4:0/0:30,1:0,30,80\\
   	3&C&G,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.1:0,.,.,.,.,.,.,.,.,.,30,.,.,.,80\\
-  	4&G&A,T,\textless*\textgreater& LAA:LGT:LAD:LPL& :0/0:30:0\\
+  	4&G&A,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 0:0/0:30:0\\
   	4&G&A,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,..:0,.,.,.,.,.,.,.,.,.,.,.,.,.,.\\
   \end{tabular}
-  \item LAD: is a list of $n+1$ integers giving read depths (as per AD) for the REF allele and each of the local alleles as listed in LAA.
-  \item LGT: is the genotype, encoded as allele indexes separated by either of $/$ or $\mid$, as with GT, however, the indexes are into the list consisting of REF and the ALTs referenced by LAA.
-  So that in the case that LAA is 2,3, LGT=0/2 is equivalent to GT=0/3 and LGT=1/2 is equivalent to GT=2/3 (see example above).
-  \item LPL: is a list of $n+1 \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the REF and LAA local alleles.
+  \item LAD: is a list of $n$ integers giving read depths (as per AD) for each of the local alleles as listed in LAA.
+  \item LGT: is the genotype, encoded as allele indexes separated by either of $/$ or $\mid$, as with GT, however, the indexes are into the alleles referenced by LAA.
+  So that in the case that LAA is 0,2,3, LGT=0/2 is equivalent to GT=0/3 and LGT=1/2 is equivalent to GT=2/3 (see example above).
+  \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LAA local alleles.
   The precise ordering is defined in the GL paragraph.
   \item MQ (Integer): RMS mapping quality, similar to the version in the INFO field.
   \item PL (Integer): The phred-scaled genotype likelihoods rounded to the closest integer, and otherwise defined in the same way as the GL field.
@@ -625,7 +626,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.
   If the genotype in the GT field is unphased, the corresponding PS field is ignored.
   The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required).
-  \item PSL (List of Strings): The list of phase sets, one for each allele specified in the {\tt GT}. 
+  \item PSL (List of Strings): The list of phase sets, one for each allele specified in the {\tt GT} or {\tt LGT}. 
   Unphased alleles (without a $\mid$ separator before them) must have the value '$.$' in their corresponding position in the list.
   Unlike {\tt PS} (which is defined per CHROM), records with different CHROM but the same phase-set name are considered part of the same phase set.
   If an implementation cannot guarantee uniqueness of phase-set names across the VCF (for example, phasing a streaming VCF or each CHROM is processed independently in parallel), new phase-set names should be of the format CHROM*POS*ALLELE-NUMBER of the ``first'' allele which is included in this set, with ALLELE-NUMBER being the index of the allele in the {\tt GT} field, since multiple distinct phase-sets could start at the same position. \footnote{The `*' character is used as a separator since `:' is not reserved in the CHROM column.}
