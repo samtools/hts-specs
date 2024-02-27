@@ -477,6 +477,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       ADR		& R		& Integer	& Read depth for each allele on the reverse strand \\
       DP		& 1		& Integer	& Read depth \\
       EC		& A		& Integer	& Expected alternate allele counts \\
+      END		& 1		& Integer	& End position on CHROM (used with multi-sample $<$*$>$ alleles) \\
       FT		& 1		& String	& Filter indicating if this genotype was ``called'' \\
       GL		& G		& Float		& Genotype likelihoods \\
       GP		& G		& Float		& Genotype posterior probabilities \\
@@ -504,6 +505,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item DP (Integer): Read depth at this position for this sample.
   \item EC (Integer): Comma separated list of expected alternate allele counts for each alternate allele in the same order as listed in the ALT field.
   Typically used in association analyses.
+  \item END (Integer): end position of the $<$*$>$ reference block for this sample.
   \item FT (String): Sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field).
   Again, use PASS to indicate that all filters have been passed, a semicolon-separated list of codes for filters that fail, or `.' to indicate that filters have not been applied.
   These values should be described in the meta-information in the same way as FILTERs.
@@ -1739,6 +1741,26 @@ Example records are given below:
 \normalsize
 
 
+\subsubsection{Multi-sample REF-only blocks}
+When handling VCFs with multiple samples, the length of the $<$*$>$ reference blocks can differ.
+To account for this, a sample-specific END can be specified via the FORMAT END field.
+If any FORMAT END value exists, the INFO END must be present and equal the largest FORMAT END value.
+Positions implicitly called by a preceding $<$*$>$ for a sample must have $GT$/$LGT$ set to the missing value (`.') and have no other FORMAT fields present.
+If $LAA$ is present and a reference block is defined for a given sample, the $<$*$>$ allele must be included as an $LAA$ allele for that sample even though the $LGT$ is $0/0$.
+
+For example, the genotype-only version of the above example with a second sample with no variants:
+\scriptsize
+\begin{flushleft}
+\begin{tabular}{ l l l l l l l l }
+POS & REF & ALT & INFO & FORMAT & SampleA & SampleB \\
+4370 & G & $<$*$>$ & END=4416 & LGT:LAA:END & 0/0:0,1:4388 & 0/0:0,1:4416 \\
+4389 & T & TC & . & LGT:LAA:END & 0/1:0,1:. & . \\
+4390 & C & $<$*$>$ & END=4416 & LGT:LAA:END & 0/0:0,1:4416 & . \\
+\end{tabular}
+\end{flushleft}
+\normalsize
+
+
 \pagebreak
 \subsection{Representing copy number variation}
 \label{cnv}
@@ -2589,7 +2611,8 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \subsection{Changes between VCFv4.5 and VCFv4.4}
 
 \begin{itemize}
-	\item Added local allele support
+	\item Added local allele support (FORMAT LAA, LGT, LAD, LPL) to reduce the size of multi-sample VCFs and enable lossless merging.
+	\item Added FORMAT END to support sample-specific $<$*$>$ alleles.
 \end{itemize}
 
 \subsection{Changes between VCFv4.4 and VCFv4.3}
