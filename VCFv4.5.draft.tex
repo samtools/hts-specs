@@ -591,7 +591,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   Similarly, in rare sites, which can be the bulk of the sites, the vast majority of the samples are reference.
   To prevent this growth in VCF size, one can choose to specify the genotype, allele depth and the genotype likelihood against a subset of ``Local Alleles''.
   LAA is the strictly increasing index into REF and ALT, pointing out the alleles that are actually in-play for that sample.
-  0 indicates the REF allele and should always be included with the subsequence values being 1-based indexes into ALT.
+  0 indicates the REF allele and should always be included with the subsequent values being 1-based indexes into ALT.
   LAD is the depth of the local alleles,
   LPL is subset of the PL array that pertains to the alleles that are referred to by LAA,
   LGT is the genotype but referencing the local alleles rather than the global ones.
