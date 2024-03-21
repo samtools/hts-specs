@@ -863,7 +863,7 @@ Using TD, an integer from the TL data series can be mapped back into a list of t
 Thus per alignment record we only need to store tag values and not their ids and types.
 
 The TD is written as a byte array consisting of $L_{i}$ values separated with \textbackslash{}0.
-Each $L_{i}$ value is written as a concatenation of 3 byte $T_{ij}$ elements: tag id followed by BAM tag type code (one of A, c, C, s, S, i, I, f, F, Z, H or B, as described in the SAM specification).
+Each $L_{i}$ value is written as a concatenation of 3 byte $T_{ij}$ elements: tag id followed by BAM tag type code (one of A, c, C, s, S, i, I, f, Z, H or B, as described in the SAM specification).
 For example the TD for tag lists X1:i BC:Z SA:Z and X1:i BC:Z may be encoded as X1CBCZSAZ\textbackslash{}0X1CBCZ\textbackslash{}0, with X1C indicating a 1 byte unsigned value for tag X1.
 
 \subsubsection*{Tag values}
@@ -1546,7 +1546,7 @@ int & TL & tag line & an index into the tag dictionary (TD)\tabularnewline
 \end{algorithmic}
 
 In the above procedure, $name$ is a two letter tag name and $type$ is one of the permitted types documented in the SAM/BAM specification.
-Type is \texttt{c} (signed 8-bit integer), \texttt{C} (unsigned 8-bit integer), \texttt{s} (signed 16-bit integer), \texttt{S} (unsigned 16-bit integer), \texttt{i} (signed 32-bit integer), \texttt{I} (unsigned 32-bit integer), \texttt{f} (32-bit float), \texttt{Z} (nul-terminated string), \texttt{H} (nul-terminated string of hex digits) and \texttt{B} (binary data in array format with the first byte being one of c,C,s,S,i,I,f using the meaning above, a 32-bit integer for the number of array elements, followed by array data encoded using the specified format).  All integers are little endian encoded.
+Type is \texttt{A} (a single character), \texttt{c} (signed 8-bit integer), \texttt{C} (unsigned 8-bit integer), \texttt{s} (signed 16-bit integer), \texttt{S} (unsigned 16-bit integer), \texttt{i} (signed 32-bit integer), \texttt{I} (unsigned 32-bit integer), \texttt{f} (32-bit float), \texttt{Z} (nul-terminated string), \texttt{H} (nul-terminated string of hex digits) and \texttt{B} (binary data in array format with the first byte being one of c,C,s,S,i,I,f using the meaning above, a 32-bit integer for the number of array elements, followed by array data encoded using the specified format).  All integers are little endian encoded.
 
 For example a SAM tag \texttt{MQ:i} has name \texttt{MQ} and type \texttt{i} and will be decoded using one of MQc, MQC, MQs, MQS, MQi and MQI data series depending on size and sign of the integer value.
 
