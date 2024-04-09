@@ -1711,7 +1711,7 @@ To encode copy number variation, VCF uses $<$CNV$>$, $<$DEL$>$ and $<$DUP$>$ sym
 Allele specific copy number is specified through a $<$CNV$>$ ALT allele for each distinct allelic copy number.
 INFO CN defines the allele specific copy number with FORMAT CN defining the overall copy number for that sample.
 POS and INFO SVLEN specify the genomic interval over which the copy number is defined.
-$<$DEL$>$ and $<$DUP$>$ copy number (SVCLAIM=D) alleles should be treated as $<$CNV$>$ alleles that implicitly define INFO CN=0 and INFO CICN=2,. respectively.
+$<$DEL$>$ and $<$DUP$>$ copy number (SVCLAIM=D) alleles should be treated as $<$CNV$>$ alleles that implicitly define INFO CN=0 and CN=2, respectively.
 As with all symbolic structural variants, the starting position of the interval is the base immediately after POS.
 For example, a region on chr1 from position 101 to 130 (both inclusive) with allele-specific copy numbers of 1 and 2 can be represented as follows:
 
