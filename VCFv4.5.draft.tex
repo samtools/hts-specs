@@ -497,7 +497,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GT		& 1			& String	& Genotype \\
       HQ		& 2			& Integer	& Haplotype quality \\
       LA		& .			& Integer	& Reserved \\
-      LAA		& .			& Integer	& Indices into ALT, indicating which alleles are relevant (local) for the current sample \\
+      LAA		& .			& Integer	& 1-based indices into ALT, indicating which alleles are relevant (local) for the current sample \\
       LAD		& LR    	& Integer	& Local-allele representation of AD \\
       LADF		& LR    	& Integer	& Local-allele representation of ADF \\
       LADR		& LR    	& Integer	& Local-allele representation of ADR \\
@@ -604,16 +604,16 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
     \end{itemize}
 
   \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
-  \item LAA is a list of $n$ distinct integers, giving the indices of the ALT alleles that are observed in the sample.
+  \item LAA is a list of $n$ distinct integers, giving the 1-based indices of the ALT alleles that are observed in the sample.
   In callsets with many samples, sites may grow to include numerous alternate alleles at the same POS.
   Usually, few of these alleles are actually observed in any one sample, but each genotype must supply fields like PL and AD for all of the alleles---a very inefficient representation as PL's size is quadratic in the allele count.
   Similarly, in rare sites, which can be the bulk of the sites, the vast majority of the samples are reference.
   To prevent this growth in VCF size, one can choose to specify the genotype, allele depth and the genotype likelihood against a subset of ``Local Alleles''.
-  LAA is the index into ALT, defining the alleles that are actually in-play for that sample and the order in which they are interpreted.
-  LAA is required when interpreting local-allele fields and must be present if any local-allele fields neither omitted nor MISSING.
+  LAA is the 1-based index into ALT, defining the alleles that are actually in-play for that sample and the order in which they are interpreted.
+  LAA is required when interpreting local-allele fields and must be present if any local-allele fields are neither omitted nor MISSING.
   Since BCF encodes zero length vectors as MISSING, a LAA containing the MISSING value should be treated as the empty vector (i.e. a REF-only site) if any local-allele fields are neither omitted nor MISSING.
   All specifications-defined A, R and G FORMAT fields have a local-allele equivalent that should be interpreted in the same manner as it's matching field except for the ALT alleles considered present and the order in which they are interpreted.
-  For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LA=[2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
+  For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LAA=[2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
   In this case LGT=0/1 means that the sample is G/C.
   GQ is still the genotype quality, even when the genotype is given against the local alleles.
   In the following example, the records with the same POS encode the same information (some columns removed for clarity):
