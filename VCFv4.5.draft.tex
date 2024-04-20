@@ -460,7 +460,7 @@ If any of the fields is missing, it is replaced with the MISSING value.
 For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing.
 If a field contains a list of missing values, it can be represented either as a single MISSING value (`.') or as a list of missing values (e.g.\ `.,.,.' if the field was Number=3).
 Trailing fields can be dropped, with the exception of the GT field, which should always be present if specified in the FORMAT field.
-If a field and it's local equivalent are both defined they must encode identical information or one must ignored by containing the MISSING value or omitted.
+If a field and it's local-allele equivalent (including GT/LGT) are both defined they must encode identical information or one must ignored by containing the MISSING value or omitted.
 
 
 As with the INFO field, there are several common, reserved keywords that are standards across the community.
@@ -497,6 +497,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GT		& 1			& String	& Genotype \\
       HQ		& 2			& Integer	& Haplotype quality \\
       LA		& .			& Integer	& Indices into REF and ALT, indicating which alleles are relevant (local) for the current sample \\
+      LAA		& .			& Integer	& Reserved \\
       LAD		& LR    	& Integer	& Local-allele representation of AD \\
       LADF		& LR    	& Integer	& Local-allele representation of ADF \\
       LADR		& LR    	& Integer	& Local-allele representation of ADR \\
@@ -505,7 +506,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       LGP		& LG    	& Integer	& Local-allele representation of GP \\
       LGT		& 1			& String 	& Local-allele representation of GT \\
       LPL		& LG    	& Integer	& Local-allele representation of PL \\
-      LPP		& LGV   	& Integer	& Local-allele representation of PP \\
+      LPP		& LG    	& Integer	& Local-allele representation of PP \\
       MQ		& 1			& Integer	& RMS mapping quality \\
       PL		& G			& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
       PP		& G			& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
@@ -621,7 +622,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   	POS &REF&  ALT&FORMAT&sample\\
   	1&G&A,C,T,\textless*\textgreater& LA:LGT:LAD:LPL&  0,2,4:1/1:20,30,10:90,80,0,100,110,120\\
   	1&G&A,C,T,\textless*\textgreater& GT:AD:PL&  2/2:20,.,30,.,10:90,.,.,80,.,0,.,.,.,.,100,.,110,.,120\\
-  	2&A&C,G,T,\textless*\textgreater& LA:LGT:LAD:LPL& 0,3:0/1:15,25:40,0,80\\
+  	2&A&C,G,T,\textless*\textgreater& LA:GT:LAD:LPL& 0,3:0/3:15,25:40,0,80\\
   	2&A&C,G,T,\textless*\textgreater& GT:AD:PL&0/3:15,.,.,25,.:40,.,.,.,.,.,0,.,.,80,.,.,.,.,.\\
   	3&C&G,T,\textless*\textgreater& LA:LGT:LAD:LPL& 0,3:0/0:30,1:0,30,80\\
   	3&C&G,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,1:0,.,.,.,.,.,30,.,.,80\\
