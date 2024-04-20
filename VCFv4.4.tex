@@ -2299,10 +2299,10 @@ Examples:
 \begin{tabular}{|p{2.5cm} | p{10cm} | p{3cm}|} \hline
 0/1 & in standard format $(0 + 1) << 1 \mid 0$ followed by $(1 + 1) << 1 \mid 0$ & 0x02 04 \\ \hline
 0/1, 1/1, and 0/0 & three samples encoded consecutively & 0x02 04 04 04 02 02 \\ \hline
-$0\mid1$ & $(1 + 1) << 1 \mid 1$ = 0x05 preceded by the standard first byte value 0x02 & 0x02 05 \\ \hline
+$0\mid1$ & $(1 + 1) << 1 \mid 1$ = 0x05 preceded by the phased first byte value 0x03 & 0x03 05 \\ \hline
 ./. & where both alleles are missing & 0x00 00 \\ \hline
-0 & as a haploid it is represented by a single byte & 0x02 \\ \hline
-1 & as a haploid it is represented by a single byte & 0x04 \\ \hline
+0 & as an implicitly phased haploid it is represented by a single byte & 0x03 \\ \hline
+1 & as an implicitly phased haploid it is represented by a single byte & 0x05 \\ \hline
 0/1/2 & is tetraploid, with alleles & 0x02 04 06 \\ \hline
 $0/1\mid2$ & is tetraploid with a single phased allele & 0x02 04 07 \\ \hline
 0 and 0/1 & pad out the final allele for the haploid individual & 0x02 81 02 04\\ \hline
