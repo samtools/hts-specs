@@ -452,7 +452,7 @@ First a FORMAT field is given specifying the data types and order (colon-separat
 This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format.
 The first key must always be the genotype (GT) if it is present.
 If LGT key is present, it must precede all fields other than GT.
-If any local allele field is present, LA must also be present and precede all fields other than GT and LGT.
+If any local-allele field is present, LA must also be present and precede all fields other than GT and LGT.
 There are no required keys.
 Additional Genotype keys can be defined in the meta-information, however, software support for them is not guaranteed.
 
@@ -460,6 +460,7 @@ If any of the fields is missing, it is replaced with the MISSING value.
 For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing.
 If a field contains a list of missing values, it can be represented either as a single MISSING value (`.') or as a list of missing values (e.g.\ `.,.,.' if the field was Number=3).
 Trailing fields can be dropped, with the exception of the GT field, which should always be present if specified in the FORMAT field.
+If a field and it's local equivalent are both defined they must encode identical information or one must ignored by containing the MISSING value or omitted.
 
 
 As with the INFO field, there are several common, reserved keywords that are standards across the community.
@@ -609,7 +610,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   To prevent this growth in VCF size, one can choose to specify the genotype, allele depth and the genotype likelihood against a subset of ``Local Alleles''.
   LA is the strictly increasing index into REF and ALT, pointing out the alleles that are actually in-play for that sample.
   0 indicates the REF allele and must always be included with the subsequent values being 1-based indexes into ALT.
-  All specifications-defined A, R and G FORMAT fields have a local-allele equivalent that should be interpreted as the in the same manner as it's matching field except for the ALT alleles considered present.
+  All specifications-defined A, R and G FORMAT fields have a local-allele equivalent that should be interpreted in the same manner as it's matching field except for the ALT alleles considered present.
   For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LA=[0,2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
   In this case LGT=0/1 means that the sample is G/C.
   GQ is still the genotype quality, even when the genotype is given against the local alleles.
