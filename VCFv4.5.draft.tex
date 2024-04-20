@@ -496,7 +496,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GQ		& 1			& Integer	& Conditional genotype quality \\
       GT		& 1			& String	& Genotype \\
       HQ		& 2			& Integer	& Haplotype quality \\
-      LA		& .			& Integer	& Strictly increasing indices into REF and ALT, indicating which alleles are relevant (local) for the current sample \\
+      LA		& .			& Integer	& Indices into REF and ALT, indicating which alleles are relevant (local) for the current sample \\
       LAD		& LR    	& Integer	& Local-allele representation of AD \\
       LADF		& LR    	& Integer	& Local-allele representation of ADF \\
       LADR		& LR    	& Integer	& Local-allele representation of ADR \\
@@ -603,14 +603,14 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
     \end{itemize}
 
   \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
-  \item LA is a sorted list of $n$ distinct integers, where $0 \le n \le \left|\mathrm{ALT}\right|$, giving the indices of the alleles that are observed in the sample.
+  \item LA is a list of $n$ distinct integers, giving the indices of the alleles that are observed in the sample.
   In callsets with many samples, sites may grow to include numerous alternate alleles at the same POS.
   Usually, few of these alleles are actually observed in any one sample, but each genotype must supply fields like PL and AD for all of the alleles---a very inefficient representation as PL's size is quadratic in the allele count.
   Similarly, in rare sites, which can be the bulk of the sites, the vast majority of the samples are reference.
   To prevent this growth in VCF size, one can choose to specify the genotype, allele depth and the genotype likelihood against a subset of ``Local Alleles''.
-  LA is the strictly increasing index into REF and ALT, pointing out the alleles that are actually in-play for that sample.
-  0 indicates the REF allele and must always be included with the subsequent values being 1-based indexes into ALT.
-  All specifications-defined A, R and G FORMAT fields have a local-allele equivalent that should be interpreted in the same manner as it's matching field except for the ALT alleles considered present.
+  LA is the index into REF and ALT, pointing out the alleles that are actually in-play for that sample and the order in which they are interpreted.
+  0 indicates the REF allele and must always be included as the first entry with the subsequent values being 1-based indexes into ALT.
+  All specifications-defined A, R and G FORMAT fields have a local-allele equivalent that should be interpreted in the same manner as it's matching field except for the ALT alleles considered present and the order in which they are interpreted.
   For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LA=[0,2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
   In this case LGT=0/1 means that the sample is G/C.
   GQ is still the genotype quality, even when the genotype is given against the local alleles.
