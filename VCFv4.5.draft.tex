@@ -192,9 +192,9 @@ Possible Types for FORMAT fields are: Integer, Float, Character, and String (thi
 The Number field is defined as per the INFO Number field with the following additional possibilities:
 
 \begin{itemize}
-  \item LOCAL-A: Identical to A except the only alternate alleles defined in the $LA$ field are considered present.
-  \item LOCAL-R: Identical to R except the only alternate alleles defined in the $LA$ field are considered present.
-  \item LOCAL-G: Identical to G except the only alternate alleles defined in the $LA$ field are considered present.
+  \item LA: Identical to A except the only alternate alleles defined in the $LA$ field are considered present.
+  \item LR: Identical to R except the only alternate alleles defined in the $LA$ field are considered present.
+  \item LG: Identical to G except the only alternate alleles defined in the $LA$ field are considered present.
   \item P: The field has one value for each allele value defined in $GT$/$LGT$.
 \end{itemize}
 
@@ -497,15 +497,15 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GT		& 1			& String	& Genotype \\
       HQ		& 2			& Integer	& Haplotype quality \\
       LA		& .			& Integer	& Strictly increasing indices into REF and ALT, indicating which alleles are relevant (local) for the current sample \\
-      LAD		& LOCAL-R	& Integer	& Local-allele representation of AD \\
-      LADF		& LOCAL-R	& Integer	& Local-allele representation of ADF \\
-      LADR		& LOCAL-R	& Integer	& Local-allele representation of ADR \\
-      LEC		& LOCAL-A	& Integer	& Local-allele representation of EC \\
-      LGL		& LOCAL-G	& Integer	& Local-allele representation of GL \\
-      LGP		& LOCAL-G	& Integer	& Local-allele representation of GP \\
+      LAD		& LR    	& Integer	& Local-allele representation of AD \\
+      LADF		& LR    	& Integer	& Local-allele representation of ADF \\
+      LADR		& LR    	& Integer	& Local-allele representation of ADR \\
+      LEC		& LA     	& Integer	& Local-allele representation of EC \\
+      LGL		& LG    	& Integer	& Local-allele representation of GL \\
+      LGP		& LG    	& Integer	& Local-allele representation of GP \\
       LGT		& 1			& String 	& Local-allele representation of GT \\
-      LPL		& LOCAL-G	& Integer	& Local-allele representation of PL \\
-      LPP		& LOCAL-G	& Integer	& Local-allele representation of PP \\
+      LPL		& LG    	& Integer	& Local-allele representation of PL \\
+      LPP		& LGV   	& Integer	& Local-allele representation of PP \\
       MQ		& 1			& Integer	& RMS mapping quality \\
       PL		& G			& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
       PP		& G			& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
@@ -2600,7 +2600,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 
 \begin{itemize}
 	\item Added Number=P support for fields with cardinality matching sample ploidy/local copy number.
-	\item Added local allele support (Number=LOCAL-A, LOCAL-G, LOCAL-R; FORMAT LA, LAD, LADF, LADR, LEC, LGL, LGP, LGT, LPL, LPP) to reduce the size of multi-sample VCFs and enable lossless merging.
+	\item Added local allele support (Number=LA, LG, LR; FORMAT LA, LAD, LADF, LADR, LEC, LGL, LGP, LGT, LPL, LPP) to reduce the size of multi-sample VCFs and enable lossless merging.
 	\item Deprecated INFO END. It is now a computed field written only for backwards compatibility with older versions of VCF.
 	\item Added FORMAT LEN to support sample-specific $<$*$>$ alleles.
 \end{itemize}
