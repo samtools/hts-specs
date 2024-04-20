@@ -413,7 +413,7 @@ Fixed fields are:
 	CIGAR		& A		& String	& Cigar string describing how to align an alternate allele to the reference allele \\
 	DB		& 0		& Flag		& dbSNP membership \\
 	DP		& 1		& Integer	& Combined depth across samples \\
-	END		& 1		& Integer	& End position on CHROM (used with symbolic alleles; see below) \\
+	END		& 1		& Integer	& Deprecated. Present for backwards compatibility with earlier versions of VCF. \\
 	H2		& 0		& Flag		& HapMap2 membership \\
 	H3		& 0		& Flag		& HapMap3 membership \\
 	MQ		& 1		& Float		& RMS mapping quality \\
@@ -427,12 +427,15 @@ Fixed fields are:
 
 \begin{itemize}
 \renewcommand{\labelitemii}{$\circ$}
-\item END: End reference position (1-based), indicating the variant spans positions POS--END on reference/contig CHROM.
-Normally this is the position of the last base in the REF allele, so it can be derived from POS and the length of REF, and no END INFO field is needed.
-However when symbolic alleles are used, e.g.\ in gVCF or structural variants, an explicit END INFO field provides variant span information that is otherwise unknown.
-If a record containing a symbolic structural variant allele does not have an END field, it must be computed from the SVLEN field as per Section \ref{sv-info-keys}.
+\item END: Deprecated.
+Retained for backwards compatibility with  earlier versions of VCF and older VCF indexing software which rely on this field being present.
 
-This field is used to compute BCF's {\tt rlen} field (see~\ref{BcfSiteEncoding}) and is important when indexing VCF/BCF files to enable random access and querying by position.
+This is a computed field that, when present, must be set to the maximum end reference position (1-based) of:
+the position of the final base of the REF allele,
+the end position corresponding to the SVLEN of a symbolic SV allele,
+and the end positions calculated from FORMAT LEN for the $<$*$>$ symbolic allele.
+
+The computed value of this field is used to compute BCF's {\tt rlen} field (see~\ref{BcfSiteEncoding}) and is important when indexing VCF/BCF files to enable random access and querying by position.
 
 \end{itemize}
 
@@ -477,7 +480,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       ADR		& R		& Integer	& Read depth for each allele on the reverse strand \\
       DP		& 1		& Integer	& Read depth \\
       EC		& A		& Integer	& Expected alternate allele counts \\
-      END		& 1		& Integer	& End position on CHROM (used with multi-sample $<$*$>$ alleles) \\
+      LEN		& 1		& Integer	& Length of $<$*$>$ allele for a sample \\
       FT		& 1		& String	& Filter indicating if this genotype was ``called'' \\
       GL		& G		& Float		& Genotype likelihoods \\
       GP		& G		& Float		& Genotype posterior probabilities \\
@@ -505,7 +508,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item DP (Integer): Read depth at this position for this sample.
   \item EC (Integer): Comma separated list of expected alternate allele counts for each alternate allele in the same order as listed in the ALT field.
   Typically used in association analyses.
-  \item END (Integer): end position of the $<$*$>$ reference block for this sample.
+  \item LEN (Integer): length of the $<$*$>$ reference block for this sample.
   \item FT (String): Sample genotype filter indicating if this genotype was ``called'' (similar in concept to the FILTER field).
   Again, use PASS to indicate that all filters have been passed, a semicolon-separated list of codes for filters that fail, or `.' to indicate that filters have not been applied.
   These values should be described in the meta-information in the same way as FILTERs.
@@ -718,25 +721,11 @@ If a precise ALT allele is present in a record with the $IMPRECISE$ flag, $CIPOS
 \footnotesize
 \begin{verbatim}
 ##INFO=<ID=NOVEL,Number=0,Type=Flag,Description="Indicates a novel structural variation">
-##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the longest variant described in this record">
+##INFO=<ID=END,Number=1,Type=Integer,Description="Deprecated. Present for backwards compatibility with earlier versions of VCF.">
 \end{verbatim}
 \normalsize
 
-$END$ position of the longest variant described in this record.
-The END of each allele is defined as:
-
-Non-symbolic alleles: $\mbox{POS} + \mbox{length of REF allele} - 1$.
-
-$<$INS$>$ symbolic structural variant alleles: $\mbox{POS} + \mbox{length of REF allele} - 1$.
-
-$<$DEL$>$, $<$DUP$>$, $<$INV$>$, and $<$CNV$>$ symbolic structural variant alleles:, $\mbox{POS} + \mbox{SVLEN}$.
-
-$<$*$>$ symbolic allele: the last reference call position.
-
-END must be present for all records containing the $<$*$>$ symbolic allele and, for backwards compatibility, should be present for records containing any symbolic structural variant alleles.
-
-To prevent loss of information, any VCF record containing the $<$*$>$ symbolic allele must have END set to the last reference call position of the $<$*$>$ symbolic allele.
-When a record contains both the $<$*$>$ symbolic allele, the END position of the longest allele should be used as the record end position for indexing purposes.
+$END$ has been deprecated in favour of INFO SVLEN and FORMAT LEN.
   
 \footnotesize
 \begin{verbatim}
@@ -761,7 +750,7 @@ SVLEN is defined for $INS$, $DUP$, $INV$, and $DEL$ symbolic alleles as the numb
 SVLEN is defined for $CNV$ symbolic alleles as the length of the segment over which the copy number variant is defined.
 The missing value $.$ should be used for all other ALT alleles, including ALT alleles using breakend notation.
 
-For backwards compatibility, a missing SVLEN should be inferred from the $END$ field of VCF records whose $ALT$ field contains a single symbolic allele.
+For backwards compatibility, a missing SVLEN should be inferred from the $END$ field.
 
 For backwards compatibility, the absolute value of SVLEN should be taken and a negative SVLEN should be treated as positive values.
 
@@ -785,7 +774,7 @@ Each $CIPOS$ interval must span 0. That is, the lower bound cannot be greater th
 
 \footnotesize
 \begin{verbatim}
-##INFO=<ID=CIEND,Number=.,Type=Integer,Description="Confidence interval around END for symbolic structural variants">
+##INFO=<ID=CIEND,Number=.,Type=Integer,Description="Confidence interval around the inferred END for symbolic structural variants">
 \end{verbatim}
 \normalsize
 
@@ -1238,7 +1227,6 @@ VCF STRUCTURAL VARIANT EXAMPLE
 ##ALT=<ID=DEL,Description="Deletion">
 ##ALT=<ID=CNV,Description="Copy number variable region">
 ##INFO=<ID=MATEID,Number=A,Type=String,Description="ID of mate breakend">
-##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the longest variant described in this record">
 ##INFO=<ID=CIPOS,Number=.,Type=Integer,Description="Confidence interval around POS for symbolic structural variants">
 ##INFO=<ID=SVLEN,Number=A,Type=Integer,Description="Length of structural variant">
 ##INFO=<ID=CILEN,Number=.,Type=Integer,Description="Confidence interval for the SVLEN field">
@@ -1251,13 +1239,13 @@ VCF STRUCTURAL VARIANT EXAMPLE
 ##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
 #CHROM POS ID   REF ALT       QUAL FILTER INFO                                             FORMAT sample
 chrA   2   .    TGC T         .    .      EVENT=DEL_seq                                        GT    0/1
-chrA   2   .    T   <DEL>     .    .      SVLEN=2;SVCLAIM=DJ;EVENT=DEL_symbolic;END=4          GT    0/1
+chrA   2   .    T   <DEL>     .    .      SVLEN=2;SVCLAIM=DJ;EVENT=DEL_symbolic                GT    0/1
 chrA   2 delbp1 T   T[chrA:5[ .    .      MATEID=delbp2;EVENT=DEL_split_bp_cn                  GT    0/1
 chrA   2 delbp2 A   ]chrA:2]A .    .      MATEID=delbp1;EVENT=DEL_split_bp_cn                  GT    0/1
-chrA   2   .    T   <DEL>     .    .      SVLEN=2;SVCLAIM=D;EVENT=DEL_split_bp_cn;END=4        GT    0/1
+chrA   2   .    T   <DEL>     .    .      SVLEN=2;SVCLAIM=D;EVENT=DEL_split_bp_cn              GT    0/1
 chrA   5   .    G   GAAA      .    .      EVENT=homology_seq                                   GT    1/1
 chrA   5   .    G   <DUP>     .    .      SVLEN=3;CIPOS=0,5;EVENT=homology_dup                 GT    0/1
-chrA   14  .    T   <INS>     .    .      IMPRECISE;SVLEN=100;CILEN=-50,50;CIPOS=-10,10;END=14 GT    0/1
+chrA   14  .    T   <INS>     .    .      IMPRECISE;SVLEN=100;CILEN=-50,50;CIPOS=-10,10        GT    0/1
 chrA   14  .    G   .CCCCCCG  .    .      EVENT=single_breakend                                GT    0/1
 \end{verbatim}
 \end{landscape}
@@ -1500,7 +1488,7 @@ Either one uses the short hand notation described previously (recommended for si
 \small
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
-2 & 321681 & INV0 & T & $<$INV$>$ & 6 & PASS & END=421681 \\
+2 & 321681 & INV0 & T & $<$INV$>$ & 6 & PASS & SVLEN=100000 \\
 \end{tabular}
 \normalsize
 \vspace{0.3cm}
@@ -1583,7 +1571,7 @@ Another possible reason for calling single breakends is an observed but unexplai
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
 3 & 12665 & bnd\_X & A & .A & 6 & PASS & CIPOS=-50,50 \\
-3 & 12665 & . & A & $<$DUP$>$ & 14 & PASS & END=13686;CIPOS=-50,50;CIEND=-50,50 \\
+3 & 12665 & . & A & $<$DUP$>$ & 14 & PASS & SVCLAIM=D;SVLEN=1021;CIPOS=-50,50;CIEND=-50,50 \\
 3 & 13686 & bnd\_Y & T & T. & 6 & PASS & CIPOS=-50,50 \\
 \end{tabular}
 \normalsize
@@ -1596,7 +1584,7 @@ Finally, if an insertion is detected but only the first few base-pairs provided 
 \begin{tabular}{ l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO \\
 3 & 12665 & bnd\_X & A & .TGCA & 6 & PASS & CIPOS=-50,50 \\
-3 & 12665 & . & A & $<$DUP$>$ & 14 & PASS & END=13686;CIPOS=-50,50;CIEND=-50,50 \\
+3 & 12665 & . & A & $<$DUP$>$ & 14 & PASS & SVCLAIM=D;SVLEN=1021;CIPOS=-50,50;CIEND=-50,50 \\
 3 & 13686 & bnd\_Y & T & TCC. & 6 & PASS & CIPOS=-50,50 \\
 \end{tabular}
 \normalsize
@@ -1718,48 +1706,35 @@ All these novel haplotypes have in common their \textbf{haplotype ancestor} in t
 \pagebreak
 \subsection{Representing unspecified alleles and REF-only blocks (gVCF)}
 \label{unspecified-allele}
-In order to report sequencing data evidence for both variant and non-variant positions in the genome, the VCF specification allows to represent blocks of reference-only calls in a single record using the END INFO tag, an idea originally introduced by the gVCF file format\footnote{\url{https://help.basespace.illumina.com/articles/descriptive/gvcf-files/}}.
-
+In order to report sequencing data evidence for both variant and non-variant positions in the genome, the VCF specification allows to represent blocks of reference-only calls in a single record using the $<$*$>$ allele and the FORMAT LEN field.
 The convention adopted here is to represent reference evidence as likelihoods against an unknown alternate allele represented as $<$*$>$.
 Think of this as the likelihood for reference as compared to any other possible alternate allele (both SNP, indel, or otherwise).
-The $<$*$>$ representation is preferred over the symbolic allele $<$NON\_REF$>$.
 
-Example records are given below:
+Positions implicitly called by a preceding $<$*$>$ for a sample must have $GT$/$LGT$ set to the missing value (`.') and have no FORMAT fields other than $LA$ present.
+If $LA$ is present and a reference block start is being defined for a given sample, the $<$*$>$ allele must be included as an $LA$ allele for that sample even though the $LGT$ is $0/0$.
+
+Reference blocks were originally introduced by the gVCF file format\footnote{\url{https://help.basespace.illumina.com/articles/descriptive/gvcf-files/}}.
+Unfortunately, gVCF has issues scaling to many samples as the use of INFO END to encode the reference block length requires the reference block length to be the same for all samples.
+
+To retain backwards compatibility with with gVCF,
+the symbolic allele $<$NON\_REF$>$ should be treated as an alias of $<$*$>$
+and a missing FORMAT LEN field should be inferred from the INFO END tag if present.
+
+An example with both FORMAT LEN and INFO END is given below:
 \scriptsize
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Sample \\
-1 & 4370 & . & G & $<$*$>$ & . & . & END=4383 & GT:DP:GQ:MIN\_DP:PL & 0/0:25:60:23:0,60,900 \\
-1 & 4384 & . & C & $<$*$>$ & . & . & END=4388 & GT:DP:GQ:MIN\_DP:PL & 0/0:25:45:25:0,42,630 \\
-1 & 4389 & . & T & TC,$<$*$>$ & 213.73 & . & . & GT:DP:GQ:PL & 0/1:23:99:51,0,36,93,92,86 \\
-1 & 4390 & . & C & $<$*$>$ & . & . & END=4390 & GT:DP:GQ:MIN\_DP:PL & 0/0:26:0:26:0,0,315 \\
-1 & 4391 & . & C & $<$*$>$ & . & . & END=4395 & GT:DP:GQ:MIN\_DP:PL & 0/0:27:63:27:0,63,945 \\
-1 & 4396 & . & G & C,$<$*$>$ & 0 & . & . & GT:DP:GQ:P & 0/0:24:52:0,52,95,66,95,97 \\
-1 & 4397 & . & T & $<$*$>$ & . & . & END=4416 & GT:DP:GQ:MIN\_DP:PL & 0/0:22:14:22:0,15,593 \\
+1 & 4370 & . & G & $<$*$>$ & . & . & END=4383 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:25:60:23:0,60,900;14 \\
+1 & 4384 & . & C & $<$*$>$ & . & . & END=4388 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:25:45:25:0,42,630;4 \\
+1 & 4389 & . & T & TC,$<$*$>$ & 213.73 & . & . & GT:DP:GQ:PL:LEN & 0/1:23:99:51,0,36,93,92,86 \\
+1 & 4390 & . & C & $<$*$>$ & . & . & END=4390 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:26:0:26:0,0,315;1 \\
+1 & 4391 & . & C & $<$*$>$ & . & . & END=4395 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:27:63:27:0,63,945;4 \\
+1 & 4396 & . & G & C,$<$*$>$ & 0 & . & . & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:24:52:0,52,95,66,95,97 \\
+1 & 4397 & . & T & $<$*$>$ & . & . & END=4416 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:22:14:22:0,15,593;19 \\
 \end{tabular}
 \end{flushleft}
 \normalsize
-
-
-\subsubsection{Multi-sample REF-only blocks}
-When handling VCFs with multiple samples, the length of the $<$*$>$ reference blocks can differ.
-To account for this, a sample-specific END can be specified via the FORMAT END field.
-If any FORMAT END value exists, the INFO END must be present and equal the largest FORMAT END value.
-Positions implicitly called by a preceding $<$*$>$ for a sample must have $GT$/$LGT$ set to the missing value (`.') and have no other FORMAT fields present.
-If $AA$ is present and a reference block is defined for a given sample, the $<$*$>$ allele must be included as an $LA$ allele for that sample even though the $LGT$ is $0/0$.
-
-For example, the genotype-only version of the above example with a second sample with no variants:
-\scriptsize
-\begin{flushleft}
-\begin{tabular}{ l l l l l l l l }
-POS & REF & ALT & INFO & FORMAT & SampleA & SampleB \\
-4370 & G & $<$*$>$ & END=4416 & LGT:LA:END & 0/0:0,1:4388 & 0/0:0,1:4416 \\
-4389 & T & TC & . & LGT:LA:END & 0/1:0,1:. & . \\
-4390 & C & $<$*$>$ & END=4416 & LGT:LA:END & 0/0:0,1:4416 & . \\
-\end{tabular}
-\end{flushleft}
-\normalsize
-
 
 \pagebreak
 \subsection{Representing copy number variation}
@@ -1776,7 +1751,7 @@ For example, a region on chr1 from position 101 to 130 (both inclusive) with all
 
 \footnotesize
 \begin{verbatim}
-	chr1 100 . T <CNV>,<CNV> . . END=130;SVLEN=30,30;CN=1,2 GT:CN 1/2:3
+	chr1 100 . T <CNV>,<CNV> . . SVLEN=30,30;CN=1,2 GT:CN 1/2:3
 \end{verbatim}
 \normalsize
 
@@ -1789,7 +1764,7 @@ In the above example this corresponds to the following:
 
 \footnotesize
 \begin{verbatim}
-	chr1 100 . T <CNV> . . END=130;SVLEN=30 GT:CN .:3
+	chr1 100 . T <CNV> . . SVLEN=30 GT:CN .:3
 \end{verbatim}
 \normalsize
 
@@ -1835,7 +1810,6 @@ In the following example, the reference genome contains a $(CAG)_{10}$ repeat at
 \begin{landscape}
 \begin{verbatim}
 ##fileformat=VCFv4.5
-##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the longest variant described in this record">
 ##INFO=<ID=SVLEN,Number=A,Type=Integer,Description="Length of structural variant">
 ##INFO=<ID=CN,Number=A,Type=Float,Description="Copy number of allele">
 ##INFO=<ID=RN,Number=A,Type=Integer,Description="Total number of repeat sequences in this allele">
@@ -1851,7 +1825,7 @@ In the following example, the reference genome contains a $(CAG)_{10}$ repeat at
 ##FORMAT=<ID=CN,Number=1,Type=Float,Description="Copy number">
 ##ALT=<ID=CNV:TR,Description="Tandem repeat determined based on DNA abundance">
 #CHROM POS ID REF ALT QUAL FILTER INFO FORMAT sample
-chr1 100 cnv_notation T <CNV:TR>,<CNV:TR> . . END=130;SVLEN=30,30;CN=3,0.9666;RUS=CAG,CAG,CA,CAG;RN=1,3;RB=90,15,2,12  GT:PS:CN 1|2:100:3.9666
+chr1 100 cnv_notation T <CNV:TR>,<CNV:TR> . . SVLEN=30,30;CN=3,0.9666;RUS=CAG,CAG,CA,CAG;RN=1,3;RB=90,15,2,12  GT:PS:CN 1|2:100:3.9666
 chr1 117 precise_alt2 AG A . . GT:PS 0|1:100
 chr1 130 precise_alt1 G GCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAGCAG . . GT:PS 1|0:100
 \end{verbatim}
@@ -1880,7 +1854,7 @@ Note the following:
     \item RUL should be omitted when RUS is present (as it is redundant when RS is present).
     \item RUS or RUL must be specified for each $<$CNV:TR$>$.
     \item Support for multiple levels of repeat nesting (such as STRs within VNTRs) is limited to the RUL repeat unit length field which allows the overall length of each top-level repeat unit to be encoded.
-    \item The POS and END of $<$CNV:TR$>$ records should match the STR/VNTR reference catalog sizes for catalog-based callers.
+    \item The POS and SVLEN of $<$CNV:TR$>$ records should match the STR/VNTR reference catalog sizes for catalog-based callers.
     \item Variant normalisation has limited utility in regions of low complexity as almost identical haplotypes can have very different normalised representations.
 \end{itemize}
 
@@ -1903,7 +1877,7 @@ For example, if the total number of $CAG$ repeats at the above locus was at leas
 
 \footnotesize
 \begin{verbatim}
-chr1 100 . T <CNV:TR> . . END=130;SVLEN=30;CN=6.5;RUS=CAG;RUC=65;CIRUC=-15,. GT ./.
+chr1 100 . T <CNV:TR> . . SVLEN=30;CN=6.5;RUS=CAG;RUC=65;CIRUC=-15,. GT ./.
 \end{verbatim}
 \normalsize
 
@@ -1922,7 +1896,7 @@ For example, a 10,000bp VNTRs domain repeated 5 times, each repeat 500bp longer 
 
 \footnotesize
 \begin{verbatim}
-chr1 1000000 . T <CNV:TR> . . END=20000;SVLEN=20000;CN=1.25;RUL=10000;RUC=5;RUB=10000,10500,11000,11500,12000 GT ./.
+chr1 1000000 . T <CNV:TR> . . SVLEN=20000;CN=1.25;RUL=10000;RUC=5;RUB=10000,10500,11000,11500,12000 GT ./.
 \end{verbatim}
 \normalsize
 
@@ -2071,7 +2045,7 @@ CHROM     & int32\_t  & Given as an offset into the mandatory contig dictionary 
 POS       & int32\_t  & 0-based leftmost coordinate \\ \hline
 rlen      & int32\_t  & Length of the record as projected onto the reference sequence.
                         Must be the maximum of the length of the REF allele and the lengths
-                        inferred from the SVLEN/END of any symbolic alleles \\ \hline
+                        inferred from the SVLEN/LEN of any symbolic alleles \\ \hline
 QUAL      & float     & Variant quality; 0x7F800001 for a missing value \\ \hline
 n\_info   & uint16\_t & The number of INFO fields in this record \\ \hline
 n\_allele & uint16\_t & The number of REF+ALT alleles in this record \\ \hline
@@ -2612,7 +2586,8 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 
 \begin{itemize}
 	\item Added local allele support (FORMAT LA, LGT, LAD, LPL) to reduce the size of multi-sample VCFs and enable lossless merging.
-	\item Added FORMAT END to support sample-specific $<$*$>$ alleles.
+	\item Deprecated INFO END. It is now a computed field written only for backwards compatibility with older versions of VCF.
+	\item Added FORMAT LEN to support sample-specific $<$*$>$ alleles.
 \end{itemize}
 
 \subsection{Changes between VCFv4.4 and VCFv4.3}
