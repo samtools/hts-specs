@@ -192,9 +192,9 @@ Possible Types for FORMAT fields are: Integer, Float, Character, and String (thi
 The Number field is defined as per the INFO Number field with the following additional possibilities:
 
 \begin{itemize}
-  \item LA: Identical to A except the only alternate alleles defined in the $LA$ field are considered present.
-  \item LR: Identical to R except the only alternate alleles defined in the $LA$ field are considered present.
-  \item LG: Identical to G except the only alternate alleles defined in the $LA$ field are considered present.
+  \item LA: Identical to A except the only alternate alleles defined in the $LAA$ field are considered present.
+  \item LR: Identical to R except the only alternate alleles defined in the $LAA$ field are considered present.
+  \item LG: Identical to G except the only alternate alleles defined in the $LAA$ field are considered present.
   \item P: The field has one value for each allele value defined in $GT$/$LGT$.
 \end{itemize}
 
@@ -452,7 +452,7 @@ First a FORMAT field is given specifying the data types and order (colon-separat
 This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format.
 The first key must always be the genotype (GT) if it is present.
 If LGT key is present, it must precede all fields other than GT.
-If any local-allele field is present, LA must also be present and precede all fields other than GT and LGT.
+If any local-allele field is present, LAA must also be present and precede all fields other than GT and LGT.
 There are no required keys.
 Additional Genotype keys can be defined in the meta-information, however, software support for them is not guaranteed.
 
@@ -496,8 +496,8 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GQ		& 1			& Integer	& Conditional genotype quality \\
       GT		& 1			& String	& Genotype \\
       HQ		& 2			& Integer	& Haplotype quality \\
-      LA		& .			& Integer	& Indices into REF and ALT, indicating which alleles are relevant (local) for the current sample \\
-      LAA		& .			& Integer	& Reserved \\
+      LA		& .			& Integer	& Reserved \\
+      LAA		& .			& Integer	& Indices into ALT, indicating which alleles are relevant (local) for the current sample \\
       LAD		& LR    	& Integer	& Local-allele representation of AD \\
       LADF		& LR    	& Integer	& Local-allele representation of ADF \\
       LADR		& LR    	& Integer	& Local-allele representation of ADR \\
@@ -604,34 +604,34 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
     \end{itemize}
 
   \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
-  \item LA is a list of $n$ distinct integers, giving the indices of the alleles that are observed in the sample.
+  \item LAA is a list of $n$ distinct integers, giving the indices of the ALT alleles that are observed in the sample.
   In callsets with many samples, sites may grow to include numerous alternate alleles at the same POS.
   Usually, few of these alleles are actually observed in any one sample, but each genotype must supply fields like PL and AD for all of the alleles---a very inefficient representation as PL's size is quadratic in the allele count.
   Similarly, in rare sites, which can be the bulk of the sites, the vast majority of the samples are reference.
   To prevent this growth in VCF size, one can choose to specify the genotype, allele depth and the genotype likelihood against a subset of ``Local Alleles''.
-  LA is the index into REF and ALT, pointing out the alleles that are actually in-play for that sample and the order in which they are interpreted.
-  0 indicates the REF allele and must always be included as the first entry with the subsequent values being 1-based indexes into ALT.
+  LAA is the index into ALT, defining the alleles that are actually in-play for that sample and the order in which they are interpreted.
+  LAA is required when interpreting local-allele fields and must be present if any local-allele fields neither omitted nor MISSING.
+  Since BCF encodes zero length vectors as MISSING, a LAA containing the MISSING value should be treated as the empty vector (i.e. a REF-only site) if any local-allele fields are neither omitted nor MISSING.
   All specifications-defined A, R and G FORMAT fields have a local-allele equivalent that should be interpreted in the same manner as it's matching field except for the ALT alleles considered present and the order in which they are interpreted.
-  For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LA=[0,2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
+  For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LA=[2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
   In this case LGT=0/1 means that the sample is G/C.
   GQ is still the genotype quality, even when the genotype is given against the local alleles.
-  Note that when merging VCFs, reordering might be required and care needs to be taken to reorder all local-allele fields appropriately.
-  LA is required in order to interpret local-allele fields and must be present if any local-allele fields are present.
   In the following example, the records with the same POS encode the same information (some columns removed for clarity):
   \begin{tabular}[l]{llllll}
   	POS &REF&  ALT&FORMAT&sample\\
-  	1&G&A,C,T,\textless*\textgreater& LA:LGT:LAD:LPL&  0,2,4:1/1:20,30,10:90,80,0,100,110,120\\
+  	1&G&A,C,T,\textless*\textgreater& LGT:LAA:LAD:LPL&  1/1:2,4:20,30,10:90,80,0,100,110,120\\
   	1&G&A,C,T,\textless*\textgreater& GT:AD:PL&  2/2:20,.,30,.,10:90,.,.,80,.,0,.,.,.,.,100,.,110,.,120\\
-  	2&A&C,G,T,\textless*\textgreater& LA:GT:LAD:LPL& 0,3:0/3:15,25:40,0,80\\
+  	2&A&C,G,T,\textless*\textgreater& GT:LAA:LAD:LPL& 0/3:3:15,25:40,0,80\\
   	2&A&C,G,T,\textless*\textgreater& GT:AD:PL&0/3:15,.,.,25,.:40,.,.,.,.,.,0,.,.,80,.,.,.,.,.\\
-  	3&C&G,T,\textless*\textgreater& LA:LGT:LAD:LPL& 0,3:0/0:30,1:0,30,80\\
+  	3&C&G,T,\textless*\textgreater& LGT:LAA:LAD:LPL& 0/0:3:30,1:0,30,80\\
   	3&C&G,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,1:0,.,.,.,.,.,30,.,.,80\\
-  	4&G&A,T,\textless*\textgreater& LA:LGT:LAD:LPL& 0:0/0:30:0\\
+  	4&G&A,T,\textless*\textgreater& LGT:LAA:LAD:LPL& 0/0::30:0\\
   	4&G&A,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,.:0,.,.,.,.,.,.,.,.,.\\
   \end{tabular}
-  \item LGT: is the genotype, encoded as allele indexes separated by either of $/$ or $\mid$, as with GT, however, the indexes are into the alleles referenced by LA.
-  So that in the case that LA is 0,2,3, LGT=0/2 is equivalent to GT=0/3 and LGT=1/2 is equivalent to GT=2/3 (see example above).
-  \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LA local alleles.
+  Due to BCF encoding empty vectors as missing, implementation-defined Number=LA local-allele fields should not be used if distinguishing between zero-length data and missing data is required at REF-only sites.
+  \item LGT: is the genotype, encoded as allele indexes separated by either of $/$ or $\mid$, as with GT, however, the indexes are into the alleles referenced by LAA.
+  So that in the case that LAA is 2,3, LGT=0/2 is equivalent to GT=0/3 and LGT=1/2 is equivalent to GT=2/3 (see example above).
+  \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LAA local alleles.
   The precise ordering is defined in the GL paragraph.
   \item MQ (Integer): RMS mapping quality, similar to the version in the INFO field.
   \item PL (Integer): The phred-scaled genotype likelihoods rounded to the closest integer, and otherwise defined in the same way as the GL field.
@@ -1725,8 +1725,8 @@ In order to report sequencing data evidence for both variant and non-variant pos
 The convention adopted here is to represent reference evidence as likelihoods against an unknown alternate allele represented as $<$*$>$.
 Think of this as the likelihood for reference as compared to any other possible alternate allele (both SNP, indel, or otherwise).
 
-Positions implicitly called by a preceding $<$*$>$ for a sample must have $GT$/$LGT$ set to the missing value (`.') and have no FORMAT fields other than $LA$ present.
-If $LA$ is present and a reference block start is being defined for a given sample, the $<$*$>$ allele must be included as an $LA$ allele for that sample even though the $LGT$ is $0/0$.
+Positions implicitly called by a preceding $<$*$>$ for a sample must have $GT$/$LGT$ set to the missing value (`.') and have no FORMAT fields other than $LAA$ present.
+If $LAA$ is present and a reference block start is being defined for a given sample, the $<$*$>$ allele must be included as an $LAA$ allele for that sample even though the $GT$/$LGT$ is $0/0$.
 
 Reference blocks were originally introduced by the gVCF file format\footnote{\url{https://help.basespace.illumina.com/articles/descriptive/gvcf-files/}}.
 Unfortunately, gVCF has issues scaling to many samples as the use of INFO END to encode the reference block length requires the reference block length to be the same for all samples.
@@ -1735,7 +1735,7 @@ To retain backwards compatibility with with gVCF,
 the symbolic allele $<$NON\_REF$>$ should be treated as an alias of $<$*$>$
 and a missing FORMAT LEN field should be inferred from the INFO END tag if present.
 
-An example with both FORMAT LEN and INFO END is given below:
+An example with both FORMAT LEN and a redundant INFO END is given below:
 \scriptsize
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l l l }
@@ -2601,7 +2601,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 
 \begin{itemize}
 	\item Added Number=P support for fields with cardinality matching sample ploidy/local copy number.
-	\item Added local allele support (Number=LA, LG, LR; FORMAT LA, LAD, LADF, LADR, LEC, LGL, LGP, LGT, LPL, LPP) to reduce the size of multi-sample VCFs and enable lossless merging.
+	\item Added local allele support (Number=LA, LG, LR; FORMAT LAA, LAD, LADF, LADR, LEC, LGL, LGP, LGT, LPL, LPP) to reduce the size of multi-sample VCFs and enable lossless merging.
 	\item Deprecated INFO END. It is now a computed field written only for backwards compatibility with older versions of VCF.
 	\item Added FORMAT LEN to support sample-specific $<$*$>$ alleles.
 \end{itemize}
