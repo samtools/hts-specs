@@ -1,0 +1,10 @@
+##fileformat=VCFv4.5
+##FORMAT=<ID=LAA,Number=.,Type=Integer,Description="Indices into ALT, indicating which alleles are relevant (local) for the current sample">
+##FORMAT=<ID=LEC,Number=LA,Type=Integer,Description="Local-allele representation of EC">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	homref	het
+1	100	zero_length_EC	C	T	.	.	.	LAA:LEC	:	1:1
+1	200	missing_EC	C	T	.	.	.	LAA:LEC	:.	1:1
+1	400	omitted_EC	C	T	.	.	.	LAA:LEC	.	1:1
+1	300	missing_LAA	C	T	.	.	.	LAA:LEC	.:.	1:1
+1	500	omitted_or_zero_LAA	C	T	.	.	.	LAA:LEC		1:1
+1	600	inferred_LAA	C	T	.	.	.	LAA:LEC	.:	1:1
