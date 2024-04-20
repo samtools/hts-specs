@@ -2647,10 +2647,15 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \subsection{Changes between VCFv4.5 and VCFv4.4}
 
 \begin{itemize}
+	\item Added DNA base modification support (FORMAT M5mC, M5hmC, M5fC, M5caC, M5hmU, M5fU, M4mC, M6mA, etc).
+	\item Reserved all FORMAT keys starting with M then a digit as base modification fields.
 	\item Added Number=P support for fields with cardinality matching sample ploidy/local copy number.
 	\item Added local allele support (Number=LA, LG, LR; FORMAT LAA, LAD, LADF, LADR, LEC, LGL, LGP, LGT, LPL, LPP) to reduce the size of multi-sample VCFs and enable lossless merging.
 	\item Deprecated INFO END. It is now a computed field written only for backwards compatibility with older versions of VCF.
+	\item Updated BCF rlen field to reflect INFO END being a computed value.
 	\item Added FORMAT LEN to support sample-specific $<$*$>$ alleles.
+	\item Clarified that the header line is indeed mandatory
+	\item Clarified that $<$NON\_REF$>$ should be treated as an alias of $<$*$>$
 \end{itemize}
 
 \subsection{Changes between VCFv4.4 and VCFv4.3}
