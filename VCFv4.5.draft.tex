@@ -507,6 +507,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       LGT		& 1			& String 	& Local-allele representation of GT \\
       LPL		& LG    	& Integer	& Local-allele representation of PL \\
       LPP		& LG    	& Integer	& Local-allele representation of PP \\
+      M[0-9].*	& .         & Float     & Base modification abundance. Reserved keys include M5mC, M5hmC, M4mC, M6mA, and M5hmU. \\
       MQ		& 1			& Integer	& RMS mapping quality \\
       PL		& G			& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
       PP		& G			& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
@@ -633,6 +634,52 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   So that in the case that LAA is 2,3, LGT=0/2 is equivalent to GT=0/3 and LGT=1/2 is equivalent to GT=2/3 (see example above).
   \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LAA local alleles.
   The precise ordering is defined in the GL paragraph.
+  
+  \item M[0-9].* (Float): DNA base modification abundance.
+  
+  A large number of DNA base modifications occur naturally.
+  To ensure all base modifications can be represented in VCF, all FORMAT keys starting with $M$ and a digit are reserved.
+  Key names for base modifications correspond to their abbreviated name prefixed with an M.
+  These keys include M5mC, M5hmC, M5fC, M5caC, M5hmU, M5fU, M4mC, and M6mA.
+  
+  Values must be between 0 and 1 and indicate how prevalent the modified base is in the sample. 
+  The cardinality of these fields is determined by genotype, phasing, and number of possible base modifications for the corresponding alleles.
+  If any base modification key is present for a sample, GT/LGT must be defined for that sample.
+  The number of base modification values for a given allele is the number of bases on either strand in the allele sequence that could contain the base modification.
+  The order of the base modification values is the order that these bases occur in the allele.
+  For example, an allele of CGA has 2 M5mC values, the first defining the methylation rate on forward strand C at the first base pair, and the second defining the methylation rate for reverse strand C at the second base pair.
+  
+  The order and number of alleles encoded in these fields is determined by the order and phasing in the genotype.
+  Base modifications values for unphased allele values are encoded first and contain the concatenated base modification values for each distinct unphased allele value in the GT ordering of their first occurrence.
+  Phased allele values are encoded after unphased allele values and contain the concatenated base modification values for each phased allele in the GT ordering of their first occurrence.
+  MISSING allele values treated as containing no relevant bases thus encode no base modification values.
+  
+  Examples: 
+  
+  \vspace{0.5em}
+  \begin{tabular}{ l l l l l l l l l l}
+  	\#CHROM & POS & REF & ALT & FORMAT & SAMPLE\\
+  	chr & $10$ & C & A         & GT:M5mC       & \tt{0/1:0.95}\\
+  	chr & $20$ & C & CTAG      & GT:M5mC       & \tt{0/1:0,0.5,0.7}\\
+  	chr & $30$ & C & .         & GT:M5mC:M5hmC & \tt{0|0:0.9,0:0,0.1}\\
+  	chr & $40$ & C & A,T,G,ACG & GT:M5mC       & \tt{/3|1/0|4|0/0/3/1:0.25,0.1,0.5,0.6,.}\\
+  \end{tabular}
+  
+  The first record encodes a 95 percent methylation on the REF C.
+  Since the ALT A cannot be 5mC methylated, only one value is present.
+  
+  The second record encodes the methylation of the REF (since it's the first allele occurring the GT field), followed by the methylation values of the first and fourth base of the CTAG ALT.
+  
+  The third record encodes that both 5mC and 5hmC modifications are present at the homozygous C but they are mutually exclusive allele: 90 percent 5mC and no 5hmC on the first haplotype, and 10 percent 5hmC with no 5mC on the second haplotype.
+  
+  The fourth record demonstrates the encoded ordering of the methylation state of a partially phased locally-octoploid sample.
+  The first value encodes the 25 percent methylation of the 2 unphased copies of the G allele (encoded first since /3 occurs first in GT).
+  The second value encodes the 10 percent methylation of the 2 unphased copies of the C REF allele.
+  There exists an unphased A allele but that is not relevant to 5mC methylation so encodes no values.
+  Similarly the first phased allele is |1 but that also encodes no values.
+  The next two values encoding the 50 and 60 percent methylation rates of the second and third base pairs of the ACG allele.
+  The next value encodes an unknown methylation rate of the single phase C REF allele.
+    
   \item MQ (Integer): RMS mapping quality, similar to the version in the INFO field.
   \item PL (Integer): The phred-scaled genotype likelihoods rounded to the closest integer, and otherwise defined in the same way as the GL field.
   \item PP (Integer): The phred-scaled genotype posterior probabilities rounded to the closest integer, and otherwise defined in the same way as the GP field.
