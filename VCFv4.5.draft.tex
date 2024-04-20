@@ -189,7 +189,14 @@ FORMAT meta-information lines are structured lines with required fields ID, Numb
 \end{verbatim}
 
 Possible Types for FORMAT fields are: Integer, Float, Character, and String (this field is otherwise defined precisely as the INFO field).
-The Number field is defined as per the INFO Number field.
+The Number field is defined as per the INFO Number field with the following additional possibilities:
+
+\begin{itemize}
+  \item LOCAL-A: Identical to A except the only alternate alleles defined in the $LA$ field are considered present.
+  \item LOCAL-R: Identical to R except the only alternate alleles defined in the $LA$ field are considered present.
+  \item LOCAL-G: Identical to G except the only alternate alleles defined in the $LA$ field are considered present.
+  \item P: The field has one value for each allele value defined in $GT$/$LGT$.
+\end{itemize}
 
 \subsubsection{Alternative allele field format} \label{altfield}
 ALT meta-information lines are structured lines with require fields of ID and Description that describe the possible symbolic alternate alleles in the ALT column of the VCF records:
@@ -444,7 +451,8 @@ If genotype information is present, then the same types of data must be present 
 First a FORMAT field is given specifying the data types and order (colon-separated FORMAT keys matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate keys are not allowed).
 This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format.
 The first key must always be the genotype (GT) if it is present.
-If LGT key is present, it must be after GT (if also present) and before all others.
+If LGT key is present, it must precede all fields other than GT.
+If any local allele field is present, LA must also be present and precede all fields other than GT and LGT.
 There are no required keys.
 Additional Genotype keys can be defined in the meta-information, however, software support for them is not guaranteed.
 
@@ -475,30 +483,36 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       \caption{Reserved genotype keys}
       \label{table:reserved-genotypes}
   \endlastfoot
-      AD		& R		& Integer	& Read depth for each allele \\
-      ADF		& R		& Integer	& Read depth for each allele on the forward strand \\
-      ADR		& R		& Integer	& Read depth for each allele on the reverse strand \\
-      DP		& 1		& Integer	& Read depth \\
-      EC		& A		& Integer	& Expected alternate allele counts \\
-      LEN		& 1		& Integer	& Length of $<$*$>$ allele for a sample \\
-      FT		& 1		& String	& Filter indicating if this genotype was ``called'' \\
-      GL		& G		& Float		& Genotype likelihoods \\
-      GP		& G		& Float		& Genotype posterior probabilities \\
-      GQ		& 1		& Integer	& Conditional genotype quality \\
-      GT		& 1		& String	& Genotype \\
-      HQ		& 2		& Integer	& Haplotype quality \\
-      LA		& .		& Integer	& Strictly increasing indices into REF and ALT, indicating which alleles are relevant (local) for the current sample \\
-      LAD		& .		& Integer	& Read depth for each of the local alternate alleles listed in LA \\
-      LGT		& .		& String 	& Genotype against the local alleles \\
-      LPL		& .		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer for genotypes that involve the local alternative alleles listed in LA \\
-      MQ		& 1		& Integer	& RMS mapping quality \\
-      PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
-      PP		& G		& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
-      PQ		& 1		& Integer	& Phasing quality \\
-      PS		& 1		& Integer	& Phase set \\
-      PSL		& P		& String	& Phase set list \\
-      PSO		& P		& Integer	& Phase set list ordinal \\
-      PSQ		& P		& Integer	& Phase set list quality \\
+      AD		& R			& Integer	& Read depth for each allele \\
+      ADF		& R			& Integer	& Read depth for each allele on the forward strand \\
+      ADR		& R			& Integer	& Read depth for each allele on the reverse strand \\
+      DP		& 1			& Integer	& Read depth \\
+      EC		& A			& Integer	& Expected alternate allele counts \\
+      LEN		& 1			& Integer	& Length of $<$*$>$ reference block \\
+      FT		& 1			& String	& Filter indicating if this genotype was ``called'' \\
+      GL		& G			& Float		& Genotype likelihoods \\
+      GP		& G			& Float		& Genotype posterior probabilities \\
+      GQ		& 1			& Integer	& Conditional genotype quality \\
+      GT		& 1			& String	& Genotype \\
+      HQ		& 2			& Integer	& Haplotype quality \\
+      LA		& .			& Integer	& Strictly increasing indices into REF and ALT, indicating which alleles are relevant (local) for the current sample \\
+      LAD		& LOCAL-R	& Integer	& Local-allele representation of AD \\
+      LADF		& LOCAL-R	& Integer	& Local-allele representation of ADF \\
+      LADR		& LOCAL-R	& Integer	& Local-allele representation of ADR \\
+      LEC		& LOCAL-A	& Integer	& Local-allele representation of EC \\
+      LGL		& LOCAL-G	& Integer	& Local-allele representation of GL \\
+      LGP		& LOCAL-G	& Integer	& Local-allele representation of GP \\
+      LGT		& 1			& String 	& Local-allele representation of GT \\
+      LPL		& LOCAL-G	& Integer	& Local-allele representation of PL \\
+      LPP		& LOCAL-G	& Integer	& Local-allele representation of PP \\
+      MQ		& 1			& Integer	& RMS mapping quality \\
+      PL		& G			& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
+      PP		& G			& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
+      PQ		& 1			& Integer	& Phasing quality \\
+      PS		& 1			& Integer	& Phase set \\
+      PSL		& P			& String	& Phase set list \\
+      PSO		& P			& Integer	& Phase set list ordinal \\
+      PSQ		& P			& Integer	& Phase set list quality \\
 
 \end{longtable}
 
@@ -595,14 +609,12 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   To prevent this growth in VCF size, one can choose to specify the genotype, allele depth and the genotype likelihood against a subset of ``Local Alleles''.
   LA is the strictly increasing index into REF and ALT, pointing out the alleles that are actually in-play for that sample.
   0 indicates the REF allele and must always be included with the subsequent values being 1-based indexes into ALT.
-  LAD is the depth of the local alleles,
-  LPL is subset of the PL array that pertains to the alleles that are referred to by LA,
-  LGT is the genotype but referencing the local alleles rather than the global ones.
+  All specifications-defined A, R and G FORMAT fields have a local-allele equivalent that should be interpreted as the in the same manner as it's matching field except for the ALT alleles considered present.
   For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LA=[0,2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
   In this case LGT=0/1 means that the sample is G/C.
   GQ is still the genotype quality, even when the genotype is given against the local alleles.
-  Note that reordering might be required and care need to be taken to reorder LAD and LPL appropriately.
-  LA is required in order to interpret LAD, LPL, and LGT.
+  Note that when merging VCFs, reordering might be required and care needs to be taken to reorder all local-allele fields appropriately.
+  LA is required in order to interpret local-allele fields and must be present if any local-allele fields are present.
   In the following example, the records with the same POS encode the same information (some columns removed for clarity):
   \begin{tabular}[l]{llllll}
   	POS &REF&  ALT&FORMAT&sample\\
@@ -615,7 +627,6 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   	4&G&A,T,\textless*\textgreater& LA:LGT:LAD:LPL& 0:0/0:30:0\\
   	4&G&A,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,.:0,.,.,.,.,.,.,.,.,.\\
   \end{tabular}
-  \item LAD: is a list of $n$ integers giving read depths (as per AD) for each of the local alleles as listed in LA.
   \item LGT: is the genotype, encoded as allele indexes separated by either of $/$ or $\mid$, as with GT, however, the indexes are into the alleles referenced by LA.
   So that in the case that LA is 0,2,3, LGT=0/2 is equivalent to GT=0/3 and LGT=1/2 is equivalent to GT=2/3 (see example above).
   \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LA local alleles.
@@ -631,7 +642,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.
   If the genotype in the GT field is unphased, the corresponding PS field is ignored.
   The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required).
-  \item PSL (List of Strings): The list of phase sets, one for each allele specified in the {\tt GT} or {\tt LGT}. 
+  \item PSL (List of Strings): The list of phase sets, one for each allele value specified in the {\tt GT} or {\tt LGT}. 
   Unphased alleles (without a $\mid$ separator before them) must have the value '$.$' in their corresponding position in the list.
   Unlike {\tt PS} (which is defined per CHROM), records with different CHROM but the same phase-set name are considered part of the same phase set.
   If an implementation cannot guarantee uniqueness of phase-set names across the VCF (for example, phasing a streaming VCF or each CHROM is processed independently in parallel), new phase-set names should be of the format CHROM*POS*ALLELE-NUMBER of the ``first'' allele which is included in this set, with ALLELE-NUMBER being the index of the allele in the {\tt GT} field, since multiple distinct phase-sets could start at the same position. \footnote{The `*' character is used as a separator since `:' is not reserved in the CHROM column.}
@@ -685,7 +696,7 @@ ALT haplotypes are constructed from the REF haplotype by taking the REF allele b
 In essence, the VCF record specifies a-REF-t and the alternative haplotypes are a-ALT-t for each alternative allele.
 
 \subsection{VCF tag naming conventions}
-Several tag names follow conventions indicating how their values are represented numerically:
+Several tag names follow conventions which should be used for implementation-defined tag as well:
 \begin{itemize}
     \item The `L' suffix means \emph{likelihood} as log-likelihood in the sampling distribution, $\log_{10} \Pr(\mathrm{Data}|\mathrm{Model})$.
     Likelihoods are represented as $\log_{10}$ scale, thus they are negative numbers (e.g.\ GL, CNL).
@@ -696,6 +707,8 @@ Several tag names follow conventions indicating how their values are represented
     \item The `Q' suffix means \emph{quality} as log-complementary-phred-scale posterior probability, $-10 \log_{10} \Pr(\mathrm{Data}|\mathrm{Model})$, where the model is the most likely genotype that appears in the GT field.
     Examples are GQ, CNQ.
     The fixed site-level QUAL field follows the same convention (represented as a phred-scaled number).
+    
+	\item The `L' prefix indicates the local-allele equivalent of a Number=A, R or G field.
 \end{itemize}
 
 
@@ -2585,7 +2598,8 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \subsection{Changes between VCFv4.5 and VCFv4.4}
 
 \begin{itemize}
-	\item Added local allele support (FORMAT LA, LGT, LAD, LPL) to reduce the size of multi-sample VCFs and enable lossless merging.
+	\item Added Number=P support for fields with cardinality matching sample ploidy/local copy number.
+	\item Added local allele support (Number=LOCAL-A, LOCAL-G, LOCAL-R; FORMAT LA, LAD, LADF, LADR, LEC, LGL, LGP, LGT, LPL, LPP) to reduce the size of multi-sample VCFs and enable lossless merging.
 	\item Deprecated INFO END. It is now a computed field written only for backwards compatibility with older versions of VCF.
 	\item Added FORMAT LEN to support sample-specific $<$*$>$ alleles.
 \end{itemize}
