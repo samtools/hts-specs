@@ -603,14 +603,14 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   In the following example, the records with the same POS encode the same information (some columns removed for clarity):
   \begin{tabular}[l]{llllll}
   	POS &REF&  ALT&FORMAT&sample\\
-  	1&G&A,C,T,\textless*\textgreater& LAA:LGT:LAD:LPL&  2,4:1/1:20,30,10:90,80,0,100,110,120\\
+  	1&G&A,C,T,\textless*\textgreater& LAA:LGT:LAD:LPL&  0,2,4:1/1:20,30,10:90,80,0,100,110,120\\
   	1&G&A,C,T,\textless*\textgreater& GT:AD:PL&  2/2:20,.,30,.,10:90,.,.,80,.,0,.,.,.,.,100,.,110,.,120\\
   	2&A&C,G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 0,3:0/1:15,25:40,0,80\\
-  	2&A&C,G,T,\textless*\textgreater& GT:AD:PL&0/3:15,.,.,25,.:40,.,.,.,.,.,0,.,.,80,.,.,.,.\\
-  	3&C&G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 0,4:0/0:30,1:0,30,80\\
-  	3&C&G,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.1:0,.,.,.,.,.,.,.,.,.,30,.,.,.,80\\
+  	2&A&C,G,T,\textless*\textgreater& GT:AD:PL&0/3:15,.,.,25,.:40,.,.,.,.,.,0,.,.,80,.,.,.,.,.\\
+  	3&C&G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 0,3:0/0:30,1:0,30,80\\
+  	3&C&G,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,1:0,.,.,.,.,.,30,.,.,80\\
   	4&G&A,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 0:0/0:30:0\\
-  	4&G&A,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,..:0,.,.,.,.,.,.,.,.,.,.,.,.,.,.\\
+  	4&G&A,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,.:0,.,.,.,.,.,.,.,.,.\\
   \end{tabular}
   \item LAD: is a list of $n$ integers giving read depths (as per AD) for each of the local alleles as listed in LAA.
   \item LGT: is the genotype, encoded as allele indexes separated by either of $/$ or $\mid$, as with GT, however, the indexes are into the alleles referenced by LAA.
