@@ -484,10 +484,10 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       GQ		& 1		& Integer	& Conditional genotype quality \\
       GT		& 1		& String	& Genotype \\
       HQ		& 2		& Integer	& Haplotype quality \\
-      LAA		& .		& Integer	& Strictly increasing indices into REF and ALT, indicating which alternate alleles are relevant (local) for the current sample \\
-      LAD		& .		& Integer	& Read depth for each of the local alternate alleles listed in LAA \\
+      LA		& .		& Integer	& Strictly increasing indices into REF and ALT, indicating which alleles are relevant (local) for the current sample \\
+      LAD		& .		& Integer	& Read depth for each of the local alternate alleles listed in LA \\
       LGT		& .		& String 	& Genotype against the local alleles \\
-      LPL		& .		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer for genotypes that involve the local alternative alleles listed in LAA \\
+      LPL		& .		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer for genotypes that involve the local alternative alleles listed in LA \\
       MQ		& 1		& Integer	& RMS mapping quality \\
       PL		& G		& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
       PP		& G		& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
@@ -585,37 +585,37 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
     \end{itemize}
 
   \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
-  \item LAA is a sorted list of $n$ distinct integers, where $0 \le n \le \left|\mathrm{ALT}\right|$, giving the indices of the alleles that are observed in the sample.
+  \item LA is a sorted list of $n$ distinct integers, where $0 \le n \le \left|\mathrm{ALT}\right|$, giving the indices of the alleles that are observed in the sample.
   In callsets with many samples, sites may grow to include numerous alternate alleles at the same POS.
   Usually, few of these alleles are actually observed in any one sample, but each genotype must supply fields like PL and AD for all of the alleles---a very inefficient representation as PL's size is quadratic in the allele count.
   Similarly, in rare sites, which can be the bulk of the sites, the vast majority of the samples are reference.
   To prevent this growth in VCF size, one can choose to specify the genotype, allele depth and the genotype likelihood against a subset of ``Local Alleles''.
-  LAA is the strictly increasing index into REF and ALT, pointing out the alleles that are actually in-play for that sample.
-  0 indicates the REF allele and should always be included with the subsequent values being 1-based indexes into ALT.
+  LA is the strictly increasing index into REF and ALT, pointing out the alleles that are actually in-play for that sample.
+  0 indicates the REF allele and must always be included with the subsequent values being 1-based indexes into ALT.
   LAD is the depth of the local alleles,
-  LPL is subset of the PL array that pertains to the alleles that are referred to by LAA,
+  LPL is subset of the PL array that pertains to the alleles that are referred to by LA,
   LGT is the genotype but referencing the local alleles rather than the global ones.
-  For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LAA=[0,2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
+  For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LA=[0,2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
   In this case LGT=0/1 means that the sample is G/C.
   GQ is still the genotype quality, even when the genotype is given against the local alleles.
   Note that reordering might be required and care need to be taken to reorder LAD and LPL appropriately.
-  LAA is required in order to interpret LAD, LPL, and LGT.
+  LA is required in order to interpret LAD, LPL, and LGT.
   In the following example, the records with the same POS encode the same information (some columns removed for clarity):
   \begin{tabular}[l]{llllll}
   	POS &REF&  ALT&FORMAT&sample\\
-  	1&G&A,C,T,\textless*\textgreater& LAA:LGT:LAD:LPL&  0,2,4:1/1:20,30,10:90,80,0,100,110,120\\
+  	1&G&A,C,T,\textless*\textgreater& LA:LGT:LAD:LPL&  0,2,4:1/1:20,30,10:90,80,0,100,110,120\\
   	1&G&A,C,T,\textless*\textgreater& GT:AD:PL&  2/2:20,.,30,.,10:90,.,.,80,.,0,.,.,.,.,100,.,110,.,120\\
-  	2&A&C,G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 0,3:0/1:15,25:40,0,80\\
+  	2&A&C,G,T,\textless*\textgreater& LA:LGT:LAD:LPL& 0,3:0/1:15,25:40,0,80\\
   	2&A&C,G,T,\textless*\textgreater& GT:AD:PL&0/3:15,.,.,25,.:40,.,.,.,.,.,0,.,.,80,.,.,.,.,.\\
-  	3&C&G,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 0,3:0/0:30,1:0,30,80\\
+  	3&C&G,T,\textless*\textgreater& LA:LGT:LAD:LPL& 0,3:0/0:30,1:0,30,80\\
   	3&C&G,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,1:0,.,.,.,.,.,30,.,.,80\\
-  	4&G&A,T,\textless*\textgreater& LAA:LGT:LAD:LPL& 0:0/0:30:0\\
+  	4&G&A,T,\textless*\textgreater& LA:LGT:LAD:LPL& 0:0/0:30:0\\
   	4&G&A,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,.:0,.,.,.,.,.,.,.,.,.\\
   \end{tabular}
-  \item LAD: is a list of $n$ integers giving read depths (as per AD) for each of the local alleles as listed in LAA.
-  \item LGT: is the genotype, encoded as allele indexes separated by either of $/$ or $\mid$, as with GT, however, the indexes are into the alleles referenced by LAA.
-  So that in the case that LAA is 0,2,3, LGT=0/2 is equivalent to GT=0/3 and LGT=1/2 is equivalent to GT=2/3 (see example above).
-  \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LAA local alleles.
+  \item LAD: is a list of $n$ integers giving read depths (as per AD) for each of the local alleles as listed in LA.
+  \item LGT: is the genotype, encoded as allele indexes separated by either of $/$ or $\mid$, as with GT, however, the indexes are into the alleles referenced by LA.
+  So that in the case that LA is 0,2,3, LGT=0/2 is equivalent to GT=0/3 and LGT=1/2 is equivalent to GT=2/3 (see example above).
+  \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LA local alleles.
   The precise ordering is defined in the GL paragraph.
   \item MQ (Integer): RMS mapping quality, similar to the version in the INFO field.
   \item PL (Integer): The phred-scaled genotype likelihoods rounded to the closest integer, and otherwise defined in the same way as the GL field.
@@ -1746,16 +1746,16 @@ When handling VCFs with multiple samples, the length of the $<$*$>$ reference bl
 To account for this, a sample-specific END can be specified via the FORMAT END field.
 If any FORMAT END value exists, the INFO END must be present and equal the largest FORMAT END value.
 Positions implicitly called by a preceding $<$*$>$ for a sample must have $GT$/$LGT$ set to the missing value (`.') and have no other FORMAT fields present.
-If $LAA$ is present and a reference block is defined for a given sample, the $<$*$>$ allele must be included as an $LAA$ allele for that sample even though the $LGT$ is $0/0$.
+If $AA$ is present and a reference block is defined for a given sample, the $<$*$>$ allele must be included as an $LA$ allele for that sample even though the $LGT$ is $0/0$.
 
 For example, the genotype-only version of the above example with a second sample with no variants:
 \scriptsize
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l }
 POS & REF & ALT & INFO & FORMAT & SampleA & SampleB \\
-4370 & G & $<$*$>$ & END=4416 & LGT:LAA:END & 0/0:0,1:4388 & 0/0:0,1:4416 \\
-4389 & T & TC & . & LGT:LAA:END & 0/1:0,1:. & . \\
-4390 & C & $<$*$>$ & END=4416 & LGT:LAA:END & 0/0:0,1:4416 & . \\
+4370 & G & $<$*$>$ & END=4416 & LGT:LA:END & 0/0:0,1:4388 & 0/0:0,1:4416 \\
+4389 & T & TC & . & LGT:LA:END & 0/1:0,1:. & . \\
+4390 & C & $<$*$>$ & END=4416 & LGT:LA:END & 0/0:0,1:4416 & . \\
 \end{tabular}
 \end{flushleft}
 \normalsize
@@ -2611,7 +2611,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \subsection{Changes between VCFv4.5 and VCFv4.4}
 
 \begin{itemize}
-	\item Added local allele support (FORMAT LAA, LGT, LAD, LPL) to reduce the size of multi-sample VCFs and enable lossless merging.
+	\item Added local allele support (FORMAT LA, LGT, LAD, LPL) to reduce the size of multi-sample VCFs and enable lossless merging.
 	\item Added FORMAT END to support sample-specific $<$*$>$ alleles.
 \end{itemize}
 
