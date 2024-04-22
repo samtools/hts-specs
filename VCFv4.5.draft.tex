@@ -604,6 +604,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
 
   \item HQ (Integer): Haplotype qualities, two comma separated phred qualities.
   \item LAA is a list of $n$ distinct integers, giving the 1-based indices of the ALT alleles that are observed in the sample.
+  
   In callsets with many samples, sites may grow to include numerous alternate alleles at the same POS.
   Usually, few of these alleles are actually observed in any one sample, but each genotype must supply fields like PL and AD for all of the alleles---a very inefficient representation as PL's size is quadratic in the allele count.
   Similarly, in rare sites, which can be the bulk of the sites, the vast majority of the samples are reference.
@@ -627,6 +628,9 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   	4&G&A,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,.:0,.,.,.,.,.,.,.,.,.\\
   \end{tabular}
   Due to BCF encoding empty vectors as missing, implementation-defined Number=LA local-allele fields should not be used if distinguishing between zero-length data and missing data is required at REF-only sites.
+  
+  It is recommended that VCF libraries provide an API in which local allele encoding can be abstracted away from the API consumer and values accessed through their corresponding non-local key.
+  
   \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LAA local alleles.
   The precise ordering is defined in the GL paragraph.
   
