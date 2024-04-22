@@ -195,7 +195,7 @@ The Number field is defined as per the INFO Number field with the following addi
   \item LA: Identical to A except the only alternate alleles defined in the $LAA$ field are considered present.
   \item LR: Identical to R except the only alternate alleles defined in the $LAA$ field are considered present.
   \item LG: Identical to G except the only alternate alleles defined in the $LAA$ field are considered present.
-  \item P: The field has one value for each allele value defined in $GT$/$LGT$.
+  \item P: The field has one value for each allele value defined in $GT$.
 \end{itemize}
 
 \subsubsection{Alternative allele field format} \label{altfield}
@@ -451,8 +451,7 @@ If genotype information is present, then the same types of data must be present 
 First a FORMAT field is given specifying the data types and order (colon-separated FORMAT keys matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate keys are not allowed).
 This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format.
 The first key must always be the genotype (GT) if it is present.
-If LGT key is present, it must precede all fields other than GT.
-If any local-allele field is present, LAA must also be present and precede all fields other than GT and LGT.
+If any local-allele field is present, LAA must also be present and precede all fields other than GT.
 There are no required keys.
 Additional Genotype keys can be defined in the meta-information, however, software support for them is not guaranteed.
 
@@ -460,7 +459,7 @@ If any of the fields is missing, it is replaced with the MISSING value.
 For example if the FORMAT is GT:GQ:DP:HQ then $0\mid0:.:23:23,34$ indicates that GQ is missing.
 If a field contains a list of missing values, it can be represented either as a single MISSING value (`.') or as a list of missing values (e.g.\ `.,.,.' if the field was Number=3).
 Trailing fields can be dropped, with the exception of the GT field, which should always be present if specified in the FORMAT field.
-If a field and it's local-allele equivalent (including GT/LGT) are both defined they must encode identical information or one must ignored by containing the MISSING value or omitted.
+If a field and it's local-allele equivalent are both defined they must encode identical information or one must ignored by containing the MISSING value or omitted.
 
 
 As with the INFO field, there are several common, reserved keywords that are standards across the community.
@@ -504,7 +503,6 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       LEC		& LA     	& Integer	& Local-allele representation of EC \\
       LGL		& LG    	& Integer	& Local-allele representation of GL \\
       LGP		& LG    	& Integer	& Local-allele representation of GP \\
-      LGT		& 1			& String 	& Local-allele representation of GT \\
       LPL		& LG    	& Integer	& Local-allele representation of PL \\
       LPP		& LG    	& Integer	& Local-allele representation of PP \\
       M[0-9].*	& .         & Float     & Base modification abundance. Reserved keys include M5mC, M5hmC, M4mC, M6mA, and M5hmU. \\
@@ -615,23 +613,20 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   Since BCF encodes zero length vectors as MISSING, a LAA containing the MISSING value should be treated as the empty vector (i.e. a REF-only site) if any local-allele fields are neither omitted nor MISSING.
   All specifications-defined A, R and G FORMAT fields have a local-allele equivalent that should be interpreted in the same manner as it's matching field except for the ALT alleles considered present and the order in which they are interpreted.
   For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LAA=[2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
-  In this case LGT=0/1 means that the sample is G/C.
   GQ is still the genotype quality, even when the genotype is given against the local alleles.
   In the following example, the records with the same POS encode the same information (some columns removed for clarity):
   \begin{tabular}[l]{llllll}
   	POS &REF&  ALT&FORMAT&sample\\
-  	1&G&A,C,T,\textless*\textgreater& LGT:LAA:LAD:LPL&  1/1:2,4:20,30,10:90,80,0,100,110,120\\
+  	1&G&A,C,T,\textless*\textgreater& GT:LAA:LAD:LPL&  2/4:2,4:20,30,10:90,80,0,100,110,120\\
   	1&G&A,C,T,\textless*\textgreater& GT:AD:PL&  2/2:20,.,30,.,10:90,.,.,80,.,0,.,.,.,.,100,.,110,.,120\\
   	2&A&C,G,T,\textless*\textgreater& GT:LAA:LAD:LPL& 0/3:3:15,25:40,0,80\\
   	2&A&C,G,T,\textless*\textgreater& GT:AD:PL&0/3:15,.,.,25,.:40,.,.,.,.,.,0,.,.,80,.,.,.,.,.\\
-  	3&C&G,T,\textless*\textgreater& LGT:LAA:LAD:LPL& 0/0:3:30,1:0,30,80\\
+  	3&C&G,T,\textless*\textgreater& GT:LAA:LAD:LPL& 0/0:3:30,1:0,30,80\\
   	3&C&G,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,1:0,.,.,.,.,.,30,.,.,80\\
-  	4&G&A,T,\textless*\textgreater& LGT:LAA:LAD:LPL& 0/0::30:0\\
+  	4&G&A,T,\textless*\textgreater& GT:LAA:LAD:LPL& 0/0::30:0\\
   	4&G&A,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,.:0,.,.,.,.,.,.,.,.,.\\
   \end{tabular}
   Due to BCF encoding empty vectors as missing, implementation-defined Number=LA local-allele fields should not be used if distinguishing between zero-length data and missing data is required at REF-only sites.
-  \item LGT: is the genotype, encoded as allele indexes separated by either of $/$ or $\mid$, as with GT, however, the indexes are into the alleles referenced by LAA.
-  So that in the case that LAA is 2,3, LGT=0/2 is equivalent to GT=0/3 and LGT=1/2 is equivalent to GT=2/3 (see example above).
   \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LAA local alleles.
   The precise ordering is defined in the GL paragraph.
   
@@ -644,7 +639,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   
   Values must be between 0 and 1 and indicate how prevalent the modified base is in the sample. 
   The cardinality of these fields is determined by genotype, phasing, and number of possible base modifications for the corresponding alleles.
-  If any base modification key is present for a sample, GT/LGT must be defined for that sample.
+  If any base modification key is present for a sample, GT must be defined for that sample.
   The number of base modification values for a given allele is the number of bases on either strand in the allele sequence that could contain the base modification.
   The order of the base modification values is the order that these bases occur in the allele.
   For example, an allele of CGA has 2 M5mC values, the first defining the methylation rate on forward strand C at the first base pair, and the second defining the methylation rate for reverse strand C at the second base pair.
@@ -691,7 +686,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   All phased genotypes that do not contain a PS subfield are assumed to belong to the same phased set.
   If the genotype in the GT field is unphased, the corresponding PS field is ignored.
   The recommended convention is to use the position of the first variant in the set as the PS identifier (although this is not required).
-  \item PSL (List of Strings): The list of phase sets, one for each allele value specified in the {\tt GT} or {\tt LGT}. 
+  \item PSL (List of Strings): The list of phase sets, one for each allele value specified in the {\tt GT}. 
   Unphased alleles (without a $\mid$ separator before them) must have the value '$.$' in their corresponding position in the list.
   Unlike {\tt PS} (which is defined per CHROM), records with different CHROM but the same phase-set name are considered part of the same phase set.
   If an implementation cannot guarantee uniqueness of phase-set names across the VCF (for example, phasing a streaming VCF or each CHROM is processed independently in parallel), new phase-set names should be of the format CHROM*POS*ALLELE-NUMBER of the ``first'' allele which is included in this set, with ALLELE-NUMBER being the index of the allele in the {\tt GT} field, since multiple distinct phase-sets could start at the same position. \footnote{The `*' character is used as a separator since `:' is not reserved in the CHROM column.}
@@ -1772,8 +1767,8 @@ In order to report sequencing data evidence for both variant and non-variant pos
 The convention adopted here is to represent reference evidence as likelihoods against an unknown alternate allele represented as $<$*$>$.
 Think of this as the likelihood for reference as compared to any other possible alternate allele (both SNP, indel, or otherwise).
 
-Positions implicitly called by a preceding $<$*$>$ for a sample must have $GT$/$LGT$ set to the missing value (`.') and have no FORMAT fields other than $LAA$ present.
-If $LAA$ is present and a reference block start is being defined for a given sample, the $<$*$>$ allele must be included as an $LAA$ allele for that sample even though the $GT$/$LGT$ is $0/0$.
+Positions implicitly called by a preceding $<$*$>$ for a sample must have $GT$ set to the missing value (`.') and have no FORMAT fields other than $LAA$ present.
+If $LAA$ is present and a reference block start is being defined for a given sample, the $<$*$>$ allele must be included as an $LAA$ allele for that sample even though the $GT$ is $0/0$.
 
 Reference blocks were originally introduced by the gVCF file format\footnote{\url{https://help.basespace.illumina.com/articles/descriptive/gvcf-files/}}.
 Unfortunately, gVCF has issues scaling to many samples as the use of INFO END to encode the reference block length requires the reference block length to be the same for all samples.
@@ -2650,7 +2645,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 	\item Added DNA base modification support (FORMAT M5mC, M5hmC, M5fC, M5caC, M5hmU, M5fU, M4mC, M6mA, etc).
 	\item Reserved all FORMAT keys starting with M then a digit as base modification fields.
 	\item Added Number=P support for fields with cardinality matching sample ploidy/local copy number.
-	\item Added local allele support (Number=LA, LG, LR; FORMAT LAA, LAD, LADF, LADR, LEC, LGL, LGP, LGT, LPL, LPP) to reduce the size of multi-sample VCFs and enable lossless merging.
+	\item Added local allele support (Number=LA, LG, LR; FORMAT LAA, LAD, LADF, LADR, LEC, LGL, LGP, LPL, LPP) to reduce the size of multi-sample VCFs and enable lossless merging.
 	\item Deprecated INFO END. It is now a computed field written only for backwards compatibility with older versions of VCF.
 	\item Updated BCF rlen field to reflect INFO END being a computed value.
 	\item Added FORMAT LEN to support sample-specific $<$*$>$ alleles.
