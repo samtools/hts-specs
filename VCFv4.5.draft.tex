@@ -196,7 +196,55 @@ The Number field is defined as per the INFO Number field with the following addi
   \item LR: Identical to R except the only alternate alleles defined in the $LAA$ field are considered present.
   \item LG: Identical to G except the only alternate alleles defined in the $LAA$ field are considered present.
   \item P: The field has one value for each allele value defined in $GT$.
+  \item M: The field has one value for each possible base modification for the corresponding ChEBI ID.
 \end{itemize}
+
+The cardinality of M fields is determined by genotype and number of possible base modifications for the corresponding alleles.
+The ID of all M fields must end with A, C, G, T, U, or N which defines the base(s) that the modification can occur on.
+U must be treated as synonymous with T.
+If any base modification key is present for a sample, GT must be defined for that sample.
+The number of base modification values for a given allele is the number of bases on either strand in the allele sequence that could contain the base modification.
+The order of the base modification values is the order that these bases occur in the allele.
+For N base modifications, the field contains values for both the positive and negative strands with the negative strand value immediately after the positive strand value.
+For example, an allele of CGA has 2 M5mC values, the first defining the methylation rate on forward strand C at the first base pair, and the second defining the methylation rate for reverse strand C at the second base pair.
+
+The order and number of alleles encoded in these fields is determined by the order and phasing in the genotype.
+Base modifications values are encoded in their GT order with one value for each possible base modification in the concatenated genotype allele bases.
+Unphased allele values are aggregated and encoded at the position of the first occurrence of the unphased allele value.
+MISSING allele values and symbolic alleles are treated as containing no relevant bases thus encode no base modification values.
+
+Unstranded base modification information should be stored at the base with the lowest POS with the other values MISSING.
+Unstranded N base modifications should be stored on the positive strand with the values MISSING.
+For example, unstranded 5mC CpG methylation should be stored on the VCF recording containing the C with the M5mC value of the subsequent G set to MISSING or omitted entirely. Similarly, unstranded MxaoN values should be stored in the positive strand value with the negative strand value MISSING.
+
+Examples: 
+
+\vspace{0.5em}
+\begin{tabular}{ l l l l l l l l l l}
+	\#CHROM & POS & REF & ALT & FORMAT & SAMPLE\\
+	chr & $10$ & C & A         & GT:M5mC       & \tt{0/1:0.95}\\
+	chr & $20$ & C & CTAG      & GT:M5mC       & \tt{0/1:0,0.5,0.7}\\
+	chr & $30$ & C & .         & GT:M5mC:M5hmC & \tt{0|0:0.9,0:0,0.1}\\
+	chr & $40$ & C & A,T,G,ACG & GT:M5mC       & \tt{/3|1/0|4|0/0/3/1:0.25,0.1,0.5,0.6,.}\\
+\end{tabular}
+
+The first record encodes a 95 percent methylation on the REF C.
+Since the ALT A cannot be 5mC methylated, only one value is present.
+
+The second record encodes the methylation of the REF (since it's the first allele occurring the GT field), followed by the methylation values of the first and fourth base of the CTAG ALT.
+
+The third record encodes that both 5mC and 5hmC modifications are present at the homozygous C but they are mutually exclusive allele: 90 percent 5mC and no 5hmC on the first haplotype, and 10 percent 5hmC with no 5mC on the second haplotype.
+
+The fourth record demonstrates the encoded ordering of the methylation state of a partially phased locally-octoploid sample.
+The first   allele value (unphased G) encodes a 25 percent methylation of the 2 unphased copies of the G allele (encoded first since /3 occurs first in GT).
+The second  allele value (phased A)   is not relevant to 5mC methylation so there is nothing to encode.
+The third   allele value (unphased C) encodes a 10 precent methylation rate for both unphased copies of the C REF allele.
+The fourth  allele value (phased ACG) encoding the 50 and 60 percent methylation rates of the second and third base pairs of the ACG allele.
+The fifth   allele value (phased C)   encodes an unknown methylation rate of the single phased copy of the C REF allele.
+The sixth   allele value (unphased C) was already encoded as part of the third allele value so there is nothing more to encode.
+The seventh allele value (unphased G) was already encoded as part of the first allele value so there is nothing more to encode.
+The eighth  allele value (unphased A) is not relevant to 5mC methylation so there is nothing to encode.
+
 
 \subsubsection{Alternative allele field format} \label{altfield}
 ALT meta-information lines are structured lines with require fields of ID and Description that describe the possible symbolic alternate alleles in the ALT column of the VCF records:
@@ -505,10 +553,39 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       LGP		& LG    	& Integer	& Local-allele representation of GP \\
       LPL		& LG    	& Integer	& Local-allele representation of PL \\
       LPP		& LG    	& Integer	& Local-allele representation of PP \\
-      M[0-9]+	& .         & Float     & Abundance of base modification with the given ChEBI ID. \\
-      M5mC   	& .         & Float     & Alias for M27551 5-methylcytosine \\
-      M5hmC   	& .         & Float     & Alias for M76792 5-(hydroxymethyl)cytosine \\
-      M6mA   	& .         & Float     & Alias for M28871 6-methyladenine \\
+      M[0-9]+[ACGTUN]   & M & Float     & Fraction of bases modified with the given ChEBI ID. \\
+      DPM[0-9]+[ACGTUN]	& M & Integer   & Total read depth for reads able to detect the base modification with the given ChEBI ID. \\
+      ADM[0-9]+[ACGTUN]	& M & Integer   & Read depth for reads with the base modification with the given ChEBI ID. \\
+      M5mC   	& M         & Float     & Alias for M27551C 5-Methylcytosine \\
+      DPM5mC   	& M         & Integer   & Alias for DPM27551C \\
+      ADM5mC   	& M         & Integer   & Alias for ADM27551C \\
+      M5hmC   	& M         & Float     & Alias for M76792C 5-Hydroxymethylcytosine \\
+      DPM5hmC   & M         & Integer   & Alias for DPM76792C \\
+      ADM5hmC   & M         & Integer   & Alias for ADM76792C \\
+      M5fC   	& M         & Float     & Alias for M76794C 5-Formylcytosine \\
+      DPM5fC   	& M         & Integer   & Alias for DPM76794C \\
+      ADM5fC   	& M         & Integer   & Alias for ADM76794C \\
+      M5caC   	& M         & Float     & Alias for M76793C 5-Carboxylcytosine \\
+      DPM5caC   & M         & Integer   & Alias for DPM76793C \\
+      ADM5caC   & M         & Integer   & Alias for ADM76793C \\
+      M5hmU   	& M         & Float     & Alias for M16964T 5-Hydroxymethyluracil \\
+      DPM5hmU   & M         & Integer   & Alias for DPM16964T \\
+      ADM5hmU	& M         & Integer   & Alias for ADM16964T \\
+      M5fU   	& M         & Float     & Alias for M80961T 5-Formyluracil \\
+      DPM5fU  	& M         & Integer   & Alias for DPM80961T \\
+      ADM5fU  	& M         & Integer   & Alias for ADM80961T \\
+      M5caU   	& M         & Float     & Alias for M17477T 5-Carboxyluracil \\
+      DPM5caU   & M         & Integer   & Alias for DPM17477T \\
+      ADM5caU   & M         & Integer   & Alias for ADM17477T \\
+      M6mA   	& M         & Float     & Alias for M28871A 6-Methyladenine \\
+      DPM6mA   	& M         & Integer   & Alias for DPM28871A \\
+      ADM6mA   	& M         & Integer   & Alias for ADM28871A \\
+      M8oxoG   	& M         & Float     & Alias for M44605G 8-Oxoguanine \\
+      DPM8oxoG  & M         & Integer   & Alias for DPM44605G \\
+      ADM8oxoG  & M         & Integer   & Alias for ADM44605G \\
+      MXaoN   	& M         & Float     & Alias for M18107N Xanthosine \\
+      DPMXaoN   & M         & Integer   & Alias for DPM18107N \\
+      ADMXaoN   & M         & Integer   & Alias for ADM18107N \\
       MQ		& 1			& Integer	& RMS mapping quality \\
       PL		& G			& Integer	& Phred-scaled genotype likelihoods rounded to the closest integer \\
       PP		& G			& Integer	& Phred-scaled genotype posterior probabilities rounded to the closest integer \\
@@ -637,70 +714,46 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LAA local alleles.
   The precise ordering is defined in the GL paragraph.
   
-  \item M[0-9]+ (Float): DNA or RNA base modification abundance for the modification with the given ChEBI ID.
+  \item M[0-9]+[ACGTUN] (Float): Fraction of DNA or RNA bases modified with the given ChEBI ID.
   
-  To ensure all base modifications can be represented in VCF, all FORMAT keys starting with $M$ followed by a number are reserved.
+  All FORMAT keys matching the given regular expression are considered reserved keys, even for ChEBI IDs that do not correspond to valid base modifications.
   
-  The alias keys M5mC, M5hmC, and M6mA should be used instead of their corresponding keys ()M27551, M76792, and M28871 respectively).
+  The alias keys M5mC, M5hmC, M5fC, M5caC, M5hmU, M5fU, M5caU, M6mA, M8oxoG, and MxaoN should be used instead of their corresponding ChEBI keys.
   
-  Values must be between 0 and 1 and indicate how prevalent the modified base is in the sample. 
-  The cardinality of these fields is determined by genotype and number of possible base modifications for the corresponding alleles.
-  If any base modification key is present for a sample, GT must be defined for that sample.
-  The number of base modification values for a given allele is the number of bases on either strand in the allele sequence that could contain the base modification.
-  The order of the base modification values is the order that these bases occur in the allele.
-  For example, an allele of CGA has 2 M5mC values, the first defining the methylation rate on forward strand C at the first base pair, and the second defining the methylation rate for reverse strand C at the second base pair.
+  Values must be between 0 and 1 and indicate how prevalent the modified base is in the sample.
   
-  The order and number of alleles encoded in these fields is determined by the order and phasing in the genotype.
-  Base modifications values are encoded in their GT order.
-  Repeated unphased allele values are aggregated and encoded at the position of the first occurrence of the unphased allele value.
-  MISSING allele values and symbolic alleles are treated as containing no relevant bases thus encode no base modification values.
-  
-  Examples: 
-  
-  \vspace{0.5em}
-  \begin{tabular}{ l l l l l l l l l l}
-  	\#CHROM & POS & REF & ALT & FORMAT & SAMPLE\\
-  	chr & $10$ & C & A         & GT:M5mC       & \tt{0/1:0.95}\\
-  	chr & $20$ & C & CTAG      & GT:M5mC       & \tt{0/1:0,0.5,0.7}\\
-  	chr & $30$ & C & .         & GT:M5mC:M5hmC & \tt{0|0:0.9,0:0,0.1}\\
-  	chr & $40$ & C & A,T,G,ACG & GT:M5mC       & \tt{/3|1/0|4|0/0/3/1:0.25,0.1,0.5,0.6,.}\\
-  \end{tabular}
-  
-  The first record encodes a 95 percent methylation on the REF C.
-  Since the ALT A cannot be 5mC methylated, only one value is present.
-  
-  The second record encodes the methylation of the REF (since it's the first allele occurring the GT field), followed by the methylation values of the first and fourth base of the CTAG ALT.
-  
-  The third record encodes that both 5mC and 5hmC modifications are present at the homozygous C but they are mutually exclusive allele: 90 percent 5mC and no 5hmC on the first haplotype, and 10 percent 5hmC with no 5mC on the second haplotype.
-  
-  The fourth record demonstrates the encoded ordering of the methylation state of a partially phased locally-octoploid sample.
-  The first   allele value (unphased G) encodes a 25 percent methylation of the 2 unphased copies of the G allele (encoded first since /3 occurs first in GT).
-  The second  allele value (phased A)   is not relevant to 5mC methylation so there is nothing to encode.
-  The third   allele value (unphased C) encodes a 10 precent methylation rate for both unphased copies of the C REF allele.
-  The fourth  allele value (phased ACG) encoding the 50 and 60 percent methylation rates of the second and third base pairs of the ACG allele.
-  The fifth   allele value (phased C)   encodes an unknown methylation rate of the single phased copy of the C REF allele.
-  The sixth   allele value (unphased C) was already encoded as part of the third allele value so there is nothing more to encode.
-  The seventh allele value (unphased G) was already encoded as part of the first allele value so there is nothing more to encode.
-  The eighth  allele value (unphased A) is not relevant to 5mC methylation so there is nothing to encode.
-    
-  \item M5mC (Float): Alias for M27551 (5-methylcytosine).
+  When base modification information is present in the FORMAT field of a reference block record, the base modification information apply to all applicable bases covered by that reference block.
 
-  This key must be treated as an alias of M27551.
-  This key should be used instead of M27551.
-  This key must not co-occur with M27551 in the same record.
-  
-  \item M5hmC (Float): Alias for M76792 (5-(hydroxymethyl)cytosine).
-  
-  This key must be treated as an alias of M76792.
-  This key should be used instead of M76792.
-  This key must not co-occur with M76792 in the same record.
-  
-  \item M6mA (Float): Alias for M28871 (6-methyladenine).
-  
-  This key must be treated as an alias of M28871.
-  This key should be used instead of M28871.
-  This key must not co-occur with M28871 in the same record.  
-    
+  \item DPM[0-9]+[ACGTUN] (Integer): Total read depth for reads able to detect the base modification with the given ChEBI ID.
+
+  All FORMAT keys matching the given regular expression are considered reserved keys, even for ChEBI IDs that do not correspond to valid base modifications.
+
+  The alias keys DPM5mC, DPM5hmC, DPM5fC, DPM5caC, DPM5hmU, DPM5fU, DPM5caU, DPM6mA, DPM8oxoG, and DPMxaoN should be used instead of their corresponding ChEBI keys.
+
+  \item ADM[0-9]+[ACGTUN] (Integer): Read depth for reads with the base modification with the given ChEBI ID.
+
+  All FORMAT keys matching the given regular expression are considered reserved keys, even for ChEBI IDs that do not correspond to valid base modifications.
+
+  The alias keys ADM5mC, ADM5hmC, ADM5fC, ADM5caC, ADM5hmU, ADM5fU, ADM5caU, ADM6mA, ADM8oxoG, and ADMxaoN should be used instead of their corresponding ChEBI keys.
+
+  Note that ADFM[0-9]+[ACGTUN] and ADRM[0-9]+[ACGTUN] are not reserved fields as Type=M fields are intrinsically stranded and unstranded information should be encoded using the MISSING value.
+  Unstranded CpG methylation counts should be placed in the C position with value for the subsequent G base MISSING.
+  Stranded CpG methylation counts should be placed in both values with the C position effectively encoding ADF, and the G effectively encoding ADR due to the strand the C in the CpG occurs on.
+
+  The follow example contains unphased, unstranded CpG methylation information for the CpG at chr:10-11 and phased, stranded CpG methylation information for the CpG at chr:20-21.
+
+\vspace{0.5em}
+\begin{tabular}{ l l l l l l l l l l}
+	\#CHROM & POS & REF & ALT & FORMAT & SAMPLE\\
+	chr & $10$ & C & .         & GT:M5mC:DPM5mC:ADM5mC       & \tt{0/0:0.5:2:1}\\
+	chr & $11$ & G & .         & GT:M5mC:DPM5mC:ADM5mC       & \tt{0/0:.:.:.}\\
+	chr & $20$ & C & .         & GT:PS:M5mC:DPM5mC:ADM5mC       & \tt{0|0:20:0.75,.:4,.:3,.}\\
+	chr & $21$ & G & A         & GT:PS:M5mC:DPM5mC:ADM5mC       & \tt{0|1:20:0.33:3:1}\\
+\end{tabular}
+
+  Note that in the above example, the second record could be omitted entirely without any change in meaning.
+
+
   \item MQ (Integer): RMS mapping quality, similar to the version in the INFO field.
   \item PL (Integer): The phred-scaled genotype likelihoods rounded to the closest integer, and otherwise defined in the same way as the GL field.
   \item PP (Integer): The phred-scaled genotype posterior probabilities rounded to the closest integer, and otherwise defined in the same way as the GP field.
@@ -1819,6 +1872,8 @@ An example with both FORMAT LEN and a redundant INFO END is given below:
 \end{flushleft}
 \normalsize
 
+When base modification information is present in the FORMAT field of a reference block record, the base modification information apply to all applicable bases covered by that reference block.
+
 \pagebreak
 \subsection{Representing copy number variation}
 \label{cnv}
@@ -2668,7 +2723,7 @@ BCF2 files are expected to be indexed through the same index scheme, section~4 a
 \subsection{Changes between VCFv4.5 and VCFv4.4}
 
 \begin{itemize}
-	\item Added base modification support (FORMAT M5mC, M5hmC, M6mA).
+	\item Added base modification support (FORMAT M5mC, M5hmC, M6mA, etc.).
 	\item Reserved all FORMAT keys of the form $M[0-9]+$ as base modification fields.
 	\item Added Number=P support for fields with cardinality matching sample ploidy/local copy number.
 	\item Added local allele support (Number=LA, LG, LR; FORMAT LAA, LAD, LADF, LADR, LEC, LGL, LGP, LPL, LPP) to reduce the size of multi-sample VCFs and enable lossless merging.
