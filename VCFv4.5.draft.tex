@@ -553,9 +553,9 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
       LGP		& LG    	& Integer	& Local-allele representation of GP \\
       LPL		& LG    	& Integer	& Local-allele representation of PL \\
       LPP		& LG    	& Integer	& Local-allele representation of PP \\
-      M[0-9]+[ACGTUN]    & M & Float     & Fraction of bases modified with the given ChEBI ID. \\
-      DPM[0-9]+[ACGTUN]	& M & Float     & Total read depth for reads able to detect the base modification with the given ChEBI ID. \\
-      ADM[0-9]+[ACGTUN]	& M & Float     & Read depth for reads with the base modification with the given ChEBI ID. \\
+      M[0-9]+[ACGTUN]   & M & Float     & Fraction of bases modified with the given ChEBI ID. \\
+      DPM[0-9]+[ACGTUN]	& M & Integer   & Total read depth for reads able to detect the base modification with the given ChEBI ID. \\
+      ADM[0-9]+[ACGTUN]	& M & Integer   & Read depth for reads with the base modification with the given ChEBI ID. \\
       M5mC   	& M         & Float     & Alias for M27551C 5-Methylcytosine \\
       DPM5mC   	& M         & Integer   & Alias for DPM27551C \\
       ADM5mC   	& M         & Integer   & Alias for ADM27551C \\
@@ -714,29 +714,31 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item LPL: is a list of $n \choose \mathrm{Ploidy}$ integers giving phred-scaled genotype likelihoods (rounded to the closest integer; as per PL) for all possible genotypes given the set of alleles defined in the LAA local alleles.
   The precise ordering is defined in the GL paragraph.
   
-  \item M[0-9]+[ACGTN] (Float): Fraction of DNA or RNA bases modified with the given ChEBI ID.
+  \item M[0-9]+[ACGTUN] (Float): Fraction of DNA or RNA bases modified with the given ChEBI ID.
   
-  To all FORMAT keys matching the given regular expression are considered reserved keys, even for ChEBI IDs that do not correspond to a valid base modifications.
+  All FORMAT keys matching the given regular expression are considered reserved keys, even for ChEBI IDs that do not correspond to valid base modifications.
   
   The alias keys M5mC, M5hmC, M5fC, M5caC, M5hmU, M5fU, M5caU, M6mA, M8oxoG, and MxaoN should be used instead of their corresponding ChEBI keys.
   
-  Values must be between 0 and 1 and indicate how prevalent the modified base is in the sample. 
+  Values must be between 0 and 1 and indicate how prevalent the modified base is in the sample.
+  
+  When base modification information is present in the FORMAT field of a reference block record, the base modification information apply to all applicable bases covered by that reference block.
 
-  \item DPM[0-9]+[ACGTN] (Integer): Total read depth for reads able to detect the base modification with the given ChEBI ID.
+  \item DPM[0-9]+[ACGTUN] (Integer): Total read depth for reads able to detect the base modification with the given ChEBI ID.
 
-  To all FORMAT keys matching the given regular expression are considered reserved keys, even for ChEBI IDs that do not correspond to a valid base modifications.
+  All FORMAT keys matching the given regular expression are considered reserved keys, even for ChEBI IDs that do not correspond to valid base modifications.
 
   The alias keys DPM5mC, DPM5hmC, DPM5fC, DPM5caC, DPM5hmU, DPM5fU, DPM5caU, DPM6mA, DPM8oxoG, and DPMxaoN should be used instead of their corresponding ChEBI keys.
 
-  \item ADM[0-9]+[ACGTN] (Integer): Read depth for reads with the base modification with the given ChEBI ID.
+  \item ADM[0-9]+[ACGTUN] (Integer): Read depth for reads with the base modification with the given ChEBI ID.
 
-  To all FORMAT keys matching the given regular expression are considered reserved keys, even for ChEBI IDs that do not correspond to a valid base modifications.
+  All FORMAT keys matching the given regular expression are considered reserved keys, even for ChEBI IDs that do not correspond to valid base modifications.
 
   The alias keys ADM5mC, ADM5hmC, ADM5fC, ADM5caC, ADM5hmU, ADM5fU, ADM5caU, ADM6mA, ADM8oxoG, and ADMxaoN should be used instead of their corresponding ChEBI keys.
 
-  Note that M[0-9]+[ACGTN]ADF and M[0-9]+[ACGTN]ADR are not reserved fields as Type=M fields are intrinsically stranded and unstranded information can be encoded using the MISSING value.
-  For example, unstranded CpG methylation counts are placed in the C position with value for the subsequent G base MISSING.
-  Stranded CpG methylation counts are placed in both values with The C position encoding ADF, and the G encoding the ADR due to the strand the C in the CpG occurs on.
+  Note that ADFM[0-9]+[ACGTUN] and ADRM[0-9]+[ACGTUN] are not reserved fields as Type=M fields are intrinsically stranded and unstranded information should be encoded using the MISSING value.
+  Unstranded CpG methylation counts should be placed in the C position with value for the subsequent G base MISSING.
+  Stranded CpG methylation counts should be placed in both values with the C position effectively encoding ADF, and the G effectively encoding ADR due to the strand the C in the CpG occurs on.
 
   The follow example contains unphased, unstranded CpG methylation information for the CpG at chr:10-11 and phased, stranded CpG methylation information for the CpG at chr:20-21.
 
@@ -748,6 +750,8 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
 	chr & $20$ & C & .         & GT:PS:M5mC:DPM5mC:ADM5mC       & \tt{0|0:20:0.75,.:4,.:3,.}\\
 	chr & $21$ & G & A         & GT:PS:M5mC:DPM5mC:ADM5mC       & \tt{0|1:20:0.33:3:1}\\
 \end{tabular}
+
+  Note that in the above example, the second record could be omitted entirely without any change in meaning.
 
 
   \item MQ (Integer): RMS mapping quality, similar to the version in the INFO field.
@@ -1867,6 +1871,8 @@ An example with both FORMAT LEN and a redundant INFO END is given below:
 \end{tabular}
 \end{flushleft}
 \normalsize
+
+When base modification information is present in the FORMAT field of a reference block record, the base modification information apply to all applicable bases covered by that reference block.
 
 \pagebreak
 \subsection{Representing copy number variation}
