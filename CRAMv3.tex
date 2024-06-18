@@ -361,6 +361,13 @@ Figure 1: A CRAM file consists of a file definition, followed by a header contai
 
 Containers consist of one or more blocks. The first container, called the CRAM header container,
 is used to store a textual header as described in the SAM specification (see the section 7.1).
+This container may have additional padding bytes present for purposes
+of permitting inline rewriting of the SAM header with small changes in
+size. These padding bytes are undefined, but we recommend filling with
+nuls.  The padding bytes can either be in explicit uncompressed Block
+structures, or as unallocated extra space where the size of the
+container is larger than the combined size of blocks held within it.
+
 
 \begin{center}
 \begin{tikzpicture}[
@@ -377,12 +384,14 @@ is used to store a textual header as described in the SAM specification (see the
 \nodepart[text width=8em]{six}CRAM EOF Container
 };
 
-\node (header) [boxes=2,below=1 of file.three south, text width=15em] {
+\node (header) [boxes=3,below=1 of file.three south, text width=12em] {
 \nodepart{one}Block 1:\break
 CRAM Header\break
-(optionally compressed)
+(optionally compressed)\
 \nodepart{two}Optional Block 2:\break
 nul padding bytes\break
+(uncompressed)\
+\nodepart{three}Optional padding:\break
 (uncompressed)
 };
 \draw (file.one split south) to (header.north west);
@@ -548,7 +557,9 @@ structure where the container content is stored in the `blocks' field:
 \textbf{Data type} & \textbf{Name} & \textbf{Value}
 \tabularnewline
 \hline
-int32 & length & the sum of the lengths of all blocks in this container (headers and data); 
+int32 & length & the sum of the lengths of all blocks in this
+container (headers and data) and any padding bytes (CRAM header
+container only);
 equal to the total byte length of the container minus the byte length of this header structure\tabularnewline
 \hline
 itf8 & reference sequence id & reference sequence identifier  or\linebreak{}
