@@ -189,7 +189,11 @@ FORMAT meta-information lines are structured lines with required fields ID, Numb
 \end{verbatim}
 
 Possible Types for FORMAT fields are: Integer, Float, Character, and String (this field is otherwise defined precisely as the INFO field).
-The Number field is defined as per the INFO Number field.
+The Number field is defined as per the INFO Number field with the following additional possibilities:
+
+\begin{itemize}
+	\item P: The field has one value for each allele value defined in $GT$.
+\end{itemize}
 
 \subsubsection{Alternative allele field format} \label{altfield}
 ALT meta-information lines are structured lines with require fields of ID and Description that describe the possible symbolic alternate alleles in the ALT column of the VCF records:
@@ -2548,6 +2552,12 @@ Implementations should perform BGZF encoding and must support the reading of bot
 BCF2 files are expected to be indexed through the same index scheme, section~4 as BAM files and other block-compressed files with BGZF.
 
 \section{List of changes}
+
+\subsection{VCFv4.4 Errata}
+
+\begin{itemize}
+	\item Type=P added to FORMAT field type list (used by PSL/PSO fields)
+\end{itemize}
 
 \subsection{Changes between VCFv4.4 and VCFv4.3}
 
