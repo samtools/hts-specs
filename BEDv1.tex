@@ -75,7 +75,7 @@ This printing is version~\commitdesc\ from that repository, last modified on the
 
 \section{Specification}
 
-\Ac{BED} is a whitespace-delimited file format, where each~\textbf{file} consists of zero or more~\textbf{line}s.\footnote{``Frequently Asked Questions: Data File Formats.'' \ac{UCSC} Genome Browser FAQ, \url{https://genome.ucsc.edu/FAQ/FAQformat.html}}
+\Ac{BED} is a whitespace-delimited file format, where each~\textbf{file} consists of one or more~\textbf{line}s.\footnote{``Frequently Asked Questions: Data File Formats.'' \ac{UCSC} Genome Browser FAQ, \url{https://genome.ucsc.edu/FAQ/FAQformat.html}}
 Data are in~\textbf{data line}s, which describe discrete genomic~\textbf{feature}s by physical start and end position on a linear~\textbf{chromosome}.
 The file extension for the \ac{BED} format is~\texttt{.bed}.
 
@@ -170,8 +170,8 @@ This document uses several typographic conventions~(\autoref{tab:typographic-con
   Sequence of one or more~\textbf{line}s.
 
 \item[line:]
-  String terminated by a~\textbf{line separator}, in one of the following classes.
-  Either a~\textbf{data line}, a~\textbf{comment line}, or a~\textbf{blank line}.
+  String terminated by a~\textbf{line separator} or the end of the file.
+  The \ac{BED} format distinguished three classes: \textbf{data line}s, \textbf{comment line}s, and \textbf{blank line}s.
   Discussed more fully in~\autoref{sec:lines}.
 
 \item[line separator:]
