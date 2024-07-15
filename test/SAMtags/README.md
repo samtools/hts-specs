@@ -1,15 +1,15 @@
-Mm and Ml auxiliary tags
+MM and ML auxiliary tags
 ========================
 
-The purpose of these test files is to test parsing of the Mm and Ml
-tags.  These succinct Mm and Ml tags are present in the .sam files,
+The purpose of these test files is to test parsing of the MM and ML
+tags.  These succinct MM and ML tags are present in the .sam files,
 with a more human readable expanded form in the .txt files.
 Developers should check whether their implementation is able to
 convert between the two forms.
 
 The .sam files are SAM format, but the only fields used for this
 test are the reverse-complementation flag (FLAG bit 0x10), the
-sequence, and the Mm and Ml tags.
+sequence, and the MM and ML tags.
 
 The .txt files uses one line per base, with a blank line separating
 sequences.  Each line consists of two tab-separated fields

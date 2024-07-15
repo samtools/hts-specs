@@ -69,7 +69,8 @@ while (<>) {
 
     print "\n" if $nseq++ > 0;
     foreach (@mods) {
-	my ($base, $strand, $types, $pos) = $_ =~ m/([A-Z])([-+])([^,]+),(.*)/;
+	my ($base, $strand, $types, $skipped_prob, $pos) =
+	    $_ =~ m/([A-Z])([-+])([a-z]+|[0-9]+)([.?]?),(.*)/;
 
 	my $i = 0; # I^{th} bosition in sequence
 	foreach my $delta (split(",", $pos)) {
