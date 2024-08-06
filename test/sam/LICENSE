@@ -1,0 +1,21 @@
+Copyright for the different files here varies by host institution that
+submitted the tests.  A generic wildcard assignment is for Genome
+Reseatch Limited as this constitutes the vast bulk of the data, with
+exceptions listed below.
+
+- */*.sam:
+
+    Copyright (C) 2021 Genome Research Ltd.
+
+- failed/hdr.SQ14.sam:
+
+    Copyright (C) 2021 John Marshall
+
+All files have the same Apache 2.0 license irrespective of copyright
+holder.  A copy of this license can be found in the GA4GH Copyright
+Policy at https://www.ga4gh.org/copyright-policy/ and
+https://www.apache.org/licenses/LICENSE-2.0.
+
+Note: some files may also contain their own individual copyright
+and/or license notices, which take precedence over anything listed
+here.  (See compare_sam.pl as an example)

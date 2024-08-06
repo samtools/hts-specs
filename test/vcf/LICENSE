@@ -1,0 +1,50 @@
+Copyright and licensing for the different files here varies by host
+institution that submitted the tests.
+
+- test/vcf/*.vcf:
+
+    The vast bulk of the test files originated from European
+    Bioinformatics Institute's vcf-validator:
+    https://github.com/EBIvariation/vcf-validator/blob/master/LICENSE
+
+    These are Copyright EBI and the project is Apache 2.0 licensed.
+    See https://www.apache.org/licenses/LICENSE-2.0
+
+- test/vcf/4.*/passed/complexfile_passed_000.vcf:
+
+    Also present in the EBI vcf-validator, however this data looks to
+    be a subset of the 1000 Genomes project so it may be covered by
+    the 1000 genomes license instead (i.e. freely available under the
+    Fort Lauderdale Agreement).
+    See https://www.internationalgenome.org/IGSR_disclaimer
+    and https://www.internationalgenome.org/category/data-access/
+
+- examples/vcf/simple.vcf:
+
+    Copied from the VCF TeX document.  The example also appears in VCFtools
+    (https://sourceforge.net/p/vcftools/code/HEAD/tree/trunk/) which
+    is LGPLv3, but it is unknown if it was copied to there from the
+    original spec or vice versa.
+
+- examples/vcf/sv44.vcf:
+
+    Copyright Daniel Cameron, 2022.
+    Apache 2.0 license.
+
+- test/vcf/4.3/failed/failed_body_format_007.vcf:
+
+    Copyright Daniel Cameron, 2023.
+    Apache 2.0 license.
+
+- test/vcf/4.3/failed/failed_body_info_integer_overflow.vcf:
+- test/vcf/4.3/failed/failed_body_info_integer_reserved.vcf:
+- test/vcf/4.3/failed/failed_body_info_integer_underflow.vcf:
+
+    Copyright Daniel Cameron, 2024.
+    Apache 2.0 license.
+
+- test/vcf/4.5/passed/zero_length_LAA.vcf:
+
+    Copyright Daniel Cameron, 2024.
+    Apache 2.0 license.
+
