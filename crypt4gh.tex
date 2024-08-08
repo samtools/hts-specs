@@ -266,13 +266,13 @@ in which case each key will be stored in a separate data\_encryption\_parameters
 \node (data encryption packet) [boxes=3,below=of header packet.five south] {
 \nodepart{one}Packet Type
 \nodepart{two}Encryption Method
-\nodepart[text width=10em]{three}Data Encryption Key
+\nodepart[text width=15em]{three}Data Encryption Parameters
 };
 \draw (header packet.four split south) to (data encryption packet.north west);
 \draw (header packet.five split south) to (data encryption packet.north east);
 \node (data encryption packet notes) at (data encryption packet -| file notes) [notes] {
   \textbf{Data Encryption Packet (plain-text)} \\
-  Stores $K_{data}$
+  Stores $K_{data}$ and/or a sequence number per key
 };
 
 \node (data edit list) [boxes=3,below=of data encryption packet.south] {
@@ -323,12 +323,19 @@ This is the actual application data, stored in a sequence of blocks containing:
 \subsection{Header Packet Types}\label{overview:header_packet_types}
 There are two types of header packet:
 \begin{itemize}
-\item Data encryption key packets.
+\item Data encryption parameters packets.
 
-These describe the parameters used to encrypt one or more of the data blocks.
-They contain a code indicating the type of encryption, and the symmetric key ($K_{data}$) needed to decrypt the data.
+They contain a code indicating the type of encryption and describe the list of parameters used to encrypt one or more of the data blocks.
 
+The list starts with the symmetric key ($K_{data}$) needed to decrypt the data.
 If parts of the data have been encrypted with different keys, more than one of this packet type will be present.
+
+In AEAD mode, an additional 8-bytes sequence number is appended to the
+parameter list. The sequence number forms part of the authenticated
+data used when encrypting each segment (See
+section~\ref{data:AEAD_encrypting_mode}).
+%
+This mode ensures no encrypted segments can be lost or re-ordered.
 
 \item Data edit list packets.
 
@@ -536,6 +543,7 @@ enum Header_packet_type<le_uint32> {
 
 enum Data_encryption_method<le_uint32> {
   chacha20_ietf_poly1305 = 0;
+  chacha20_ietf_poly1305_with_AEAD = 1;
 };
 
 struct Encrypted_header_packet {
@@ -547,11 +555,15 @@ struct Encrypted_header_packet {
       select (data_encryption_method) {
         case chacha20_ietf_poly1305:
           byte  data_key[32];
+        case chacha20_ietf_poly1305_with_AEAD:
+          byte      data_key[32];
+          le_uint64 sequence_number;
       };
 
     case data_edit_list:
       le_uint32 number_lengths;
       le_uint64 lengths[number_lengths];
+
   };
 };
 \end{verbatim}
@@ -569,7 +581,11 @@ This packet contains the parameters needed to decrypt the data part of the file.
 To allow parts of the data to be encrypted with different $K_{data}$ keys,
 more than one of this packet type may be present.
 If there is more than one, the \kw{data\_encryption\_method} MUST be the same for all of them to prevent problems
-with random access in the encrypted file.
+with random access in the encrypted file. If the data encryption methods are mixed, the file MUST be rejected.
+
+When \kw{data\_encryption\_method} is \kw{chacha20\_ietf\_poly1305\_with\_AEAD}, the AEAD mode is activated and each 
+\kw{data\_key} is followed by an 8-bytes unsigned integer \kw{sequence\_number}, which forms part of the authenticated data used to encrypt part of the file.
+Application of the AEAD mode to the plain-text is described in section~\ref{data:AEAD_encrypting_mode}.
 
 \subsubsection{data\_edit\_list packet}
 
@@ -671,20 +687,6 @@ If a \kw{data\_edit\_list} packet is found, the reader should store it for use w
 If more than one \kw{data\_edit\_list} packet is present, the file SHOULD be rejected.
 
 \subsection{Encrypted Data}\label{data:encryption}
-\subsubsection{chacha20\_ietf\_poly1305 Encryption}\label{data:chacha20_encryption}
-
-ChaCha20 is a stream cipher which maps a 256-bit key, nonce and counter to a 512-bit key-stream block.
-In IETF mode the nonce is 96 bits long and the counter is 32 bits.
-The counter starts at 1, and is incremented by 1 for each successive key-stream block.
-The cipher-text is the plain-text message combined with the key-stream using the bit-wise exclusive-or operation.
-
-Poly1305 is used to generate a 16-byte message authentication code (MAC) over the cipher-text.
-As the MAC is generated over the entire cipher-text it is not possible to authenticate partially decrypted data.
-
-ChaCha20 and Poly1305 are combined using the AEAD construction described in section 2.8 of \cite{RFC8439}.
-This construction allows additional authenticated data (AAD) to be included in the Poly1305 MAC calculation.
-For the purposes of this format, the AAD is zero bytes long.
-
 \subsubsection{Segmenting the input}
 
 To allow random access without having to authenticate the entire file, the plain-text is divided into 65536-byte
@@ -697,6 +699,7 @@ The nonce used to encrypt the segment is then stored, followed by the encrypted 
 struct Segment {
   select (method) {
     case chacha20_ietf_poly1305:
+    case chacha20_ietf_poly1305_with_AEAD:
       byte    nonce[12];
       byte[]  encrypted_data;
       byte    mac[16];
@@ -708,9 +711,48 @@ The addition of the \kw{nonce} and \kw{mac} bytes will expand the data slightly.
 For chacha20\_ietf\_poly1305, this expansion will be 28 bytes, so a 65536 byte plain-text input will become a 65564
 byte encrypted and authenticated cipher-text output.
 
+\subsubsection{chacha20\_ietf\_poly1305 Encryption}\label{data:chacha20_encryption}
+
+ChaCha20 is a stream cipher which maps a 256-bit key, nonce and counter to a 512-bit key-stream block.
+In IETF mode the nonce is 96 bits long and the counter is 32 bits.
+The counter starts at 1, and is incremented by 1 for each successive key-stream block.
+The cipher-text is the plain-text message combined with the key-stream using the bit-wise exclusive-or operation.
+
+Poly1305 is used to generate a 16-byte message authentication code (MAC) over the cipher-text.
+As the MAC is generated over the entire cipher-text it is not possible to authenticate partially decrypted data.
+
+ChaCha20 and Poly1305 are combined using the AEAD construction described in section 2.8 of \cite{RFC8439}.
+This construction allows additional authenticated data (AAD) to be included in the Poly1305 MAC calculation.
+In case the selected encryption method is \kw{chacha20\_ietf\_poly1305}, the AAD is zero bytes long.
+In case the selected encryption method is \kw{chacha20\_ietf\_poly1305\_with\_AEAD}, the AAD is a 8-bytes little-endian number (section~\ref{data:AEAD_encrypting_mode}).
+
+\subsubsection{AEAD encrypting mode: chacha20\_ietf\_poly1305\_with\_AEAD}\label{data:AEAD_encrypting_mode}
+
+The AEAD mode ensures no segments can be lost or re-ordered.
+
+Consider the incrementing sequence of segment indexes, starting at
+$0$, created when the file is read segment by segment, in order.
+%
+When encrypting the plain-text segment, at index $i$, using the key
+$k$ (as in~\ref{data:chacha20_encryption}), we attach the number $n$ as authenticated data.
+%
+$n$ is obtained by adding $i$ to the sequence number paired with the
+encryption key $k$.
+%
+Note that $n$ is limited to 8-bytes, so it might eventually wrap
+around.
+
+Additionally, in case the end of the file lands on a segment boundary,
+a final and empty encrypted segment is appended to the ciphertext. If
+not, the last segment is smaller then the segment maximum size and no
+extra encrypted segment is appended.
+% Should we mention the index position is the last element of the sequence + 1
+% or is it obvious?
+
+
 \section{Decryption}
 
-\subsection{chacha20\_ietf\_poly1305 Decryption}
+\subsection{chacha20\_ietf\_poly1305 Decryption}\label{data:decryption}
 
 The cipher-text is decrypted by authenticating and decrypting the segment(s) enclosing the requested byte range $[P;Q]$,
 where $P<Q$.
@@ -743,6 +785,15 @@ out where key changes occur due to the extra time needed to select the new key a
 If this is unacceptable, readers could either try each key for every block (although this may still be vulnerable
 to timing attacks which try to detect which key was successful); or simply insist that only one key is used for
 the whole file.
+
+\subsection{AEAD mode}\label{data:AEAD_decrypting_mode}
+
+The encryption method MUST be \kw{chacha20\_ietf\_poly1305\_with\_AEAD} and is \kw{data\_key} is paired with a \kw{sequence\_number}.
+
+The $n^{th}$ segment is decrypted, as in~\ref{data:decryption}, using the sequence number incremented by $n$ as authenticated data.
+
+Finally, the presence of the eventual last empty segment must be checked according~to~\ref{data:AEAD_encrypting_mode}.\\
+Failing that check SHOULD consider the file as truncated, and reject it.
 
 \subsection{Edit List}\label{data:edit_list}
 
