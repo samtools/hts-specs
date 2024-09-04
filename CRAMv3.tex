@@ -1325,7 +1325,7 @@ The sequence data itself is in one of two encoding formats depending on whether 
 \State \Call{DecodeTagData}{}\Comment{See section \ref{subsec:tags}}
 \Statex
 
-\If{$(BF$ AND $4) \ne 0$}\Comment{Unmapped flag}
+\If{$(BF$ AND $4) = 0$}\Comment{Unmapped flag}
   \State \Call{DecodeMappedRead}{}\Comment{See section \ref{subsec:mapped}}
 \Else
   \State \Call{DecodeUnmappedRead}{}\Comment{See section \ref{subsec:unmapped}}
