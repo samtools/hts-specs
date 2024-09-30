@@ -696,6 +696,8 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   For example, if REF is G, ALT is A,C,T,\verb!<*>! and a genotype only has information about G, C, and \verb!<*>!, one can have LAA=[2,4] and thus LPL will be interpreted as pertaining to the alleles [G, C, \verb!<*>!] and not contain likelihood values for genotypes that involve A or T.
   GQ is still the genotype quality, even when the genotype is given against the local alleles.
   In the following example, the records with the same POS encode the same information (some columns removed for clarity):
+
+  \vspace{0.5em}
   \begin{tabular}[l]{llllll}
   	POS &REF&  ALT&FORMAT&sample\\
   	1&G&A,C,T,\textless*\textgreater& GT:LAA:LAD:LPL&  2/4:2,4:20,30,10:90,80,0,100,110,120\\
@@ -707,6 +709,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   	4&G&A,T,\textless*\textgreater& GT:LAA:LAD:LPL& 0/0::30:0\\
   	4&G&A,T,\textless*\textgreater& GT:AD:PL& 0/0:30,.,.,.:0,.,.,.,.,.,.,.,.,.\\
   \end{tabular}
+
   Due to BCF encoding empty vectors as missing, implementation-defined Number=LA local-allele fields should not be used if distinguishing between zero-length data and missing data is required at REF-only sites.
   
   It is recommended that VCF libraries provide an API in which local allele encoding can be abstracted away from the API consumer and values accessed through their corresponding non-local key.
