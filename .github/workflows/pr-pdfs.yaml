@@ -8,7 +8,7 @@ jobs:
   LaTeX:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -37,7 +37,7 @@ jobs:
           run1: make ${{ env.pdfs }}
           run2: -make -k OLD=$mergebase_sha NEW=HEAD ${{ env.diffs }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: pdf
           retention-days: 1
