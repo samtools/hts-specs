@@ -2450,11 +2450,18 @@ can lead to many separate data streams.  The name tokeniser codec is
 a format within a format, as the multiple byte streams $B_{pos,type}$
 are serialised into a single byte stream.
 
-The serialised data stream starts with two unsigned little endiand 32-bit
-integers holding the total size of uncompressed name buffer and the
-number of read names.  This is followed the array elements
-themselves.
+The serialised data stream starts with two unsigned little endian
+32-bit integers holding the total size of uncompressed name buffer and
+the number of read names, and a flag byte indicating whether data is
+compressed with arithmetic coding or rANS Nx16.
+Note the uncompressed size is calculated as the sum of
+all name lengths including a termination byte per name (e.g. the nul
+char).  This is irrespective of whether the implementation produces
+data in this form or whether it returns separate name and name-length
+arrays.
 
+This is then followed by serialised data and meta-data for each token
+stream.
 Token types, $ttype$ holds one of the token ID values listed above
 in the list above, plus special values to indicate certain additional
 flags.  Bit 6 (64) set indicates that this entire token data stream is a
