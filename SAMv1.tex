@@ -81,6 +81,7 @@ Where it makes a difference, SAM file contents should be read and written using 
 For example, floating-point values in SAM always use `{\tt .}' for the decimal-point character.
 
 The regular expressions in this specification are written using the POSIX\,/\,IEEE Std 1003.1 extended syntax.
+For brevity, named character classes are written as~{\tt [\cclass{class}]} without an additional pair of brackets.
 
 \subsection{An example}\label{sec:example}
 Suppose we have the following alignment with bases in lowercase
@@ -227,8 +228,10 @@ In the header, each line is TAB-delimited and, apart from {\tt @CO} lines,
 each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
 is a two-character string that defines the format and content of {\tt VALUE}.
 Thus header lines match {\tt
-  /\char94@(HD|SQ|RG|PG)(\char92t[A-Za-z][A-Za-z0-9]:[
-  -\char126]+)+\$/} or {\tt /\char94@CO\char92t.*/}.
+  /\char94@(HD|SQ|RG|PG)(\char92t[A-Za-z][A-Za-z0-9]:[\cclass{print}]+)+\$/}
+  or {\tt /\char94@CO\char92t.*/}.%
+\footnote{{\tt [\cclass{print}]} indicates that header field values contain printable characters, i.e.,~non-control characters.
+For fields limited to~ASCII, which is the majority, this is equivalent to~{\tt [ -\char126]}.}
 Within each (non-{\tt @CO}) header line, no field tag may appear more than
 once and the order in which the fields appear is not significant.
 
