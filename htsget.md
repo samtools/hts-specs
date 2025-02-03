@@ -19,6 +19,7 @@ This data retrieval API bridges from existing genomics bulk data transfers to a 
 
 * Incumbent data formats (BAM, CRAM) are preferred initially, with a future path to others.
 * Multiple server implementations are supported, including those that do format transcoding on the fly, and those that return essentially unaltered filesystem data.
+* Multiple encryption schemes on the files are supported, including but not limited to [Crypt4GH](https://samtools.github.io/hts-specs/crypt4gh.pdf).
 * Multiple use cases are supported, including access to small subsets of genomic data (e.g. for browsing a given region) and to full genomes (e.g. for calling variants).
 * Clients can provide hints of the information to be retrieved; servers can respond with more information than requested but not less.
 * We use the following conventions:
@@ -203,6 +204,20 @@ Request the SAM/CRAM/VCF headers only. The ticket response represents read or va
 The server SHOULD respond with an `InvalidInput` error if any other htsget query parameters other than `format` are specified at the same time as `class=header`.
 </td></tr>
 </table>
+</td></tr>
+<tr markdown="block"><td>
+
+`encryptionScheme`
+_optional_
+</td><td>
+
+Request data encrypted with a particular encryption scheme.
+
+
+
+If `encryptionScheme` is specified a 4 letter code for the encryption standard MUST be returned. When `c4gh` is specified, Crypt4GH payload for a particular object will be returned (if available).
+
+The server SHOULD reply with a `NotFound` error if the requested reference does not exist.
 </td></tr>
 <tr markdown="block"><td>
 
@@ -760,6 +775,11 @@ Example listing of htsget reads API and variants API registrations from a servic
 # Version history
 
 This appendix lists the significant functionality introduced and changes made in each published version of the htsget protocol.
+
+## 1.3.1 (February 2025)
+{:.no_toc}
+
+Added an `encryptionScheme` query parameter for requesting encrypted payload of any object (any underlying bioinformatics format).
 
 ## 1.3.0 (March 2021)
 {:.no_toc}
