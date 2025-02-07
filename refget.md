@@ -4,6 +4,8 @@ title: refget protocol
 suppress_footer: true
 ---
 
+<strong>Refget's specification is no longer hosted here and has moved to the central <a href="https://ga4gh.github.io/refget/sequences/">GA4GH Refget repository</a>. Please update your bookmarks</strong>
+
 # Refget API Specification v2.0.0
 {:.no_toc}
 
