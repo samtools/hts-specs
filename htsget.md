@@ -212,7 +212,7 @@ _optional_
 </td><td>
 Request data encrypted with a particular encryption scheme.
 
-If `encryptionScheme` is specified a 4 letter code for the encryption standard MUST be returned. When `c4gh` is specified, Crypt4GH payload for a particular object will be returned (if available).
+If `encryptionScheme` is specified a 4 letter value for the encryption standard MUST be provided. When `c4gh` is specified, Crypt4GH payload for a particular object will be returned (if available).
 
 The server SHOULD reply with a `NotFound` error if the requested (encrypted) id does not exist.
 </td></tr>
