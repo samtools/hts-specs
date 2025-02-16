@@ -77,6 +77,9 @@ or
   {\tt CS} & Z & Color read sequence \\
   {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features \\
   {\tt CY} & Z & Phred quality of the cellular barcode sequence in the {\tt CR} tag \\
+  {\tt DI} & Z & Duplicate Identity, for identifying the queryname that this read is a duplicate of\\
+  {\tt DS} & i & Duplicate-set Size containing the size of the duplicate set\\
+  {\tt DT} & Z & Duplicate type, used to identifying duplicate reads as coming from the library-construction (LB) or sequencing (SQ)\\
   {\tt E2} & Z & The 2nd most likely base calls \\
   {\tt FI} & i & The index of segment in the template \\
   {\tt FS} & Z & Segment suffix \\
@@ -153,10 +156,12 @@ Real CIGAR in its binary form if (and only if) it contains $>$65535 operations. 
 a BAM file only tag as a workaround of BAM's incapability to store long CIGARs
 in the standard way. SAM and CRAM files created with updated tools aware of the
 workaround are not expected to contain this tag. See also the footnote in
-Section 4.2 of the SAM spec for details.
+Section 4.2 of the SAM spec for details.th
 
 \item[CP:i:\tagvalue{pos}]
 Leftmost coordinate of the next hit.
+
+\item[DS:i]:count] Size of the duplicate set that the template is part of.
 
 \item[E2:Z:\tagvalue{bases}]
 The 2nd most likely base calls. Same encoding and same length as {\sf SEQ}.
