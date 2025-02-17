@@ -161,8 +161,20 @@ Section 4.2 of the SAM spec for details.
 \item[CP:i:\tagvalue{pos}]
 Leftmost coordinate of the next hit.
 
+\item[DI:Z:\tagvalue{rname}]
+(For duplicate templates) The queryname of the template that is not marked as duplicate
+and that this template is a duplicate of.
+
 \item[DS:i:\tagvalue{count}]
 Size of the duplicate set that the template is part of.
+
+\item[DT:Z:\tagvalue{str}]
+(For duplicate templates) Either LB or SQ indicating the source of the duplication.
+Use LB if the duplication occured during library-construction (e.g., via PCR).
+Use SQ if the duplication occured during sequencing (e.g., due to imaging error, aka "optical duplicates", or due to
+over-aggressive bridge-amp).
+
+\item[GL:f:\tagvalue{score}]
 
 \item[E2:Z:\tagvalue{bases}]
 The 2nd most likely base calls. Same encoding and same length as {\sf SEQ}.
