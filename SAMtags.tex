@@ -156,12 +156,13 @@ Real CIGAR in its binary form if (and only if) it contains $>$65535 operations. 
 a BAM file only tag as a workaround of BAM's incapability to store long CIGARs
 in the standard way. SAM and CRAM files created with updated tools aware of the
 workaround are not expected to contain this tag. See also the footnote in
-Section 4.2 of the SAM spec for details.th
+Section 4.2 of the SAM spec for details.
 
 \item[CP:i:\tagvalue{pos}]
 Leftmost coordinate of the next hit.
 
-\item[DS:i]:count] Size of the duplicate set that the template is part of.
+\item[DS:i:\tagvalue{count}]
+Size of the duplicate set that the template is part of.
 
 \item[E2:Z:\tagvalue{bases}]
 The 2nd most likely base calls. Same encoding and same length as {\sf SEQ}.
