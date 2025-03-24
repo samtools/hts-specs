@@ -412,11 +412,10 @@ data stream (in fact for 4 equally spaced starting points, see
 the starting context for each interleaved rANS state and so need to
 consider this in our frequency table.
 
-Consider \texttt{abracadabraabracadabraabracadabraabracadabr} as
-example input.  Note for the last ``a'' was omitted from this string
-in order to demonstrate how the method works when the data is not a
-multiple of 4 long.  This can be broken into 4 approximate equal
-portions \texttt{abracadabra abracadabra abracadabra abracadabr}.  We
+Consider \texttt{abracadabraabracadabraabracadabraabracadabrad} as
+example input.  Note for the additional trailing ``d'' giving us 45
+characters instead of 44.  This can be broken into 4 approximate equal
+portions \texttt{abracadabra abracadabra abracadabra abracadabrad}.  We
 operate one independent rANS stream per portion, providing us the
 opportunity to exploit CPU data parallelism.
 
@@ -432,7 +431,7 @@ Context & Symbol & Frequency\\
 a & a & 3 \\
   & b & 8 \\
   & c & 4 \\
-  & d & 4 \\
+  & d & 5 \\
 \hline
 b & r & 8 \\
 \hline
@@ -440,7 +439,7 @@ c & a & 4 \\
 \hline
 d & a & 4 \\
 \hline
-r & a & 7 \\
+r & a & 8 \\
 \hline
 \end{tabular}
 \end{minipage}
@@ -453,10 +452,10 @@ Context & Symbol & Frequency\\
 \hline
 \textbackslash0 & a & 4095 \\
 \hline
-a & a &  646 \\
-  & b & 1725 \\
-  & c &  862 \\
-  & d &  862 \\
+a & a &  614 \\
+  & b & 1639 \\
+  & c &  819 \\
+  & d & 1023 \\
 \hline
 b & r & 4095 \\
 \hline
@@ -491,10 +490,10 @@ The above tables are encoded as:
 0x00                 # end of Order-0 table
 
 0x61                 # `a' context
-0x61      0x82 0x86  # a            <646>
-0x62 0x02 0x86 0xbd  # b <+2: c,d> <1725>
-          0x83 0x5e  # c (implicit) <862>
-          0x83 0x5e  # d (implicit) <862>
+0x61      0x82 0x66  # a             <614>
+0x62 0x02 0x86 0x67  # b <+2: c,d>  <1639>
+          0x83 0x33  # c (implicit)  <819>
+          0x83 0xff  # d (implicit) <1023>
 0x00                 # end of Order-0 table
 
 0x62 0x02            # `b' context, <+2: c, d>
