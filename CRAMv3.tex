@@ -785,7 +785,7 @@ AP & encoding\texttt{<}int\texttt{>} & in-seq positions & if \textbf{AP-Delta} =
 delta from the AP value in the previous record.
 Note this delta may be negative, for example when switching references in a multi-reference slice.
 When the record is the first in the slice, the previous position used is the slice alignment-start field (hence the first delta should be zero for single-reference slices, or the AP value itself for multi-reference slices).  \linebreak{}
-if \textbf{AP-Delta} = false: encodes the alignment start position directly\tabularnewline
+if \textbf{AP-Delta} = false: encodes the alignment start position directly (1-based)\tabularnewline
 \hline
 RG & encoding\texttt{<}int\texttt{>} & read groups & read groups. Special value 
 `-1' stands for no group.\tabularnewline
@@ -798,7 +798,7 @@ NS & encoding\texttt{<}int\texttt{>} & next fragment reference sequence id & ref
 sequence ids for the next fragment \tabularnewline
 \hline
 NP & encoding\texttt{<}int\texttt{>} & next mate alignment start & alignment positions 
-for the next fragment\tabularnewline
+for the next fragment (1-based)\tabularnewline
 \hline
 TS & encoding\texttt{<}int\texttt{>} & template size & template sizes\tabularnewline
 \hline
@@ -1352,7 +1352,8 @@ Positional data is stored for both mapped and unmapped sequences, as unmapped da
 Typically this is done to keep a sequence pair (paired-end or mate-pair sequencing libraries) together when one of the pair aligns and the other does not.
 
 For reads stored in a position-sorted slice, the AP-delta flag in the compression header preservation map should be set and the AP data series will be delta encoded, using the slice alignment-start value as the first position to delta against.
-Note for multi-reference slices this may mean that the AP series includes negative values, such as when moving from an alignment to the end of one reference sequence to the start of the next or to unmapped unplaced data.  When the AP-delta flag is not set the AP data series is stored as a normal integer value.
+Note for multi-reference slices this may mean that the AP series includes negative values, such as when moving from an alignment to the end of one reference sequence to the start of the next or to unmapped unplaced data.
+When the AP-delta flag is not set the AP data series is stored as a normal integer value, using 1-based coordinates as per SAM.
 
 \begin{tabular}{|>{\raggedright}p{70pt}|>{\raggedright}p{75pt}|>{\raggedright}p{90pt}|>{\raggedright}p{171pt}|}
 \hline
@@ -1457,7 +1458,7 @@ byte[ ] & RN & the read name (if and only if not known already)\tabularnewline
 \hline
 int & NS & mate reference sequence identifier \tabularnewline
 \hline
-int & NP & mate alignment start position \tabularnewline
+int & NP & mate alignment start position (1-based)\tabularnewline
 \hline
 int & TS & the size of the template (insert size)\tabularnewline
 \hline
