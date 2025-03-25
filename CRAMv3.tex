@@ -124,13 +124,13 @@ An array of any logical data type: array\texttt{<}type\texttt{>}
 % \textbf{Array}   & An array of any logical data type: \texttt{<}type\texttt{>}[ ] \\
 % \end{tabular}
 
-\subsection{\textbf{Writing bits to a bit stream}}
+\subsection{\textbf{Reading and writing bits in a bit stream}}
 
-A bit stream consists of a sequence of 1s and 0s. The bits are written most significant 
-bit first where new bits are stacked to the right and full bytes on the left are 
-written out. In a bit stream the last byte will be incomplete if less than 8 bits 
-have been written to it. In this case the bits in the last byte are shifted to 
-the left.
+The CORE block supports bit-based encoding methods.
+A bit stream consists of a sequence of 1s and 0s.
+The bits are written most significant bit first where new bits are stacked to the right and full bytes on the left are written out.
+In a bit stream the last byte will be incomplete if less than 8 bits have been written to it.
+In this case the bits in the last byte are shifted to the left to complete a whole byte.
 
 \subsubsection*{Example of writing to bit stream}
 
@@ -141,13 +141,13 @@ operations:
 \hline
 \textbf{Operation order} & \textbf{Buffer state before} & \textbf{Written bits} & \textbf{Buffer state after} & \textbf{Issued bytes}\tabularnewline
 \hline
-1 & 0x0 & 1 & 0x1 & -\tabularnewline
+1 & xxxx xxxx & 1 & xxxx xxx1 (0x01) & -\tabularnewline
 \hline
-2 & 0x1 & 0 & 0x2 & -\tabularnewline
+2 & xxxx xxxx & 0 & xxxx xx10 (0x02) & -\tabularnewline
 \hline
-3 & 0x2 & 11 & 0xB & -\tabularnewline
+3 & xxxx xx10 & 11 & xxxx 1011 (0x0B) & -\tabularnewline
 \hline
-4 & 0xB & 0000 0111 & 0x7 & 0xB0\tabularnewline
+4 & xxxx 1011 & 0000 0111 & xxxx 0111 (0x07) & 1011 0000 (0xB0)\tabularnewline
 \hline
 \end{tabular}
 
@@ -166,26 +166,29 @@ And the whole bit sequence:
 \texttt{> echo "obase=2; ibase=16; B070" \textbar{} bc\\
 1011000001110000}
 
-When reading the bits from the bit sequence it must be known that only 12 bits 
-are meaningful and the bit stream should not be read after that. 
+When reading the bits from the bit sequence, only the first 12 bits are meaningful and the remaining 4 will should be discarded.
 
-\subsubsection*{Note on writing to bit stream}
+\subsubsection*{Note on reading from and writing to bit stream}
 
-When writing to a bit stream both the value and the number of bits in the value 
-must be known. This is because programming languages normally operate with bytes 
-(8 bits) and to specify which bits are to be written requires a bit-holder, for 
-example an integer, and the number of bits in it. Equally, when reading a value 
-from a bit stream the number of bits must be known in advance. In case of prefix 
-codes (e.g. Huffman) all possible bit combinations are either known in advance 
-or it is possible to calculate how many bits will follow based on the first few 
-bits. Alternatively, two codes can be combined, where the first contains the number 
-of bits to read. 
+When reading and writing to a bit stream our numeric values are
+typically held in a byte oriented data type, such as an 8-bit or
+32-bit integer.
+The bit stream itself does not explicitly store the number of bits
+per value, and it will vary by context, so we must know this by other means.
+For example, we may be reading bits using a BETA encoding whose parameters
+indicate each value is 6 bits.
+So we read the next 6 bits into a 32-bit integer to get a value
+between 0 and 63.
+The next bits may be for a HUFFMAN encoding, in which case we can read one
+bit at a time until we match a known code-word in the Huffman tree.
 
 \subsection{\textbf{Writing bytes to a byte stream}}
 \label{subsec:writing-bytes}
 
-The interpretation of byte stream is straightforward. CRAM uses \emph{little endianness}
-for bytes when applicable and defines the following storage data types:
+Byte streams cannot be mixed in the same block as bit streams.
+The interpretation of byte stream is straightforward.
+CRAM uses \emph{little endianness} for bytes when applicable and
+defines the following storage data types:
 
 \begin{description}
 
