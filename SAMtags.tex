@@ -77,6 +77,9 @@ or
   {\tt CS} & Z & Color read sequence \\
   {\tt CT} & Z & Complete read annotation tag, used for consensus annotation dummy features \\
   {\tt CY} & Z & Phred quality of the cellular barcode sequence in the {\tt CR} tag \\
+  {\tt DI} & Z & Duplicate Identity, for identifying the queryname that this read is a duplicate of\\
+  {\tt DS} & i & Duplicate-set Size containing the size of the duplicate set\\
+  {\tt DT} & Z & Duplicate type, used to identifying duplicate reads as coming from the library-construction (LB) or sequencing (SQ)\\
   {\tt E2} & Z & The 2nd most likely base calls \\
   {\tt FI} & i & The index of segment in the template \\
   {\tt FS} & Z & Segment suffix \\
@@ -157,6 +160,21 @@ Section 4.2 of the SAM spec for details.
 
 \item[CP:i:\tagvalue{pos}]
 Leftmost coordinate of the next hit.
+
+\item[DI:Z:\tagvalue{rname}]
+(For duplicate templates) The queryname of the template that is not marked as duplicate
+and that this template is a duplicate of.
+
+\item[DS:i:\tagvalue{count}]
+Size of the duplicate set that the template is part of.
+
+\item[DT:Z:\tagvalue{str}]
+(For duplicate templates) Either LB or SQ indicating the source of the duplication.
+Use LB if the duplication occurred during library-construction (e.g., via PCR).
+Use SQ if the duplication occurred during sequencing (e.g., due to imaging error, aka "optical duplicates", or due to
+over-aggressive bridge-amp).
+
+\item[GL:f:\tagvalue{score}]
 
 \item[E2:Z:\tagvalue{bases}]
 The 2nd most likely base calls. Same encoding and same length as {\sf SEQ}.
