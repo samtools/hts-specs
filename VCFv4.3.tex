@@ -267,6 +267,7 @@ The contig names must not use a reserved symbolic allele name.
 
 
 \subsubsection{Sample field format}
+\label{meta-sample}
 It is possible to define sample to genome mappings as shown below:
 {\scriptsize
 \begin{verbatim}
@@ -285,13 +286,38 @@ It is possible to record relationships between genomes using the following synta
 ##PEDIGREE=<ID=SomaticNonTumour,Original=GermlineID>
 ##PEDIGREE=<ID=ChildID,Father=FatherID,Mother=MotherID>
 ##PEDIGREE=<ID=SampleID,Name_1=Ancestor_1,...,Name_N=Ancestor_N>
+##PEDIGREE=<ID=ChildID,MonozygoticTwin=OtherChildID>
+##PEDIGREE=<ID=ChildID,DizygoticTwin=AnotherChildID>
+##PEDIGREE=<ID=ChildID,Sibling=SiblingChildID>
 \end{verbatim}
-\noindent or a link to a database:
+
+The first two lines assert that the DNA in genomes TumourSample and SomaticNonTumour is asexually or clonally derived with mutations from the DNA in genome OriginalID. 
+The third line describes a family relationship between genomes.
+A VCF will therefore contain one entry per trio.
+The fourth line is an example of the most general form of a pedigree line.
+It means that the genome SampleID is derived from the N $\ge$ 1 genomes Ancestor1, ..., AncestorN.
+The fifth and sixth lines describe relationships between twins.
+Regular siblings can be inferred implicitly from trios like the third line, but if the parents are unknown, the seventh line describes a sibling relationship explicitly.
+
+Mother and Father are optional (e.g.\ if unknown) and have the same meaning as in PED files. Consider the following example PED line (the columns are Family ID, Individual ID, Paternal ID, Maternal ID, Sex, Phenotype, Genotypes):
+\begin{verbatim}
+FAM001  9  7 8  1  2  A A
+\end{verbatim}
+
+The family described in that line can be expressed in VCF as:
+
+\begin{verbatim}
+##PEDIGREE=<ID=9,Father=7,Mother=8>
+\end{verbatim}
+
+Phenotypes can be expressed as explained in Section \ref{meta-sample}, and genotypes as in Section \ref{genotype-fields}.
+
+If samples and the relationships between them are described in an external resource such as a database or PED file, is it also possible to provide a link:
 \begin{verbatim}
 ##pedigreeDB=URL
 \end{verbatim}
 
-\noindent See \ref{PedigreeInDetail} for details.
+\noindent See Section \ref{ClonalPedigree} for more details about clonal relationships.
 
 
 \subsection{Header line syntax}
@@ -425,6 +451,7 @@ This field is used to compute BCF's {\tt rlen} field (see~\ref{BcfSiteEncoding})
 \end{itemize}
 
 \subsubsection{Genotype fields}
+\label{genotype-fields}
 If genotype information is present, then the same types of data must be present for all samples.
 First a FORMAT field is given specifying the data types and order (colon-separated FORMAT keys matching the regular expression \texttt{\^{}[A-Za-z\_][0-9A-Za-z\_.]*\$}, duplicate keys are not allowed).
 This is followed by one data block per sample, with the colon-separated data corresponding to the types specified in the format.
@@ -1305,7 +1332,7 @@ However, a more evolved algorithm could attempt actually deconvolving the two ge
 \normalsize
 
 \subsubsection{Clonal derivation relationships}
-\label{PedigreeInDetail}
+\label{ClonalPedigree}
 In cancer, each VCF file represents several genomes from a patient, but one genome is special in that it represents the germline genome of the patient.
 This genome is contrasted to a second genome, the cancer tumor genome.
 In the simplest case the VCF file for a single patient contains only these two genomes.
@@ -1325,11 +1352,6 @@ The general format of a PEDIGREE line describing asexual, clonal derivation is:
 \end{verbatim}
 
 This line asserts that the DNA in genome DerivedID is asexually or clonally derived with mutations from the DNA in genome OriginalID.
-This is the asexual analog of the VCF format that has been proposed for family relationships between genomes, i.e., there is one entry per trio of the form:
-
-\begin{verbatim}
-##PEDIGREE=<ID=ChildID,Mother=MotherID,Father=FatherID>
-\end{verbatim}
 
 Let's consider a cancer patient VCF file with 4 genomes: germline, primary\_tumor, secondary\_tumor1, and secondary\_tumor2 as illustrated in Figure 10.
 The primary\_tumor is derived from the germline and the secondary tumors are each derived independently from the primary tumor, in all cases by clonal derivation with mutations.
