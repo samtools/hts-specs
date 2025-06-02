@@ -52,7 +52,7 @@ Past refget maintainers include Matt Laird.
 * Michael Hoffman (@michaelmhoffman)
 * Aaron Quinlan (@arq5x)
 
-[ga4gh-ff]:  https://www.ga4gh.org/howwework/workstreams/#lsg
+[ga4gh-ff]:  https://www.ga4gh.org/work_stream/large-scale-genomics/
 
 
 ## Updating the specifications
