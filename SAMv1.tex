@@ -650,7 +650,12 @@ Each bit is explained in the following table:
 \item {\sf QUAL}: ASCII of base QUALity plus 33 (same as the quality
   string in the Sanger FASTQ format). A base quality is the phred-scaled
   base error probability which equals $-10\log_{10}\Pr\{\mbox{base is
-    wrong}\}$. This field can be a `*' when quality is not stored. If
+  wrong}\}$. This field can be a `*' when quality is not stored.\footnote{In
+  the unlikely case in which {\sf SEQ} is of length~1 and {\sf QUAL} is `*',
+  {\sf QUAL} should be interpreted as quality not stored. Tools should avoid
+  writing a solitary base quality 9 (ASCII `{\tt *}') to SAM, BAM, or CRAM files
+  for alignment lines where {\sf SEQ} is of length~1, instead adjusting the
+  base quality to 10 (ASCII `{\tt +}') to avoid this potential ambiguity.} If
   not a `*', {\sf SEQ} must not be a `*' and the length of the quality string
   ought to equal the length of {\sf SEQ}.
 \end{enumerate}
