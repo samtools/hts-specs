@@ -771,7 +771,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \item PSL (List of Strings): The list of phase sets, one for each allele value specified in the {\tt GT}. 
   Unphased alleles (without a $\mid$ separator before them) must have the value '$.$' in their corresponding position in the list.
   Unlike {\tt PS} (which is defined per CHROM), records with different CHROM but the same phase-set name are considered part of the same phase set.
-  If an implementation cannot guarantee uniqueness of phase-set names across the VCF (for example, phasing a streaming VCF or each CHROM is processed independently in parallel), new phase-set names should be of the format CHROM*POS*ALLELE-NUMBER of the ``first'' allele which is included in this set, with ALLELE-NUMBER being the index of the allele in the {\tt GT} field, since multiple distinct phase-sets could start at the same position. \footnote{The `*' character is used as a separator since `:' is not reserved in the CHROM column.}
+  If an implementation cannot guarantee uniqueness of phase-set names across the VCF (for example, phasing a streaming VCF or each CHROM is processed independently in parallel), new phase-set names should be of the format CHROM*POS*ALLELE-NUMBER of the ``first'' allele which is included in this set, with ALLELE-NUMBER being the one-based index of the allele in the {\tt GT} field, since multiple distinct phase-sets could start at the same position. \footnote{The `*' character is used as a separator since `:' is not reserved in the CHROM column.}
   A given sample-genotype must not have values for both PS and PSL.
   In addition, PS and PSL are not interoperable, in that a PS mentioned in one variant cannot be referenced in a PSL in another,  since when used in PS it isn't connected to any specific haplotype (i.e. first or second), but PSL is. 
  
@@ -780,8 +780,8 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \vspace{0.5em}
   \begin{tabular}{ l l l l l l l l l l}
     \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & SAMPLE1\\
-     chr19 & $5$ & . & T & G & . & PASS & DP=100 &GT:PSL & \tt{|0/1:chr9*5*1,.}\\
-    chr20 & $10$ & . & A & T,G & . & PASS & DP=100 &GT:PSL & \tt{|1/2|3:chr20*10*1,.,chr9*5*1} \\
+     chr19 & $5$ & . & T & G & . & PASS & DP=100 &GT:PSL & \tt{|0/1:chr19*5*1,.}\\
+    chr20 & $10$ & . & A & T,G & . & PASS & DP=100 &GT:PSL & \tt{|1/2|3:chr20*10*1,.,chr19*5*1} \\
     chr20 & $15$ & . & G & C & . & PASS & DP=100 &GT:PSL & \tt{1|2:.,chr20*10*1}\\
   \end{tabular}
   
@@ -797,9 +797,9 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   \vspace{0.5em}
   \begin{tabular}{ l l l l l l l l l l}
   \#CHROM & POS & REF & ALT & INFO & FORMAT & SAMPLE1\\
-    chr1 & $10$ & T & $<$DUP$>$ & SVCLAIM=DJ & GT:PSL:PSO & \tt{/0/0|1:.,.,chr1*10*1:.,.,3}\\
-    chr1 & $20$ & A & G & . & GT:PSL:PSO & \tt{/0/0|0|1:.,.,chr1*10*1,chr1*10*1:.,.,4,1} \\
-    chr1 & $30$ & G & T & . & GT:PSL:PSO & \tt{/0/0|0|1:.,.,chr1*10*1,chr1*10*1:.,.,2,5} \\
+    chr1 & $10$ & T & $<$DUP$>$ & SVCLAIM=DJ & GT:PSL:PSO & \tt{/0/0|1:.,.,chr1*10*3:.,.,3}\\
+    chr1 & $20$ & A & G & . & GT:PSL:PSO & \tt{/0/0|0|1:.,.,chr1*10*1,chr1*10*3:.,.,4,1} \\
+    chr1 & $30$ & G & T & . & GT:PSL:PSO & \tt{/0/0|0|1:.,.,chr1*10*1,chr1*10*3:.,.,2,5} \\
   \end{tabular}
   
   Without defining PSO, it would be ambiguous as to which copy of the duplicated region the SNVs occur on.
