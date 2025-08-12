@@ -2477,9 +2477,9 @@ $0\mid1$ & $(1 + 1) << 1 \mid 1$ = 0x05 preceded by the phased first byte value 
 ./. & where both alleles are missing & 0x00 00 \\ \hline
 0 & as an implicitly phased haploid it is represented by a single byte & 0x03 \\ \hline
 1 & as an implicitly phased haploid it is represented by a single byte & 0x05 \\ \hline
-0/1/2 & is tetraploid, with alleles & 0x02 04 06 \\ \hline
-$0/1\mid2$ & is tetraploid with a single phased allele & 0x02 04 07 \\ \hline
-0 and 0/1 & pad out the final allele for the haploid individual & 0x02 81 02 04\\ \hline
+0/1/2 & is triploid, with alleles & 0x02 04 06 \\ \hline
+$0/1\mid2$ & is triploid with a single phased allele & 0x02 04 07 \\ \hline
+0 and 0/1 & pad out the final allele for the haploid individual & 0x03 81 02 04\\ \hline
 \end{tabular}
 \normalsize
 
