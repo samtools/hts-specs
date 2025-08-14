@@ -93,6 +93,7 @@ InvalidAuthentication	| 401	| Authorization provided is invalid
 PermissionDenied	| 403	| Authorization is required to access the resource
 NotFound		| 404	| The resource requested was not found
 PayloadTooLarge         | 413   | POST request size is too large
+HtsgetRequired		| 426	| An htsget request is required to access the resource
 UnsupportedFormat	| 400	| The requested file format is not supported by the server
 InvalidInput		| 400	| The request parameters do not adhere to the specification
 InvalidRange		| 400	| The requested range cannot be satisfied
@@ -625,6 +626,22 @@ The client obtains the data block by decoding the embedded base64 payload.
 2. client should ignore the media type (if any), treating the payload as a partial blob.
 
 Note: the base64 text should not be additionally percent encoded.
+
+## "Upgrade Required" response for index file requests
+
+A client attempting to access a resource directly, rather than via the htsget protocol, will likely also request index files alongside the requested resource.
+For example, in preparing to access `/reads/<id>`, such a client could make requests for `/reads/<id>.bai` and/or `/reads/<id>.csi`.
+
+When a request does not refer to an extant served resource (thus would otherwise result in a 404 `NotFound` error or similar), contains a known BAI/CSI/CRAI/TBI/etc index extension, and particularly when trimming that extension **does** result in an `<id>` that denotes an extant resource, that is a request for an apparent index file.
+A server MAY respond to such requests by replying with an `HtsgetRequired` error:
+
+    HTTP/1.1 426 Upgrade Required
+    Upgrade: htsget/1.3.0
+    Connection: Upgrade
+
+    { "htsget": { "error": "HtsgetRequired", "message": "..." } }
+
+Upon receiving an `HtsgetRequired` error, clients SHOULD switch to making requests for genomic regions via the htsget protocol, rather than attempting to use the index (which is not available) to make client-side HTTP Range requests on the resource.
 
 ## Reliability & performance considerations
 
