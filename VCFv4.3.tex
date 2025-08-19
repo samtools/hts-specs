@@ -1844,6 +1844,7 @@ For example, some CNV call sets encode different numbers of genotype likelihoods
 For example, one sample could have CN0:0,CN1:10 and another CN0:0,CN1:10,CN2:10.  
 In the situation when a genotype field contain vector values of different lengths, these are represented in BCF2 by a vector of the maximum length per sample, with all values in the each vector aligned to the left, and END\_OF\_VECTOR values assigned to all values not present in the original vector.  
 The BCF2 encoder / decoder must automatically add and remove these END\_OF\_VECTOR values from the vectors. Note that the use of END\_OF\_VECTOR means that it is legal to encode a vector VCF field with MISSING values.
+Empty vectors (i.e. vectors with no data available) are represented by one MISSING value followed by as many END\_OF\_VECTOR values as are required to pad the vector to the appropriate length.
 
 For example, suppose I have two samples, each with a FORMAT field X.  
 Sample A has values [1], while sample B has [2,3].  
