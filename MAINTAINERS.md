@@ -34,14 +34,6 @@ Past VCF/BCF maintainers include Petr Danecek, Cristina Yenyxe Gonzalez Garcia, 
 
 Past htsget maintainers include Jerome Kelleher.
 
-### Refget
-
-* Andy Yates (@andrewyatz)
-* Rasko Leinonen (@raskoleinonen)
-* Timothe Cezard (@tcezard)
-
-Past refget maintainers include Matt Laird.
-
 ### crypt4gh
 
 * Alexander Senf (@AlexanderSenf)
