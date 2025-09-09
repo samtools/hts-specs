@@ -33,7 +33,8 @@
 \newcommand*{\firstbytebox}[2]{\byteboxAux{#1}{#2}{\put(0,0){\line(0,1){\bytetotalheight}}}}
 \newcommand*{\bytebox}[2]{\byteboxAux{#1}{#2}{}}
 
-\newcommand*{\cclass}[1]{{\rm\sf :#1:}}
+\newcommand*{\cclass}[1]{[{\rm\sf :#1:}]}
+\newcommand*{\cclassexcept}[2]{[{\rm\sf :#1:}\caret #2]}
 \newcommand*{\caret}{\textsuperscript{$\wedge$}}
 
 \newcommand*{\memlimited}{\textcolor{gray}{\footnotesize\it limited}}
@@ -212,9 +213,7 @@ Thus they match the following regular expression:
 {\tt [\verb"0-9A-Za-z!#$%&+./:;?@^_|~-"][\verb"0-9A-Za-z!#$%&*+./:;=?@^_|~-"]*}
 \end{center}
 
-% Pedantically this should be [[:rname:]^*=][[:rname:]]*, but we take advantage
-% of POSIX (Issue 7) section 9.3.5/8 to elide the excess brackets for clarity.
-\newcommand*{\rnameRegexp}{[\cclass{rname}\caret*=][\cclass{rname}]*}
+\newcommand*{\rnameRegexp}{[\cclassexcept{rname}{*=}][\cclass{rname}]*}
 
 \noindent
 For clarity, elsewhere in this specification we write this set of allowed characters as a character class~{\tt [\cclass{rname}]} and extend the POSIX regular expression notation to use {\tt\caret *=} to indicate the omission of `{\tt *}' and `{\tt =}' from the character class.
@@ -227,8 +226,10 @@ In the header, each line is TAB-delimited and, apart from {\tt @CO} lines,
 each data field follows a format `{\tt TAG:VALUE}' where {\tt TAG}
 is a two-character string that defines the format and content of {\tt VALUE}.
 Thus header lines match {\tt
-  /\char94@(HD|SQ|RG|PG)(\char92t[A-Za-z][A-Za-z0-9]:[
-  -\char126]+)+\$/} or {\tt /\char94@CO\char92t.*/}.
+  /\char94@(HD|SQ|RG|PG)(\char92t[A-Za-z][A-Za-z0-9]:[\cclass{print}]+)+\$/}
+  or {\tt /\char94@CO\char92t.*/}.%
+\footnote{{\tt [\cclass{print}]} indicates that header field values contain printable characters, i.e.,~non-control characters.
+For fields limited to~ASCII, which is the majority, this is equivalent to~{\tt [ -\char126]}.}
 Within each (non-{\tt @CO}) header line, no field tag may appear more than
 once and the order in which the fields appear is not significant.
 
@@ -302,6 +303,7 @@ or~`chrM' succeeds and refers to the same sequence.}
 These alternative names are not used elsewhere within the SAM file;
 in particular, they must not appear in alignment records' {\sf RNAME}
 or~{\sf RNEXT} fields.
+\newline
 \emph{Regular expression}: \emph{name}{\tt (,}\emph{name}{\tt )*}
 where \emph{name} is {\tt\rnameRegexp}\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
