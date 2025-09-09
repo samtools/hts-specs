@@ -357,6 +357,14 @@ It is possible to record relationships between genomes using the following synta
 \noindent See \ref{PedigreeInDetail} for details.
 
 
+\subsubsection{Sequence collection format}
+The reference sequences can be recorded as a sequence collection identifier\footnote{\url{https://ga4gh.github.io/refget/seqcols/}}
+\begin{verbatim}
+##seqcol=<ID=ga4gh:SC.hsgd70lp87g2u8sgsnd0g2fxxc,url=ga4gh_resolver_url>
+\end{verbatim}
+The ID section should contain the sequence collection identifier of the reference sequence that was used to generate the VCF prefixed with ga4gh:SC.
+Only one refget-seqcol entry can be added per VCF.
+
 \subsection{Header line syntax}
 \label{header-line}
 The mandatory header line names the 8 fixed, mandatory columns. These columns are as follows:
