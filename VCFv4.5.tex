@@ -1864,13 +1864,13 @@ An example with both FORMAT LEN and a redundant INFO END is given below:
 \begin{flushleft}
 \begin{tabular}{ l l l l l l l l l l }
 \#CHROM & POS & ID & REF & ALT & QUAL & FILTER & INFO & FORMAT & Sample \\
-1 & 4370 & . & G & $<$*$>$ & . & . & END=4383 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:25:60:23:0,60,900;14 \\
-1 & 4384 & . & C & $<$*$>$ & . & . & END=4388 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:25:45:25:0,42,630;4 \\
-1 & 4389 & . & T & TC,$<$*$>$ & 213.73 & . & . & GT:DP:GQ:PL:LEN & 0/1:23:99:51,0,36,93,92,86 \\
-1 & 4390 & . & C & $<$*$>$ & . & . & END=4390 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:26:0:26:0,0,315;1 \\
-1 & 4391 & . & C & $<$*$>$ & . & . & END=4395 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:27:63:27:0,63,945;4 \\
-1 & 4396 & . & G & C,$<$*$>$ & 0 & . & . & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:24:52:0,52,95,66,95,97 \\
-1 & 4397 & . & T & $<$*$>$ & . & . & END=4416 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:22:14:22:0,15,593;19 \\
+1 & 4370 & . & G & $<$*$>$ & . & . & END=4383 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:25:60:23:0,60,900:14 \\
+1 & 4384 & . & C & $<$*$>$ & . & . & END=4388 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:25:45:25:0,42,630:4 \\
+1 & 4389 & . & T & TC,$<$*$>$ & 213.73 & . & . & GT:DP:GQ:PL & 0/1:23:99:51,0,36,93,92,86 \\
+1 & 4390 & . & C & $<$*$>$ & . & . & END=4390 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:26:0:26:0,0,315:1 \\
+1 & 4391 & . & C & $<$*$>$ & . & . & END=4395 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:27:63:27:0,63,945:4 \\
+1 & 4396 & . & G & C,$<$*$>$ & 0 & . & . & GT:DP:GQ:MIN\_DP:PL & 0/0:24:52:0,52,95,66,95,97 \\
+1 & 4397 & . & T & $<$*$>$ & . & . & END=4416 & GT:DP:GQ:MIN\_DP:PL:LEN & 0/0:22:14:22:0,15,593:19 \\
 \end{tabular}
 \end{flushleft}
 \normalsize
@@ -2722,6 +2722,12 @@ Implementations should perform BGZF encoding and must support the reading of bot
 BCF2 files are expected to be indexed through the same index scheme, section~4 as BAM files and other block-compressed files with BGZF.
 
 \section{List of changes}
+
+\subsection{VCFv4.4 Errata}
+
+\begin{itemize}
+	\item Fixed typos in gVCF example.
+\end{itemize}
 
 \subsection{Changes between VCFv4.5 and VCFv4.4}
 
