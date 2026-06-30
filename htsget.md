@@ -4,10 +4,10 @@ title: htsget protocol
 suppress_footer: true
 ---
 
-# Htsget retrieval API spec v1.3.0
+# Htsget retrieval API spec v1.3.1
 {:.no_toc}
 
-This specification describes the htsget protocol version 1.3.0.
+This specification describes the htsget protocol version 1.3.1.
 This printing is version {{site.github.build_revision | truncate: 7, ""}} from the [hts-specs](https://github.com/samtools/hts-specs) repository.
 
 * Do not remove this line (it will not be displayed)
@@ -182,7 +182,7 @@ Request data in this format. The allowed values for each type of record are:
 
 VCFTEXT indicates a request for uncompressed VCF in plaintext.
 When VCF is specified or by default, the server SHOULD return gzip-compressed (or BGZF-compressed) VCF data.
-At present, the server MAY instead return uncompressed plaintext VCF in these cases, but this is deprecated.
+At present, the server MAY instead return uncompressed plaintext VCF in these cases, but this is deprecated and will become invalid starting with version 1.5 of the protocol.
 
 The server SHOULD reply with an `UnsupportedFormat` error if the requested format is not supported.
 </td></tr>
@@ -701,7 +701,7 @@ Example service-info response:
    "type":  {
       "group":        "org.ga4gh",
       "artifact":     "htsget",
-      "version":      "1.3.0"
+      "version":      "1.3.1"
    },
    "htsget": {
       "datatype": "reads",
@@ -739,7 +739,7 @@ Example listing of htsget reads API and variants API registrations from a servic
       "type": {
          "group": "org.ga4gh",
          "artifact": "htsget",
-         "version": "1.3.0"
+         "version": "1.3.1"
       }
    },
    {
@@ -755,7 +755,7 @@ Example listing of htsget reads API and variants API registrations from a servic
       "type": {
          "group": "org.ga4gh",
          "artifact": "htsget",
-         "version": "1.3.0"
+         "version": "1.3.1"
       }
    }
 ]
@@ -765,12 +765,12 @@ Example listing of htsget reads API and variants API registrations from a servic
 
 This appendix lists the significant functionality introduced and changes made in each published version of the htsget protocol.
 
-## 1.3.1 (May 2026)
+## 1.3.1 (July 2026)
 {:.no_toc}
 
 Added VCFTEXT and clarified whether VCF variants response data is compressed or uncompressed.
 
-## 1.3.0 (March 2021)
+## [1.3.0] (March 2021)
 {:.no_toc}
 
 Added POST requests for both reads and variants endpoints, allowing data to be queried via the HTTP `POST` method, and defining a JSON request object to be used as the POST payload instead of the corresponding set of htsget query parameters.
@@ -808,6 +808,7 @@ BAM/CRAM sequencing data could be queried via the HTTP `GET` method using `forma
 [1.1.0]:    https://github.com/samtools/hts-specs/blob/1fef57fa22a6867707a14a0c9f698038d470f2d3/htsget.md
 [1.1.1]:    https://github.com/samtools/hts-specs/blob/c7731727974a7d9cd305f6ecac1efe83911f2cbb/htsget.md
 [1.2.0]:    https://github.com/samtools/hts-specs/blob/52dfd0fc866fc6a073515dbc1d59eb47485c4964/htsget.md
+[1.3.0]:    https://github.com/samtools/hts-specs/blob/d97f9e27b332e85eaebd9383f56a882ee3e11fc4/htsget.md
 
 [CORS]:     http://www.w3.org/TR/cors/
 [Data URI]: https://en.wikipedia.org/wiki/Data_URI_scheme
