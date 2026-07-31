@@ -690,7 +690,7 @@ For example:
 \begin{quote}
 {\tt Ma:Z:1000;ctcf+Q:100-25,700-30}
 \end{quote}
-Here {\tt ctcf} is the {\tt annotation type} and the two coordinate pairs are two {\tt annotations}.
+Here {\tt ctcf} is the {\tt annotation type} and the two intervals are two {\tt annotations}.
 
 Type names contain letters, digits, or underscores and are case-sensitive.
 Strand is one of `{\tt +}' for the same strand as the original sequenced molecule, `{\tt -}' for the opposite strand, or `{\tt .}' for unstranded, unknown, or inapplicable strand.
@@ -701,33 +701,27 @@ The optional quality specifier declares the number and interpretation of {\tt Aq
 Multiple characters, such as `{\tt PQ}', indicate multiple {\tt Aq} values per {\tt annotation} in the stated order.
 If the specifier is absent, no {\tt Aq} values are stored for {\tt annotations} of that {\tt annotation type}.
 
-The coordinate list is a comma-separated list of intervals written {\tt start-length}.
+The interval list is a comma-separated list of intervals written {\tt start-length}.
+Within each block, intervals must be listed in non-decreasing start order.
 Lengths are the number of bases spanned by the {\tt annotation}, so {\tt 101-50} covers bases 101 through 150 inclusive.
 Starts and lengths must be positive, and no interval may extend beyond the length recorded at the start of {\tt Ma}.
+Individual {\tt annotations} of the same {\tt annotation type} may overlap.
 
-The same type name may appear in multiple blocks, for example when a type has {\tt annotations} on both strands.
-For example:
-\begin{quote}
-{\tt Ma:Z:1000;ctcf+Q:100-25,700-30;ctcf-Q:350-18}
-\end{quote}
-This describes one {\tt annotation type}, split by strand.
-This follows the same convention as {\tt MM}: strand is encoded in the block while positions are still counted on the original sequence.
-All blocks with the same type name must use the same quality specifier.
+If a type name is used in more than one block, all such blocks must use the same quality specifier.
 Parsers should reject an {\tt Ma} tag where one type name is used with conflicting quality specifiers.
 
 \item[Aq:B:C,\tagvalue{qualities}]
 \hfill\\
-The optional {\tt Aq} tag lists quality values for {\tt annotations} in {\tt Ma} order, stored in an unsigned byte array of type {\tt C}.
+The optional {\tt Aq} tag lists quality values for {\tt annotations} in {\tt Ma} order, stored as a {\tt B,C} array of unsigned 8-bit integer ({\tt uint8\_t}) values.
 It is omitted when no {\tt annotation type} has quality values.
-The number of {\tt Aq} elements must equal the sum, over all {\tt Ma} blocks, of the number of intervals multiplied by the number of quality-specifier characters in that block.
+The number of {\tt Aq} elements must equal the sum, over all {\tt Ma} blocks, of the number of {\tt annotations} multiplied by the number of quality-specifier characters in that block.
 
-For {\tt Q} values, the continuous probability range 0.0 to 1.0 is remapped in equal sized portions to integer values 0 to 255 inclusive, as in {\tt ML}.
-Thus the probability range corresponding to integer value $N$ is $N/256$ to $(N + 1)/256$.
-{\tt P} values are Phred-scaled confidence values, using the Phred convention defined by the main SAM specification.
+{\tt P} values use the Phred-scaled confidence convention defined by the main SAM specification.
+{\tt Q} values use the same 0--255 linearly scaled probability encoding as {\tt ML}.
 For example:
 \begin{quote}
 {\tt Ma:Z:1000;msp.P:100-50,200-60;nuc.:500-147}\\
-{\tt Aq:B:C,40,35}
+{\tt Aq:B:C,40,35,}
 \end{quote}
 This gives Phred qualities 40 and 35 to the two {\tt msp} {\tt annotations}; the {\tt nuc} {\tt annotation} has no quality value.
 
