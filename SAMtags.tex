@@ -688,9 +688,9 @@ It is analogous to a base modification code in {\tt MM}.
 The intervals in the block are individual {\tt annotations} of that type.
 For example:
 \begin{quote}
-{\tt Ma:Z:1000;ctcf+Q:100-25,700-30}
+{\tt Ma:Z:1000;ctcf+Q:100-25,700-30;ctcf-Q:800-20}
 \end{quote}
-Here {\tt ctcf} is the {\tt annotation type} and the two intervals are two {\tt annotations}.
+Here {\tt ctcf} is the {\tt annotation type}. The tag contains three {\tt annotations}: two on the `{\tt +}' strand and one on the `{\tt -}' strand. Both blocks describe the same {\tt annotation type}.
 
 Type names contain letters, digits, or underscores and are case-sensitive.
 Strand is one of `{\tt +}' for the same strand as the original sequenced molecule, `{\tt -}' for the opposite strand, or `{\tt .}' for unstranded, unknown, or inapplicable strand.
