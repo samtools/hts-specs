@@ -530,8 +530,9 @@ Note ChEBI codes cannot be used in the multi-modification form (such as the `{\t
 If the modification is not one of the standard common types (listed below) it can be specified as a numeric ChEBI code.
 For example `{\tt C+76792,57;}' is the same as `{\tt C+h,57;}'.
 
-An unmodified base of `{\tt N}' means count any base in {\sf SEQ}, not only those of `{\tt N}'.
+A fundamental base of `{\tt N}' means count any base in {\sf SEQ}, not only those of `{\tt N}'.
 Thus `{\tt N+n,100;}' means the 101st base is Xanthosine (n), irrespective of the sequence composition.
+A fundamental base of `{\tt N}' may also be used with a base-specific modification code to force the counting to be applied per base rather than per base-type.
 
 The standard code types and their associated ChEBI values are listed
 below, taken from Viner {\it et al.}%
@@ -567,6 +568,7 @@ G & G &       & Ambiguity code; any G mod & \\
 \hline
 N & n & Xao   & Xanthosine              & 18107 \\
 N & N &       & Ambiguity code; any mod & \\
+N & any &     & Mod applied to any base & \\
 \end{tabular}
 \end{center}
 
