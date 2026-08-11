@@ -490,12 +490,11 @@ Given the unmodified base already has a phred likelihood, this base modification
 \begin{description}
 \item[MM:Z:\tagregex{([ACGTUN][-+]([a-z]+|[0-9]+)[.?]?(,[0-9]+)*;)*}]
 \hfill\\
-The first character is the unmodified ``fundamental'' base as reported
-by the sequencing instrument for the top strand.
+The first character is the unmodified ``fundamental'' base for the strand called by the sequencing instrument (i.e. the original SEQ orientation prior to any reverse complementing during alignment).
 It must be one of `{\tt A}', `{\tt C}', `{\tt G}', `{\tt T}', `{\tt U}' (if RNA) or `{\tt N}' for anything else, including any IUPAC ambiguity codes in the reported SEQ field.
 Note `{\tt N}' may be used to match any base rather than specifically an `{\tt N}' call by the sequencing instrument.
 This may be used in situations where the base modification is not a derivation of a standard base type.
-This is followed by either plus or minus indicating the strand the modification was observed on (relative to the original sequenced strand of {\sf SEQ} with plus meaning same orientation),\footnote{Hence a tool that may reverse complement sequences does not need to understand how to manipulate the {\tt MM} and {\tt ML} tags.} and one or more base modification codes.
+This is followed by either plus or minus indicating the strand the modification was observed on (with plus meaning the same strand called by the sequencing instrument, and minus being the opposite strand),\footnote{Hence a tool that may reverse complement sequences does not need to understand how to manipulate the {\tt MM} and {\tt ML} tags.} and one or more base modification codes.
 
 Following the base modification codes is a recommended but optional `{\tt .}' or `{\tt ?}' describing how skipped seq bases of the stated base type should be interpreted by downstream tools.
 When this flag is `{\tt ?}' there is no information about the modification status of the skipped bases provided.
@@ -506,13 +505,13 @@ This number series is comparable to the numbers in an {\tt MD} tag,
 albeit counting specific base types only and potentially reverse-complemented.
 
 For example `{\tt C+m,5,12,0;}' tells us there are three
-potential 5-Methylcytosine bases on the top strand of {\sf SEQ}.
+potential 5-Methylcytosine bases on the original-orientation {\sf SEQ}.
 The first 5 `{\tt C}' bases are unmodified and the 6th, 19th and 20th have modification status indicated by the corresponding probabilities in the {\tt ML} tag. The 12 cytosines between the 6th and 19th cytosine are unmodified. Modification probabilities for the 17 skipped cytosines are not provided.
 
 When the `{\tt ?}' flag is present the tag `{\tt C+m?,5,12,0;}' tells us the modification status of the first five 
 cytosine bases is unknown, the sixth cytosine is called (as either modified or unmodified), followed by 12 more unknown cytosines, and the 19th and 20th are called.
 
-Similarly `{\tt G-m,14;}' indicates the 15th `{\tt G}' there might be a 5-Methylcytosine on the opposite strand (still counting using the top strand base calls from the 5' end).
+Similarly `{\tt G-m,14;}' indicates the 15th `{\tt G}' there might be a 5-Methylcytosine on the opposite strand (still counting using the original-orientation base calls from the 5' end).
 When the alignment record is reverse complemented (SAM flag 0x10) these two examples do not change since the tag always refers to the as-sequenced orientation.
 See the test/SAMtags/MM-orient.sam file for examples.
 
