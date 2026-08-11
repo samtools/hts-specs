@@ -210,14 +210,28 @@ The most significant bits of the first byte have special meaning and are called
 `prefix'. These are 0 to 3 true bits followed by a 0 or 4 true bits. 
 The number of 1's denote  the number of bytes to follow. So 0 for no bytes, 10 
 for one byte, 110 for two bytes, 1110 for three bytes and 1111 for four bytes.
-To accommodate 32 bits such representation requires 
-5 bytes with only 4 lower bits used in the last byte 5.
+To accommodate 32 bits such representation requires  5 bytes with only 4 lower bits used in the last byte.
+The higher 4 bits are undefined and decoders should not assume these to be zero.
+
+\vskip 10pt
+\begin{tabular}{lllllll}
+\textbf{Bytes} & \textbf{Byte 1} & \textbf{Byte 2} & \textbf{Byte 3} & \textbf{Byte 4} & \textbf{Byte 5} & \textbf{Data bits} \\
+\hline
+1 & 0xxxxxxx &          &          &          &          & 7  \\
+2 & 10xxxxxx & xxxxxxxx &          &          &          & 14 \\
+3 & 110xxxxx & xxxxxxxx & xxxxxxxx &          &          & 21 \\
+4 & 1110xxxx & xxxxxxxx & xxxxxxxx & xxxxxxxx &          & 28 \\
+5 & 1111xxxx & xxxxxxxx & xxxxxxxx & xxxxxxxx & ....xxxx & 32
+\end{tabular}
 
 \item[LTF-8 long (ltf8)]\ \newline
-See ITF-8 for more details. The only difference between ITF-8 and LTF-8 is the 
-number of bytes used to encode a single value. To do so 64 bits are required and 
-this can be done with 9 byte at most with the first byte consisting of just 1s 
-or 0xFF value. 
+This is an extension of ITF-8 to accommodate 64-bit unsigned quantities.
+These require up to 9 bytes.
+The prefix in byte 1 now extends from 0xxxxxx (for 1 byte) to 11111111 (for 9 bytes).
+Due to the full 64-bit quantity requiring 8 prefix bits, the whole of the byte 9 is used and unlike ITF-8 has no undefined bits remaining.
+
+Note that fields that are defined as LTF-8, such as the ``record counter'' in the Container header, must use LTF-8 encoding even if the value would fit in a 32-bit quantity.
+This has implications for quantities between 29-bits and 32-bits.
 
 \item[{Array (array\texttt{<}type\texttt{>})}]\ \newline
 A variable sized array with an explicitly written dimension.
