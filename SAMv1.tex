@@ -744,6 +744,20 @@ specific software package for it to function properly.
   \item Unmapped reads should be stored in the orientation in which they came
     off the sequencing machine and have their {\sf reverse} flag bit~(0x10)
     correspondingly unset.
+  \item Fields stated to have no assumptions on their content if {\sf FLAG}
+      bit 0x4 is set (unmapped) should have values `{\tt *}' or `{\tt 0}' as
+      appropriate.
+      \footnote{This is desirable as CRAM will not store some or all of these
+        fields for unmapped data, so round-trips should yield these default
+        values for maximum compatibility.}
+
+      Specifically this includes {\sf RNAME} (`{\tt *}', but see caveat),
+      {\sf POS} (`{\tt 0}', see caveat), {\sf CIGAR} (`{\tt *}'),
+      {\sf MAPQ} ('{\tt 0}') and {\sf FLAG} bits 0x2, 0x100 and 0x800
+      (all unset).
+
+      One caveat to this is with paired sequencing protocols where one record
+      is aligned and one unaligned within a pair.  See item 1 above.
   \end{enumerate}
 \item Multiple mapping
   \begin{enumerate}[label=\arabic*]
