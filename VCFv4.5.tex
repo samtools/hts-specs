@@ -46,7 +46,9 @@ In order to ensure interoperability across platforms, VCF compliant implementati
 ##reference=file:///seq/references/1000GenomesPilot-NCBI36.fasta
 ##contig=<ID=20,length=62435964,assembly=B36,md5=f126cdf8a6e0c7f379d618ff66beb2da,species="Homo sapiens",taxonomy=x>
 ##phasing=partial
-##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of Samples With Data">
+##INFO=<ID=NS,Number=1,Type=Integer,Description="Number of \begin{environment-name}
+	Samples
+\end{environment-name} With Data">
 ##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
 ##INFO=<ID=AF,Number=A,Type=Float,Description="Allele Frequency">
 ##INFO=<ID=AA,Number=1,Type=String,Description="Ancestral Allele">
@@ -468,7 +470,7 @@ Fixed fields are:
 	CIGAR		& A		& String	& Cigar string describing how to align an alternate allele to the reference allele \\
 	DB		& 0		& Flag		& dbSNP membership \\
 	DP		& 1		& Integer	& Combined depth across samples \\
-	END		& 1		& Integer	& Deprecated. Present for backwards compatibility with earlier versions of VCF. \\
+	END		& 1		& Integer	& End position of the longest variant described in this record \\
 	H2		& 0		& Flag		& HapMap2 membership \\
 	H3		& 0		& Flag		& HapMap3 membership \\
 	MQ		& 1		& Float		& RMS mapping quality \\
@@ -482,15 +484,25 @@ Fixed fields are:
 
 \begin{itemize}
 \renewcommand{\labelitemii}{$\circ$}
-\item END: Deprecated.
-Retained for backwards compatibility with  earlier versions of VCF and older VCF indexing software which rely on this field being present.
+\item END: End position of the longest variant described in this record
 
 This is a computed field that, when present, must be set to the maximum end reference position (1-based) of:
 the position of the final base of the REF allele,
 the end position corresponding to the SVLEN of a symbolic SV allele,
 and the end positions calculated from FORMAT LEN for the $<$*$>$ symbolic allele.
 
-The computed value of this field is used to compute BCF's {\tt rlen} field (see~\ref{BcfSiteEncoding}) and is important when indexing VCF/BCF files to enable random access and querying by position.
+The computed value of this field is used to compute BCF's {\tt rlen} field (see~\ref{BcfSiteEncoding}).
+
+Whilst technically deprecated (INFO SVLEN and FORMAT LEN are the authoritative fields), END remains important for backwards compatibility.
+
+Unfortunately, the introduction of FORMAT LEN is not fully backwards compatible with END.
+END is used for VCF indexing and a large ecosystem of pre-VCFv4.5 tools rely on END being present.
+Those same tools will incorrectly interpret the size of the smaller symbolic structural variants and $<$*$>$ symbolic alleles when END is present.
+
+It is recommended that VCFv4.5 files include END unless that VCF contains any record that could be misinterpreted by the presence of END.
+That is, if there exists a sample or allele in which the END computed for that SVLEN or FORMAT LEN does not equal the maximum END, then no END should be present in any record that VCF.
+This approachs maintains backwards compatibility for unproblematic VCFs while attempting to minimise the probability of downstream data errors by making problematic records not valid for earlier versions of VCF (END was required for $<$*$>$ symbolic alleles).
+
 
 \end{itemize}
 
@@ -860,11 +872,11 @@ If a precise ALT allele is present in a record with the $IMPRECISE$ flag, $CIPOS
 \footnotesize
 \begin{verbatim}
 ##INFO=<ID=NOVEL,Number=0,Type=Flag,Description="Indicates a novel structural variation">
-##INFO=<ID=END,Number=1,Type=Integer,Description="Deprecated. Present for backwards compatibility with earlier versions of VCF.">
+##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the longest variant described in this record">
 \end{verbatim}
 \normalsize
 
-$END$ has been deprecated in favour of INFO SVLEN and FORMAT LEN.
+Refer to section \ref{Fixed fields} for the definition of END.
   
 \footnotesize
 \begin{verbatim}
@@ -891,7 +903,7 @@ The missing value $.$ should be used for all other ALT alleles, including ALT al
 
 For backwards compatibility, a missing SVLEN should be inferred from the $END$ field.
 
-For backwards compatibility, the absolute value of SVLEN should be taken and a negative SVLEN should be treated as positive values.
+For backwards compatibility, the absolute value of SVLEN should be taken and a negative SVLEN should be treated as a positive value.
 
 Note that for structural variant symbolic alleles, $POS$ corresponds to the base immediately preceding the variant.
 
@@ -1875,6 +1887,9 @@ An example with both FORMAT LEN and a redundant INFO END is given below:
 \end{flushleft}
 \normalsize
 
+Note that usage of both FORMAT LEN and INFO END can be problematic as pre-VCFv4.5 tools will misinterpret the reference block size for records containing samples with different block sizes.
+See the definition of INFO END in section \ref{Fixed fields} for recommended behaviour.
+
 When base modification information is present in the FORMAT field of a reference block record, the base modification information apply to all applicable bases covered by that reference block.
 
 \pagebreak
@@ -2722,6 +2737,13 @@ Implementations should perform BGZF encoding and must support the reading of bot
 BCF2 files are expected to be indexed through the same index scheme, section~4 as BAM files and other block-compressed files with BGZF.
 
 \section{List of changes}
+
+\subsection{VCFv4.5 Errata}
+
+\begin{itemize}
+	\item Clarified INFO END deprecation status.
+\end{itemize}
+
 
 \subsection{Changes between VCFv4.5 and VCFv4.4}
 
