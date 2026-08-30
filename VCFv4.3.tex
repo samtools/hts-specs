@@ -278,6 +278,13 @@ It is possible to define sample to genome mappings as shown below:
 ##SAMPLE=<ID=Sample2,Assay=Exome,Ethnicity=CEU,Disease=Cancer,Tissue=Breast,Description="European patient exome from breast cancer">
 \end{verbatim}}
 
+In the \verb!SAMPLE! line:
+\begin{itemize}
+\item{ID} is a string that identifies the sample. 
+It comprises non-whitespace characters and doesn't include the comma (`.') character.
+\item{FILTER} is a string that has been defined in a \verb!##FILTER! line, except for PASS or `.' which mean that the sample passes or that the filter is missing (respectively).
+\end{itemize}
+
 \subsubsection{Pedigree field format}
 It is possible to record relationships between genomes using the following syntax:
 \begin{verbatim}
