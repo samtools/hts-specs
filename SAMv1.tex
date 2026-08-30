@@ -1407,6 +1407,71 @@ int reg2bins(int beg, int end, uint16_t list[MAX_BIN])
 \end{verbatim}
 }
 
+\subsection{The SBI index format for BGZF files}\label{sec:code}
+The SBI format is a binary file format to provide random access to records in
+data files that have been block compressed with BGZF.
+
+SBI facilitates parallel processing of BGZF data files. Since records are
+indexed by their virtual file offset rather than position in the genome, unlike
+the BAI and CSI formats, SBI does not suffer from skew due to uneven
+distribution of records across the genome. Furthermore, SBI does not require
+that the data file is coordinate sorted.
+
+SBI is a linear index that contains virtual file offsets of record start
+positions. The index must contain the virtual file offset for the first record,
+and a final sentinel virtual file offset for the position at which the next
+record would start if it were added to the file.\footnote{In the unlikely event
+the data file has no records, the index will consist solely of the sentinel
+offset.}
+
+The granularity of the index indicates the number of records between
+subsequent offsets in the index (excluding the sentinel offset). A granularity
+of 0 means that there is not a fixed number of records between subsequent
+offsets in the index.
+
+SBI filenames have a {\tt .sbi} extension added to the name of the file it is
+an index for. For example, {\tt foo.bam.sbi} is the SBI filename for
+{\tt foo.bam}. Index files contain a header followed by a sorted list of
+virtual file offsets in ascending order.
+
+\begin{table}[ht]
+\centering
+{\small
+\begin{tabular}{|l|l|l|p{8.15cm}|l|r|}
+  \cline{1-6}
+  \multicolumn{3}{|c|}{\bf Field} & \multicolumn{1}{c|}{\bf Description} & \multicolumn{1}{c|}{\bf Type} & \multicolumn{1}{c|}{\bf Value} \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf magic} & Magic string & {\tt char[4]} & {\tt SBI\char92 1}\\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf file\_length} & Length of the data file in bytes & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf md5} & MD5 hash of the data file, or 16 \textbackslash0 bytes if unspecified & {\tt byte[16]} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf uuid} & UUID for the data file, or 16 \textbackslash0 bytes if unspecified & {\tt byte[16]} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf n\_records} & Total number of records & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf granularity} & Number of records between offsets, or 0 if unspecified & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{3}{|l|}{\sf n\_offsets} & Number of virtual file offsets & {\tt uint64\_t} & \\\cline{1-6}
+  \multicolumn{6}{|c|}{\textcolor{gray}{\it List of offsets (n=n\_offsets)}} \\\cline{2-6}
+  & \multicolumn{2}{l|}{\sf offset} & Virtual file offset of the start of the record & {\tt uint64\_t} & \\\cline{1-6}
+\end{tabular}}
+\end{table}
+
+The main uses for the index are:
+
+\begin{itemize}
+\item Splitting a file for parallel processing.
+To find the records for a split that covers a byte range {\tt [beg,\,end)} use
+the index to find the smallest virtual file offset, {\tt v1}, that falls in
+this range, and the smallest virtual file offset, {\tt v2}, that is greater
+than or equal to {\tt end}. If {\tt v1} does not exist, then the split has no
+records. Otherwise, it has records that start in the range {\tt [v1,\,v2)}.
+This method will map a set of contiguous, non-overlapping {\it file ranges}
+that cover the whole data file to a set of contiguous, non-overlapping
+{\it virtual file ranges} that cover the whole data file.
+
+\item Finding the $n$th record in a file.
+For an index with granularity $g$, find the virtual file offset at position
+$\lfloor n/g \rfloor$ in the index. Seek to the record in the data file at this
+position, and then read a further $n \bmod g$ records to find the desired
+record.
+\end{itemize}
+
 \pagebreak
 
 \begin{appendices}
