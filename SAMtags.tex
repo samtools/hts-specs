@@ -42,17 +42,41 @@ conventions around creating new tags.
 
 \section{Standard tags}
 
+All optional fields follow the {\tt TAG:TYPE:VALUE} format
+where {\tt TAG} is a two-character string that matches {\tt /[A-Za-z][A-Za-z0-9]/}.
+In an optional field, {\tt TYPE} is a single case-sensitive letter which
+defines the format of {\tt VALUE}:
+\begin{center}\small
+\begin{tabular}{cll}
+\hline
+{\bf Type} & {\bf Regexp matching {\tt VALUE}} & {\bf Description} \\
+\hline
+A & {\tt [!-\char126]} & Printable character \\
+i & {\tt [-+]?[0-9]+} & Signed integer\footnotemark\\
+f & {\tt [-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?} & Single-precision floating number \\
+Z & {\tt [\,\,\,!-\char126]*} & Printable string, including space\\
+H & {\tt ([0-9A-F][0-9A-F])*} & Byte array in the Hex format\footnotemark\\
+B & {\tt [cCsSiIf](,[-+]?[0-9]*\char92.?[0-9]+([eE][-+]?[0-9]+)?)*} & Integer or numeric array\\
+\hline
+\end{tabular}
+\addtocounter{footnote}{-1}
+\footnotetext{The number of digits in an integer optional field is not
+explicitly limited in SAM.  However, BAM can represent values in the
+range~$[-2^{31},2^{32})$, so in practice this is the realistic range
+of values for SAM's `{\tt i}' as well.}
+\stepcounter{footnote}
+\footnotetext{For example, the six-character Hex string `{\tt 1AE301}' represents the byte array $[{\tt 0x1a},{\tt 0xe3},{\tt 0x1}]$.}
+\end{center}
+For an integer or numeric array (type `{\tt B}'), the first letter indicates the type of numbers
+in the following comma separated array. The letter can be one of `{\tt cCsSiIf}', corresponding to
+{\tt int8\_t} (signed 8-bit integer), {\tt uint8\_t} (unsigned 8-bit integer), {\tt int16\_t}, {\tt uint16\_t}, {\tt int32\_t}, {\tt uint32\_t}
+and {\tt float}, respectively.\footnotemark\@ During import/export, the element type
+may be changed if the new type is also compatible with the array.
+\footnotetext{Explicit typing eases format parsing and helps to reduce the file size when SAM is converted to BAM.}
+
+\vspace*{1em}
 Predefined standard tags are listed in the following table and described
 in greater detail in later subsections.
-Optional fields are usually displayed as {\tt TAG:TYPE:VALUE}; the {\it type\/}
-may be one of
-{\tt A} (character),
-{\tt B} (general array),
-{\tt f} (real number),
-{\tt H} (hexadecimal array),
-{\tt i} (integer),
-or
-{\tt Z} (string).
 
 \begin{center}\small
 % This table is sorted alphabetically
