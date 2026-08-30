@@ -608,7 +608,7 @@ See also Section~\ref{sv-format-keys} for a list of genotype keys reserved for s
   Again, use PASS to indicate that all filters have been passed, a semicolon-separated list of codes for filters that fail, or `.' to indicate that filters have not been applied.
   These values should be described in the meta-information in the same way as FILTERs.
   No whitespace or semicolons permitted.
-  \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, conditioned on the site's being variant).
+  \item GQ (Integer): Conditional genotype quality, encoded as a phred quality $-10log_{10}$ p(genotype call is wrong, may be conditioned on the site being polymorphic in the population).
   \item GP (Float): Genotype posterior probabilities in the range 0 to 1 using the same ordering as the GL field; one use can be to store imputed genotype probabilities.
   \item GT (String): Genotype, encoded as allele value preceded by either of $/$ or $\mid$ depending on whether that allele is considered phased. 
     The first phasing indicator may be omitted and is implicitly defined as $/$ if any phasing indicators are $/$ and $\mid$ otherwise.
