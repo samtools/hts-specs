@@ -60,7 +60,10 @@ Transfer protocols
 
 **[Htsget.md]** describes the _hts-get_ retrieval protocol, which enables parallel streaming access to data sharded across multiple URLs or files.
 
-**[Refget.md]** enables access to reference sequences using an identifier derived from the sequence itself.
+Previously hosted specifications
+--------------------------------
+
+**Refget Sequences** specification has moved to [GA4GH's GitHub](https://ga4gh.github.io/refget/sequences/).
 
 [GA4GH.org]:    https://www.ga4gh.org/
 [LSG-wiki]:     https://github.com/ga4gh/large-scale-genomics-wiki/wiki
@@ -82,7 +85,6 @@ Transfer protocols
 [BEDv1.tex]:    https://samtools.github.io/hts-specs/BEDv1.pdf
 [crypt4gh.tex]: http://samtools.github.io/hts-specs/crypt4gh.pdf
 [Htsget.md]:    http://samtools.github.io/hts-specs/htsget.html
-[Refget.md]:    https://samtools.github.io/hts-specs/refget.html
 
 [ena-cram]:   http://www.ebi.ac.uk/ena/about/cram_toolkit
 [ga4gh-cram]: https://www.ga4gh.org/cram/
