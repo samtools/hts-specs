@@ -1,0 +1,19 @@
+##fileformat=VCFv4.5
+##contig=<ID=chr1>
+##contig=<ID=chr19>
+##contig=<ID=chr20>
+##ALT=<ID=DUP,Description="Duplication">
+##INFO=<ID=DP,Number=1,Type=Integer,Description="Total Depth">
+##INFO=<ID=SVLEN,Number=A,Type=Integer,Description="Length of structural variant">
+##INFO=<ID=SVCLAIM,Number=A,Type=String,Description="Claim made by the structural variant call. Valid values are D, J, DJ for abundance, adjacency and both respectively">
+##FORMAT=<ID=GT,Number=1,Type=String,Description="Genotype">
+##FORMAT=<ID=PSL,Number=P,Type=String,Description="Phase set list">
+##FORMAT=<ID=PSO,Number=P,Type=Integer,Description="Phase set list ordinal">
+##FORMAT=<ID=PSQ,Number=P,Type=Integer,Description="Phase set list quality">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SAMPLE1
+chr1	10	.	T	<DUP>	.	.	SVLEN=30;SVCLAIM=DJ	GT:PSL:PSO	/0/0|1:.,.,chr1*10*3:.,.,3
+chr1	20	.	A	G	.	.	.	GT:PSL:PSO	/0/0|0|1:.,.,chr1*10*1,chr1*10*3:.,.,4,1
+chr1	30	.	G	T	.	.	.	GT:PSL:PSO	/0/0|0|1:.,.,chr1*10*1,chr1*10*3:.,.,2,5
+chr19	5	.	T	G	.	PASS	DP=100	GT:PSL:PSQ	|0/1:chr19*5*1,.:30,.
+chr20	10	.	A	T,G,C	.	PASS	DP=100	GT:PSL:PSQ	|1/2|3:chr20*10*1,.,chr19*5*1:30,.,20
+chr20	15	.	G	C,T	.	PASS	DP=100	GT:PSL:PSQ	1|2:.,chr20*10*1:.,30
